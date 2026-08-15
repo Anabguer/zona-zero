@@ -2882,7 +2882,7 @@ Cuando una fase pide revisión visual:
 
 **CURSOR: PROPUESTA / DUDA restantes (menores):**
 1. ¿`quarantine_drill` como tech con tradeoff −prod? (rec: sí, opcional).  
-2. ¿HQ L2/L3 debe seguir costando fuel o solo wood/metal? (rec: quitar fuel del coste HQ; fuel solo vehículos).
+2. Coste HQ L2/L3: **ya aplicado wood/metal sin fuel** (alineado con “fuel = vehículos”). Si Neni prefiere flavor “generador del cuartel”, revertir.
 
 **ZZ-001 sigue NO aprobada** hasta que ChatGPT marque el GAME_MASTER tras consolidación 2.4.
 
