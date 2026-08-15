@@ -1,0 +1,24 @@
+---
+description: Capturas de revisión visual en docs/review/ para ChatGPT/GitHub
+alwaysApply: true
+---
+
+# Revisión visual (docs/review/)
+
+Cuando termines una versión o cambio que requiera revisión visual:
+
+1. Genera las capturas necesarias.
+2. Súbelas a `docs/review/` **en el mismo commit** que el cambio (o en el commit de cierre de la versión).
+3. Mantén **solo** las capturas de la revisión actual: sustituye/borra las anteriores en `docs/review/` para no acumular.
+4. No dejes las capturas únicamente en `scripts/screenshots-*` local; deben estar en el repo bajo `docs/review/`.
+
+## Mínimo cuando corresponda
+
+- `mobile.png`
+- `desktop.png`
+- `gameplay.png`
+- Más capturas específicas necesarias para entender el cambio (p. ej. `poblacion.png`, `construir.png`, `explorador.png`).
+
+## Entrega al usuario
+
+Indica el **commit** y **qué archivos** has dejado en `docs/review/`.

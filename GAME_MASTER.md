@@ -1328,6 +1328,7 @@ Y periódicamente el juego debe responder:
 - Dock: Avanzar día sigue siendo global; construir/más secundarios; acciones en el mundo
 - Prueba D1–D10 con decisiones reales cada día (`scripts/manual-play-colony.mjs`, `MANUAL-D10.txt`)
 - Capturas móvil: `scripts/screenshots-prod/colony-*.png`
+- **Revisión visual GitHub:** `docs/review/` (`mobile`, `desktop`, `gameplay`, `poblacion`, `construir`, `explorador`)
 - Cache `?v=15` · **sin deploy** (gestión primero; balance después)
 
 ### 1.2.3 — Recalibración dificultad
