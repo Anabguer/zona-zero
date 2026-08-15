@@ -1,44 +1,41 @@
 Inicio OK — estrategia: farm/well temprano, zonas baja riesgo, defensa, no overexpand
 D1: huerto + pozo; labor comida/agua
 Expedición: Bloques del Este (Bajo)
-D10 pop=3 food=76 ctrl=3 bld=8 ex=1 thr=16 stab=90 [REC]
-Captura recuperación
-D12 pop=3 food=88 ctrl=3 bld=8 ex=1 thr=12 stab=98
-D13 pop=3 food=95 ctrl=3 bld=9 ex=1 thr=14 stab=100
-D14 pop=3 food=100 ctrl=3 bld=9 ex=1 thr=14 stab=100
-D15 pop=4 food=108 ctrl=3 bld=9 ex=1 thr=16 stab=100
-D16 pop=4 food=114 ctrl=3 bld=9 ex=1 thr=18 stab=100
-D17 pop=4 food=119 ctrl=3 bld=10 ex=1 thr=19 stab=100
-D18 pop=4 food=124 ctrl=4 bld=10 ex=1 thr=20 stab=100
-D19 pop=4 food=130 ctrl=4 bld=10 ex=1 thr=22 stab=100
-D20 pop=4 food=135 ctrl=4 bld=10 ex=1 thr=22 stab=95 [REC]
 Captura ataque
-D22 pop=4 food=147 ctrl=5 bld=11 ex=1 thr=20 stab=100
-D23 pop=4 food=153 ctrl=5 bld=11 ex=1 thr=20 stab=100
-D24 pop=4 food=160 ctrl=5 bld=11 ex=1 thr=20 stab=100
-D25 pop=4 food=166 ctrl=5 bld=11 ex=1 thr=20 stab=100
-D26 pop=4 food=174 ctrl=6 bld=11 ex=1 thr=19 stab=100
-D27 pop=4 food=181 ctrl=6 bld=11 ex=1 thr=19 stab=100
-D28 pop=4 food=186 ctrl=6 bld=11 ex=1 thr=19 stab=100
-D29 pop=4 food=190 ctrl=7 bld=12 ex=1 thr=17 stab=100
-D30 pop=4 food=194 ctrl=7 bld=12 ex=1 thr=17 stab=100
-D31 pop=4 food=199 ctrl=7 bld=12 ex=1 thr=16 stab=100
-D32 pop=4 food=205 ctrl=8 bld=12 ex=1 thr=16 stab=100
-D33 pop=4 food=210 ctrl=8 bld=13 ex=1 thr=14 stab=100
-D36 pop=4 food=230 ctrl=9 bld=13 ex=1 thr=11 stab=99
-D39 pop=4 food=247 ctrl=9 bld=14 ex=1 thr=9 stab=100
-D40 pop=5 food=253 ctrl=9 bld=14 ex=1 thr=12 stab=99
-D41 pop=5 food=257 ctrl=9 bld=14 ex=1 thr=13 stab=98
-D42 pop=5 food=262 ctrl=9 bld=14 ex=1 thr=14 stab=100
-D43 pop=5 food=267 ctrl=9 bld=14 ex=1 thr=14 stab=100
-D44 pop=5 food=270 ctrl=10 bld=14 ex=1 thr=15 stab=100
-D47 pop=5 food=285 ctrl=10 bld=15 ex=1 thr=16 stab=100
-D50 pop=5 food=300 ctrl=10 bld=15 ex=1 thr=17 stab=100
-D51 pop=5 food=304 ctrl=11 bld=15 ex=1 thr=20 stab=100
-D52 pop=5 food=309 ctrl=11 bld=15 ex=1 thr=21 stab=100
-D53 pop=5 food=314 ctrl=11 bld=15 ex=1 thr=22 stab=100
-D54 pop=6 food=318 ctrl=11 bld=15 ex=1 thr=24 stab=100
-D55 pop=6 food=327 ctrl=11 bld=15 ex=1 thr=25 stab=100
-Objetivo alcanzado: Día 55
-FIN: D55 pop=6 ctrl=11 bld=15 era=1 defeated=false
-Exploradores: Jaime:away
+D10 pop=4 food=39 ctrl=2 bld=8 ex=1 thr=18 stab=86
+D20 pop=6 food=39 ctrl=4 bld=10 ex=1 thr=23 stab=100
+D22 pop=4 food=44 ctrl=5 bld=11 ex=1 thr=23 stab=90 [REC]
+Captura recuperación
+D27 pop=4 food=48 ctrl=5 bld=11 ex=1 thr=20 stab=100
+D28 pop=4 food=50 ctrl=5 bld=11 ex=1 thr=20 stab=100
+D29 pop=4 food=52 ctrl=5 bld=12 ex=1 thr=21 stab=100
+D30 pop=4 food=54 ctrl=5 bld=12 ex=1 thr=23 stab=100
+D31 pop=4 food=57 ctrl=6 bld=12 ex=1 thr=24 stab=100
+D32 pop=4 food=55 ctrl=6 bld=12 ex=1 thr=25 stab=100
+D33 pop=4 food=57 ctrl=6 bld=13 ex=1 thr=27 stab=100
+D34 pop=5 food=57 ctrl=7 bld=13 ex=1 thr=28 stab=100
+D35 pop=5 food=58 ctrl=7 bld=13 ex=1 thr=29 stab=100
+D36 pop=5 food=58 ctrl=7 bld=13 ex=1 thr=31 stab=100
+D40 pop=3 food=56 ctrl=8 bld=14 ex=1 thr=28 stab=99 [REC]
+D42 pop=3 food=55 ctrl=8 bld=14 ex=1 thr=22 stab=100
+D43 pop=3 food=53 ctrl=8 bld=14 ex=1 thr=23 stab=100
+D44 pop=3 food=53 ctrl=8 bld=14 ex=1 thr=23 stab=100
+D45 pop=3 food=53 ctrl=8 bld=15 ex=1 thr=23 stab=100
+D46 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=23 stab=98
+D47 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D48 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D49 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D50 pop=3 food=55 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D51 pop=3 food=52 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D52 pop=3 food=52 ctrl=8 bld=15 ex=1 thr=23 stab=100
+D53 pop=3 food=53 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D54 pop=3 food=53 ctrl=8 bld=15 ex=1 thr=24 stab=99
+D55 pop=3 food=53 ctrl=8 bld=15 ex=1 thr=25 stab=99
+D56 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=25 stab=100
+D57 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=24 stab=100
+D58 pop=3 food=54 ctrl=8 bld=15 ex=1 thr=23 stab=100
+D59 pop=4 food=51 ctrl=8 bld=15 ex=1 thr=23 stab=100
+D60 pop=4 food=53 ctrl=8 bld=15 ex=1 thr=24 stab=100
+Objetivo alcanzado: Día 60
+FIN: D60 pop=4 ctrl=8 bld=15 era=1 defeated=false
+Exploradores: Oriol:away

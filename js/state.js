@@ -366,7 +366,9 @@ export function defenseValue(state, buildingsContent, balance) {
   });
   const assigned = state.population?.labor?.defense || 0;
   def += assigned * (balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5);
-  def += Math.floor((state.resources.ammo || 0) * (balance.ammoDefenseFactor ?? 1.2));
+  const ammoFactor = balance.ammoDefenseFactor ?? 1.2;
+  const ammoCap = balance.ammoDefenseCap ?? 12;
+  def += Math.min(ammoCap, Math.floor((state.resources.ammo || 0) * ammoFactor));
   // Bonus exploradores en casa
   livingExplorers(state).forEach((e) => {
     if (e.status === 'ready') def += (e.skills.fight || 1) * 0.8;

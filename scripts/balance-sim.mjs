@@ -39,7 +39,7 @@ const PROFILES = {
   conservative: { exploreEvery: 5, buildEvery: 4, risk: false },
   balanced: { exploreEvery: 3, buildEvery: 3, risk: false },
   expansive: { exploreEvery: 2, buildEvery: 3, risk: true },
-  mismanaged: { exploreEvery: 1, buildEvery: 12, risk: true, noBuild: true },
+  mismanaged: { exploreEvery: 2, buildEvery: 12, risk: true, noBuild: true },
 };
 
 function freeCell(state) {
@@ -84,10 +84,8 @@ function runGame(seed, days, profileName, opts = {}) {
       const cell = freeCell(state);
       if (cell) {
         let r = placeBuilding(state, content, buildOrder[built], cell[0], cell[1]);
-        if (!r.ok) {
-          // Ayuda mínima (no dump de recursos)
-          state.resources.wood = (state.resources.wood || 0) + 5;
-          state.resources.metal = (state.resources.metal || 0) + 3;
+        if (!r.ok && (state.resources.wood || 0) < 3) {
+          state.resources.wood = (state.resources.wood || 0) + 2;
           r = placeBuilding(state, content, buildOrder[built], cell[0], cell[1]);
         }
         if (r.ok) built++;
@@ -103,8 +101,12 @@ function runGame(seed, days, profileName, opts = {}) {
       const z = candidates[0];
       const ex = (state.explorers || []).find((e) => e.status === 'ready' && !e.expeditionId);
       if (z && ex) {
-        state.resources.fuel += 1;
-        startExpedition(state, content, z.id, ex.id);
+        // Mismanaged: algo de combustible por saqueo ocasional; atento: 1 ud si hace falta
+        if (profile.noBuild && state.day % 7 === 0) state.resources.fuel = (state.resources.fuel || 0) + 1;
+        if (!profile.noBuild && (state.resources.fuel || 0) < 1) state.resources.fuel += 1;
+        if ((state.resources.fuel || 0) >= (content.balance.expeditionFuelCost || 1)) {
+          startExpedition(state, content, z.id, ex.id);
+        }
       }
     }
 

@@ -1,71 +1,71 @@
 {
-  "generatedAt": "2026-08-15T13:44:13.476Z",
+  "generatedAt": "2026-08-15T13:58:30.544Z",
   "batches": [
     {
       "label": "conservative@60",
       "n": 40,
-      "survivalRate": 1,
-      "avgPopAlive": 8.05,
-      "avgMaxPop": 8.18,
-      "avgEraAlive": 1.23,
-      "avgControlled": 6.4,
+      "survivalRate": 0.875,
+      "avgPopAlive": 3.83,
+      "avgMaxPop": 4.67,
+      "avgEraAlive": 0.63,
+      "avgControlled": 6.06,
       "victories": 0,
-      "dead": 0,
-      "medianDeathDay": null
+      "dead": 5,
+      "medianDeathDay": 33
     },
     {
       "label": "balanced@60",
       "n": 40,
-      "survivalRate": 0.975,
-      "avgPopAlive": 9.51,
-      "avgMaxPop": 9.43,
-      "avgEraAlive": 1.51,
-      "avgControlled": 8.31,
+      "survivalRate": 0.825,
+      "avgPopAlive": 3.64,
+      "avgMaxPop": 5.17,
+      "avgEraAlive": 0.67,
+      "avgControlled": 8.15,
       "victories": 0,
-      "dead": 1,
-      "medianDeathDay": 55
+      "dead": 7,
+      "medianDeathDay": 43
     },
     {
       "label": "expansive@60",
       "n": 40,
-      "survivalRate": 0.975,
-      "avgPopAlive": 7.77,
-      "avgMaxPop": 8.03,
-      "avgEraAlive": 1.15,
-      "avgControlled": 3.74,
+      "survivalRate": 0.75,
+      "avgPopAlive": 3.37,
+      "avgMaxPop": 4.4,
+      "avgEraAlive": 0.47,
+      "avgControlled": 3.7,
       "victories": 0,
-      "dead": 1,
-      "medianDeathDay": 25
+      "dead": 10,
+      "medianDeathDay": 47
     },
     {
       "label": "mismanaged@60",
       "n": 40,
-      "survivalRate": 0.75,
-      "avgPopAlive": 1.4,
-      "avgMaxPop": 4.08,
-      "avgEraAlive": 0.33,
-      "avgControlled": 5.2,
+      "survivalRate": 0.125,
+      "avgPopAlive": 1.2,
+      "avgMaxPop": 3.4,
+      "avgEraAlive": 0,
+      "avgControlled": 2.4,
       "victories": 0,
-      "dead": 10,
-      "medianDeathDay": 46
+      "dead": 35,
+      "medianDeathDay": 37
     },
     {
       "label": "balanced@120",
       "n": 20,
-      "survivalRate": 0.95,
-      "avgPopAlive": 13.42,
-      "avgMaxPop": 14.05,
-      "avgEraAlive": 1.89,
-      "avgControlled": 12.47,
+      "survivalRate": 0.85,
+      "avgPopAlive": 3.29,
+      "avgMaxPop": 5.8,
+      "avgEraAlive": 0.82,
+      "avgControlled": 13.65,
       "victories": 0,
-      "dead": 1,
-      "medianDeathDay": 113
+      "dead": 3,
+      "medianDeathDay": 82
     }
   ],
   "victoryTest": {
     "victory": true,
     "dead": false,
     "day": 2,
-    "pop": 44
+    "pop": 40
   }
 }

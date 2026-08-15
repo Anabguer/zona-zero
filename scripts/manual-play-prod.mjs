@@ -122,7 +122,7 @@ try {
   let lastShotCrisis = false;
   let lastShotRecover = false;
 
-  for (let turn = 0; turn < 70; turn++) {
+  for (let turn = 0; turn < 75; turn++) {
     await dismiss();
     const st0 = await page.evaluate(() => {
       const s = window.__zz.getState();
@@ -198,7 +198,7 @@ try {
       }
     }
 
-    // Expedición si hay explorador listo y no en recuperación crítica
+    // Expedición: pausar si población crítica o recuperación
     await page.evaluate(() => {
       const s = window.__zz.getState();
       return import('/js/sim.js').then(({ startExpedition, autoAssignWorkers }) => {
@@ -208,15 +208,14 @@ try {
         const busy = (s.expeditions || []).length > 0;
         const ex = s.explorers.find((e) => e.status === 'ready' && !e.expeditionId);
         if (!ex || busy) return;
-        // En recuperación: solo zonas muy seguras; si amenaza alta, pausa
-        if (s.director.threat > 55 && recovering) return;
+        if ((s.population.total || 0) <= 2) return;
+        if (s.director.threat > 40 && recovering) return;
         const zones = s.zones
           .filter((z) => z.type !== 'camp' && (z.state === 'discovered' || z.state === 'hostile'))
-          .filter((z) => (recovering ? z.risk < 0.35 : true))
+          .filter((z) => (recovering || s.population.total <= 3 ? z.risk < 0.35 : z.risk < 0.55))
           .sort((a, b) => a.risk - b.risk);
         const z = zones[0];
         if (!z) return;
-        if (!recovering && z.risk > 0.55 && (ex.skills.fight || 1) < 2) return;
         s.resources.fuel = Math.max(s.resources.fuel || 0, 2);
         startExpedition(s, c, z.id, ex.id);
         window.__zz.paint();
@@ -296,7 +295,7 @@ try {
       push(`DERROTA en D${st.day}`);
       break;
     }
-    if (st.day >= 55) {
+    if (st.day >= 60) {
       push(`Objetivo alcanzado: Día ${st.day}`);
       break;
     }

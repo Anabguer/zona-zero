@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness 1.2</title>
-  <link rel="stylesheet" href="../css/game.css?v=13" />
-  <link rel="stylesheet" href="../css/world.css?v=13" />
+  <link rel="stylesheet" href="../css/game.css?v=14" />
+  <link rel="stylesheet" href="../css/world.css?v=14" />
   <script type="importmap">
   {
     "imports": {
@@ -85,7 +85,7 @@
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=13';
+    import { bootGame } from '../js/main.js?v=14';
     window.__zzReady = bootGame({ slot: 1, mode: 'new', name: 'Harness' })
       .then(() => { window.__zzOk = true; })
       .catch((e) => { window.__zzOk = false; window.__zzErr = String(e && e.message ? e.message : e); throw e; });

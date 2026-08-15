@@ -455,8 +455,8 @@ function applyProduction(state, content) {
       let staff = labor.produce || 0;
       if (k === 'food') staff = labor.food || 0;
       if (k === 'water') staff = labor.water || 0;
-      const ratio = clamp(staff / Math.max(1, jobs * 1.5), 0.4, 1.25);
-      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * 1.2));
+      const ratio = clamp(staff / Math.max(1, jobs * 1.5), 0.35, 1.1);
+      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * 0.95));
       if (k === 'food') buildingFood += amt;
       else if (k === 'water') buildingWater += amt;
       else buildingOther[k] = (buildingOther[k] || 0) + amt;
@@ -467,12 +467,12 @@ function applyProduction(state, content) {
   const hasFarm = state.base.buildings.some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
   const hasWell = state.base.buildings.some((b) => ['well', 'cistern', 'pump'].includes(b.type) && b.hp > 0);
   const foodExtra = Math.round(
-    (labor.food || 0) * (per.food || 2.4) * (hasFarm ? 0.45 : 0.18) * stabMod
+    (labor.food || 0) * (per.food || 2.1) * (hasFarm ? 0.3 : 0.22) * stabMod
   );
   const waterExtra = Math.round(
-    (labor.water || 0) * (per.water || 2.2) * (hasWell ? 0.45 : 0.18) * stabMod
+    (labor.water || 0) * (per.water || 2.0) * (hasWell ? 0.3 : 0.22) * stabMod
   );
-  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.4) * 0.35 * stabMod);
+  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.2) * 0.3 * stabMod);
 
   state.resources.food = (state.resources.food || 0) + buildingFood + foodExtra;
   state.resources.water = (state.resources.water || 0) + buildingWater + waterExtra;
@@ -484,8 +484,25 @@ function applyProduction(state, content) {
     state.resources[k] = (state.resources[k] || 0) + v;
   });
 
-  if ((state.research.unlocked || []).includes('surv_crops')) state.resources.food += 1;
-  if ((state.research.unlocked || []).includes('surv_filters')) state.resources.water += 1;
+  if ((state.research.unlocked || []).includes('surv_crops') && hasFarm) state.resources.food += 1;
+  if ((state.research.unlocked || []).includes('surv_filters') && hasWell) state.resources.water += 1;
+
+  // Merma por exceso sin almacén (evita stock infinito)
+  const pop = Math.max(1, state.population?.total || 1);
+  const storageN = state.base.buildings.filter((b) => ['storage', 'warehouse'].includes(b.type) && b.hp > 0).length;
+  const softDays = content.balance.foodSoftCapDays || 10;
+  const foodCap = pop * softDays + storageN * 18;
+  const waterCap = pop * softDays + storageN * 16;
+  if ((state.resources.food || 0) > foodCap) {
+    const excess = state.resources.food - foodCap;
+    const lost = Math.max(1, Math.ceil(excess * 0.2));
+    state.resources.food -= lost;
+    if (lost >= 3) pushLog(state, `Comida se estropea sin almacenaje (−${lost}).`, 'warn');
+  }
+  if ((state.resources.water || 0) > waterCap) {
+    state.resources.water -= Math.max(1, Math.ceil((state.resources.water - waterCap) * 0.15));
+  }
+
   state.energy.produced = energyProd;
   state.energy.demand = energyDemand;
 }
@@ -513,11 +530,23 @@ function consumeNeed(state, key, need, label, balance) {
   state.stability -= 2 + Math.min(4, missing);
   pushLog(state, `Escasez de ${label}.`, 'bad');
   const loss = Math.min(1, Math.max(0, Math.ceil(missing / 3)));
+  const softRate = balance.starvationLossPerDay ?? 0.55;
+  const hasProd =
+    state.base.buildings.some((b) => ['farm', 'greenhouse', 'well', 'cistern'].includes(b.type) && b.hp > 0);
+  // Sin producción: hambre duele, pero no ejecuta cada noche (permite recuperarse con botín)
   const softDead =
-    missing >= 2 && loss && rngOf(state).chance(balance.starvationLossPerDay ?? 0.5) ? 1 : 0;
-  // Nunca vaciar la colonia de golpe por una sola noche de hambre
+    missing >= 2 &&
+    loss &&
+    rngOf(state).chance(hasProd ? softRate : softRate * 0.55)
+      ? 1
+      : 0;
   const pop = state.population?.total || 0;
-  const dead = softDead && pop > 1 ? 1 : 0;
+  // Última persona puede caer por hambre prolongada (no inmunidad)
+  let dead = 0;
+  if (softDead) {
+    if (pop > 1) dead = 1;
+    else if (pop === 1) dead = rngOf(state).chance(missing >= 2 ? 0.5 : 0.25) ? 1 : 0;
+  }
   applyCasualties(state, balance, { dead, injured: Math.max(dead ? 0 : 1, loss) });
   if (loss) pushLog(state, `La colonia sufre por falta de ${label}.`, 'bad');
 }
@@ -533,7 +562,7 @@ function updateStability(state, content) {
   if (state.director.recentLosses > 0) d -= state.director.recentLosses;
   d += Math.min(2, Math.floor(state.stats.zonesControlled / 3));
   state.stability = clamp(state.stability + d, 0, 100);
-  state.director.recentLosses = Math.max(0, (state.director.recentLosses || 0) - 2);
+  state.director.recentLosses = Math.max(0, (state.director.recentLosses || 0) - 1);
 }
 
 function populationTick(state, content) {
@@ -564,23 +593,23 @@ function populationTick(state, content) {
     pop >= (bal.birthMinPop || 8) &&
     pop < cap &&
     pop < max &&
-    state.stability >= 42 &&
-    (state.resources.food || 0) > pop * 2
+    state.stability >= 48 &&
+    (state.resources.food || 0) > pop * 2.5
   ) {
-    if (rng.chance(bal.birthChance || 0.18)) {
+    if (rng.chance(bal.birthChance || 0.11)) {
       changePopulation(state, 1, bal, 'birth');
       pushLog(state, 'Nueva vida en el refugio. Población +1.', 'good');
     }
   }
 
   if (
-    rng.chance((bal.immigrantBaseChance || 0.12) * 0.65) &&
+    rng.chance((bal.immigrantBaseChance || 0.07) * 0.55) &&
     pop < cap &&
     pop < max &&
-    state.stability >= 42 &&
-    state.stats.zonesControlled >= 2 &&
-    (state.resources.food || 0) >= pop * 2 &&
-    (state.resources.water || 0) >= pop * 2
+    state.stability >= 50 &&
+    state.stats.zonesControlled >= 3 &&
+    (state.resources.food || 0) >= pop * 2.5 &&
+    (state.resources.water || 0) >= pop * 2.5
   ) {
     changePopulation(state, 1, bal, 'immigrant');
     pushLog(state, 'Llega gente buscando refugio. Población +1.', 'good');
@@ -589,57 +618,99 @@ function populationTick(state, content) {
   redistributeLabor(state, bal);
 }
 
-export function resolveBaseAttack(state, content, intensity = 2) {
+export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
   const rng = rngOf(state);
   let inten = Math.max(1, Math.floor(intensity));
-  // Periodo de recuperación: oleadas atenuadas
-  if (state.day < (state.director.protectionUntil || 0)) {
-    inten = Math.max(1, inten - 1);
-  }
+  const underProtection =
+    opts.wasProtected != null
+      ? !!opts.wasProtected
+      : state.day < (state.director.protectionUntil || 0);
+  if (underProtection) inten = Math.max(1, inten - 1);
+
   const def = defenseValue(state, content.buildings, content.balance);
-  const atk = 9 + inten * 10.5 + state.director.threat * 0.24;
+  const atk = 12 + inten * 12 + state.director.threat * 0.3;
   const ratio = def / Math.max(1, atk);
-  const roll = rng.float(0.8, 1.2) * ratio;
+  const roll = rng.float(0.75, 1.15) * ratio;
   const ammoSpend = Math.max(1, Math.ceil(inten / 2));
   state.resources.ammo = Math.max(0, (state.resources.ammo || 0) - ammoSpend);
+
   const camp = state.zones.find((z) => z.type === 'camp');
   if (camp) {
     camp._attackFlash = true;
     state.flags.lastAttackZoneId = camp.id;
   }
+
   const pop = state.population?.total || 1;
-  const towers = state.base.buildings.filter((b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0)
-    .length;
-  if (roll >= 1.05) {
+  const towers = state.base.buildings.filter(
+    (b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0
+  ).length;
+
+  let floorPop = 1;
+  if (pop <= 4) floorPop = underProtection ? 1 : rng.chance(0.22) ? 0 : 1;
+  else if (pop <= 8) floorPop = underProtection ? 2 : Math.max(1, pop - 2);
+  else floorPop = underProtection ? Math.max(3, Math.floor(pop * 0.65)) : Math.max(2, Math.floor(pop * 0.45));
+
+  if (roll >= 1.15) {
     state.stats.attacksSurvived += 1;
     state.stability += 2;
     pushLog(state, `Ataque repelido (intensidad ${inten}). Munición −${ammoSpend}.`, 'good');
     return { result: 'win', intensity: inten, dead: 0, injured: 0 };
   }
-  if (roll >= 0.72) {
-    const dead = ratio > 0.9 && rng.chance(0.14) ? 1 : rng.chance(0.22) ? 1 : 0;
-    const injured = Math.min(2, Math.max(1, Math.floor(inten * 0.6)));
-    applyCasualties(state, content.balance, { injured, dead: Math.min(dead, Math.max(0, pop - 1)) });
+
+  if (roll >= 0.7) {
+    let dead = ratio > 0.95 && rng.chance(0.18) ? 1 : rng.chance(0.28) ? 1 : 0;
+    if (pop >= 20 && rng.chance(0.2)) dead = Math.min(2, dead + 1);
+    dead = Math.min(dead, Math.max(0, pop - floorPop));
+    const injured = Math.min(3, Math.max(1, Math.floor(inten * 0.7)));
+    applyCasualties(state, content.balance, { injured, dead });
     const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
-    if (b && rng.chance(0.32)) {
-      b.hp -= rng.int(15, 40);
+    if (b && rng.chance(0.35)) {
+      b.hp -= rng.int(15, 45);
       if (b.hp <= 0) pushLog(state, `${content.buildings[b.type]?.name || b.type} queda destruido.`, 'bad');
     }
     state.stability -= 5;
     if (dead) state.director.recentLosses += dead;
+    if (dead > 0 && pop - dead <= 4) {
+      state.director.protectionUntil = Math.max(
+        state.director.protectionUntil || 0,
+        state.day + 2
+      );
+      state.director.lastCrisisDay = state.day;
+    }
     pushLog(state, `Ataque contenido con pérdidas (${dead} muertos, ${injured} heridos).`, 'warn');
     return { result: 'messy', intensity: inten, dead, injured };
   }
-  const maxDead = towers ? 2 : Math.min(3, 1 + Math.floor(inten * 0.7));
-  const dead = Math.min(Math.max(1, pop - 1), maxDead);
-  const injured = Math.min(3, inten);
+
+  let maxDead = towers ? 2 : Math.min(4, 1 + Math.floor(inten * 0.85));
+  if (pop >= 25) maxDead = Math.min(maxDead + 2, Math.floor(pop * 0.4));
+  if (pop <= 4) maxDead = underProtection ? 1 : Math.min(3, maxDead);
+  else if (pop <= 8) maxDead = underProtection ? 1 : Math.min(2, maxDead);
+
+  let dead = Math.min(Math.max(1, pop - floorPop), maxDead);
+  dead = Math.min(dead, Math.max(0, pop - floorPop));
+  const hasFarmOrDef =
+    state.base.buildings.some(
+      (b) =>
+        ['farm', 'greenhouse', 'watchtower', 'bunker', 'fence', 'barricade'].includes(b.type) && b.hp > 0
+    );
+  // Últimos supervivientes: más letal sin infraestructura; con base, suele quedar alguien
+  if (pop === 1 && !underProtection && rng.chance(hasFarmOrDef ? 0.28 : 0.5)) dead = 1;
+  if (pop === 2 && !underProtection && inten >= 2 && rng.chance(hasFarmOrDef ? 0.18 : 0.35)) dead = 2;
+
+  const injured = Math.min(4, inten + 1);
   applyCasualties(state, content.balance, { dead, injured });
   state.stability -= 10;
   state.director.recentLosses += dead;
-  state.director.protectionUntil = Math.max(
-    state.director.protectionUntil || 0,
-    state.day + Math.max(3, Math.floor((content.balance.postDisasterProtectionDays || 4) * 0.6))
+
+  const hasTower = state.base.buildings.some(
+    (b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0
   );
+  const recoverDays = !hasTower
+    ? Math.max(4, (content.balance.postDisasterProtectionDays || 4) + 1)
+    : pop - dead <= 2
+      ? Math.max(2, (content.balance.postDisasterProtectionDays || 4) - 1)
+      : Math.max(3, content.balance.postDisasterProtectionDays || 4);
+  state.director.protectionUntil = Math.max(state.director.protectionUntil || 0, state.day + recoverDays);
   state.director.lastCrisisDay = state.day;
   pushLog(state, `El perímetro cede (${dead} muertos). Días de recuperación forzosa.`, 'bad');
   return { result: 'lose', intensity: inten, dead, injured };
@@ -821,10 +892,11 @@ export function advanceDay(state, content) {
   populationTick(state, content);
   updateEra(state, content);
 
+  const wasProtected = state.day < (state.director.protectionUntil || 0);
   const dir = runDirector(state, content);
   let attack = null;
   if (dir?.attackIntensity) {
-    attack = resolveBaseAttack(state, content, dir.attackIntensity);
+    attack = resolveBaseAttack(state, content, dir.attackIntensity, { wasProtected });
   }
 
   checkVictory(state, content);

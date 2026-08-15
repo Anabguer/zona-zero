@@ -25,8 +25,10 @@ function colonyForce(state, content) {
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
   const tech = (state.research.unlocked || []).length;
   const reserves =
-    (state.resources.food || 0) + (state.resources.water || 0) + (state.resources.ammo || 0) * 2;
-  return pop * 2 + def + controlled * 4 + tech * 3 + Math.min(40, reserves / 5);
+    Math.min(30, (state.resources.food || 0) / 4) +
+    Math.min(20, (state.resources.water || 0) / 4) +
+    Math.min(12, (state.resources.ammo || 0));
+  return pop * 2 + def + controlled * 4 + tech * 3 + reserves;
 }
 
 function fragility(state, content) {
@@ -64,17 +66,18 @@ function updateIndices(state, content) {
   else state.director.momentum = Math.max(0, (state.director.momentum || 0) - 1);
 
   let t = state.director.tension || 10;
-  t += (state.director.momentum || 0) * 0.6;
-  t += frag * 0.04;
-  t -= force * 0.025;
-  if (state.day > 45) t += 0.35;
-  if (state.day > 80) t += 0.45;
-  if (inProtection(state)) t -= 3;
-  if (state.day <= (content.balance.softCapThreatEarlyDays || 12)) t = Math.min(t, 26);
-  if (state.day < 10) t = Math.min(t, 32);
+  t += (state.director.momentum || 0) * 0.75;
+  t += frag * 0.055;
+  t -= force * 0.018;
+  if (state.day > 25) t += 0.25;
+  if (state.day > 45) t += 0.4;
+  if (state.day > 80) t += 0.55;
+  if (inProtection(state)) t -= 2;
+  if (state.day <= (content.balance.softCapThreatEarlyDays || 12)) t = Math.min(t, 30);
+  if (state.day < 10) t = Math.min(t, 34);
   state.director.tension = clampNum(t, 0, 100);
   state.director.threat = Math.round(
-    clampNum(6 + state.director.tension * 0.3 + state.era * 4 + frag * 0.08, 0, 100)
+    clampNum(8 + state.director.tension * 0.34 + state.era * 5 + frag * 0.1, 0, 100)
   );
 }
 
@@ -111,25 +114,32 @@ function weightFor(ev, state, balance) {
   let w = ev.weight || 1;
   const recent = state.director.recentFamilies || [];
   const repeats = recent.filter((f) => f === ev.family).length;
-  if (repeats) w *= Math.max(0.12, 1 - repeats * 0.4);
-  if (ev.id === state.director.lastEventId) w *= 0.15;
-  const budget = 1 + state.director.tension / 28 + state.era * 0.45;
-  if (state.day < 14 && (ev.intensity || 0) >= 3) w *= 0.2;
-  if (state.day < 10 && (ev.intensity || 0) >= 4) w *= 0.04;
-  if ((ev.intensity || 0) > budget + 1.5) w *= 0.05;
-  if ((ev.intensity || 0) === 0) w *= 1.25;
-  if ((ev.intensity || 0) === 1) w *= 1.05;
-  // Tras crisis: menos ataques / catástrofes
+  if (repeats) w *= Math.max(0.15, 1 - repeats * 0.35);
+  if (ev.id === state.director.lastEventId) w *= 0.18;
+  const budget = 1 + state.director.tension / 24 + state.era * 0.5;
+  if (state.day < 18 && (ev.intensity || 0) >= 3) w *= 0.35;
+  if (state.day < 10 && (ev.intensity || 0) >= 4) w *= 0.08;
+  if ((ev.intensity || 0) > budget + 1.5) w *= 0.08;
+  if ((ev.intensity || 0) === 0) w *= 1.1;
+  // Amenazas medias (int 2) más presentes cuando hay tensión
+  if ((ev.intensity || 0) === 2 && state.director.tension >= 28) w *= 1.25;
+  if ((ev.intensity || 0) === 2 && (ev.family === 'ataques' || ev.family === 'infectados')) {
+    w *= 1.15;
+  }
+  // Tras crisis: bloquea graves, deja pasar presión media atenuada
   if (inCrisisCooldown(state, balance) && (ev.family === 'ataques' || ev.family === 'catastrofes')) {
-    w *= 0.35;
+    w *= (ev.intensity || 0) >= 3 ? 0.25 : 0.55;
   }
   if (inProtection(state) && (ev.family === 'ataques' || ev.family === 'catastrofes')) {
-    w *= 0.4;
+    w *= (ev.intensity || 0) >= 3 ? 0.3 : 0.55;
   }
-  if (inProtection(state) && (ev.intensity || 0) >= 3) w *= 0.25;
-  // Calma / oportunidades si fragilidad baja
-  if ((state.director.fragility || 0) < 25 && (ev.family === 'calma' || ev.family === 'oportunidad')) {
-    w *= 1.35;
+  if (inProtection(state) && (ev.intensity || 0) >= 4) w *= 0.05;
+  if ((state.director.fragility || 0) < 20 && (ev.family === 'calma' || ev.family === 'oportunidad')) {
+    w *= 1.15;
+  }
+  // Colonia muy débil: algo más de presión media (no wipe garantizado)
+  if ((state.director.force || 0) < 28 && (ev.intensity || 0) === 2) {
+    w *= 1.12;
   }
   return Math.max(0, w);
 }
@@ -198,19 +208,16 @@ function afterEvent(state, content, chosen) {
     state.director.lastCrisisDay = state.day;
     state.director.protectionUntil = Math.max(
       state.director.protectionUntil || 0,
-      state.day + (content.balance.postDisasterProtectionDays || 4)
+      state.day + (content.balance.postDisasterProtectionDays || 3)
     );
-    state.director.tension = Math.max(8, state.director.tension - 16);
+    state.director.tension = Math.max(12, state.director.tension - 12);
     pushLog(state, 'Tras lo ocurrido, la zona respira unos días. Aprovechad para recuperaros.', 'story');
   } else if (intensity >= 3) {
     state.director.lastCrisisDay = state.day;
-    state.director.protectionUntil = Math.max(
-      state.director.protectionUntil || 0,
-      state.day + 2
-    );
-    state.director.tension = Math.max(10, state.director.tension - 6);
+    state.director.protectionUntil = Math.max(state.director.protectionUntil || 0, state.day + 2);
+    state.director.tension = Math.max(14, state.director.tension - 4);
   } else {
-    state.director.tension = clampNum(state.director.tension + Math.max(1, intensity), 0, 100);
+    state.director.tension = clampNum(state.director.tension + Math.max(1, intensity + 0.5), 0, 100);
   }
 }
 
@@ -229,18 +236,17 @@ export function runDirector(state, content) {
   const bal = content.balance;
   if (state.day < (bal.directorMinDay || 1)) return { quiet: true };
 
-  let quietChance = bal.quietNightChance || 0.4;
-  if (inProtection(state)) quietChance = Math.min(0.58, quietChance + 0.12);
-  if (inCrisisCooldown(state, bal)) quietChance = Math.min(0.52, quietChance + 0.06);
-  if ((state.director.fragility || 0) < 20) quietChance += 0.03;
-  // Presión creciente a largo plazo
-  if (state.day > 50) quietChance *= 0.8;
-  if (state.day > 90) quietChance *= 0.75;
-  if (state.era >= 2) quietChance *= 0.88;
+  let quietChance = bal.quietNightChance || 0.3;
+  if (inProtection(state)) quietChance = Math.min(0.48, quietChance + 0.1);
+  if (inCrisisCooldown(state, bal)) quietChance = Math.min(0.42, quietChance + 0.05);
+  if ((state.population?.total || 0) <= 4) quietChance = Math.min(0.45, quietChance + 0.08);
+  if (state.day > 40) quietChance *= 0.9;
+  if (state.day > 90) quietChance *= 0.88;
+  if (state.era >= 2) quietChance *= 0.92;
 
-  if (rng.chance(quietChance) && state.director.tension < 55) {
+  if (rng.chance(quietChance) && state.director.tension < 52) {
     pushLog(state, 'Noche tranquila. Nada digno de anotar.', 'story');
-    state.director.tension = Math.max(0, state.director.tension - 3);
+    state.director.tension = Math.max(0, state.director.tension - 2);
     return { quiet: true };
   }
 

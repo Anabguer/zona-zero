@@ -651,7 +651,7 @@ function renderChoiceModal() {
     btn.addEventListener('click', () => {
       const r = resolvePendingChoice(state, content, i);
       if (r.ok && r.attackIntensity) {
-        const atk = resolveBaseAttack(state, content, r.attackIntensity);
+        const atk = resolveBaseAttack(state, content, r.attackIntensity, { wasProtected: false });
         showAttackCard(atk);
         sfx.attack?.();
       }

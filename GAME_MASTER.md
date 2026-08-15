@@ -1289,13 +1289,13 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.2.2 — pulido jugable (balance, escritorio 16:9, feedback, expediciones)  
+**Versión técnica:** 1.2.3 — recalibración de dificultad (sin death spiral)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=13`
+**save_version / v:** **4** · cache assets `?v=14`
 
 ## Arquitectura real (1.2)
 - Cliente: `js/` state, sim, director, population, explorers, render-map, render-base, icons, sound, api, main, rng, util
@@ -1318,6 +1318,15 @@ Y periódicamente el juego debe responder:
 - Pulido continuo de glifos por edificio según feedback
 
 ## Changelog técnico
+### 1.2.3 — Recalibración dificultad
+- Protección post-crisis no inmuniza el ataque del mismo día (`wasProtected`)
+- Amenazas medias ↑; quiet nights ↓; defensa/munición con tope; merma de comida sin almacén
+- Producción de huertos/labor más justa; crecimiento poblacional más estricto
+- Anti-espiral: floor de bajas + recuperación tras lose/messy; colonias grandes sí pueden caer fuerte
+- Balance-sim: balanced@60 ≈82% · expansive@60 ≈75% · mismanaged@60 ≈12% · balanced@120 ≈85%
+- Partida manual D60: caída fuerte (pop 3→1) + recuperación → supervivencia
+- Cache `?v=14`
+
 ### 1.2.2 — Pulido jugable
 - Director: calma real, `crisisCooldownDays` cableado, protección post-catástrofe, menos espirales
 - Ataques suaves con techo de bajas + recuperación forzosa tras lose; hambre sin edificios duele
