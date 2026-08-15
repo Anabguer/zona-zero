@@ -91,10 +91,10 @@ NO
 - Resource chips sin nombres en landscape (solo iconos) — legible tras aprender, menos para primer minuto.
 
 ## COMMIT
-(pendiente al cerrar esta entrada)
+`fa81a36` — feat(ZZ-016): landscape-first + rotate gate (HUMAN_GATE)
 
 ## Sync Drive/GitHub
-Tras commit.
+OK (masters + Review/).
 
 ---
 
