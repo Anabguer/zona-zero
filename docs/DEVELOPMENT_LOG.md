@@ -169,7 +169,8 @@ Correcciones:
 `docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos).
 
 ## COMMIT
-*(ver hash tras commit de ronda)*
+`5f06c1d` — fix(ZZ-018): mundo físico continuo, no plano GIS (CAMBIOS SOLICITADOS)
+Entrega previa: `54d7946` / registro `2210582`.
 
 ## Sync Drive/GitHub
 Masters + Review. **ZZ-019 NO. No deploy. PARAR.**
