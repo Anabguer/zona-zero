@@ -226,11 +226,11 @@ function drawPlayableTerrain(parent, camp, tier, day) {
       })
     );
   }
-  const farN = early ? 10 : 20;
+  const farN = early ? 14 : 22;
   for (let i = 0; i < farN; i++) {
     let x = rng.float(5, 95);
     let y = rng.float(5, 95);
-    if (camp && Math.hypot(x - camp.x, y - camp.y) < 16) continue;
+    if (camp && Math.hypot(x - camp.x, y - camp.y) < 12) continue;
     g.appendChild(
       svgEl('ellipse', {
         cx: x,
@@ -242,11 +242,12 @@ function drawPlayableTerrain(parent, camp, tier, day) {
       })
     );
   }
-  const ruinN = early ? 7 : 16;
+  const ruinN = early ? 12 : 18;
   for (let i = 0; i < ruinN; i++) {
     let x = rng.float(8, 92);
     let y = rng.float(10, 90);
-    if (camp && Math.hypot(x - camp.x, y - camp.y) < (early ? 22 : 14)) continue;
+    // ZZ-017: ruinas del mundo cerca del camp (no edificios jugables)
+    if (camp && Math.hypot(x - camp.x, y - camp.y) < (early ? 11 : 10)) continue;
     const ang = rng.float(-35, 35);
     const w = rng.float(1.4, 2.4);
     g.appendChild(
@@ -378,62 +379,57 @@ function irregularPatch(cx, cy, rx, ry, rng, n = 7) {
 }
 
 /**
- * Patio físico D1: placa isométrica + props del mismo mundo que el HQ.
- * Sin óvalo negro, sin GIS, sin foto aérea.
+ * Patio físico D1: placa de terreno mundo (ruinas/escombros) + scrub.
+ * ZZ-017: sin huerto/pozo/almacén/barricada falsos ni props de edificios jugables.
  */
 function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day) {
   const early = day <= 2;
-  const yardW = early ? scale * 7.2 : scale * 5.2;
+  const yardW = early ? scale * 8.4 : scale * 6.2;
   const yardH = yardW * 0.92;
   layer.appendChild(
     svgEl('image', {
       href: artUrl(COLONY_YARD_ART),
       x: ox - yardW / 2,
-      y: oy - yardH / 2 + scale * 0.35,
+      y: oy - yardH / 2 + scale * 0.28,
       width: yardW,
       height: yardH,
-      opacity: early ? '0.95' : '0.75',
+      opacity: early ? '0.98' : '0.82',
       preserveAspectRatio: 'xMidYMid meet',
       class: 'zz-settle-yard-art',
       style: 'pointer-events:none',
     })
   );
 
-  if (early) {
-    const prop = (type, dx, dy, s) => {
-      const sz = scale * s;
+  // Escombros / vegetación procedural (nunca assets de edificios construibles)
+  const debrisN = early ? 9 : 5;
+  for (let i = 0; i < debrisN; i++) {
+    const a = rng.float(0, Math.PI * 2);
+    const r = scale * rng.float(2.2, 3.8);
+    const cx = ox + Math.cos(a) * r;
+    const cy = oy + Math.sin(a) * r * 0.78;
+    if (rng.chance(0.55)) {
       layer.appendChild(
-        svgEl('image', {
-          href: buildingArtUrl(type),
-          x: ox + dx - sz / 2,
-          y: oy + dy - sz / 2,
-          width: sz,
-          height: sz,
-          opacity: '0.92',
-          preserveAspectRatio: 'xMidYMid meet',
-          class: 'zz-settle-scenery',
-          style: 'pointer-events:none',
+        svgEl('ellipse', {
+          cx,
+          cy,
+          rx: rng.float(0.28, 0.55),
+          ry: rng.float(0.18, 0.32),
+          class: 'zz-settle-scrub',
         })
       );
-    };
-    prop('farm', -scale * 2.35, scale * 1.55, 1.15);
-    prop('well', scale * 2.45, scale * 1.35, 0.95);
-    prop('storage', scale * 2.1, -scale * 1.55, 0.9);
-    prop('barricade', -scale * 2.2, -scale * 1.4, 0.85);
-  }
-
-  for (let i = 0; i < (early ? 6 : 3); i++) {
-    const a = rng.float(0, Math.PI * 2);
-    const r = scale * rng.float(1.8, 3.2);
-    layer.appendChild(
-      svgEl('ellipse', {
-        cx: ox + Math.cos(a) * r,
-        cy: oy + Math.sin(a) * r * 0.75,
-        rx: rng.float(0.35, 0.7),
-        ry: rng.float(0.22, 0.4),
-        class: 'zz-settle-scrub',
-      })
-    );
+    } else {
+      layer.appendChild(
+        svgEl('rect', {
+          x: cx - rng.float(0.2, 0.45),
+          y: cy - 0.12,
+          width: rng.float(0.4, 0.85),
+          height: rng.float(0.18, 0.32),
+          rx: 0.06,
+          class: 'zz-settle-debris',
+          transform: `rotate(${rng.float(-28, 28)} ${cx} ${cy})`,
+        })
+      );
+    }
   }
 
   if (buildings.length >= 2) {
@@ -877,7 +873,7 @@ function drawLegend() {
   /* Leyenda retirada: el estado de zona se lee por luz/borde/niebla */
 }
 
-const ZOOM_MIN = 1.55;
+const ZOOM_MIN = 1.45;
 const ZOOM_MAX = 3.45;
 
 export function recenterCamera(state) {
@@ -895,21 +891,22 @@ export function recenterCamera(state) {
   const day = state.day || 1;
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
-  if (day <= 1) state.mapCamera.zoom = wide ? 2.55 : 2.65;
-  else if (day <= 3) state.mapCamera.zoom = wide ? 2.25 : 2.2;
-  else if (day <= 5) state.mapCamera.zoom = 2.1;
+  // ZZ-017: zoom D1 menos cerrado → mundo > viewport
+  if (day <= 1) state.mapCamera.zoom = wide ? 2.25 : 2.35;
+  else if (day <= 3) state.mapCamera.zoom = wide ? 2.05 : 2.1;
+  else if (day <= 5) state.mapCamera.zoom = 1.95;
   else state.mapCamera.zoom = 1.65;
 }
 
 export function clampCamera(state) {
   if (!state?.mapCamera) return;
   const day = state.day || 1;
-  // Early game: no alejarse tanto como para “perder” la colonia
-  const minZ = day <= 2 ? 2.15 : day <= 5 ? 1.75 : ZOOM_MIN;
+  // ZZ-017: permitir alejarse/recorrer terreno alrededor del camp
+  const minZ = day <= 2 ? 1.75 : day <= 5 ? 1.55 : ZOOM_MIN;
   state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, minZ, ZOOM_MAX);
   const camp = state.zones?.find((z) => z.type === 'camp');
   if (camp) {
-    const maxDist = day <= 2 ? 10 : day <= 5 ? 16 : 26;
+    const maxDist = day <= 2 ? 26 : day <= 5 ? 32 : 40;
     const dx = (state.mapCamera.x || camp.x) - camp.x;
     const dy = (state.mapCamera.y || camp.y) - camp.y;
     const d = Math.hypot(dx, dy);
@@ -918,8 +915,8 @@ export function clampCamera(state) {
       state.mapCamera.y = camp.y + (dy / d) * maxDist;
     }
   }
-  state.mapCamera.x = clamp(state.mapCamera.x ?? 50, 8, 92);
-  state.mapCamera.y = clamp(state.mapCamera.y ?? 50, 8, 92);
+  state.mapCamera.x = clamp(state.mapCamera.x ?? 50, 4, 96);
+  state.mapCamera.y = clamp(state.mapCamera.y ?? 50, 4, 96);
 }
 
 /** Zoom relativo (±) respetando clamp D1. factor>1 acerca. */

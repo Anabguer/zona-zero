@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** B0 autorizado · **ZZ-016 HUMAN_GATE PENDIENTE DE REVISIÓN**. · ZZ-012 sigue bloqueada hasta ZZ-019. · **ZZ-017 NO iniciada.** No deploy.
+**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 entregada · **PARADO** (no ZZ-018). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -63,10 +63,10 @@ IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE YES · GAME_MASTER §9.1 / §31.8
 COMPLETADA (código + evidencias). **PARADO** — no ZZ-017.
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ## ENTREGA
 - Landscape-first en gameplay móvil: HUD compacto, ficha lateral, dock pulgares, safe areas.
@@ -75,26 +75,50 @@ NO
 - Tests: `smoke-orient`, `smoke-d1`.
 - Review: `docs/review/` + Drive `Review\` + `review-contact-sheet.jpg`.
 
-## AUTOCRÍTICA CURSOR (obligatoria)
-
-1. **¿Diseñado para landscape o UI vertical rotada?** Parece landscape: chrome en bordes, ficha lateral (~1/3), mundo dominante. No es un portrait encogido.
-2. **¿Mundo visible con HUD normal?** ~75–85% del alto útil; HUD top fino + dock ~3rem. Prioridad mundo OK.
-3. **¿Mundo con HQ seleccionado?** Ficha lateral deja ~60–70% del ancho al mundo; explorer rail se oculta con sheet abierta.
-4. **¿Controles pulgares?** Dock abajo Construir / Avanzar / Más; zoom cerca del dock. OK landscape; en 740×360 el chrome aprieta pero sigue usable.
-5. **¿Rotate gate de juego?** Sí: fondo ZZ, icono animado, «Gira tu dispositivo» + subtítulo; no alert nativo.
-6. **¿UI heredada que estorba?** Coach tip puede competir con mundo (mitigado arriba-izquierda en landscape). Arte patio con huerto/pozo «falsos» sigue (purga = ZZ-017). Emoji 💾 sustituido por «G».
-7. **¿Riesgos ZZ-017/018?** Clamp cámara D1 aún «patio»; no hay sectores reales; arte base mentirá hasta ZZ-017. Landscape composition ya anticipa colonia ancha.
-
-## PROBLEMAS TODAVÍA VISIBLES (no bloquean gate, a vigilar)
-- Decoración jugable falsa en yard (ZZ-017).
-- Dock full-width sigue ocupando franja vertical notable en móviles bajos.
-- Resource chips sin nombres en landscape (solo iconos) — legible tras aprender, menos para primer minuto.
+## DEUDAS VISUALES (no bloquean; registradas)
+1. Dock inferior full-width demasiado protagonista en poca altura → refinamiento UI posterior.
+2. Chips HUD sin nombres en landscape → deuda legibilidad HUD definitivo.
+3. *(resuelta en ZZ-017)* huerto/pozo falsos en arte base.
 
 ## COMMIT
 `fa81a36` — feat(ZZ-016): landscape-first + rotate gate (HUMAN_GATE)
 
 ## Sync Drive/GitHub
 OK (masters + Review/).
+
+---
+
+# FASE ZZ-017 — Arte base limpio + colonia > viewport
+
+IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE NO · deps ZZ-016 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA. **PARADO** — ZZ-018 NO iniciada.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+## APROBACIÓN FINAL CHATGPT
+NO
+
+## CAMBIOS
+- Nuevo `colony-yard.webp` sin huerto/pozo/solares/placements.
+- Eliminados props SVG `farm`/`well`/`storage`/`barricade` del patio.
+- Cámara D1: pan ~26, zoom menos cerrado → mundo > viewport.
+- Save v5: `layoutVersion` + `sectors` stub (`recovered: ['core']`).
+- Ruins/debris del mundo más cerca del camp (no jugables).
+
+## AUTOCRÍTICA
+1. **¿Mundo vs construido?** Sí: solo el HQ brilla como colonia; el anillo es ruina/escombro/valla rota. Sin huerto ni pozo falsos.
+2. **¿Rico para sectores orgánicos después?** Sí a nivel sensación: hay perímetro de restos y terreno panneable alrededor; geometría de sectores queda para ZZ-018 (stub solo).
+
+## DEUDAS
+- Dock full-width / chips sin nombre (heredadas ZZ-016).
+- Stub sectores sin recuperación real (ZZ-018).
+- Yard art todavía “claro circular”; ZZ-018 puede romper simetría con sectores irregulares.
+
+## COMMIT
+(pendiente)
 
 ---
 

@@ -7,7 +7,7 @@ import { emptyLabor, redistributeLabor, workforce } from './population.js';
 import { makeExplorer, livingExplorers } from './explorers.js';
 import { syncLaborFromColony } from './colony.js';
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 /** @deprecated legacy individual skills — solo migración */
 export const SKILL_KEYS = ['scout', 'gather', 'build', 'produce', 'fight'];
 
@@ -199,6 +199,12 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     uiMode: null, // 'build' | 'explore' | null
     buildMode: null,
     mapCamera: { x: 50, y: 48, zoom: 1.15 },
+    /** ZZ-017 stub — geometría/recuperación completa en ZZ-018 */
+    layoutVersion: 1,
+    sectors: {
+      recovered: ['core'],
+      pending: [],
+    },
     lastDayBrief: null,
     equipment: { weapon: 'none', armor: 'none', vehicleId: null },
     vehiclesOwned: [],
@@ -328,6 +334,12 @@ export function migrateState(state, content) {
     workers: b.workers != null ? Math.max(0, b.workers) : 0,
   }));
   if (!next.mapCamera) next.mapCamera = { x: 50, y: 48, zoom: 1.15 };
+  if (next.layoutVersion == null) next.layoutVersion = 1;
+  if (!next.sectors || typeof next.sectors !== 'object') {
+    next.sectors = { recovered: ['core'], pending: [] };
+  }
+  if (!Array.isArray(next.sectors.recovered)) next.sectors.recovered = ['core'];
+  if (!Array.isArray(next.sectors.pending)) next.sectors.pending = [];
   if (next.uiMode == null) next.uiMode = null;
   if (!next.population.manual) next.population.manual = {};
   (next.zones || []).forEach((z) => {

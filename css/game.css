@@ -497,13 +497,22 @@ body.zz-body {
   pointer-events: none;
 }
 .zz-settle-scrub {
-  fill: #243024;
-  opacity: 0.5;
+  fill: rgba(90, 78, 48, 0.45);
+  opacity: 0.7;
   stroke: none;
   pointer-events: none;
 }
-.zz-settle-yard-art,
+.zz-settle-yard-art {
+  pointer-events: none;
+}
 .zz-settle-scenery {
+  /* ZZ-017: no debe usarse para edificios jugables falsos */
+  display: none !important;
+}
+.zz-settle-debris {
+  fill: rgba(70, 62, 52, 0.55);
+  stroke: rgba(40, 36, 30, 0.4);
+  stroke-width: 0.06;
   pointer-events: none;
 }
 .zz-settle-yard-patch {
