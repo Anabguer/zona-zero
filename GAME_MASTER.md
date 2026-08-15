@@ -19,6 +19,7 @@
 | Biblioteca juegos | https://intocables13.com/juegos/ |
 | Repositorio | `https://github.com/Anabguer/zona-zero` (privado) |
 | Rama | `main` |
+| Último commit (MVP inicial) | `ecda2c8` — feat: add playable MVP client (map, base, director, UI) |
 | Stack | HTML / CSS / JS / PHP / MySQL |
 | Prefijo SQL | `zona_zero_*` |
 | Auth | Sesión Intocables Universe |
