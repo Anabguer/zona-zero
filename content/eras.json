@@ -1,0 +1,74 @@
+{
+  "eras": [
+    {
+      "id": 0,
+      "name": "Refugio",
+      "desc": "Sobrevivir el primer cerco.",
+      "unlock": {
+        "minPop": 0,
+        "minControlled": 0,
+        "minResearch": 0,
+        "minDay": 0
+      },
+      "soft": {
+        "minDay": 1
+      }
+    },
+    {
+      "id": 1,
+      "name": "Asentamiento",
+      "desc": "Organizar producción y rutas.",
+      "unlock": {
+        "minPop": 5,
+        "minControlled": 2,
+        "minResearch": 2,
+        "minDay": 8
+      },
+      "soft": {
+        "minDay": 6
+      }
+    },
+    {
+      "id": 2,
+      "name": "Colonia",
+      "desc": "Expandir perímetro y diplomacia.",
+      "unlock": {
+        "minPop": 10,
+        "minControlled": 4,
+        "minResearch": 5,
+        "minDay": 18
+      },
+      "soft": {
+        "minDay": 14
+      }
+    },
+    {
+      "id": 3,
+      "name": "Distrito",
+      "desc": "Logística pesada y amenazas mayores.",
+      "unlock": {
+        "minPop": 18,
+        "minControlled": 7,
+        "minResearch": 10,
+        "minDay": 30
+      },
+      "soft": {
+        "minDay": 24
+      }
+    },
+    {
+      "id": 4,
+      "name": "Zona Zero",
+      "desc": "Dominio regional bajo presión constante.",
+      "unlock": {
+        "minPop": 28,
+        "minControlled": 10,
+        "minResearch": 16,
+        "minDay": 45
+      },
+      "soft": {
+        "minDay": 36
+      }
+    }
+  ]
+}

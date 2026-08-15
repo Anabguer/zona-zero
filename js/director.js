@@ -1,220 +1,255 @@
 /**
- * Director: eventos variables por pesos/condiciones (no guion fijo por día).
+ * Director adaptativo + resolución de eventos
  */
-import { chance, pick, rollRange, clamp } from './util.js';
+import { createRng } from './rng.js';
 import {
   livingSurvivors,
+  allLiving,
   pushLog,
   defenseValue,
+  housingCapacity,
   makeSurvivor,
-  maxSurvivorsCap,
 } from './state.js';
 
-function eventAllowed(ev, state, balance) {
-  if (state.day < (ev.minDay || 1)) return false;
-  const cd = state.director.cooldowns[ev.id] || 0;
-  if (state.day < cd) return false;
-  const c = ev.conditions || {};
-  const alive = livingSurvivors(state).length;
+function rngOf(state) {
+  return createRng((state.rngState || 1) ^ (state.day * 7919));
+}
+
+function clampNum(n, a, b) {
+  return Math.max(a, Math.min(b, n));
+}
+
+function colonyForce(state, content) {
+  const pop = livingSurvivors(state).length;
+  const def = defenseValue(state, content.buildings, content.balance);
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
-  const R = state.resources || {};
-  if (c.minDay != null && state.day < c.minDay) return false;
-  if (c.minPop != null && alive < c.minPop) return false;
-  if (c.maxPop != null && alive > c.maxPop) return false;
-  if (c.minFood != null && R.food < c.minFood) return false;
-  if (c.minWater != null && R.water < c.minWater) return false;
-  if (c.minWood != null && R.wood < c.minWood) return false;
-  if (c.minMetal != null && R.metal < c.minMetal) return false;
-  if (c.minFuel != null && R.fuel < c.minFuel) return false;
-  if (c.maxFuel != null && R.fuel > c.maxFuel) return false;
+  const tech = (state.research.unlocked || []).length;
+  const reserves =
+    (state.resources.food || 0) + (state.resources.water || 0) + (state.resources.ammo || 0) * 2;
+  return pop * 2 + def + controlled * 4 + tech * 3 + Math.min(40, reserves / 5);
+}
+
+function fragility(state, content) {
+  const pop = Math.max(1, allLiving(state).length);
+  const foodDays = (state.resources.food || 0) / pop;
+  const waterDays = (state.resources.water || 0) / pop;
+  const wounded = livingSurvivors(state).filter((s) => s.status === 'wounded' || s.status === 'sick').length;
+  const cap = housingCapacity(state, content.buildings);
+  let f = 0;
+  if (foodDays < 2) f += 25;
+  if (waterDays < 2) f += 25;
+  f += wounded * 8;
+  if (allLiving(state).length > cap) f += 15;
+  f += Math.max(0, 40 - state.stability);
+  f += state.director.recentLosses * 10;
+  return f;
+}
+
+function updateIndices(state, content) {
+  const force = colonyForce(state, content);
+  const frag = fragility(state, content);
+  state.director.force = Math.round(force);
+  state.director.fragility = Math.round(frag);
+  if (force > 40 && state.director.tension < 30) state.director.momentum = (state.director.momentum || 0) + 1;
+  else state.director.momentum = Math.max(0, (state.director.momentum || 0) - 1);
+  let t = state.director.tension || 10;
+  t += (state.director.momentum || 0) * 0.8;
+  t += frag * 0.05;
+  t -= force * 0.02;
+  if (state.day <= (content.balance.softCapThreatEarlyDays || 5)) t = Math.min(t, 28);
+  // early game: damp deadly intensity
+  if (state.day < 10) {
+    state.director.tension = Math.min(state.director.tension, 40);
+  }
+  state.director.tension = clampNum(t, 0, 100);
+  state.director.threat = Math.round(
+    clampNum(8 + state.director.tension * 0.35 + state.era * 5 + frag * 0.1, 0, 100)
+  );
+}
+
+function conditionsMet(ev, state) {
+  const c = ev.conditions || {};
+  const pop = allLiving(state).length;
+  const controlled = state.zones.filter((z) => z.state === 'controlled').length;
+  if (ev.minDay != null && state.day < ev.minDay) return false;
+  if (ev.minEra != null && state.era < ev.minEra) return false;
+  if (ev.maxEra != null && state.era > ev.maxEra) return false;
+  if (c.minPop != null && pop < c.minPop) return false;
+  if (c.maxPop != null && pop > c.maxPop) return false;
   if (c.minThreat != null && state.director.threat < c.minThreat) return false;
   if (c.maxThreat != null && state.director.threat > c.maxThreat) return false;
   if (c.minControlled != null && controlled < c.minControlled) return false;
-  if ((ev.intensity || 0) >= 3 && state.day <= (balance.softCapThreatEarlyDays || 4)) {
-    return false;
-  }
-  if ((ev.intensity || 0) >= 5 && alive < 2) return false;
+  if (c.minStability != null && state.stability < c.minStability) return false;
+  if (c.maxStability != null && state.stability > c.maxStability) return false;
+  if (c.requiresFlag && !state.flags.narrative?.[c.requiresFlag]) return false;
+  if (c.blocksFlag && state.flags.narrative?.[c.blocksFlag]) return false;
+  if (state.day < (state.director.cooldowns?.[ev.id] || 0)) return false;
+  if (ev.family && state.day < (state.director.familyCooldowns?.[ev.family] || 0)) return false;
+  if (state.day < (state.director.protectionUntil || 0) && (ev.intensity || 0) >= 4) return false;
   return true;
 }
 
 function weightFor(ev, state) {
   let w = ev.weight || 1;
-  const threat = state.director.threat;
-  const alive = livingSurvivors(state).length;
-  const R = state.resources || {};
-  if ((ev.intensity || 0) >= 3) w += Math.floor(threat / 12);
-  if ((ev.intensity || 0) === 0) w += threat < 15 ? 2 : 0;
-  if (ev.id === 'uneventful' || ev.id === 'quiet_night') {
-    if (threat < 20) w += 4;
-    if (threat > 40) w *= 0.55;
-  }
-  if (ev.id === 'hard_raid' || ev.id === 'siege_pressure') {
-    if (threat < 18) w *= 0.3;
-  }
-  if (ev.id === 'fuel_leak_find' && R.fuel < 4) w += 2;
-  if (ev.id === 'rain_cistern' && R.water < 6) w += 2;
-  if (ev.id === 'scavenge_bonus' && R.food < 8) w += 1.5;
-  if (ev.id === 'deserter_hope' && alive < 6) w += 1.5;
-  if (ev.id === 'deserter_hope' && alive > 30) w *= 0.5;
-  if (state.director.recentLosses > 0 && (ev.intensity || 0) >= 3) w *= 0.5;
-  if (state.director.lastEventId === ev.id) w *= 0.35;
-  return Math.max(0.05, w);
+  const recent = state.director.recentFamilies || [];
+  const repeats = recent.filter((f) => f === ev.family).length;
+  if (repeats) w *= Math.max(0.15, 1 - repeats * 0.35);
+  if (ev.id === state.director.lastEventId) w *= 0.2;
+  const budget = 1 + state.director.tension / 25 + state.era * 0.5;
+  if (state.day < 12 && (ev.intensity || 0) >= 3) w *= 0.25;
+  if (state.day < 8 && (ev.intensity || 0) >= 4) w *= 0.05;
+  if ((ev.intensity || 0) > budget + 1.5) w *= 0.05;
+  if ((ev.intensity || 0) === 0) w *= 1.15;
+  return Math.max(0, w);
 }
 
-function applyLoot(state, loot) {
-  if (!loot) return;
-  Object.entries(loot).forEach(([k, range]) => {
-    const n = rollRange(range);
-    if (n > 0) state.resources[k] = (state.resources[k] || 0) + n;
-  });
-}
-
-function applyLose(state, lose) {
-  if (!lose) return;
-  Object.entries(lose).forEach(([k, range]) => {
-    const n = rollRange(range);
-    state.resources[k] = Math.max(0, (state.resources[k] || 0) - n);
-  });
-}
-
-function applyRaid(state, raid, balance) {
-  const power = raid.power || 10;
-  const def = defenseValue(state, balance);
-  const margin = def - power;
-  const survivors = livingSurvivors(state);
-  if (margin >= 8 && chance(0.55)) {
-    pushLog(state, 'La defensa aguanta. La oleada se dispersa.', 'good');
-    if (state.resources.ammo > 0 && chance(0.4)) state.resources.ammo -= 1;
-    return;
+export function applyEventEffects(state, content, effects = {}, rng) {
+  if (!effects) return { attackIntensity: 0 };
+  let attackIntensity = 0;
+  if (effects.loot) {
+    Object.entries(effects.loot).forEach(([k, range]) => {
+      const n = Array.isArray(range) ? rng.int(range[0], range[1]) : Number(range) || 0;
+      if (n) state.resources[k] = (state.resources[k] || 0) + n;
+    });
   }
-  const dmg = rollRange(raid.damage || [8, 20]);
-  const target = pick(survivors);
-  if (!target) return;
-  target.hp -= Math.max(5, dmg - Math.floor(def / 4));
-  if (state.resources.ammo > 0) state.resources.ammo -= 1;
-  if (target.hp <= 0) {
-    target.hp = 0;
-    target.status = 'dead';
-    state.stats.deaths += 1;
-    state.director.recentLosses += 1;
-    pushLog(state, `${target.name} cae defendiendo el refugio.`, 'bad');
-  } else if (target.hp < 55) {
-    target.status = 'wounded';
-    pushLog(state, `${target.name} resulta herido en la oleada (−${dmg} PV).`, 'bad');
-  } else {
-    pushLog(state, `${target.name} resiste la embestida (−${dmg} PV).`, 'warn');
+  if (effects.threatDelta) state.director.threat = clampNum(state.director.threat + effects.threatDelta, 0, 100);
+  if (effects.stabilityDelta) state.stability = clampNum(state.stability + effects.stabilityDelta, 0, 100);
+  if (effects.tensionDelta) state.director.tension = clampNum(state.director.tension + effects.tensionDelta, 0, 100);
+  if (effects.weather) {
+    state.weather = effects.weather;
+    state.weatherDaysLeft = rng.int(1, 3);
   }
-  if (margin < -10) {
-    const hasStorage = state.base.buildings.some((b) => b.type === 'storage');
-    const loseFood = hasStorage ? randSafe(1, 2) : randSafe(2, 5);
-    const loseWater = hasStorage ? randSafe(0, 1) : randSafe(1, 3);
-    state.resources.food = Math.max(0, state.resources.food - loseFood);
-    state.resources.water = Math.max(0, state.resources.water - loseWater);
-    pushLog(state, `Saquean provisiones (−${loseFood} comida, −${loseWater} agua).`, 'bad');
-  }
-}
-
-function randSafe(a, b) {
-  return a + Math.floor(Math.random() * (b - a + 1));
-}
-
-function discoverOneUnknown(state) {
-  const unknown = state.zones.filter((z) => z.state === 'unknown');
-  if (!unknown.length) return;
-  const z = pick(unknown);
-  z.state = 'discovered';
-  pushLog(state, `Nuevos rumores revelan la zona: ${z.name}.`, 'info');
-}
-
-function applyEffects(state, effects, content, balance) {
-  if (!effects) return;
-  applyLoot(state, effects.loot);
-  applyLose(state, effects.lose);
-  if (effects.raid) applyRaid(state, effects.raid, balance);
-  if (effects.threatDelta) {
-    state.director.threat = clamp(state.director.threat + effects.threatDelta, 0, 100);
-  }
-  if (effects.discoverNeighbor) discoverOneUnknown(state);
-  if (effects.woundOne) {
-    const s = pick(livingSurvivors(state));
+  if (effects.setFlag) state.flags.narrative[effects.setFlag] = true;
+  if (effects.clearFlag) delete state.flags.narrative[effects.clearFlag];
+  if (effects.damageSurvivor) {
+    const s = rng.pick(livingSurvivors(state));
     if (s) {
-      s.hp = Math.max(1, s.hp - effects.woundOne);
-      s.status = s.hp < 55 ? 'wounded' : s.status;
-      if (effects.needMeds && state.resources.medicine > 0) {
-        state.resources.medicine -= 1;
-        s.hp = Math.min(s.maxHp, s.hp + 15);
-        pushLog(state, `Usáis medicina con ${s.name}.`, 'info');
-      } else if (effects.needMeds) {
-        pushLog(state, `${s.name} empeora: no hay medicinas.`, 'warn');
-      } else {
-        pushLog(state, `${s.name} resulta afectado (−${effects.woundOne} PV).`, 'warn');
-      }
+      s.hp -= effects.damageSurvivor;
+      if (s.hp <= 0) {
+        s.status = 'dead';
+        s.hp = 0;
+        state.stats.deaths += 1;
+      } else if (s.hp < 50) s.status = 'wounded';
     }
   }
-  if (effects.recruit) {
-    const cap = maxSurvivorsCap(balance);
-    const alive = livingSurvivors(state).length;
-    if (alive < cap) {
-      const neo = makeSurvivor(content.survivorsDoc.names, content.survivorsDoc.skillKeys);
-      state.survivors.push(neo);
-      pushLog(state, `${neo.name} se une al refugio.`, 'good');
-    } else {
-      pushLog(state, 'Llega gente… pero no cabe nadie más (límite de población).', 'warn');
+  if (effects.killSurvivorChance && rng.chance(effects.killSurvivorChance)) {
+    const s = rng.pick(livingSurvivors(state));
+    if (s) {
+      s.status = 'dead';
+      s.hp = 0;
+      state.stats.deaths += 1;
+      state.director.recentLosses += 1;
+      pushLog(state, `${s.name} no sobrevive al incidente.`, 'bad');
     }
   }
+  if (effects.damageBuildingChance && rng.chance(effects.damageBuildingChance)) {
+    const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
+    if (b) {
+      b.hp -= rng.int(25, 60);
+      pushLog(state, `Daños en ${content.buildings[b.type]?.name || b.type}.`, 'warn');
+    }
+  }
+  if (effects.spawnSurvivorChance && rng.chance(effects.spawnSurvivorChance)) {
+    const s = makeSurvivor(rng, content.survivorsDoc);
+    state.survivors.push(s);
+    pushLog(state, `${s.name} se une al refugio.`, 'good');
+  }
+  if (effects.discoverZone) {
+    const z = state.zones.find((x) => x.state === 'unknown');
+    if (z) {
+      z.state = 'discovered';
+      pushLog(state, `Descubrís ${z.name}.`, 'info');
+    }
+  }
+  if (effects.researchBonus && state.research.active) {
+    state.research.progress += effects.researchBonus;
+  }
+  if (effects.attackIntensity) attackIntensity = effects.attackIntensity;
+  return { attackIntensity };
+}
+
+function afterEvent(state, content, chosen) {
+  state.director.lastEventId = chosen.id;
+  state.director.cooldowns[chosen.id] = state.day + (chosen.cooldown || 3);
+  if (chosen.family) {
+    state.director.familyCooldowns[chosen.family] =
+      state.day + (content.balance.familyCooldownDays || 3);
+    state.director.recentFamilies = [chosen.family, ...(state.director.recentFamilies || [])].slice(0, 8);
+  }
+  if ((chosen.intensity || 0) >= 4) {
+    state.director.lastCrisisDay = state.day;
+    state.director.protectionUntil = state.day + (content.balance.postDisasterProtectionDays || 3);
+    state.director.tension = Math.max(10, state.director.tension - 15);
+  } else {
+    state.director.tension = clampNum(state.director.tension + (chosen.intensity || 0) * 2, 0, 100);
+  }
+}
+
+function resolveChosenEvent(state, content, chosen, rng) {
+  const variant = rng.pick(chosen.variants || [{ text: chosen.name, effects: {} }]);
+  const kind = (chosen.intensity || 0) >= 4 ? 'bad' : (chosen.intensity || 0) >= 2 ? 'warn' : 'info';
+  pushLog(state, `${chosen.name}: ${variant.text}`, kind);
+  const applied = applyEventEffects(state, content, variant.effects || {}, rng);
+  afterEvent(state, content, chosen);
+  return { event: chosen, attackIntensity: applied.attackIntensity };
 }
 
 export function runDirector(state, content) {
-  const { eventsDoc, balance } = content;
+  updateIndices(state, content);
+  const rng = rngOf(state);
+  const bal = content.balance;
+  if (state.day < (bal.directorMinDay || 1)) return { quiet: true };
 
-  // Muchas noches no traen un evento “importante”: tirada de silencio previo.
-  if (chance(balance.quietNightChance ?? 0.32) && state.day > 1) {
-    pushLog(state, 'Noche tranquila. Nada digno de informe.', 'info');
-    state.director.threat = clamp(
-      state.director.threat + (state.director.threat > 35 ? 1 : 0) - (livingSurvivors(state).length >= 8 ? 1 : 0),
-      0,
-      100
-    );
-    if (state.director.recentLosses > 0) state.director.recentLosses -= 1;
-    return;
+  if (rng.chance(bal.quietNightChance || 0.28) && state.director.tension < 55) {
+    pushLog(state, 'Noche tranquila. Nada digno de anotar.', 'story');
+    state.director.tension = Math.max(0, state.director.tension - 2);
+    return { quiet: true };
   }
 
-  const pool = (eventsDoc.events || []).filter((ev) => eventAllowed(ev, state, balance));
-  if (!pool.length) {
-    pushLog(state, 'La noche pasa sin novedad.', 'info');
-    return;
+  const events = (content.eventsDoc?.events || []).filter((ev) => conditionsMet(ev, state));
+  if (!events.length) {
+    pushLog(state, 'El viento arrastra polvo. Sin novedades.', 'story');
+    return { quiet: true };
   }
-  const weights = pool.map((ev) => weightFor(ev, state));
-  const total = weights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  let chosen = pool[0];
-  for (let i = 0; i < pool.length; i++) {
-    r -= weights[i];
+
+  const weighted = events.map((ev) => ({ ev, w: weightFor(ev, state) })).filter((x) => x.w > 0);
+  const total = weighted.reduce((n, x) => n + x.w, 0) || 1;
+  let r = rng.float(0, total);
+  let chosen = weighted[0]?.ev;
+  for (const row of weighted) {
+    r -= row.w;
     if (r <= 0) {
-      chosen = pool[i];
+      chosen = row.ev;
       break;
     }
   }
-  const variant = pick(chosen.variants || [{ text: chosen.name, effects: {} }]);
-  const kind =
-    chosen.intensity >= 4 ? 'bad' : chosen.intensity >= 2 ? 'warn' : chosen.intensity <= 0 ? 'info' : 'event';
-  pushLog(state, `${chosen.name}: ${variant.text}`, kind);
-  applyEffects(state, variant.effects, content, balance);
-  state.director.cooldowns[chosen.id] = state.day + (chosen.cooldown || 3);
-  state.director.lastEventId = chosen.id;
+  if (!chosen) return { quiet: true };
 
-  const controlled = state.zones.filter((z) => z.state === 'controlled').length;
-  const pop = livingSurvivors(state).length;
-  state.director.threat = clamp(
-    state.director.threat +
-      ((chosen.intensity || 0) >= 3 ? 2 : 1) +
-      Math.floor(state.day / 6) +
-      Math.floor(controlled * 0.4) -
-      Math.floor(defenseValue(state, balance) / 22) +
-      (state.director.recentLosses > 0 ? -1 : 0) -
-      (pop >= 8 ? 1 : 0),
-    0,
-    100
-  );
-  if (state.director.recentLosses > 0) state.director.recentLosses -= 1;
+  if (chosen.choices?.length && !state._autoResolveChoices) {
+    state.pendingChoice = {
+      eventId: chosen.id,
+      name: chosen.name,
+      family: chosen.family,
+      text: rng.pick(chosen.variants || [{ text: chosen.name }]).text,
+      choices: chosen.choices,
+    };
+    pushLog(state, `Decisión: ${chosen.name}`, 'warn');
+    return { choice: true, event: chosen };
+  }
+
+  return resolveChosenEvent(state, content, chosen, rng);
+}
+
+export function resolvePendingChoice(state, content, choiceId) {
+  if (!state.pendingChoice) return { ok: false };
+  const ev = (content.eventsDoc?.events || []).find((e) => e.id === state.pendingChoice.eventId);
+  const choice = state.pendingChoice.choices.find((c) => c.id === choiceId);
+  const rng = rngOf(state);
+  const pendingText = state.pendingChoice.text;
+  state.pendingChoice = null;
+  if (!ev || !choice) return { ok: false };
+  pushLog(state, `${ev.name}: ${pendingText}`, 'info');
+  const applied = applyEventEffects(state, content, choice.effects || {}, rng);
+  afterEvent(state, content, ev);
+  return { ok: true, attackIntensity: applied.attackIntensity };
 }

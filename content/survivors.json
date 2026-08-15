@@ -6,13 +6,65 @@
     "Clara", "Eric", "Laia", "Arnau", "Julia", "Pau", "Elena", "Gerard",
     "Marina", "Roger", "Berta", "Sergi", "Núria", "Joel", "Ainhoa", "Xavi",
     "Helena", "Martí", "Ona", "Adrià", "Blanca", "Tomàs", "Júlia", "Enric",
-    "Cristina", "Ivan", "Marta", "Raúl", "Andrea", "Óscar", "Patricia", "Álvaro"
+    "Cristina", "Ivan", "Marta", "Raúl", "Andrea", "Óscar", "Patricia", "Álvaro",
+    "Carmen", "Diego", "Inés", "Pablo", "Rocío", "Andrés", "Beatriz", "Manuel",
+    "Laura", "Javier", "Sara", "Miguel", "Ana", "David", "Isabel", "Carlos",
+    "María", "Jorge", "Teresa", "Francisco", "Pilar", "Antonio", "Rosa", "Luis",
+    "Natalia", "Fernando", "Silvia", "Alberto", "Mónica", "Ricardo", "Eva", "Pedro",
+    "Alicia", "Rubén", "Noelia", "Víctor", "Irene", "Guillermo", "Esther", "Sergio",
+    "Aitana", "Unai", "Leire", "Asier", "Nahia", "Iñaki", "Maite", "Jon",
+    "Yaiza", "Raúl", "Candela", "Mateo", "Valeria", "Nicolás", "Jimena", "Gonzalo",
+    "Abril", "Héctor", "Luna", "Samuel", "Olivia", "Gabriel", "Vega", "Daniel",
+    "Celia", "Marcos", "Fátima", "Ramón", "Miriam", "Eduardo", "Lidia", "Jaime"
   ],
-  "skillKeys": ["scout", "fight", "build", "gather"],
+  "skillKeys": ["scout", "gather", "build", "produce", "fight"],
   "skillLabels": {
     "scout": "Explorar",
-    "fight": "Defender",
+    "gather": "Recolectar",
     "build": "Construir",
-    "gather": "Recolectar"
-  }
+    "produce": "Producir",
+    "fight": "Defender"
+  },
+  "traits": [
+    {
+      "id": "tough",
+      "name": "Resistente",
+      "effects": { "hpBonus": 15 }
+    },
+    {
+      "id": "quick",
+      "name": "Rápido",
+      "effects": { "scoutBonus": 1 }
+    },
+    {
+      "id": "strong",
+      "name": "Fuerte",
+      "effects": { "gatherBonus": 1, "buildBonus": 1 }
+    },
+    {
+      "id": "steady",
+      "name": "Firme",
+      "effects": { "fightBonus": 1 }
+    },
+    {
+      "id": "handy",
+      "name": "Manitas",
+      "effects": { "buildBonus": 1, "produceBonus": 1 }
+    },
+    {
+      "id": "healer",
+      "name": "Sanador",
+      "effects": { "healBonus": 1, "medicineSave": 1 }
+    },
+    {
+      "id": "thrifty",
+      "name": "Ahorrativo",
+      "effects": { "foodSave": 1, "waterSave": 1 }
+    },
+    {
+      "id": "keen",
+      "name": "Perspicaz",
+      "effects": { "scoutBonus": 1, "lootBonus": 1 }
+    }
+  ]
 }

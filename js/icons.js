@@ -91,16 +91,18 @@ export const SKILL_META = {
   scout: { label: 'Explorar', short: 'Explorar', color: '#c4a574' },
   gather: { label: 'Recolectar', short: 'Recolectar', color: '#8fbc8f' },
   build: { label: 'Construir', short: 'Construir', color: '#a89070' },
+  produce: { label: 'Producir', short: 'Producir', color: '#7a9ab0' },
   fight: { label: 'Defender', short: 'Defender', color: '#c07060' },
 };
 
-export const SKILL_ORDER = ['scout', 'gather', 'build', 'fight'];
+export const SKILL_ORDER = ['scout', 'gather', 'build', 'produce', 'fight'];
 
 export function skillIcon(key, s = 14) {
   const map = {
     scout: [{ tag: 'circle', cx: '12', cy: '12', r: '7', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8' }, { tag: 'circle', cx: '12', cy: '12', r: '2.2', fill: 'currentColor' }],
     gather: [{ tag: 'path', d: 'M12 4v12M8 9l4-5 4 5M7 20h10', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }],
     build: [{ tag: 'path', d: 'M5 18V9l7-4 7 4v9H5z', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'stroke-linejoin': 'round' }],
+    produce: [{ tag: 'path', d: 'M6 18V10l6-5 6 5v8H6z', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'stroke-linejoin': 'round' }, { tag: 'path', d: 'M10 18v-5h4v5', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5' }],
     fight: [{ tag: 'path', d: 'M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7l7-4z', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.7', 'stroke-linejoin': 'round' }],
   };
   return iconSvg(map[key] || map.scout, { size: s, className: `zz-skill-ico zz-skill-ico--${key}` });

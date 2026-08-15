@@ -1,0 +1,372 @@
+{
+  "branches": {
+    "supervivencia": {
+      "name": "Supervivencia",
+      "techs": [
+        {
+          "id": "rationing",
+          "name": "Racionamiento",
+          "desc": "Mejora el aprovechamiento de comida.",
+          "cost": {
+            "food": 4,
+            "wood": 2
+          },
+          "requires": [],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "foodProdBonus": 0.1
+          }
+        },
+        {
+          "id": "water_filters",
+          "name": "Filtros de agua",
+          "desc": "Purificación improvisada más eficiente.",
+          "cost": {
+            "metal": 3,
+            "water": 2
+          },
+          "requires": [],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "waterProdBonus": 0.1
+          }
+        },
+        {
+          "id": "field_medicine",
+          "name": "Medicina de campo",
+          "desc": "Vendajes y triaje básico.",
+          "cost": {
+            "medicine": 3,
+            "wood": 2
+          },
+          "requires": [
+            "rationing"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "healBonus": 0.15
+          }
+        },
+        {
+          "id": "greenhouse_tech",
+          "name": "Cultivo protegido",
+          "desc": "Permite construir invernaderos.",
+          "cost": {
+            "wood": 6,
+            "metal": 3,
+            "water": 4
+          },
+          "requires": [
+            "water_filters"
+          ],
+          "minEra": 1,
+          "days": 4,
+          "effects": {
+            "unlockBuilding": "greenhouse",
+            "foodProdBonus": 0.15
+          }
+        },
+        {
+          "id": "preservation",
+          "name": "Conservas",
+          "desc": "Reduce el deterioro de alimentos.",
+          "cost": {
+            "metal": 4,
+            "fuel": 2,
+            "food": 3
+          },
+          "requires": [
+            "field_medicine",
+            "greenhouse_tech"
+          ],
+          "minEra": 2,
+          "days": 4,
+          "effects": {
+            "foodProdBonus": 0.2,
+            "spoilReduction": 0.25
+          }
+        }
+      ]
+    },
+    "construccion": {
+      "name": "Construcción",
+      "techs": [
+        {
+          "id": "basic_carpentry",
+          "name": "Carpintería básica",
+          "desc": "Mejores estructuras de madera.",
+          "cost": {
+            "wood": 5,
+            "metal": 1
+          },
+          "requires": [],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "buildCostReduction": 0.1
+          }
+        },
+        {
+          "id": "metalwork",
+          "name": "Metalurgia improvisada",
+          "desc": "Forja y reciclaje de chapa.",
+          "cost": {
+            "metal": 5,
+            "fuel": 2
+          },
+          "requires": [
+            "basic_carpentry"
+          ],
+          "minEra": 0,
+          "days": 3,
+          "effects": {
+            "metalProdBonus": 0.15
+          }
+        },
+        {
+          "id": "reinforced_walls",
+          "name": "Muros reforzados",
+          "desc": "Perímetro más resistente.",
+          "cost": {
+            "wood": 6,
+            "metal": 6
+          },
+          "requires": [
+            "metalwork"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "defenseBonus": 5,
+            "unlockBuilding": "wall"
+          }
+        },
+        {
+          "id": "advanced_housing",
+          "name": "Alojamiento avanzado",
+          "desc": "Más capacidad por refugio.",
+          "cost": {
+            "wood": 8,
+            "metal": 4
+          },
+          "requires": [
+            "basic_carpentry"
+          ],
+          "minEra": 1,
+          "days": 4,
+          "effects": {
+            "housingBonus": 1
+          }
+        },
+        {
+          "id": "power_grid",
+          "name": "Red eléctrica",
+          "desc": "Optimiza generadores y talleres.",
+          "cost": {
+            "metal": 8,
+            "fuel": 4
+          },
+          "requires": [
+            "metalwork",
+            "reinforced_walls"
+          ],
+          "minEra": 2,
+          "days": 5,
+          "effects": {
+            "fuelSaveBonus": 0.2,
+            "unlockBuilding": "power_hub"
+          }
+        }
+      ]
+    },
+    "logistica": {
+      "name": "Logística",
+      "techs": [
+        {
+          "id": "scouting",
+          "name": "Exploración",
+          "desc": "Mejor lectura del mapa y rutas.",
+          "cost": {
+            "food": 2,
+            "wood": 2
+          },
+          "requires": [],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "expeditionSlots": 1
+          }
+        },
+        {
+          "id": "pack_mules",
+          "name": "Carga ligera",
+          "desc": "Más botín por expedición a pie.",
+          "cost": {
+            "wood": 3,
+            "metal": 2
+          },
+          "requires": [
+            "scouting"
+          ],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "cargoBonus": 0.15
+          }
+        },
+        {
+          "id": "bike_tech",
+          "name": "Taller de bicis",
+          "desc": "Desbloquea bicicletas.",
+          "cost": {
+            "metal": 4,
+            "wood": 4
+          },
+          "requires": [
+            "scouting"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "vehicleUnlock": "bike"
+          }
+        },
+        {
+          "id": "vehicle_bay",
+          "name": "Bahía de vehículos",
+          "desc": "Coches y furgonetas.",
+          "cost": {
+            "metal": 8,
+            "fuel": 3,
+            "wood": 4
+          },
+          "requires": [
+            "bike_tech",
+            "pack_mules"
+          ],
+          "minEra": 2,
+          "days": 4,
+          "effects": {
+            "vehicleUnlock": "car",
+            "expeditionSlots": 1
+          }
+        },
+        {
+          "id": "convoy",
+          "name": "Convoy",
+          "desc": "Operaciones con van y más carga.",
+          "cost": {
+            "metal": 10,
+            "fuel": 5
+          },
+          "requires": [
+            "vehicle_bay"
+          ],
+          "minEra": 3,
+          "days": 5,
+          "effects": {
+            "vehicleUnlock": "van",
+            "cargoBonus": 0.25
+          }
+        }
+      ]
+    },
+    "defensa": {
+      "name": "Defensa",
+      "techs": [
+        {
+          "id": "watch_protocols",
+          "name": "Protocolos de guardia",
+          "desc": "Turnos más efectivos.",
+          "cost": {
+            "wood": 3,
+            "ammo": 1
+          },
+          "requires": [],
+          "minEra": 0,
+          "days": 2,
+          "effects": {
+            "defenseBonus": 3
+          }
+        },
+        {
+          "id": "ammo_craft",
+          "name": "Recarga de munición",
+          "desc": "Recuperáis vainas útiles.",
+          "cost": {
+            "metal": 4,
+            "ammo": 2
+          },
+          "requires": [
+            "watch_protocols"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "ammoEfficiency": 0.2
+          }
+        },
+        {
+          "id": "tower_optics",
+          "name": "Óptica de atalaya",
+          "desc": "Detección temprana de oleadas.",
+          "cost": {
+            "metal": 5,
+            "wood": 3
+          },
+          "requires": [
+            "watch_protocols"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "defenseBonus": 5,
+            "threatSight": 1
+          }
+        },
+        {
+          "id": "fortify",
+          "name": "Fortificación",
+          "desc": "Barricadas y trampas perimetrales.",
+          "cost": {
+            "wood": 8,
+            "metal": 6,
+            "ammo": 2
+          },
+          "requires": [
+            "ammo_craft",
+            "tower_optics"
+          ],
+          "minEra": 2,
+          "days": 4,
+          "effects": {
+            "defenseBonus": 8,
+            "unlockBuilding": "barricade"
+          }
+        },
+        {
+          "id": "armor_vehicle",
+          "name": "Blindaje móvil",
+          "desc": "Desbloquea el vehículo acorazado.",
+          "cost": {
+            "metal": 12,
+            "fuel": 4,
+            "ammo": 3
+          },
+          "requires": [
+            "fortify"
+          ],
+          "minEra": 3,
+          "days": 5,
+          "effects": {
+            "vehicleUnlock": "armored",
+            "defenseBonus": 5
+          }
+        }
+      ]
+    }
+  }
+}

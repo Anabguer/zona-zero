@@ -93,17 +93,33 @@ try {
   });
   assert(defeatHidden, 'overlay Derrota oculto (display:none + hidden)');
 
+  const victoryHidden = await page.evaluate(() => {
+    const v = document.getElementById('zz-victory');
+    return v && v.hasAttribute('hidden') && getComputedStyle(v).display === 'none';
+  });
+  assert(victoryHidden, 'overlay Victoria oculto');
+
   const bootHidden = await page.evaluate(() => {
     const b = document.getElementById('zz-boot');
     return b.hasAttribute('hidden') && getComputedStyle(b).display === 'none';
   });
   assert(bootHidden, 'pantalla Preparando partida oculta');
 
+  const eraText = (await page.locator('#zz-era').innerText()).trim();
+  assert(eraText.length > 0 && eraText !== '\u2014' && eraText !== '-', 'HUD era visible: ' + eraText);
+
+  const stab = await page.locator('#zz-stability').innerText();
+  assert(/\d+/.test(stab), 'HUD estabilidad: ' + stab);
+
   const people = await page.locator('.zz-person:not(.is-dead)').count();
   assert(people === 3, '3 supervivientes visibles: ' + people);
 
+  // 5 skills (incl. produce) x 3 personas = 15
   const skillBars = await page.locator('.zz-skill').count();
-  assert(skillBars >= 12, 'barras de habilidad visibles: ' + skillBars);
+  assert(skillBars === 15, 'barras de habilidad (5x3 produce): ' + skillBars);
+
+  const produceBars = await page.locator('.zz-skill-ico--produce, [data-skill="produce"]').count();
+  assert(produceBars === 3, 'skill produce x3: ' + produceBars);
 
   const portraits = await page.locator('.zz-portrait').count();
   assert(portraits === 3, 'retratos SVG: ' + portraits);
@@ -131,10 +147,26 @@ try {
   });
   assert(expSent, 'expedición enviada (panel/toast)');
 
-  // Avanzar varios días
+  async function dismissChoiceIfAny() {
+    const open = await page.evaluate(() => {
+      const m = document.getElementById('zz-choice-modal');
+      return m && !m.hasAttribute('hidden');
+    });
+    if (open) {
+      const btn = page.locator('#zz-choice-actions button').first();
+      if (await btn.count()) {
+        await btn.click();
+        await page.waitForTimeout(200);
+      }
+    }
+  }
+
+  // Avanzar varios días (cerrar decisiones del director si aparecen)
   for (let i = 0; i < 5; i++) {
+    await dismissChoiceIfAny();
     await page.click('#zz-advance');
     await page.waitForTimeout(150);
+    await dismissChoiceIfAny();
   }
   const day = Number(await page.locator('#zz-day').innerText());
   assert(day >= 5, 'varios días: ' + day);
@@ -162,6 +194,15 @@ try {
 
   await page.click('#zz-tab-people');
   await page.waitForTimeout(100);
+
+  await page.click('#zz-tab-more');
+  await page.waitForTimeout(200);
+  const moreVisible = await page.evaluate(() => {
+    const panel = document.querySelector('.zz-panel[data-panel="more"]');
+    return panel?.classList.contains('is-active') && !!document.getElementById('zz-more')?.children.length;
+  });
+  assert(moreVisible, 'pestana Mas con contenido');
+
   await page.click('#zz-tab-map');
   await page.waitForTimeout(100);
 

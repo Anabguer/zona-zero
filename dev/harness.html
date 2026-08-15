@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Zona Zero · harness local</title>
-  <link rel="stylesheet" href="../css/game.css?v=6" />
+  <title>Zona Zero — harness local</title>
+  <link rel="stylesheet" href="../css/game.css?v=7" />
   <script type="importmap">
   {
     "imports": {
@@ -25,54 +25,92 @@
       </div>
       <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
     </header>
+
     <p class="zz-coach" id="zz-coach" hidden>
       <span id="zz-coach-text"></span>
       <button type="button" id="zz-coach-dismiss" aria-label="Cerrar">×</button>
     </p>
+
     <section class="zz-hud" aria-label="Estado">
       <div class="zz-hud__row">
-        <div class="zz-hud__pill"><span>Día</span><strong id="zz-day">1</strong></div>
+        <div class="zz-hud__pill">
+          <span>Día</span>
+          <strong id="zz-day">1</strong>
+        </div>
+        <div class="zz-hud__pill zz-hud__pill--era">
+          <span>Era</span>
+          <strong id="zz-era">—</strong>
+        </div>
         <div class="zz-hud__pop">
           <span class="zz-hud__pop-ico" aria-hidden="true"></span>
-          <div><strong id="zz-pop">0</strong><small>Población / camas</small></div>
+          <div>
+            <strong id="zz-pop">0</strong>
+            <small>Población / camas</small>
+          </div>
         </div>
-        <div class="zz-hud__combat">
-          <div class="zz-hud__meter zz-hud__meter--threat"><span>Amenaza</span><span></span><strong id="zz-threat">0</strong></div>
-          <div class="zz-hud__meter zz-hud__meter--def"><span>Defensa</span><span></span><strong id="zz-defense">0</strong></div>
+        <div class="zz-hud__combat" aria-label="Estabilidad, amenaza y defensa">
+          <div class="zz-hud__meter zz-hud__meter--stab">
+            <span>Estab.</span>
+            <span></span>
+            <strong id="zz-stability">0</strong>
+          </div>
+          <div class="zz-hud__meter zz-hud__meter--threat">
+            <span>Amenaza</span>
+            <span></span>
+            <strong id="zz-threat">0</strong>
+          </div>
+          <div class="zz-hud__meter zz-hud__meter--def">
+            <span>Defensa</span>
+            <span></span>
+            <strong id="zz-defense">0</strong>
+          </div>
         </div>
       </div>
       <ul class="zz-resources" id="zz-resources"></ul>
     </section>
+
     <nav class="zz-tabs" aria-label="Vistas">
       <button type="button" class="zz-tab is-active" id="zz-tab-map" data-tab="map">Mapa</button>
       <button type="button" class="zz-tab" id="zz-tab-base" data-tab="base">Base</button>
       <button type="button" class="zz-tab" id="zz-tab-people" data-tab="people">Gente</button>
+      <button type="button" class="zz-tab" id="zz-tab-more" data-tab="more">Más</button>
     </nav>
+
     <main class="zz-main">
       <section class="zz-panel is-active" data-panel="map">
         <div class="zz-map-wrap">
-          <svg id="zz-map" class="zz-map" viewBox="0 0 100 100"></svg>
+          <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Mapa de la ciudad"></svg>
         </div>
         <div id="zz-zone-panel" class="zz-side-card"></div>
       </section>
+
       <section class="zz-panel" data-panel="base">
         <div class="zz-base-wrap">
-          <svg id="zz-base" class="zz-base"></svg>
+          <svg id="zz-base" class="zz-base" role="img" aria-label="Asentamiento"></svg>
         </div>
         <div class="zz-build-bar" id="zz-build-bar"></div>
-        <p class="zz-hint" id="zz-build-hint"></p>
+        <p class="zz-hint" id="zz-build-hint">Elige un edificio y toca el terreno libre.</p>
       </section>
+
       <section class="zz-panel" data-panel="people">
         <div class="zz-people" id="zz-people"></div>
+        <p class="zz-hint">Toca para formar el equipo de expedición (máx. 3).</p>
+      </section>
+
+      <section class="zz-panel" data-panel="more">
+        <div id="zz-more" class="zz-more"></div>
       </section>
     </main>
+
     <aside class="zz-log-wrap">
       <h2>Diario</h2>
       <ul class="zz-log" id="zz-log"></ul>
     </aside>
+
     <footer class="zz-dock">
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
     </footer>
+
     <div id="zz-defeat" class="zz-defeat" hidden>
       <div class="zz-defeat__card">
         <h2>Derrota</h2>
@@ -80,10 +118,26 @@
         <a class="zz-btn zz-btn--primary" href="#">Volver</a>
       </div>
     </div>
+
+    <div id="zz-victory" class="zz-victory" hidden>
+      <div class="zz-victory__card">
+        <h2>Victoria</h2>
+        <p>Zona Zero está estabilizada. Podéis continuar en modo endless.</p>
+        <button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Continuar endless</button>
+      </div>
+    </div>
+
+    <div id="zz-choice-modal" class="zz-choice" hidden>
+      <div class="zz-choice__card">
+        <h2 id="zz-choice-title">Decisión</h2>
+        <p id="zz-choice-text"></p>
+        <div id="zz-choice-actions" class="zz-choice__actions"></div>
+      </div>
+    </div>
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=6';
+    import { bootGame } from '../js/main.js?v=7';
     window.__zzReady = bootGame({ slot: 1, mode: 'new', name: 'Harness' }).then(() => {
       window.__zzOk = true;
       return true;

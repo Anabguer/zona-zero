@@ -1,101 +1,639 @@
 {
+  "hq_central_l1": {
+    "id": "hq_central_l1",
+    "name": "Refugio Central I",
+    "desc": "Núcleo del asentamiento. Vivienda básica y centro de mando.",
+    "cost": {
+      "wood": 0,
+      "metal": 0
+    },
+    "category": "core",
+    "w": 2,
+    "h": 2,
+    "max": 1,
+    "housing": 6,
+    "jobs": 1,
+    "defense": 4,
+    "minEra": 0,
+    "requires": [],
+    "icon": "hq"
+  },
+  "hq_central_l2": {
+    "id": "hq_central_l2",
+    "name": "Refugio Central II",
+    "desc": "Ampliación del núcleo: más camas, mejor coordinación y defensa.",
+    "cost": {
+      "wood": 18,
+      "metal": 12,
+      "fuel": 2
+    },
+    "category": "core",
+    "w": 2,
+    "h": 2,
+    "max": 1,
+    "housing": 10,
+    "jobs": 2,
+    "defense": 8,
+    "minEra": 1,
+    "requires": [],
+    "upgradeFrom": "hq_central_l1",
+    "icon": "hq"
+  },
+  "hq_central_l3": {
+    "id": "hq_central_l3",
+    "name": "Refugio Central III",
+    "desc": "Cuartel general fortificado. Máxima capacidad de mando y vivienda.",
+    "cost": {
+      "wood": 28,
+      "metal": 22,
+      "fuel": 4,
+      "ammo": 2
+    },
+    "category": "core",
+    "w": 2,
+    "h": 2,
+    "max": 1,
+    "housing": 16,
+    "jobs": 3,
+    "defense": 14,
+    "minEra": 2,
+    "requires": [],
+    "upgradeFrom": "hq_central_l2",
+    "icon": "hq"
+  },
   "shelter": {
     "id": "shelter",
     "name": "Refugio",
-    "desc": "Camas y techo. +2 capacidad.",
-    "cost": { "wood": 5, "metal": 2 },
+    "desc": "Camas y techo improvisado. +2 capacidad.",
+    "cost": {
+      "wood": 5,
+      "metal": 2
+    },
+    "category": "housing",
     "w": 1,
     "h": 1,
     "max": 40,
-    "category": "housing",
+    "housing": 2,
+    "minEra": 0,
+    "requires": [],
     "icon": "shelter"
+  },
+  "house": {
+    "id": "house",
+    "name": "Casa",
+    "desc": "Vivienda reforzada con más camas y algo de privacidad.",
+    "cost": {
+      "wood": 10,
+      "metal": 4
+    },
+    "category": "housing",
+    "w": 1,
+    "h": 1,
+    "max": 20,
+    "housing": 4,
+    "minEra": 0,
+    "requires": [],
+    "requiresBuilding": "shelter",
+    "icon": "house"
+  },
+  "block": {
+    "id": "block",
+    "name": "Bloque",
+    "desc": "Edificio de varias plantas. Mucha capacidad en poco suelo.",
+    "cost": {
+      "wood": 16,
+      "metal": 12,
+      "fuel": 1
+    },
+    "category": "housing",
+    "w": 2,
+    "h": 1,
+    "max": 8,
+    "housing": 8,
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "house",
+    "icon": "block"
   },
   "farm": {
     "id": "farm",
     "name": "Huerto",
-    "desc": "Produce comida cada día.",
-    "cost": { "wood": 4, "water": 2 },
+    "desc": "Cultivos a cielo abierto. Produce comida con personal.",
+    "cost": {
+      "wood": 4,
+      "water": 2
+    },
+    "category": "production",
     "w": 1,
     "h": 1,
     "max": 12,
-    "category": "production",
+    "jobs": 2,
+    "produces": {
+      "food": 5
+    },
+    "minEra": 0,
+    "requires": [],
     "icon": "farm"
+  },
+  "greenhouse": {
+    "id": "greenhouse",
+    "name": "Invernadero",
+    "desc": "Cultivo protegido. Más rendimiento y menos mermas.",
+    "cost": {
+      "wood": 8,
+      "metal": 4,
+      "water": 3
+    },
+    "category": "production",
+    "w": 1,
+    "h": 1,
+    "max": 6,
+    "jobs": 2,
+    "produces": {
+      "food": 8
+    },
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "farm",
+    "icon": "greenhouse"
   },
   "well": {
     "id": "well",
     "name": "Pozo",
     "desc": "Extrae agua potable cada día.",
-    "cost": { "metal": 5, "wood": 2 },
+    "cost": {
+      "metal": 5,
+      "wood": 2
+    },
+    "category": "production",
     "w": 1,
     "h": 1,
     "max": 8,
-    "category": "production",
+    "jobs": 1,
+    "produces": {
+      "water": 5
+    },
+    "minEra": 0,
+    "requires": [],
     "icon": "well"
+  },
+  "cistern": {
+    "id": "cistern",
+    "name": "Cisterna",
+    "desc": "Almacena y filtra agua. Mayor caudal con personal.",
+    "cost": {
+      "metal": 8,
+      "wood": 3
+    },
+    "category": "production",
+    "w": 1,
+    "h": 1,
+    "max": 4,
+    "jobs": 1,
+    "produces": {
+      "water": 7
+    },
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "well",
+    "icon": "cistern"
   },
   "sawmill": {
     "id": "sawmill",
     "name": "Aserradero",
-    "desc": "Procesa madera útil.",
-    "cost": { "metal": 4, "wood": 3 },
+    "desc": "Procesa madera útil a partir de restos y troncos.",
+    "cost": {
+      "metal": 4,
+      "wood": 3
+    },
+    "category": "production",
     "w": 1,
     "h": 1,
     "max": 6,
-    "category": "production",
+    "jobs": 2,
+    "produces": {
+      "wood": 3
+    },
+    "minEra": 0,
+    "requires": [],
     "icon": "sawmill"
   },
-  "workshop": {
-    "id": "workshop",
-    "name": "Taller",
-    "desc": "Recupera y forja metal.",
-    "cost": { "wood": 4, "metal": 4 },
-    "w": 1,
-    "h": 1,
-    "max": 6,
+  "scrapyard": {
+    "id": "scrapyard",
+    "name": "Chatarrería",
+    "desc": "Clasifica chatarra y recupera metal usable.",
+    "cost": {
+      "wood": 4,
+      "metal": 3
+    },
     "category": "production",
-    "icon": "workshop"
-  },
-  "clinic": {
-    "id": "clinic",
-    "name": "Botiquín",
-    "desc": "Genera medicinas y mejora curación.",
-    "cost": { "metal": 4, "wood": 3, "medicine": 1 },
-    "w": 1,
-    "h": 1,
-    "max": 4,
-    "category": "support",
-    "icon": "clinic"
-  },
-  "generator": {
-    "id": "generator",
-    "name": "Generador",
-    "desc": "Reduce el consumo diario de combustible.",
-    "cost": { "metal": 8, "fuel": 2 },
-    "w": 1,
-    "h": 1,
-    "max": 3,
-    "category": "support",
-    "icon": "generator"
-  },
-  "watchtower": {
-    "id": "watchtower",
-    "name": "Atalaya",
-    "desc": "Mejora la defensa del asentamiento.",
-    "cost": { "wood": 6, "metal": 4, "ammo": 1 },
     "w": 1,
     "h": 1,
     "max": 6,
-    "category": "defense",
-    "icon": "watchtower"
+    "jobs": 2,
+    "produces": {
+      "metal": 2
+    },
+    "minEra": 0,
+    "requires": [],
+    "icon": "scrapyard"
   },
   "storage": {
     "id": "storage",
     "name": "Almacén",
-    "desc": "Reduce pérdidas por saqueos y pudrición.",
-    "cost": { "wood": 5, "metal": 2 },
+    "desc": "Reduce pérdidas por saqueos, humedad y pudrición.",
+    "cost": {
+      "wood": 5,
+      "metal": 2
+    },
+    "category": "logistics",
     "w": 1,
     "h": 1,
     "max": 4,
-    "category": "support",
+    "jobs": 1,
+    "minEra": 0,
+    "requires": [],
     "icon": "storage"
+  },
+  "workshop": {
+    "id": "workshop",
+    "name": "Taller",
+    "desc": "Forja y repara piezas. Produce metal refinado.",
+    "cost": {
+      "wood": 4,
+      "metal": 4
+    },
+    "category": "production",
+    "w": 1,
+    "h": 1,
+    "max": 6,
+    "jobs": 2,
+    "produces": {
+      "metal": 2
+    },
+    "minEra": 0,
+    "requires": [],
+    "icon": "workshop"
+  },
+  "kitchen": {
+    "id": "kitchen",
+    "name": "Cocina",
+    "desc": "Raciona y conserva comida. Mejora el rendimiento alimentario.",
+    "cost": {
+      "wood": 5,
+      "metal": 3,
+      "water": 1
+    },
+    "category": "production",
+    "w": 1,
+    "h": 1,
+    "max": 4,
+    "jobs": 2,
+    "produces": {
+      "food": 2
+    },
+    "minEra": 0,
+    "requires": [],
+    "icon": "kitchen"
+  },
+  "mech_shop": {
+    "id": "mech_shop",
+    "name": "Taller mecánico",
+    "desc": "Mantiene vehículos y herramientas. Produce piezas y metal.",
+    "cost": {
+      "wood": 6,
+      "metal": 8,
+      "fuel": 2
+    },
+    "category": "production",
+    "w": 2,
+    "h": 1,
+    "max": 3,
+    "jobs": 2,
+    "produces": {
+      "metal": 3
+    },
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "workshop",
+    "icon": "mech_shop"
+  },
+  "medkit": {
+    "id": "medkit",
+    "name": "Botiquín",
+    "desc": "Puesto de primeros auxilios. Poca producción, cura básica.",
+    "cost": {
+      "wood": 2,
+      "metal": 2,
+      "medicine": 1
+    },
+    "category": "health",
+    "w": 1,
+    "h": 1,
+    "max": 6,
+    "jobs": 1,
+    "produces": {
+      "medicine": 1
+    },
+    "minEra": 0,
+    "requires": [],
+    "icon": "medkit"
+  },
+  "infirmary": {
+    "id": "infirmary",
+    "name": "Enfermería",
+    "desc": "Camas de cura y triaje. Mejora la recuperación de heridos.",
+    "cost": {
+      "wood": 6,
+      "metal": 4,
+      "medicine": 2
+    },
+    "category": "health",
+    "w": 1,
+    "h": 1,
+    "max": 4,
+    "jobs": 2,
+    "produces": {
+      "medicine": 1
+    },
+    "minEra": 0,
+    "requires": [],
+    "requiresBuilding": "medkit",
+    "icon": "infirmary"
+  },
+  "clinic": {
+    "id": "clinic",
+    "name": "Clínica",
+    "desc": "Centro médico completo. Genera medicinas y cura avanzada.",
+    "cost": {
+      "metal": 8,
+      "wood": 5,
+      "medicine": 3,
+      "fuel": 1
+    },
+    "category": "health",
+    "w": 2,
+    "h": 1,
+    "max": 2,
+    "jobs": 3,
+    "produces": {
+      "medicine": 2
+    },
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "infirmary",
+    "icon": "clinic"
+  },
+  "barricade": {
+    "id": "barricade",
+    "name": "Barricada",
+    "desc": "Obstáculo improvisado que frena asaltos.",
+    "cost": {
+      "wood": 3,
+      "metal": 1
+    },
+    "category": "defense",
+    "w": 1,
+    "h": 1,
+    "max": 20,
+    "defense": 3,
+    "minEra": 0,
+    "requires": [],
+    "icon": "barricade"
+  },
+  "fence": {
+    "id": "fence",
+    "name": "Cerca",
+    "desc": "Perímetro reforzado. Mejor cobertura que una barricada suelta.",
+    "cost": {
+      "wood": 5,
+      "metal": 3
+    },
+    "category": "defense",
+    "w": 1,
+    "h": 1,
+    "max": 12,
+    "defense": 5,
+    "minEra": 0,
+    "requires": [],
+    "icon": "fence"
+  },
+  "watchtower": {
+    "id": "watchtower",
+    "name": "Atalaya",
+    "desc": "Vigilancia elevada. Mejora la defensa del asentamiento.",
+    "cost": {
+      "wood": 6,
+      "metal": 4,
+      "ammo": 1
+    },
+    "category": "defense",
+    "w": 1,
+    "h": 1,
+    "max": 6,
+    "jobs": 1,
+    "defense": 8,
+    "minEra": 0,
+    "requires": [],
+    "icon": "watchtower"
+  },
+  "armory": {
+    "id": "armory",
+    "name": "Armería",
+    "desc": "Almacén y taller de armas. Mejora el uso de munición.",
+    "cost": {
+      "wood": 6,
+      "metal": 8,
+      "ammo": 2
+    },
+    "category": "defense",
+    "w": 1,
+    "h": 1,
+    "max": 2,
+    "jobs": 2,
+    "defense": 6,
+    "produces": {
+      "ammo": 1
+    },
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "watchtower",
+    "icon": "armory"
+  },
+  "bunker": {
+    "id": "bunker",
+    "name": "Búnker",
+    "desc": "Refugio fortificado. Alta defensa y algo de vivienda de emergencia.",
+    "cost": {
+      "wood": 10,
+      "metal": 16,
+      "ammo": 3,
+      "fuel": 2
+    },
+    "category": "defense",
+    "w": 2,
+    "h": 1,
+    "max": 2,
+    "housing": 2,
+    "jobs": 1,
+    "defense": 18,
+    "minEra": 2,
+    "requires": [],
+    "requiresBuilding": "armory",
+    "icon": "bunker"
+  },
+  "radio": {
+    "id": "radio",
+    "name": "Radio",
+    "desc": "Escucha señales y contacta supervivientes. Apoyo a exploración.",
+    "cost": {
+      "metal": 5,
+      "wood": 2,
+      "fuel": 1
+    },
+    "category": "logistics",
+    "w": 1,
+    "h": 1,
+    "max": 2,
+    "jobs": 1,
+    "minEra": 0,
+    "requires": [],
+    "icon": "radio"
+  },
+  "expedition_center": {
+    "id": "expedition_center",
+    "name": "Centro de expediciones",
+    "desc": "Planifica salidas: más alcance y mejor organización de escuadras.",
+    "cost": {
+      "wood": 8,
+      "metal": 6,
+      "fuel": 2
+    },
+    "category": "logistics",
+    "w": 2,
+    "h": 1,
+    "max": 1,
+    "jobs": 2,
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "radio",
+    "icon": "expedition_center"
+  },
+  "garage": {
+    "id": "garage",
+    "name": "Garaje",
+    "desc": "Aparcamiento y mantenimiento ligero. Reduce gasto de combustible en rutas.",
+    "cost": {
+      "wood": 6,
+      "metal": 8,
+      "fuel": 2
+    },
+    "category": "logistics",
+    "w": 2,
+    "h": 1,
+    "max": 2,
+    "jobs": 1,
+    "fuelSave": 1,
+    "minEra": 1,
+    "requires": [],
+    "icon": "garage"
+  },
+  "command": {
+    "id": "command",
+    "name": "Puesto de mando",
+    "desc": "Sala de operaciones. Coordina defensa y expediciones.",
+    "cost": {
+      "wood": 8,
+      "metal": 10,
+      "fuel": 1
+    },
+    "category": "core",
+    "w": 1,
+    "h": 1,
+    "max": 1,
+    "jobs": 2,
+    "defense": 4,
+    "minEra": 1,
+    "requires": [],
+    "requiresBuilding": "hq_central_l1",
+    "icon": "command"
+  },
+  "generator": {
+    "id": "generator",
+    "name": "Generador",
+    "desc": "Energía diésel. Reduce el consumo diario de combustible neto.",
+    "cost": {
+      "metal": 8,
+      "fuel": 2
+    },
+    "category": "energy",
+    "w": 1,
+    "h": 1,
+    "max": 3,
+    "jobs": 1,
+    "energy": 4,
+    "fuelSave": 1,
+    "minEra": 0,
+    "requires": [],
+    "icon": "generator"
+  },
+  "solar": {
+    "id": "solar",
+    "name": "Placas solares",
+    "desc": "Energía limpia. Menos dependencia del diésel.",
+    "cost": {
+      "metal": 10,
+      "wood": 2
+    },
+    "category": "energy",
+    "w": 1,
+    "h": 1,
+    "max": 4,
+    "jobs": 1,
+    "energy": 3,
+    "fuelSave": 1,
+    "minEra": 1,
+    "requires": [],
+    "icon": "solar"
+  },
+  "tech_bench": {
+    "id": "tech_bench",
+    "name": "Banco técnico",
+    "desc": "Banco de prototipos. Desbloquea mejoras y prototipos simples.",
+    "cost": {
+      "wood": 4,
+      "metal": 6
+    },
+    "category": "research",
+    "w": 1,
+    "h": 1,
+    "max": 2,
+    "jobs": 1,
+    "minEra": 1,
+    "requires": [],
+    "icon": "tech_bench"
+  },
+  "lab": {
+    "id": "lab",
+    "name": "Laboratorio",
+    "desc": "Investigación avanzada: medicinas, filtros y prototipos.",
+    "cost": {
+      "wood": 6,
+      "metal": 10,
+      "medicine": 2,
+      "fuel": 1
+    },
+    "category": "research",
+    "w": 2,
+    "h": 1,
+    "max": 1,
+    "jobs": 2,
+    "produces": {
+      "medicine": 1
+    },
+    "minEra": 2,
+    "requires": [],
+    "requiresBuilding": "tech_bench",
+    "icon": "lab"
   }
 }

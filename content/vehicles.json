@@ -1,0 +1,60 @@
+{
+  "vehicles": [
+    {
+      "id": "bike",
+      "name": "Bicicleta",
+      "fuelPerTrip": 0,
+      "speedBonus": 0.15,
+      "cargoBonus": 0,
+      "protection": 0,
+      "minEra": 1,
+      "cost": {
+        "metal": 4,
+        "wood": 6
+      }
+    },
+    {
+      "id": "car",
+      "name": "Coche",
+      "fuelPerTrip": 2,
+      "speedBonus": 0.35,
+      "cargoBonus": 0.25,
+      "protection": 1,
+      "minEra": 2,
+      "cost": {
+        "metal": 10,
+        "wood": 4,
+        "fuel": 3
+      }
+    },
+    {
+      "id": "van",
+      "name": "Furgoneta",
+      "fuelPerTrip": 3,
+      "speedBonus": 0.25,
+      "cargoBonus": 0.5,
+      "protection": 2,
+      "minEra": 3,
+      "cost": {
+        "metal": 14,
+        "wood": 6,
+        "fuel": 4
+      }
+    },
+    {
+      "id": "armored",
+      "name": "Blindado",
+      "fuelPerTrip": 4,
+      "speedBonus": 0.2,
+      "cargoBonus": 0.35,
+      "protection": 5,
+      "minEra": 3,
+      "cost": {
+        "metal": 20,
+        "wood": 4,
+        "fuel": 5,
+        "ammo": 2
+      }
+    }
+  ]
+}

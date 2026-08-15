@@ -1,121 +1,109 @@
 # ZONA ZERO — GAME_MASTER
 
-Documento maestro compartido (Cursor ↔ ChatGPT).  
-Repositorio: `Anabguer/zona-zero` · rama `main`.
+**Fuente de verdad compartida** (Cursor ↔ ChatGPT)  
+**Versión de diseño:** 1.0 · **Versión técnica objetivo:** **1.0.0**  
+**Repositorio:** `Anabguer/zona-zero` · rama `main`  
+**URL:** https://intocables13.com/juegos/zona-zero/  
+**Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables
 
 ---
 
-## 1. Diseño aprobado (reglas funcionales)
+## 0. REGLA MAESTRA
 
-Estas reglas guían el juego. No deben cambiarse unilateralmente en código sin actualizar este documento.
+Zona Zero es un juego de **gestión indirecta, expansión territorial y supervivencia emergente**.
 
-### Fantasía y bucle
-- Supervivencia postapocalíptica en ciudad: gestionar un refugio, explorar, construir, expandir control territorial y sobrevivir a amenazas variables.
-- Bucle: abrir → gestionar → mandar expediciones → recibir botín/riesgo → construir → expandirse → sobrevivir → guardar → continuar.
-- Juego web (navegador), móvil + ordenador. Sin APK.
+> Empiezo con 3 supervivientes y casi nada. Veo algo que necesito. Asigno gente. Arriesgo. Consigo recursos. Construyo. Ocupo edificios. Mi zona crece. Llega más gente. Cuando creo que lo tengo controlado, sucede algo inesperado. Pierdo recursos, edificios o población. Me reorganizo y sigo creciendo.
 
-### Población
-- Partida típica empieza con ~3 supervivientes.
-- La colonia **debe poder crecer a 50+**.
-- Si existe tope técnico, es configurable (`balance.maxSurvivors`), nunca un `12` hardcodeado en lógica.
-
-### Recursos principales (con utilidad real)
-- **comida**, **agua**, **madera**, **metal**, **medicinas**, **combustible**, **munición**.
-- Consumo diario relevante (comida/agua; combustible de base/expediciones).
-- Producción vía edificios; botín vía expediciones/eventos.
-
-### Mapa y territorio
-- Mapa de ciudad con zonas: desconocida / descubierta / controlada.
-- Expediciones con duración, riesgo, botín variable, heridas y muerte permanente.
-- Posibilidad de controlar nuevas zonas.
-
-### Base
-- Asentamiento con parcelas; edificios colocables y reorganizables en lo esencial.
-- Capacidad de vivienda ligada a refugios.
-
-### Director / aleatoriedad
-- **No** hay guion fijo tipo «día 5 = evento A».
-- Eventos con condiciones, pesos, intensidad, cooldown y variantes.
-- La dificultad puede matar, pero no debe mandar amenazas absurdas al inicio.
-- No todos los días deben traer un evento importante.
-
-### Persistencia
-- 3 slots de partida.
-- Guardado versionado.
-- Auth reutiliza Intocables Universe.
-
-### Presentación
-- Estilo minimalista postapocalíptico; SVG/CSS.
-- Sin emojis como gráficos principales del juego.
+No es un RPG. No se controla directamente a ningún personaje. No hay campaña lineal.
 
 ---
 
-## 2. Implementación actual (técnica)
+## 1–35. DISEÑO APROBADO (PRODUCTO)
+
+Las reglas de diseño, sistemas, contenido mínimo, arte, Director, eras, victoria/endless, balance, simulador y criterio de entrega están definidas en el diseño integral v1.0 aprobado (documento MEGA PLAN fusionado). Resumen operativo:
+
+### Pilares
+Gestión indirecta · crecimiento visible · riesgo real · imprevisibilidad controlada · poca microgestión.
+
+### Inicio
+3 supervivientes · Refugio Central N1 · capacidad ~4 · reservas mínimas · sector inicial seguro · 2–4 localizaciones próximas conocidas · semilla procedural.
+
+### Recursos (7)
+comida, agua, madera, metal, medicinas, combustible, munición (+ energía como capacidad, no inventario basura).
+
+### Habilidades (5)
+Explorar · Recolectar · Construir · Producir · Defender. Escala 1–5, suben con uso. 1–2 rasgos ligeros.
+
+### Sistemas v1 (mínimos)
+- Base visual + 20+ edificios/mejoras
+- Mapa urbano 15+ tipos de localización + estados territoriales
+- Expediciones automáticas + equipamiento rápido + vehículos
+- Infectados (pocos tipos) + ataques a base
+- Director adaptativo (fuerza/fragilidad/momentum/tensión + presupuesto)
+- **≥80 eventos base / ≥15 familias** + variantes + antirrepetición
+- Clima/catástrofes · facciones 3–6 · investigación 4 ramas · 5 eras
+- Victoria + endless · muerte permanente · 3 slots MySQL
+- Arte SVG propio (sin emojis como arte principal)
+- Tutorial contextual corto
+- Simulador headless + tests E2E
+- Móvil primero
+
+### Familias de eventos
+hallazgos, radio, supervivientes, hambre_agua, enfermedad, accidentes, clima, infectados, ataques, infraestructura, comercio, rumores, conflictos, expansion, catastrofes (+ calma).
+
+### Eras
+0 Sobrevivir · 1 Asegurar · 2 Expandir · 3 Consolidar · 4 Estabilizar (por indicadores, no por día fijo).
+
+### Victoria
+Estabilizar Zona Zero (territorio, población, sostenibilidad, sanidad, energía, defensa, logística, crisis final). Luego endless o nueva partida.
+
+### Prohibido
+Campaña lineal · control directo · combate manual · Excel-UI · emojis como arte · APK · hardcodes de balance en lógica · monetización.
+
+### Criterio de entrega
+No basta con que compile: partida manual jugable, simulaciones largas, derrota/recuperación/victoria verificables, móvil+escritorio, deploy, commit/push.
+
+---
+
+## TÉCNICO — IMPLEMENTACIÓN
 
 | Campo | Valor |
 |-------|--------|
-| Versión técnica | **0.3.0** |
+| Versión técnica | **1.0.0** |
 | Ubicación local | `W:\juegos\zona-zero\` |
-| URL | https://intocables13.com/juegos/zona-zero/ |
 | Biblioteca | https://intocables13.com/juegos/ |
-| Repo | https://github.com/Anabguer/zona-zero (privado) |
-| Stack | HTML / CSS / JS / PHP / MySQL |
 | Prefijo SQL | `zona_zero_*` |
-| `save_version` / `v` | **2** |
-| `maxSurvivors` (balance) | **80** (configurable) |
-
-### Cubierto en el MVP actual
-- Hub 3 slots + nueva/continuar/borrar
-- Recursos: comida, agua, madera, metal, medicinas, combustible, munición
-- Consumo diario comida/agua/combustible; producción por edificios (huerto, pozo, taller, aserradero, clínica, generador…)
-- Expediciones gastan combustible; botín multi-recurso
-- Mapa SVG + base SVG; Director ampliado (~30 eventos con variantes)
-- Noches tranquilas posibles (`quietNightChance`)
-- Migración de partidas v1 (`scrap`→metal, `meds`→medicine)
-- Derrota por extinción / presión de supervivencia
+| Auth | Intocables (`/intocables/includes` local, `/includes` prod) |
+| `save_version` / `v` | **3** |
+| Eventos | **110** (15 familias ×7 + 5 calma) |
+| Edificios | **32** |
+| Localizaciones mapa | **18** |
 
 ### Arquitectura
-- Cliente: simulación + UI (`js/`)
-- Contenido: `content/*.json`
-- API PHP: `api/` + tabla `zona_zero_saves`
-- Auth: includes Intocables (local `/intocables/includes`, prod `/includes`)
+- Cliente: `js/` (state, sim, director, render, icons, api, main)
+- Contenido: `content/*.json` (balance, buildings, locations, events, survivors, research, vehicles, infected, factions, eras)
+- API PHP: `api/` + `zona_zero_saves`
+- Assets SVG generados en proyecto
+- Tools: `scripts/balance-sim.mjs`, E2E Playwright/harness
+
+### Persistencia
+3 slots · autosave + guardado explícito · migraciones versionadas (v1/v2 → v3).
 
 ---
 
-## 3. Pendientes relevantes
+## CHANGELOG
 
-- Ampliar sistemas futuros del diseño largo (más zonas, enemigos detallados, mejoras profundas, etc.)
-- Balance fino tras partidas reales en producción
-- Arte/identidad visual más rica (sin romper SVG minimalista)
-
----
-
-## 4. Changelog
+### 1.0.0
+- Fusión GAME_MASTER con diseño integral v1 (MEGA PLAN)
+- Implementación v1: save v3, 5 skills, 32 edificios, 18 localizaciones, 110 eventos / 15 familias + calma
+- Sistemas: producción con puestos, expediciones+equipo, combate/ataques, Director (tensión/fuerza/fragilidad), investigación, vehículos, facciones, clima, eras, victoria+endless
+- Arte/UX: HUD, mapa urbano, base, retratos, tips; móvil-first
+- Simulador `scripts/balance-sim.mjs`: 360 partidas (4 perfiles × 80 @60d + 40 @120d) + test victoria
+  - balanced@60 supervivencia ~80%; mismanaged@60 ~42%; balanced@120 ~87%; victoria forzada OK
+- E2E motor + Playwright UI OK
 
 ### 0.3.0
-- Pasada UX/UI completa del MVP (sin sistemas nuevos)
-- Paleta tierra/hormigón/metal/calor; verde solo para territorio seguro
-- HUD de videojuego con iconos SVG de recursos; amenaza vs defensa diferenciadas
-- Gente: retratos procedurales + barras Explorar/Recolectar/Construir/Defender
-- Mapa: sectores urbanos, calles, niebla, peligro, halo de control
-- Base: terreno, caminos, cerca, edificios ilustrados; grid solo en modo construir
-- Construcción con miniatura + coste + aporte; diario compacto; tips contextuales
-- Cache bust `?v=6`
+- Pasada UX/UI MVP (paleta tierra/metal, mapa/base visual, skills, tips)
 
-### 0.2.1
-- **Fix crítico UI:** `display:grid/flex` anulaba el atributo HTML `hidden` → overlay **Derrota** visible al iniciar y hub podía quedarse en «Cargando slots»
-- CSS: `[hidden]{display:none!important}` + `.zz-defeat/.zz-boot/.zz-app/.zz-toast:not([hidden])`
-- Arranque: partida nueva abre en pestaña **Gente**, guía con nº de supervivientes, errores de boot/API visibles con reintento
-- Preselección de zona: evita el campamento (expedición imposible) y elige Mercado/Bloques
-- Cache bust assets `?v=5`
-- Pruebas: `scripts/e2e-play.mjs`, `scripts/e2e-hidden-dom.mjs`, harness `dev/` + Playwright UI
-
-### 0.2.0
-- Eliminado tope hardcodeado de 12; `maxSurvivors` en `balance.json` (80)
-- Recursos ampliados al set aprobado; edificios/zonas/eventos/consumo alineados
-- Director: más eventos/variantes + noches sin evento importante
-- `GAME_MASTER.md` sincronizado (diseño / implementación / pendientes)
-- `save_version` 2 + migración legacy
-
-### 0.1.0-mvp
-- Primera versión jugable desplegada + repo GitHub
+### 0.2.x – 0.1.0
+- MVP jugable inicial, recursos ampliados, fix `[hidden]`/Derrota, repo GitHub

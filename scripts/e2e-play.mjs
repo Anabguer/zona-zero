@@ -15,15 +15,45 @@ function loadJson(name) {
   return JSON.parse(readFileSync(join(contentDir, name), 'utf8'));
 }
 
-const content = {
-  balance: loadJson('balance.json'),
-  buildings: loadJson('buildings.json'),
-  zonesDoc: loadJson('zones.json'),
-  eventsDoc: loadJson('events.json'),
-  survivorsDoc: loadJson('survivors.json'),
-};
+/** Mirror js/state.js loadContent (sync, from disk). */
+function loadContentSync() {
+  const balance = loadJson('balance.json');
+  const buildings = loadJson('buildings.json');
+  const eventsDoc = loadJson('events.json');
+  const survivorsDoc = loadJson('survivors.json');
+  const researchDoc = loadJson('research.json');
+  const vehiclesDoc = loadJson('vehicles.json');
+  const infectedDoc = loadJson('infected.json');
+  const factionsDoc = loadJson('factions.json');
+  const erasDoc = loadJson('eras.json');
+  const locationsDoc = loadJson('locations.json');
+  const zonesDoc = {
+    zones: (locationsDoc.seedLayout || []).map((z) => ({
+      ...z,
+      name: z.name || locationsDoc.locationTypes?.[z.type]?.name || z.id,
+      risk: z.risk ?? locationsDoc.locationTypes?.[z.type]?.baseRisk ?? 0.3,
+      loot: z.loot || locationsDoc.locationTypes?.[z.type]?.lootBias || {},
+      infected: z.infected || locationsDoc.locationTypes?.[z.type]?.infected || [0, 2],
+    })),
+  };
+  return {
+    balance,
+    buildings,
+    eventsDoc,
+    survivorsDoc,
+    researchDoc,
+    vehiclesDoc,
+    infectedDoc,
+    factionsDoc,
+    erasDoc,
+    locationsDoc,
+    zonesDoc,
+  };
+}
 
-const { createNewState, livingSurvivors, migrateState, summarizeState } = await import(
+const content = loadContentSync();
+
+const { createNewState, livingSurvivors, migrateState, summarizeState, SKILL_KEYS } = await import(
   pathToFileURL(join(root, 'js', 'state.js')).href
 );
 const { advanceDay, startExpedition, placeBuilding } = await import(
@@ -42,6 +72,15 @@ function assert(cond, msg) {
 assert(/\[hidden\]\s*\{[^}]*display:\s*none\s*!important/s.test(css), 'CSS [hidden] !important presente');
 assert(/\.zz-defeat:not\(\[hidden\]\)/.test(css), 'CSS derrota solo visible sin hidden');
 
+// --- Content v7 ---
+assert(!!content.locationsDoc?.seedLayout?.length, 'locations seedLayout cargado');
+assert(!!content.researchDoc, 'research cargado');
+assert(!!content.erasDoc, 'eras cargado');
+assert(!!content.factionsDoc, 'factions cargado');
+assert(!!content.vehiclesDoc, 'vehicles cargado');
+assert(!!content.infectedDoc, 'infected cargado');
+assert(SKILL_KEYS.includes('produce'), 'skill produce en SKILL_KEYS');
+
 // --- Nueva partida ---
 let state = createNewState(content, 'Prueba Real');
 assert(state.flags.defeated === false, 'nueva partida no derrotada');
@@ -49,6 +88,10 @@ assert(livingSurvivors(state).length === 3, '3 supervivientes visibles en estado
 assert(state.resources.food > 0 && state.resources.water > 0, 'recursos iniciales');
 assert(state.zones.some((z) => z.state === 'discovered'), 'hay zona descubierta');
 assert(state.base.buildings.some((b) => b.type === 'shelter'), 'hay refugios');
+assert(
+  livingSurvivors(state).every((s) => s.skills && s.skills.produce != null),
+  'supervivientes tienen skill produce'
+);
 
 // --- Selección gente + zona + expedición ---
 const team = livingSurvivors(state).slice(0, 2).map((s) => s.id);

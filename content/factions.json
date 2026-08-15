@@ -1,0 +1,103 @@
+{
+  "templates": [
+    {
+      "id": "faction_friendly",
+      "name": "Los del Puente",
+      "trait": "friendly",
+      "hostility": 10,
+      "tradeMult": 0.9,
+      "desc": "Comparten avisos y trueques justos.",
+      "offers": [
+        "food",
+        "water",
+        "medicine"
+      ],
+      "wants": [
+        "metal",
+        "ammo"
+      ]
+    },
+    {
+      "id": "faction_trader",
+      "name": "Caravana Gris",
+      "trait": "trader",
+      "hostility": 25,
+      "tradeMult": 1.0,
+      "desc": "Mercaderes nómadas: todo tiene precio.",
+      "offers": [
+        "ammo",
+        "fuel",
+        "medicine"
+      ],
+      "wants": [
+        "food",
+        "metal",
+        "wood"
+      ]
+    },
+    {
+      "id": "faction_isolationist",
+      "name": "Muralla Cerrada",
+      "trait": "isolationist",
+      "hostility": 40,
+      "tradeMult": 1.4,
+      "desc": "No quieren visitas. Disparan primero si te acercas.",
+      "offers": [
+        "water"
+      ],
+      "wants": [
+        "medicine"
+      ]
+    },
+    {
+      "id": "faction_opportunist",
+      "name": "Chatarra Viva",
+      "trait": "opportunist",
+      "hostility": 55,
+      "tradeMult": 1.2,
+      "desc": "Ayudan si conviene; saquean si pueden.",
+      "offers": [
+        "metal",
+        "fuel"
+      ],
+      "wants": [
+        "food",
+        "ammo"
+      ]
+    },
+    {
+      "id": "faction_hostile",
+      "name": "Jauría Roja",
+      "trait": "hostile",
+      "hostility": 85,
+      "tradeMult": 2.0,
+      "desc": "Bandidos organizados. La diplomacia es peaje.",
+      "offers": [
+        "ammo"
+      ],
+      "wants": [
+        "food",
+        "fuel",
+        "medicine",
+        "metal"
+      ]
+    },
+    {
+      "id": "faction_variable",
+      "name": "Círculo de Niebla",
+      "trait": "variable",
+      "hostility": 45,
+      "tradeMult": 1.1,
+      "desc": "Su humor cambia con rumores y escasez.",
+      "offers": [
+        "food",
+        "medicine",
+        "wood"
+      ],
+      "wants": [
+        "fuel",
+        "ammo"
+      ]
+    }
+  ]
+}

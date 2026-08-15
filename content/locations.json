@@ -1,0 +1,294 @@
+{
+  "locationTypes": {
+    "camp": {
+      "name": "Campamento",
+      "lootBias": { "food": 1, "water": 1, "wood": 1 },
+      "baseRisk": 0.05,
+      "infected": [0, 1]
+    },
+    "apartments": {
+      "name": "Bloques de pisos",
+      "lootBias": { "food": 2, "wood": 1, "metal": 1, "ammo": 1 },
+      "baseRisk": 0.32,
+      "infected": [1, 4]
+    },
+    "supermarket": {
+      "name": "Supermercado",
+      "lootBias": { "food": 2, "water": 1, "medicine": 1 },
+      "baseRisk": 0.35,
+      "infected": [1, 4]
+    },
+    "pharmacy": {
+      "name": "Farmacia",
+      "lootBias": { "medicine": 3, "water": 1, "food": 1 },
+      "baseRisk": 0.4,
+      "infected": [2, 4]
+    },
+    "hospital": {
+      "name": "Hospital",
+      "lootBias": { "medicine": 3, "food": 1, "water": 1, "ammo": 1 },
+      "baseRisk": 0.55,
+      "infected": [3, 6]
+    },
+    "workshop": {
+      "name": "Taller abandonado",
+      "lootBias": { "metal": 3, "wood": 1, "fuel": 1 },
+      "baseRisk": 0.38,
+      "infected": [1, 4]
+    },
+    "gas_station": {
+      "name": "Gasolinera",
+      "lootBias": { "fuel": 3, "metal": 1, "food": 1 },
+      "baseRisk": 0.48,
+      "infected": [2, 5]
+    },
+    "warehouse": {
+      "name": "Almacén",
+      "lootBias": { "metal": 2, "fuel": 2, "food": 1, "ammo": 1 },
+      "baseRisk": 0.5,
+      "infected": [2, 5]
+    },
+    "hardware": {
+      "name": "Ferretería",
+      "lootBias": { "metal": 2, "wood": 2, "ammo": 1 },
+      "baseRisk": 0.36,
+      "infected": [1, 3]
+    },
+    "police": {
+      "name": "Comisaría",
+      "lootBias": { "ammo": 3, "metal": 1, "medicine": 1 },
+      "baseRisk": 0.52,
+      "infected": [2, 5]
+    },
+    "station": {
+      "name": "Estación",
+      "lootBias": { "metal": 2, "fuel": 2, "ammo": 1, "wood": 1 },
+      "baseRisk": 0.45,
+      "infected": [2, 5]
+    },
+    "school": {
+      "name": "Colegio",
+      "lootBias": { "food": 1, "water": 1, "medicine": 1, "wood": 1 },
+      "baseRisk": 0.34,
+      "infected": [1, 4]
+    },
+    "park": {
+      "name": "Parque",
+      "lootBias": { "food": 2, "wood": 2, "water": 1 },
+      "baseRisk": 0.3,
+      "infected": [1, 3]
+    },
+    "industrial": {
+      "name": "Polígono industrial",
+      "lootBias": { "metal": 3, "fuel": 2, "wood": 1 },
+      "baseRisk": 0.5,
+      "infected": [2, 6]
+    },
+    "offices": {
+      "name": "Oficinas",
+      "lootBias": { "food": 1, "metal": 1, "medicine": 1, "ammo": 1 },
+      "baseRisk": 0.33,
+      "infected": [1, 3]
+    },
+    "mall": {
+      "name": "Centro comercial",
+      "lootBias": { "food": 2, "water": 1, "medicine": 1, "ammo": 1, "metal": 1 },
+      "baseRisk": 0.58,
+      "infected": [3, 7]
+    },
+    "water_plant": {
+      "name": "Planta de agua",
+      "lootBias": { "water": 3, "metal": 1, "fuel": 1 },
+      "baseRisk": 0.42,
+      "infected": [2, 4]
+    },
+    "substation": {
+      "name": "Subestación",
+      "lootBias": { "metal": 3, "fuel": 1, "ammo": 1 },
+      "baseRisk": 0.46,
+      "infected": [2, 5]
+    }
+  },
+  "seedLayout": [
+    {
+      "id": "camp",
+      "type": "camp",
+      "name": "Refugio Central",
+      "x": 48,
+      "y": 62,
+      "r": 16,
+      "startState": "controlled",
+      "neighbors": ["market", "apartments", "warehouse", "park"]
+    },
+    {
+      "id": "market",
+      "type": "supermarket",
+      "name": "Supermercado Norte",
+      "x": 28,
+      "y": 48,
+      "r": 14,
+      "startState": "discovered",
+      "neighbors": ["camp", "pharmacy", "station", "hardware"]
+    },
+    {
+      "id": "apartments",
+      "type": "apartments",
+      "name": "Bloques del Este",
+      "x": 68,
+      "y": 46,
+      "r": 15,
+      "startState": "discovered",
+      "neighbors": ["camp", "hospital", "park", "school"]
+    },
+    {
+      "id": "pharmacy",
+      "type": "pharmacy",
+      "name": "Farmacia Central",
+      "x": 18,
+      "y": 28,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["market", "station", "offices"]
+    },
+    {
+      "id": "station",
+      "type": "station",
+      "name": "Estación Sur",
+      "x": 42,
+      "y": 22,
+      "r": 14,
+      "startState": "unknown",
+      "neighbors": ["market", "pharmacy", "hospital", "police"]
+    },
+    {
+      "id": "hospital",
+      "type": "hospital",
+      "name": "Hospital General",
+      "x": 72,
+      "y": 24,
+      "r": 15,
+      "startState": "unknown",
+      "neighbors": ["apartments", "station", "mall", "park"]
+    },
+    {
+      "id": "park",
+      "type": "park",
+      "name": "Parque del Río",
+      "x": 86,
+      "y": 58,
+      "r": 14,
+      "startState": "unknown",
+      "neighbors": ["camp", "apartments", "hospital", "water_plant"]
+    },
+    {
+      "id": "warehouse",
+      "type": "warehouse",
+      "name": "Almacenes del Puerto",
+      "x": 55,
+      "y": 78,
+      "r": 13,
+      "startState": "unknown",
+      "neighbors": ["camp", "gas_station", "industrial", "market"]
+    },
+    {
+      "id": "gas_station",
+      "type": "gas_station",
+      "name": "Gasolinera Oeste",
+      "x": 22,
+      "y": 72,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["warehouse", "hardware", "workshop"]
+    },
+    {
+      "id": "hardware",
+      "type": "hardware",
+      "name": "Ferretería Ruiz",
+      "x": 12,
+      "y": 52,
+      "r": 11,
+      "startState": "unknown",
+      "neighbors": ["market", "gas_station", "workshop", "pharmacy"]
+    },
+    {
+      "id": "workshop",
+      "type": "workshop",
+      "name": "Taller Mecánico",
+      "x": 8,
+      "y": 68,
+      "r": 11,
+      "startState": "unknown",
+      "neighbors": ["gas_station", "hardware", "industrial"]
+    },
+    {
+      "id": "police",
+      "type": "police",
+      "name": "Comisaría Vieja",
+      "x": 52,
+      "y": 12,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["station", "offices", "mall"]
+    },
+    {
+      "id": "school",
+      "type": "school",
+      "name": "Colegio San Miguel",
+      "x": 82,
+      "y": 40,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["apartments", "offices", "mall"]
+    },
+    {
+      "id": "offices",
+      "type": "offices",
+      "name": "Torres de Oficinas",
+      "x": 32,
+      "y": 14,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["pharmacy", "police", "school"]
+    },
+    {
+      "id": "mall",
+      "type": "mall",
+      "name": "Centro Comercial Luna",
+      "x": 88,
+      "y": 18,
+      "r": 16,
+      "startState": "unknown",
+      "neighbors": ["hospital", "police", "school"]
+    },
+    {
+      "id": "industrial",
+      "type": "industrial",
+      "name": "Polígono Norte",
+      "x": 38,
+      "y": 88,
+      "r": 15,
+      "startState": "unknown",
+      "neighbors": ["warehouse", "workshop", "substation", "gas_station"]
+    },
+    {
+      "id": "water_plant",
+      "type": "water_plant",
+      "name": "Planta de Agua",
+      "x": 92,
+      "y": 72,
+      "r": 13,
+      "startState": "unknown",
+      "neighbors": ["park", "substation"]
+    },
+    {
+      "id": "substation",
+      "type": "substation",
+      "name": "Subestación Eléctrica",
+      "x": 70,
+      "y": 88,
+      "r": 12,
+      "startState": "unknown",
+      "neighbors": ["industrial", "water_plant", "warehouse"]
+    }
+  ]
+}

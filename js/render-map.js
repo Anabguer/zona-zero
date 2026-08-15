@@ -7,6 +7,7 @@ const STATE_CLASS = {
   unknown: 'zz-zone--unknown',
   discovered: 'zz-zone--discovered',
   controlled: 'zz-zone--controlled',
+  hostile: 'zz-zone--hostile',
 };
 
 /** Siluetas de manzana por id (offsets relativos al centro) */
@@ -159,6 +160,15 @@ export function renderMap(svg, state, { onSelectZone } = {}) {
       );
     }
 
+    if (z.state === 'hostile') {
+      g.appendChild(
+        svgEl('path', {
+          d: `M${z.x} ${z.y - z.r * 0.75} l2.2 4.2 h-4.4 z`,
+          class: 'zz-zone-danger',
+        })
+      );
+    }
+
     if (z.state === 'unknown') {
       g.appendChild(
         svgEl('polygon', {
@@ -219,11 +229,12 @@ export function renderMap(svg, state, { onSelectZone } = {}) {
   [
     ['#3d5c42', 'Control'],
     ['#8a6a38', 'Conocido'],
+    ['#a05030', 'Hostil'],
     ['#2a2826', 'Niebla'],
   ].forEach(([c, t], i) => {
-    legend.appendChild(svgEl('rect', { x: i * 32, y: 0, width: 4, height: 4, rx: 0.6, fill: c }));
+    legend.appendChild(svgEl('rect', { x: i * 24, y: 0, width: 4, height: 4, rx: 0.6, fill: c }));
     legend.appendChild(
-      svgEl('text', { x: i * 32 + 6, y: 3.6, class: 'zz-map-legend-t' }, [t])
+      svgEl('text', { x: i * 24 + 6, y: 3.6, class: 'zz-map-legend-t' }, [t])
     );
   });
   svg.appendChild(legend);

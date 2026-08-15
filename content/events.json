@@ -1,392 +1,5585 @@
 {
   "events": [
     {
-      "id": "uneventful",
-      "name": "Nada relevante",
+      "id": "calma_noche_tranquila",
+      "name": "Noche en calma",
+      "family": "calma",
+      "intensity": 0,
+      "cooldown": 1,
+      "weight": 12,
+      "minDay": 1,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Los infectados se oyen lejos. La colonia respira.",
+          "effects": {}
+        },
+        {
+          "text": "Fogatas bajas y turnos cortos. Descansáis mejor.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Una noche fría pero estable. Nadie llama a la puerta.",
+          "effects": {}
+        }
+      ]
+    },
+    {
+      "id": "calma_turno_rutina",
+      "name": "Turno rutinario",
+      "family": "calma",
       "intensity": 0,
       "cooldown": 0,
       "weight": 14,
       "minDay": 1,
+      "minEra": 0,
+      "maxEra": 4,
       "conditions": {},
       "variants": [
-        { "text": "La noche pasa sin incidentes dignos de anotar.", "effects": {} },
-        { "text": "Solo viento y distancias. Nadie se mueve cerca.", "effects": {} },
-        { "text": "Turno de vigilancia rutinario. Sin novedades.", "effects": {} }
+        {
+          "text": "La noche pasa sin incidentes dignos de anotar.",
+          "effects": {}
+        },
+        {
+          "text": "Solo viento y distancias. Nadie se mueve cerca.",
+          "effects": {}
+        },
+        {
+          "text": "Vigilancia rutinaria. Sin novedades en el perímetro.",
+          "effects": {}
+        }
       ]
     },
     {
-      "id": "quiet_night",
-      "name": "Noche en calma",
-      "intensity": 0,
-      "cooldown": 1,
-      "weight": 8,
-      "minDay": 1,
-      "conditions": { "maxThreat": 45 },
-      "variants": [
-        { "text": "Los infectados se oyen lejos. La colonia respira.", "effects": {} },
-        { "text": "Fogatas bajas y turnos cortos. Descansáis mejor.", "effects": {} },
-        { "text": "Una noche fría pero estable.", "effects": {} }
-      ]
-    },
-    {
-      "id": "morale_story",
+      "id": "calma_historias_fuego",
       "name": "Historias al fuego",
+      "family": "calma",
       "intensity": 0,
       "cooldown": 5,
-      "weight": 3,
+      "weight": 4,
       "minDay": 2,
-      "conditions": { "minPop": 2, "maxThreat": 50 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2,
+        "maxThreat": 50
+      },
       "variants": [
-        { "text": "Alguien cuenta una historia absurda y la tensión baja un poco.", "effects": {} },
-        { "text": "Repasáis nombres de los que ya no están. Silencio respetuoso.", "effects": {} }
+        {
+          "text": "Alguien cuenta una historia absurda y la tensión baja.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Repasáis nombres de los que ya no están. Silencio respetuoso.",
+          "effects": {}
+        },
+        {
+          "text": "Una canción a media voz mantiene despiertos a los de guardia.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
       ]
     },
     {
-      "id": "scavenge_bonus",
-      "name": "Hallazgo cercano",
+      "id": "calma_cielo_despejado",
+      "name": "Cielo despejado",
+      "family": "calma",
+      "intensity": 0,
+      "cooldown": 4,
+      "weight": 5,
+      "minDay": 1,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "maxThreat": 40
+      },
+      "variants": [
+        {
+          "text": "El horizonte se ve limpio. Buen momento para planear.",
+          "effects": {
+            "weather": "clear"
+          }
+        },
+        {
+          "text": "Sin niebla ni tormenta. Las rutas se leen mejor.",
+          "effects": {
+            "weather": "clear",
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "El sol seco ayuda a tender ropa y redes.",
+          "effects": {
+            "weather": "clear",
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "calma_descanso_merecido",
+      "name": "Descanso merecido",
+      "family": "calma",
+      "intensity": 0,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3,
+        "minStability": 20
+      },
+      "variants": [
+        {
+          "text": "Tras días duros, el turno pasa sin sobresaltos.",
+          "effects": {
+            "stabilityDelta": 2
+          }
+        },
+        {
+          "text": "Alguien reparte café amargo. El ánimo sube un punto.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Nadie discute. Raro, y bienvenido.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "hallazgo_mochila_perimetro",
+      "name": "Mochila en el perímetro",
+      "family": "hallazgos",
       "intensity": 1,
       "cooldown": 4,
       "weight": 4,
       "minDay": 2,
-      "conditions": { "maxThreat": 55 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "maxThreat": 55
+      },
       "variants": [
-        { "text": "Una mochila abandonada junto al perímetro.", "effects": { "loot": { "food": [1, 3], "water": [0, 2] } } },
-        { "text": "Un vehículo destrozado aún guarda piezas.", "effects": { "loot": { "metal": [2, 4], "fuel": [0, 2] } } },
-        { "text": "Leña seca apilada tras un muro.", "effects": { "loot": { "wood": [2, 5] } } }
+        {
+          "text": "Una mochila abandonada junto a la valla.",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                3
+              ],
+              "water": [
+                0,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Restos de un campamento improvisado: algo útil queda.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ],
+              "medicine": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Una riñonera con latas y un filtro viejo.",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                2
+              ],
+              "water": [
+                1,
+                2
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "rain_cistern",
-      "name": "Lluvia útil",
+      "id": "hallazgo_vehiculo_piezas",
+      "name": "Vehículo destrozado",
+      "family": "hallazgos",
       "intensity": 1,
       "cooldown": 6,
       "weight": 3,
       "minDay": 3,
-      "conditions": {},
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
       "variants": [
-        { "text": "La lluvia llena bidones improvisados.", "effects": { "loot": { "water": [2, 5] } } },
-        { "text": "Recolectáis agua limpia de tejados controlados.", "effects": { "loot": { "water": [3, 6] } } }
+        {
+          "text": "Un coche quemado aún guarda piezas.",
+          "effects": {
+            "loot": {
+              "metal": [
+                2,
+                4
+              ],
+              "fuel": [
+                0,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Desmontáis un eje usable del chasis.",
+          "effects": {
+            "loot": {
+              "metal": [
+                3,
+                5
+              ]
+            }
+          }
+        },
+        {
+          "text": "El depósito no está del todo seco.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                1,
+                3
+              ],
+              "metal": [
+                1,
+                2
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "ammo_cache",
-      "name": "Caja militar",
+      "id": "hallazgo_lena_muro",
+      "name": "Leña apilada",
+      "family": "hallazgos",
       "intensity": 1,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Leña seca tras un muro derruido.",
+          "effects": {
+            "loot": {
+              "wood": [
+                2,
+                5
+              ]
+            }
+          }
+        },
+        {
+          "text": "Tablones de un tejado caído, listos para cortar.",
+          "effects": {
+            "loot": {
+              "wood": [
+                3,
+                6
+              ]
+            }
+          }
+        },
+        {
+          "text": "Palés olvidados en un solar.",
+          "effects": {
+            "loot": {
+              "wood": [
+                2,
+                4
+              ],
+              "metal": [
+                0,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "llevar",
+          "label": "Llevar todo",
+          "effects": {
+            "loot": {
+              "wood": [
+                3,
+                5
+              ]
+            },
+            "threatDelta": 1
+          }
+        },
+        {
+          "id": "poco",
+          "label": "Solo lo necesario",
+          "effects": {
+            "loot": {
+              "wood": [
+                1,
+                2
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "hallazgo_caja_militar",
+      "name": "Caja militar",
+      "family": "hallazgos",
+      "intensity": 2,
       "cooldown": 9,
       "weight": 2,
       "minDay": 5,
-      "conditions": { "minControlled": 2 },
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
       "variants": [
-        { "text": "Munición olvidada en una zona controlada.", "effects": { "loot": { "ammo": [1, 3], "metal": [0, 2] } } },
-        { "text": "Un botiquín de campaña incompleto pero útil.", "effects": { "loot": { "medicine": [1, 3], "ammo": [0, 1] } } }
+        {
+          "text": "Munición olvidada en una zona controlada.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                1,
+                3
+              ],
+              "metal": [
+                0,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Un botiquín de campaña incompleto pero útil.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                1,
+                3
+              ],
+              "ammo": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Raciones de combate y un cargador medio.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                3
+              ],
+              "ammo": [
+                1,
+                2
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "fuel_leak_find",
+      "id": "hallazgo_bidon_sotano",
       "name": "Bidón medio lleno",
+      "family": "hallazgos",
       "intensity": 1,
       "cooldown": 7,
       "weight": 3,
       "minDay": 3,
-      "conditions": { "maxFuel": 12 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
       "variants": [
-        { "text": "Encontráis combustible en un sótano cercano.", "effects": { "loot": { "fuel": [2, 4] } } },
-        { "text": "Un depósito doméstico aún tiene gasolina.", "effects": { "loot": { "fuel": [1, 3], "metal": [0, 1] } } }
+        {
+          "text": "Combustible en un sótano cercano.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                2,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "text": "Un depósito doméstico aún tiene gasolina.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                1,
+                3
+              ],
+              "metal": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Garrafas etiquetadas: una sigue sellada.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                2,
+                3
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "deserter_hope",
-      "name": "Señal de humo",
-      "intensity": 1,
-      "cooldown": 8,
+      "id": "hallazgo_escondite_pared",
+      "name": "Escondite intacto",
+      "family": "hallazgos",
+      "intensity": 2,
+      "cooldown": 11,
       "weight": 2,
-      "minDay": 4,
-      "conditions": { "minControlled": 1 },
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 3
+      },
       "variants": [
-        { "text": "Un superviviente agotado pide unirse.", "effects": { "recruit": true } },
-        { "text": "Dos personas piden agua; una se queda.", "effects": { "recruit": true, "lose": { "water": [1, 2] } } }
+        {
+          "text": "Tras una pared falsa: agua, comida y un poco de todo.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ],
+              "water": [
+                2,
+                4
+              ],
+              "medicine": [
+                0,
+                2
+              ],
+              "ammo": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Una caja fuerte forzada a medias. El botín merece el riesgo.",
+          "effects": {
+            "loot": {
+              "metal": [
+                2,
+                4
+              ],
+              "ammo": [
+                1,
+                2
+              ],
+              "medicine": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Despensa de emergencia sellada desde el colapso.",
+          "effects": {
+            "loot": {
+              "food": [
+                3,
+                5
+              ],
+              "water": [
+                2,
+                3
+              ]
+            }
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "abrir",
+          "label": "Abrir con cuidado",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ],
+              "water": [
+                1,
+                3
+              ]
+            },
+            "threatDelta": 1
+          }
+        },
+        {
+          "id": "dejar",
+          "label": "Marcar y volver después",
+          "effects": {
+            "setFlag": "cache_marked",
+            "researchBonus": 1
+          }
+        },
+        {
+          "id": "forzar",
+          "label": "Forzar ya",
+          "effects": {
+            "loot": {
+              "food": [
+                3,
+                6
+              ],
+              "ammo": [
+                0,
+                2
+              ]
+            },
+            "damageSurvivor": 8
+          }
+        }
       ]
     },
     {
-      "id": "trade_whisper",
-      "name": "Trueque furtivo",
-      "intensity": 1,
+      "id": "hallazgo_farmacia_saqueada",
+      "name": "Farmacia saqueada",
+      "family": "hallazgos",
+      "intensity": 2,
       "cooldown": 10,
       "weight": 2,
       "minDay": 6,
-      "conditions": { "minPop": 3, "minMetal": 2 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
       "variants": [
-        { "text": "Un forastero cambia metal por comida.", "effects": { "lose": { "metal": [1, 2] }, "loot": { "food": [2, 4], "water": [1, 2] } } },
-        { "text": "Cambiáis munición sobrante por medicinas.", "effects": { "lose": { "ammo": [1, 1] }, "loot": { "medicine": [1, 3] } } }
+        {
+          "text": "Estantes vacíos… salvo un cajón oculto.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                2,
+                4
+              ],
+              "water": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Jeringuillas y vendas útiles.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                1,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "text": "Alguien llegó antes. Solo restos.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                0,
+                2
+              ],
+              "metal": [
+                0,
+                1
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "good_hunt",
-      "name": "Caza menor",
-      "intensity": 1,
-      "cooldown": 6,
-      "weight": 3,
-      "minDay": 2,
-      "conditions": { "minPop": 2, "maxThreat": 40 },
-      "variants": [
-        { "text": "Alguien vuelve con carne magra del perímetro.", "effects": { "loot": { "food": [2, 4] } } },
-        { "text": "Trampas improvisadas dan resultado.", "effects": { "loot": { "food": [1, 3], "wood": [0, 1] } } }
-      ]
-    },
-    {
-      "id": "repair_windfall",
-      "name": "Piezas reutilizables",
-      "intensity": 1,
-      "cooldown": 7,
-      "weight": 2,
-      "minDay": 3,
-      "conditions": { "minControlled": 2 },
-      "variants": [
-        { "text": "Desmontáis una valla inútil y ganáis metal.", "effects": { "loot": { "metal": [2, 4], "wood": [1, 2] } } }
-      ]
-    },
-    {
-      "id": "illness",
-      "name": "Fiebre",
-      "intensity": 2,
-      "cooldown": 5,
-      "weight": 3,
-      "minDay": 3,
-      "conditions": { "minPop": 2 },
-      "variants": [
-        { "text": "Un superviviente enferma. Sin medicinas, empeora.", "effects": { "woundOne": 22, "needMeds": 1 } },
-        { "text": "Tos seca por el polvo. Alguien pierde fuerzas.", "effects": { "woundOne": 16, "needMeds": 1 } }
-      ]
-    },
-    {
-      "id": "supply_rot",
-      "name": "Comida en mal estado",
-      "intensity": 1,
-      "cooldown": 6,
-      "weight": 3,
-      "minDay": 4,
-      "conditions": { "minFood": 10 },
-      "variants": [
-        { "text": "Parte de las raciones se estropea.", "effects": { "lose": { "food": [2, 5] } } },
-        { "text": "Humedad en el almacén: perdéis comida.", "effects": { "lose": { "food": [1, 4], "water": [0, 1] } } }
-      ]
-    },
-    {
-      "id": "water_spoil",
-      "name": "Agua contaminada",
-      "intensity": 2,
-      "cooldown": 7,
-      "weight": 3,
-      "minDay": 3,
-      "conditions": { "minWater": 6 },
-      "variants": [
-        { "text": "Un bidón estaba sucio. Tiréis agua dudosa.", "effects": { "lose": { "water": [2, 5] } } },
-        { "text": "Alguien bebe mal y enferma; gastáis agua limpia para lavar.", "effects": { "lose": { "water": [1, 3] }, "woundOne": 12 } }
-      ]
-    },
-    {
-      "id": "fuel_waste",
-      "name": "Fuga de combustible",
-      "intensity": 2,
-      "cooldown": 8,
-      "weight": 2,
-      "minDay": 4,
-      "conditions": { "minFuel": 3 },
-      "variants": [
-        { "text": "Un bidón pierde por una grieta.", "effects": { "lose": { "fuel": [1, 3] } } },
-        { "text": "Alguien deja un grifo abierto en el generador.", "effects": { "lose": { "fuel": [2, 4] } } }
-      ]
-    },
-    {
-      "id": "tool_break",
-      "name": "Herramienta rota",
+      "id": "radio_estatica_corta",
+      "name": "Estática corta",
+      "family": "radio",
       "intensity": 1,
       "cooldown": 5,
       "weight": 3,
       "minDay": 2,
-      "conditions": { "minWood": 2 },
-      "variants": [
-        { "text": "Se parte un mango. Gastáis madera en reparar.", "effects": { "lose": { "wood": [1, 3] } } },
-        { "text": "El taller pierde una pieza metálica.", "effects": { "lose": { "metal": [1, 2] } } }
-      ]
-    },
-    {
-      "id": "argument",
-      "name": "Discusión",
-      "intensity": 1,
-      "cooldown": 4,
-      "weight": 3,
-      "minDay": 3,
-      "conditions": { "minPop": 3 },
-      "variants": [
-        { "text": "Una pelea por turnos de vigilancia deja a alguien golpeado.", "effects": { "woundOne": 10 } },
-        { "text": "Tensión por las raciones. Nadie gana, todos pierden sueño.", "effects": {} }
-      ]
-    },
-    {
-      "id": "rats",
-      "name": "Ratas",
-      "intensity": 1,
-      "cooldown": 6,
-      "weight": 3,
-      "minDay": 2,
-      "conditions": { "minFood": 5 },
-      "variants": [
-        { "text": "Las ratas roban comida del almacén.", "effects": { "lose": { "food": [1, 3] } } },
-        { "text": "Roen cables y desperdician un poco de combustible.", "effects": { "lose": { "fuel": [0, 2], "food": [0, 2] } } }
-      ]
-    },
-    {
-      "id": "false_alarm",
-      "name": "Falsa alarma",
-      "intensity": 1,
-      "cooldown": 3,
-      "weight": 4,
-      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
       "conditions": {},
       "variants": [
-        { "text": "Gritos en la distancia. Resulta ser viento y metal.", "effects": {} },
-        { "text": "La atalaya avisa… y no hay nada. Gastáis nervios.", "effects": {} }
+        {
+          "text": "Un chasquido en la banda civil. Nadie responde.",
+          "effects": {}
+        },
+        {
+          "text": "Oís tres palabras antes de que muera la señal.",
+          "effects": {
+            "setFlag": "radio_heard"
+          }
+        },
+        {
+          "text": "Alguien tararea una frecuencia conocida. Silencio.",
+          "effects": {}
+        }
+      ],
+      "choices": [
+        {
+          "id": "escuchar",
+          "label": "Seguir escuchando",
+          "effects": {
+            "setFlag": "radio_heard",
+            "researchBonus": 1
+          }
+        },
+        {
+          "id": "apagar",
+          "label": "Apagar la radio",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
       ]
     },
     {
-      "id": "scout_tip",
-      "name": "Rumores del mapa",
+      "id": "radio_sos_lejano",
+      "name": "SOS lejano",
+      "family": "radio",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un SOS débil pide agua al norte.",
+          "effects": {
+            "discoverZone": true,
+            "setFlag": "sos_north"
+          }
+        },
+        {
+          "text": "Coordenadas a medias: una zona sin cartografiar.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "La señal se corta tras pedir medicinas.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "responder",
+          "label": "Intentar responder",
+          "effects": {
+            "setFlag": "radio_reply",
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "ignorar",
+          "label": "No comprometer la posición",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "radio_bando_militar",
+      "name": "Banda militar",
+      "family": "radio",
+      "intensity": 2,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Fragmentos de un protocolo de evacuación obsoleto.",
+          "effects": {
+            "researchBonus": 2
+          }
+        },
+        {
+          "text": "Códigos de frecuencia útiles para el taller.",
+          "effects": {
+            "loot": {
+              "metal": [
+                0,
+                1
+              ]
+            },
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Advertencia de zona caliente al este.",
+          "effects": {
+            "threatDelta": 2,
+            "discoverZone": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "radio_musica_fantasma",
+      "name": "Música fantasma",
+      "family": "radio",
+      "intensity": 1,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "maxThreat": 45
+      },
+      "variants": [
+        {
+          "text": "Una emisora muerta reproduce un bucle de canciones.",
+          "effects": {
+            "stabilityDelta": 2
+          }
+        },
+        {
+          "text": "Alguien llora al reconocer la melodía.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "La música atrae miradas al cielo. Nadie ataca.",
+          "effects": {}
+        }
+      ]
+    },
+    {
+      "id": "radio_interferencia",
+      "name": "Interferencia hostil",
+      "family": "radio",
+      "intensity": 3,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "requiresFlag": "radio_heard"
+      },
+      "variants": [
+        {
+          "text": "Alguien jammea vuestra frecuencia. Os han oído.",
+          "effects": {
+            "threatDelta": 4,
+            "setFlag": "radio_compromised"
+          }
+        },
+        {
+          "text": "Una voz amenaza con visitar el refugio.",
+          "effects": {
+            "threatDelta": 5
+          }
+        },
+        {
+          "text": "Ruido blanco intenso. Perdéis una noche de escucha.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cambiar",
+          "label": "Cambiar de banda",
+          "effects": {
+            "clearFlag": "radio_compromised",
+            "loot": {
+              "metal": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "id": "silencio",
+          "label": "Radio en silencio 48h",
+          "effects": {
+            "threatDelta": -1,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "radio_mapa_oral",
+      "name": "Mapa por voz",
+      "family": "radio",
       "intensity": 1,
       "cooldown": 8,
       "weight": 2,
-      "minDay": 4,
-      "conditions": { "minPop": 2 },
-      "variants": [
-        { "text": "Un explorador marca un edificio lejano como prometedor.", "effects": { "discoverNeighbor": true } },
-        { "text": "Oís de un depósito de combustible al sur.", "effects": { "discoverNeighbor": true } }
-      ]
-    },
-    {
-      "id": "small_raid",
-      "name": "Oleada menor",
-      "intensity": 3,
-      "cooldown": 4,
-      "weight": 5,
       "minDay": 5,
-      "conditions": { "minThreat": 8, "minDay": 5 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
       "variants": [
-        { "text": "Un grupo pequeño prueba las defensas.", "effects": { "raid": { "power": 12, "damage": [10, 24] } } },
-        { "text": "Ruidos en la valla. Hay que aguantar.", "effects": { "raid": { "power": 16, "damage": [12, 28] } } },
-        { "text": "Infectados aislados empujan la puerta este.", "effects": { "raid": { "power": 14, "damage": [8, 22] } } }
+        {
+          "text": "Un operador describe rutas seguras entre ruinas.",
+          "effects": {
+            "discoverZone": true,
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Indicaciones para un depósito de agua municipal.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Hablan de un puente caído: hay que rodear.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 1
+          }
+        }
       ]
     },
     {
-      "id": "night_probe",
-      "name": "Sondeo nocturno",
-      "intensity": 3,
-      "cooldown": 5,
-      "weight": 4,
-      "minDay": 6,
-      "conditions": { "minThreat": 12 },
-      "variants": [
-        { "text": "Prueban el perímetro en silencio. Disparáis de más.", "effects": { "raid": { "power": 18, "damage": [10, 26] }, "lose": { "ammo": [0, 1] } } },
-        { "text": "Sombras en el almacén exterior.", "effects": { "raid": { "power": 15, "damage": [12, 30] } } }
-      ]
-    },
-    {
-      "id": "hard_raid",
-      "name": "Oleada fuerte",
-      "intensity": 5,
-      "cooldown": 7,
-      "weight": 2,
-      "minDay": 9,
-      "conditions": { "minThreat": 20, "minPop": 2 },
-      "variants": [
-        { "text": "La noche se llena de aullidos. La oleada es seria.", "effects": { "raid": { "power": 28, "damage": [20, 45] } } },
-        { "text": "Rompen un tramo de valla antes de rechazarlos.", "effects": { "raid": { "power": 32, "damage": [18, 40] }, "lose": { "wood": [1, 3] } } }
-      ]
-    },
-    {
-      "id": "siege_pressure",
-      "name": "Presión sostenida",
-      "intensity": 4,
-      "cooldown": 8,
-      "weight": 2,
-      "minDay": 11,
-      "conditions": { "minThreat": 28, "minControlled": 3 },
-      "variants": [
-        { "text": "Durante horas empujan sin entrar del todo. Gastáis munición y nervios.", "effects": { "raid": { "power": 24, "damage": [14, 32] }, "lose": { "ammo": [1, 2], "fuel": [0, 2] } } }
-      ]
-    },
-    {
-      "id": "fire_scare",
-      "name": "Principio de incendio",
-      "intensity": 3,
+      "id": "radio_codigo_viejo",
+      "name": "Código viejo",
+      "family": "radio",
+      "intensity": 1,
       "cooldown": 9,
       "weight": 2,
       "minDay": 7,
-      "conditions": { "minFuel": 2, "minPop": 2 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
       "variants": [
-        { "text": "Una chispa casi prende el almacén de combustible.", "effects": { "lose": { "fuel": [1, 3], "wood": [0, 2] }, "woundOne": 8 } },
-        { "text": "Apagáis un fuego pequeño a tiempo. Perdéis madera.", "effects": { "lose": { "wood": [2, 4] } } }
+        {
+          "text": "Descifráis un mensaje civil antiguo.",
+          "effects": {
+            "researchBonus": 2
+          }
+        },
+        {
+          "text": "Listas de suministros de un depósito inexistente.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "La clave sirve para otra frecuencia.",
+          "effects": {
+            "setFlag": "radio_code",
+            "researchBonus": 1
+          }
+        }
       ]
     },
     {
-      "id": "theft_inside",
-      "name": "Hurtos internos",
-      "intensity": 2,
-      "cooldown": 10,
+      "id": "sup_senal_humo",
+      "name": "Señal de humo",
+      "family": "supervivientes",
+      "intensity": 1,
+      "cooldown": 8,
       "weight": 2,
-      "minDay": 8,
-      "conditions": { "minPop": 5, "minFood": 8 },
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
       "variants": [
-        { "text": "Alguien esconde raciones. Recuperáis parte, no todo.", "effects": { "lose": { "food": [1, 3], "medicine": [0, 1] } } }
+        {
+          "text": "Un superviviente agotado pide unirse.",
+          "effects": {
+            "spawnSurvivorChance": 0.9
+          }
+        },
+        {
+          "text": "Dos personas piden agua; una se queda.",
+          "effects": {
+            "spawnSurvivorChance": 0.7
+          }
+        },
+        {
+          "text": "Una familia rota: solo el más fuerte llega.",
+          "effects": {
+            "spawnSurvivorChance": 0.85
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "acoger",
+          "label": "Acoger",
+          "effects": {
+            "spawnSurvivorChance": 1.0,
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "raciones",
+          "label": "Dar raciones y despedir",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "rechazar",
+          "label": "Rechazar",
+          "effects": {
+            "stabilityDelta": -2,
+            "threatDelta": 1
+          }
+        }
       ]
     },
     {
-      "id": "migration_wave",
+      "id": "sup_grupo_transito",
       "name": "Grupo en tránsito",
+      "family": "supervivientes",
       "intensity": 2,
       "cooldown": 12,
       "weight": 2,
       "minDay": 10,
-      "conditions": { "minControlled": 2 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
       "variants": [
-        { "text": "Un grupo pide quedarse una noche. Uno se une al amanecer.", "effects": { "recruit": true, "lose": { "food": [1, 2], "water": [1, 2] } } },
-        { "text": "Rechazáis a forasteros armados. La amenaza sube.", "effects": { "threatDelta": 3 } }
+        {
+          "text": "Un grupo pide quedarse una noche. Uno se une al amanecer.",
+          "effects": {
+            "spawnSurvivorChance": 0.8
+          }
+        },
+        {
+          "text": "Rechazáis a forasteros armados. La amenaza sube.",
+          "effects": {
+            "threatDelta": 3
+          }
+        },
+        {
+          "text": "Intercambiáis mapas y uno decide quedarse.",
+          "effects": {
+            "spawnSurvivorChance": 0.6,
+            "discoverZone": true
+          }
+        }
       ]
     },
     {
-      "id": "contamination_zone",
-      "name": "Zona sucia",
+      "id": "sup_medico_errante",
+      "name": "Médico errante",
+      "family": "supervivientes",
+      "intensity": 2,
+      "cooldown": 14,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Un sanitario pide techo a cambio de curas.",
+          "effects": {
+            "spawnSurvivorChance": 0.75,
+            "loot": {
+              "medicine": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Trata heridas y se va dejando un botiquín.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                2,
+                4
+              ]
+            },
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Exige medicinas propias como pago de entrada.",
+          "effects": {
+            "spawnSurvivorChance": 0.55
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "reclutar",
+          "label": "Ofrecer plaza fija",
+          "effects": {
+            "spawnSurvivorChance": 1.0
+          }
+        },
+        {
+          "id": "pago",
+          "label": "Pagar y que se vaya",
+          "effects": {
+            "loot": {
+              "medicine": [
+                2,
+                3
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sup_nino_solo",
+      "name": "Menor solo",
+      "family": "supervivientes",
+      "intensity": 2,
+      "cooldown": 15,
+      "weight": 1,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2,
+        "maxThreat": 60
+      },
+      "variants": [
+        {
+          "text": "Un adolescente asustado llega al perímetro.",
+          "effects": {
+            "spawnSurvivorChance": 0.95,
+            "stabilityDelta": 2
+          }
+        },
+        {
+          "text": "Lo escondéis la primera noche; al día se integra.",
+          "effects": {
+            "spawnSurvivorChance": 1.0
+          }
+        },
+        {
+          "text": "Trae noticias de un campamento saqueado.",
+          "effects": {
+            "spawnSurvivorChance": 0.8,
+            "threatDelta": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "sup_exmilitar",
+      "name": "Exmilitar",
+      "family": "supervivientes",
+      "intensity": 2,
+      "cooldown": 16,
+      "weight": 2,
+      "minDay": 12,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4
+      },
+      "variants": [
+        {
+          "text": "Un veterano ofrece vigilancia a cambio de comida.",
+          "effects": {
+            "spawnSurvivorChance": 0.7
+          }
+        },
+        {
+          "text": "Enseña formaciones básicas a la guardia.",
+          "effects": {
+            "researchBonus": 2,
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Pide munición antes de jurar lealtad.",
+          "effects": {
+            "spawnSurvivorChance": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "sup_desercion_interna",
+      "name": "Quién se va",
+      "family": "supervivientes",
+      "intensity": 3,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 5,
+        "maxStability": 40
+      },
+      "variants": [
+        {
+          "text": "Alguien empaqueta en silencio. La moral tiembla.",
+          "effects": {
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Una discusión termina con una marcha nocturna.",
+          "effects": {
+            "stabilityDelta": -4,
+            "damageSurvivor": 5
+          }
+        },
+        {
+          "text": "Convencéis a la persona de quedarse… por ahora.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "convencer",
+          "label": "Convencer de quedarse",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "dejar_ir",
+          "label": "Dejar marchar en paz",
+          "effects": {
+            "stabilityDelta": -2,
+            "killSurvivorChance": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "sup_hermano_perdido",
+      "name": "Hermano perdido",
+      "family": "supervivientes",
+      "intensity": 2,
+      "cooldown": 13,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Alguien reconoce a un familiar entre forasteros.",
+          "effects": {
+            "spawnSurvivorChance": 0.85,
+            "stabilityDelta": 3
+          }
+        },
+        {
+          "text": "El reencuentro es amargo: solo queda uno.",
+          "effects": {
+            "spawnSurvivorChance": 0.7,
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "No es quien pensaban. Decepción.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_raciones_cortas",
+      "name": "Raciones cortas",
+      "family": "hambre_agua",
+      "intensity": 2,
+      "cooldown": 5,
+      "weight": 4,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El almacén se ve demasiado vacío esta mañana.",
+          "effects": {
+            "stabilityDelta": -2,
+            "threatDelta": 1
+          }
+        },
+        {
+          "text": "Discutís si adelantar la siguiente expedición.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Alguien esconde migajas. La tensión sube.",
+          "effects": {
+            "stabilityDelta": -3,
+            "damageSurvivor": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_comida_podrida",
+      "name": "Comida en mal estado",
+      "family": "hambre_agua",
+      "intensity": 2,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Parte de las raciones se estropea.",
+          "effects": {
+            "loot": {
+              "food": [
+                -5,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Humedad en el almacén: perdéis comida.",
+          "effects": {
+            "loot": {
+              "food": [
+                -4,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Latas hinchadas: mejor tirarlas.",
+          "effects": {
+            "loot": {
+              "food": [
+                -3,
+                -1
+              ]
+            },
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_agua_contaminada",
+      "name": "Agua dudosa",
+      "family": "hambre_agua",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un bidón estaba sucio. Tiréis agua dudosa.",
+          "effects": {
+            "loot": {
+              "water": [
+                -5,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Alguien bebe mal y enferma.",
+          "effects": {
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ]
+            },
+            "damageSurvivor": 12
+          }
+        },
+        {
+          "text": "Hervís de más y gastáis combustible.",
+          "effects": {
+            "loot": {
+              "water": [
+                -2,
+                -1
+              ],
+              "fuel": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_pozo_seco",
+      "name": "Pozo a medias",
+      "family": "hambre_agua",
       "intensity": 3,
       "cooldown": 9,
       "weight": 2,
-      "minDay": 8,
-      "conditions": { "minThreat": 15 },
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
       "variants": [
-        { "text": "El viento trae hedor. Alguien cae enfermo al limpiar.", "effects": { "woundOne": 18, "needMeds": 1 } }
+        {
+          "text": "El pozo da menos de lo esperado.",
+          "effects": {
+            "stabilityDelta": -2,
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Hay que racionar turnos de llenado.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Una bomba improvisada falla a mitad de extracción.",
+          "effects": {
+            "damageBuildingChance": 0.2,
+            "loot": {
+              "water": [
+                -2,
+                0
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "lucky_cache",
-      "name": "Escondite intacto",
+      "id": "ham_caza_menor",
+      "name": "Caza menor",
+      "family": "hambre_agua",
       "intensity": 1,
-      "cooldown": 11,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2,
+        "maxThreat": 40
+      },
+      "variants": [
+        {
+          "text": "Alguien vuelve con carne magra del perímetro.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "text": "Trampas improvisadas dan resultado.",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                3
+              ],
+              "wood": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Un conejo y dos aves. Hoy se come.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                3
+              ]
+            }
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cazar",
+          "label": "Salir a cazar",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ]
+            },
+            "threatDelta": 1
+          }
+        },
+        {
+          "id": "trampas",
+          "label": "Solo trampas",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                2
+              ],
+              "wood": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_lluvia_cisternas",
+      "name": "Lluvia útil",
+      "family": "hambre_agua",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "La lluvia llena bidones improvisados.",
+          "effects": {
+            "loot": {
+              "water": [
+                2,
+                5
+              ]
+            },
+            "weather": "rain"
+          }
+        },
+        {
+          "text": "Recolectáis agua limpia de tejados controlados.",
+          "effects": {
+            "loot": {
+              "water": [
+                3,
+                6
+              ]
+            },
+            "weather": "rain"
+          }
+        },
+        {
+          "text": "Canalones rotos: aun así salváis varios litros.",
+          "effects": {
+            "loot": {
+              "water": [
+                1,
+                4
+              ]
+            },
+            "weather": "rain"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ham_racionamiento_estricto",
+      "name": "Racionamiento",
+      "family": "hambre_agua",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4
+      },
+      "variants": [
+        {
+          "text": "Imponeis raciones estrictas. Quejas aseguradas.",
+          "effects": {
+            "stabilityDelta": -3,
+            "setFlag": "strict_rations"
+          }
+        },
+        {
+          "text": "El plan ahorra comida… y moral.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Alguien rompe el racionamiento. Castigo ligero.",
+          "effects": {
+            "stabilityDelta": -2,
+            "damageSurvivor": 4
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "estricto",
+          "label": "Mantener racionamiento",
+          "effects": {
+            "stabilityDelta": -2,
+            "setFlag": "strict_rations"
+          }
+        },
+        {
+          "id": "aflojar",
+          "label": "Aflojar un día",
+          "effects": {
+            "stabilityDelta": 1,
+            "loot": {
+              "food": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_fiebre",
+      "name": "Fiebre",
+      "family": "enfermedad",
+      "intensity": 2,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2
+      },
+      "variants": [
+        {
+          "text": "Un superviviente enferma. Sin medicinas, empeora.",
+          "effects": {
+            "damageSurvivor": 22
+          }
+        },
+        {
+          "text": "Tos seca por el polvo. Alguien pierde fuerzas.",
+          "effects": {
+            "damageSurvivor": 16
+          }
+        },
+        {
+          "text": "Fiebre alta toda la noche.",
+          "effects": {
+            "damageSurvivor": 18,
+            "stabilityDelta": -1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "medicar",
+          "label": "Usar medicinas",
+          "effects": {
+            "loot": {
+              "medicine": [
+                -1,
+                -1
+              ]
+            },
+            "damageSurvivor": 6
+          }
+        },
+        {
+          "id": "reposo",
+          "label": "Reposo sin medicinas",
+          "effects": {
+            "damageSurvivor": 18,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_gripe_campo",
+      "name": "Gripe de campo",
+      "family": "enfermedad",
+      "intensity": 3,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Varios tosen a la vez. Aisláis al más grave.",
+          "effects": {
+            "damageSurvivor": 14,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "La clínica improvisada se satura.",
+          "effects": {
+            "damageSurvivor": 20
+          }
+        },
+        {
+          "text": "Usáis las últimas pastillas. La fiebre baja.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                -2,
+                -1
+              ]
+            },
+            "damageSurvivor": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_herida_infectada",
+      "name": "Herida infectada",
+      "family": "enfermedad",
+      "intensity": 3,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2
+      },
+      "variants": [
+        {
+          "text": "Una herida antigua se encona.",
+          "effects": {
+            "damageSurvivor": 24
+          }
+        },
+        {
+          "text": "Hace falta limpiar y vendar de nuevo.",
+          "effects": {
+            "damageSurvivor": 12,
+            "loot": {
+              "medicine": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Sin antibióticos, el riesgo es alto.",
+          "effects": {
+            "damageSurvivor": 28,
+            "killSurvivorChance": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_intoxicacion",
+      "name": "Intoxicación",
+      "family": "enfermedad",
+      "intensity": 2,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Alguien come una lata dudosa.",
+          "effects": {
+            "damageSurvivor": 15,
+            "loot": {
+              "food": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Diarrea en el campamento. Gastáis agua.",
+          "effects": {
+            "damageSurvivor": 10,
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "El cocinero jura que no volverá a arriesgar.",
+          "effects": {
+            "damageSurvivor": 8,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_plaga_ratas",
+      "name": "Plaga y ratas",
+      "family": "enfermedad",
+      "intensity": 2,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2
+      },
+      "variants": [
+        {
+          "text": "Las ratas roban comida y dejan suciedad.",
+          "effects": {
+            "loot": {
+              "food": [
+                -3,
+                -1
+              ]
+            },
+            "threatDelta": 1
+          }
+        },
+        {
+          "text": "Roen cables y desperdician combustible.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -2,
+                0
+              ],
+              "food": [
+                -2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Montáis trampas; el hedor persiste.",
+          "effects": {
+            "loot": {
+              "food": [
+                -1,
+                0
+              ],
+              "wood": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_cuarentena",
+      "name": "Cuarentena",
+      "family": "enfermedad",
+      "intensity": 3,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4
+      },
+      "variants": [
+        {
+          "text": "Aisláis a dos personas por precaución.",
+          "effects": {
+            "stabilityDelta": -2,
+            "damageSurvivor": 6
+          }
+        },
+        {
+          "text": "La cuarentena funciona: el resto no enferma.",
+          "effects": {
+            "stabilityDelta": 1,
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Rompen el aislamiento demasiado pronto.",
+          "effects": {
+            "damageSurvivor": 18,
+            "stabilityDelta": -3
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "aislar",
+          "label": "Aislar 48h",
+          "effects": {
+            "stabilityDelta": -1,
+            "setFlag": "quarantine"
+          }
+        },
+        {
+          "id": "tratar",
+          "label": "Gastar medicinas ya",
+          "effects": {
+            "loot": {
+              "medicine": [
+                -2,
+                -1
+              ]
+            },
+            "damageSurvivor": 5
+          }
+        },
+        {
+          "id": "riesgo",
+          "label": "Seguir trabajando",
+          "effects": {
+            "damageSurvivor": 20,
+            "killSurvivorChance": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "enf_parasitos",
+      "name": "Parásitos",
+      "family": "enfermedad",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Piojos y rascaduras en toda la colonia.",
+          "effects": {
+            "damageSurvivor": 6,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Hervís ropa. Gastáis agua y leña.",
+          "effects": {
+            "loot": {
+              "water": [
+                -2,
+                -1
+              ],
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Un remedio casero ayuda a medias.",
+          "effects": {
+            "damageSurvivor": 4,
+            "loot": {
+              "medicine": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_herramienta_rota",
+      "name": "Herramienta rota",
+      "family": "accidentes",
+      "intensity": 1,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Se parte un mango. Gastáis madera en reparar.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "El taller pierde una pieza metálica.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Un martillo sale volando: solo un moretón.",
+          "effects": {
+            "damageSurvivor": 6
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "reparar",
+          "label": "Reparar ya",
+          "effects": {
+            "loot": {
+              "wood": [
+                -2,
+                -1
+              ],
+              "metal": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "id": "improvisar",
+          "label": "Improvisar sin reparar",
+          "effects": {
+            "stabilityDelta": -1,
+            "damageSurvivor": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_caida_tejado",
+      "name": "Caída del tejado",
+      "family": "accidentes",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Alguien resbala reparando el techo.",
+          "effects": {
+            "damageSurvivor": 20
+          }
+        },
+        {
+          "text": "Una viga cede. Herida grave evitable.",
+          "effects": {
+            "damageSurvivor": 28,
+            "damageBuildingChance": 0.25
+          }
+        },
+        {
+          "text": "Caéis de menos: asustados, no rotos.",
+          "effects": {
+            "damageSurvivor": 10,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_fuga_combustible",
+      "name": "Fuga de combustible",
+      "family": "accidentes",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un bidón pierde por una grieta.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Alguien deja un grifo abierto en el generador.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -4,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Recuperáis parte del charco con trapos.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -2,
+                -1
+              ],
+              "water": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_principio_incendio",
+      "name": "Principio de incendio",
+      "family": "accidentes",
+      "intensity": 3,
+      "cooldown": 9,
       "weight": 2,
       "minDay": 7,
-      "conditions": { "minControlled": 3 },
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2
+      },
       "variants": [
-        { "text": "Tras una pared falsa: agua, comida y un poco de todo.", "effects": { "loot": { "food": [2, 4], "water": [2, 4], "medicine": [0, 2], "ammo": [0, 1] } } }
+        {
+          "text": "Una chispa casi prende el almacén de combustible.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -3,
+                -1
+              ],
+              "wood": [
+                -2,
+                0
+              ]
+            },
+            "damageSurvivor": 8
+          }
+        },
+        {
+          "text": "Apagáis un fuego pequeño a tiempo. Perdéis madera.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -4,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "El humo alerta al perímetro. Amenaza menor.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": 2
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "apagar",
+          "label": "Apagar con agua",
+          "effects": {
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ],
+              "wood": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "id": "arena",
+          "label": "Sofocar con tierra",
+          "effects": {
+            "damageSurvivor": 6,
+            "loot": {
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
       ]
     },
     {
-      "id": "cold_snap",
+      "id": "acc_cortocircuito",
+      "name": "Cortocircuito",
+      "family": "accidentes",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El generador echa chispas.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -2,
+                -1
+              ],
+              "metal": [
+                -1,
+                0
+              ]
+            },
+            "damageBuildingChance": 0.3
+          }
+        },
+        {
+          "text": "Cables pelados: apagáis todo una hora.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Reparáis con cinta y fe.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "researchBonus": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_derrumbe_menor",
+      "name": "Derrumbe menor",
+      "family": "accidentes",
+      "intensity": 3,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
+      "variants": [
+        {
+          "text": "Un muro interior cede un poco.",
+          "effects": {
+            "damageBuildingChance": 0.45,
+            "damageSurvivor": 12
+          }
+        },
+        {
+          "text": "Polvo y gritos. Nadie muere.",
+          "effects": {
+            "damageSurvivor": 8,
+            "loot": {
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Apuntaláis con lo que hay.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ],
+              "metal": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "acc_disparo_accidental",
+      "name": "Disparo accidental",
+      "family": "accidentes",
+      "intensity": 3,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 2
+      },
+      "variants": [
+        {
+          "text": "Un arma se dispara en la limpieza.",
+          "effects": {
+            "damageSurvivor": 22,
+            "loot": {
+              "ammo": [
+                -1,
+                -1
+              ]
+            },
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Solo un susto y un agujero en la pared.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                -1,
+                -1
+              ],
+              "wood": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Herida leve y protocolo nuevo de armas.",
+          "effects": {
+            "damageSurvivor": 10,
+            "researchBonus": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_lluvia_tormenta",
+      "name": "Tormenta",
+      "family": "clima",
+      "intensity": 3,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Truenos y lluvia gruesa azotan el campamento.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "water": [
+                1,
+                3
+              ]
+            },
+            "damageBuildingChance": 0.2
+          }
+        },
+        {
+          "text": "El viento arranca lonas. Recogéis agua a cambio.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "water": [
+                2,
+                4
+              ],
+              "wood": [
+                -2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Rayos cercanos. Los infectados se agitan.",
+          "effects": {
+            "weather": "storm",
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_ola_calor",
+      "name": "Ola de calor",
+      "family": "clima",
+      "intensity": 2,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El calor aprieta. Bebéis más de la cuenta.",
+          "effects": {
+            "weather": "heat",
+            "loot": {
+              "water": [
+                -4,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Trabajar al sol agota a todos.",
+          "effects": {
+            "weather": "heat",
+            "damageSurvivor": 8,
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "La comida se estropea más rápido.",
+          "effects": {
+            "weather": "heat",
+            "loot": {
+              "food": [
+                -3,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_frio_seco",
       "name": "Frío seco",
+      "family": "clima",
       "intensity": 2,
       "cooldown": 7,
       "weight": 3,
       "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
       "conditions": {},
       "variants": [
-        { "text": "El frío fuerza a quemar más combustible.", "effects": { "lose": { "fuel": [1, 3], "wood": [0, 2] } } },
-        { "text": "Sin calor suficiente, alguien se resfría.", "effects": { "lose": { "fuel": [0, 2] }, "woundOne": 10 } }
+        {
+          "text": "El frío fuerza a quemar más combustible.",
+          "effects": {
+            "weather": "cold",
+            "loot": {
+              "fuel": [
+                -3,
+                -1
+              ],
+              "wood": [
+                -2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Sin calor suficiente, alguien se resfría.",
+          "effects": {
+            "weather": "cold",
+            "loot": {
+              "fuel": [
+                -2,
+                0
+              ]
+            },
+            "damageSurvivor": 10
+          }
+        },
+        {
+          "text": "Helada matinal: las tuberías crujen.",
+          "effects": {
+            "weather": "cold",
+            "loot": {
+              "water": [
+                -2,
+                0
+              ],
+              "fuel": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_niebla_densa",
+      "name": "Niebla densa",
+      "family": "clima",
+      "intensity": 2,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "No se ve a diez metros. La guardia se tensa.",
+          "effects": {
+            "weather": "fog",
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Expediciones retrasadas por la niebla.",
+          "effects": {
+            "weather": "fog",
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Siluetas falsas en la bruma. Falsa alarma.",
+          "effects": {
+            "weather": "fog"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "doblar",
+          "label": "Doblar guardias",
+          "effects": {
+            "weather": "fog",
+            "threatDelta": 1,
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "id": "esperar",
+          "label": "Esperar a que pase",
+          "effects": {
+            "weather": "fog",
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_viento_ceniza",
+      "name": "Viento de ceniza",
+      "family": "clima",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Ceniza lejana cubre lonas y cultivos.",
+          "effects": {
+            "weather": "fog",
+            "loot": {
+              "food": [
+                -2,
+                0
+              ]
+            },
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Toséis toda la tarde.",
+          "effects": {
+            "damageSurvivor": 6,
+            "weather": "fog"
+          }
+        },
+        {
+          "text": "El cielo se pone naranja. Mal presagio.",
+          "effects": {
+            "threatDelta": 2,
+            "weather": "fog"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_despejado_util",
+      "name": "Día claro",
+      "family": "clima",
+      "intensity": 1,
+      "cooldown": 4,
+      "weight": 3,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Cielo limpio: ideal para cartografiar.",
+          "effects": {
+            "weather": "clear",
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Secáis ropa y leña al sol.",
+          "effects": {
+            "weather": "clear",
+            "loot": {
+              "wood": [
+                0,
+                1
+              ]
+            },
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Visibilidad perfecta en las atalayas.",
+          "effects": {
+            "weather": "clear",
+            "threatDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cli_granizo",
+      "name": "Granizo",
+      "family": "clima",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El granizo destroza lonas del huerto.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "food": [
+                -2,
+                -1
+              ],
+              "wood": [
+                -2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Cubís lo esencial a tiempo.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "food": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "El ruido enloquece a los infectados cercanos.",
+          "effects": {
+            "weather": "storm",
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_avistamiento",
+      "name": "Avistamiento",
+      "family": "infectados",
+      "intensity": 2,
+      "cooldown": 4,
+      "weight": 4,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un infectado solo deambula cerca del perímetro.",
+          "effects": {
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Huellas frescas en el barro exterior.",
+          "effects": {
+            "threatDelta": 3
+          }
+        },
+        {
+          "text": "Aullidos cortos al amanecer.",
+          "effects": {
+            "threatDelta": 2,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_manada_lejana",
+      "name": "Manada lejana",
+      "family": "infectados",
+      "intensity": 3,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 8
+      },
+      "variants": [
+        {
+          "text": "Una manada pasa a distancia. Os agacháis.",
+          "effects": {
+            "threatDelta": 5
+          }
+        },
+        {
+          "text": "Cientos de pasos en la carretera norte.",
+          "effects": {
+            "threatDelta": 6,
+            "setFlag": "horde_nearby"
+          }
+        },
+        {
+          "text": "Se desvían… por ahora.",
+          "effects": {
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_rapido_cerca",
+      "name": "Rápido cerca",
+      "family": "infectados",
+      "intensity": 3,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 6,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 10
+      },
+      "variants": [
+        {
+          "text": "Un infectado veloz prueba la valla.",
+          "effects": {
+            "threatDelta": 4,
+            "attackIntensity": 2,
+            "damageSurvivor": 10
+          }
+        },
+        {
+          "text": "Lo abatís, pero hace ruido.",
+          "effects": {
+            "threatDelta": 3,
+            "loot": {
+              "ammo": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Escapa hacia el bosque. Vendrán más.",
+          "effects": {
+            "threatDelta": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_tanque_ruido",
+      "name": "Tanque a lo lejos",
+      "family": "infectados",
+      "intensity": 4,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 10,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 18
+      },
+      "variants": [
+        {
+          "text": "Un bruto enorme derriba un poste lejano.",
+          "effects": {
+            "threatDelta": 7,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "El suelo vibra. Preferís no mirar.",
+          "effects": {
+            "threatDelta": 6
+          }
+        },
+        {
+          "text": "Se aleja tras un rebaño de comunes.",
+          "effects": {
+            "threatDelta": 5,
+            "setFlag": "tank_seen"
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_nido_descubierto",
+      "name": "Nido descubierto",
+      "family": "infectados",
+      "intensity": 3,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Encontráis un edificio lleno de inmóviles.",
+          "effects": {
+            "threatDelta": 4,
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Quemar el nido o marcarlo: hay que decidir.",
+          "effects": {
+            "threatDelta": 3
+          }
+        },
+        {
+          "text": "Uno se despierta. Disparo de emergencia.",
+          "effects": {
+            "threatDelta": 5,
+            "loot": {
+              "ammo": [
+                -1,
+                0
+              ]
+            },
+            "damageSurvivor": 8
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "quemar",
+          "label": "Quemar el nido",
+          "effects": {
+            "threatDelta": -2,
+            "loot": {
+              "fuel": [
+                -2,
+                -1
+              ]
+            },
+            "attackIntensity": 1
+          }
+        },
+        {
+          "id": "evitar",
+          "label": "Marcar y evitar",
+          "effects": {
+            "setFlag": "nido_marcado",
+            "discoverZone": true
+          }
+        },
+        {
+          "id": "limpiar",
+          "label": "Limpiar a tiros",
+          "effects": {
+            "loot": {
+              "ammo": [
+                -3,
+                -1
+              ]
+            },
+            "threatDelta": -3,
+            "damageSurvivor": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_olor_podredumbre",
+      "name": "Olor a podredumbre",
+      "family": "infectados",
+      "intensity": 2,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El viento trae hedor. Alguien cae enfermo al limpiar.",
+          "effects": {
+            "damageSurvivor": 18,
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Cubís bocas. La amenaza no baja.",
+          "effects": {
+            "threatDelta": 2,
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Seguís el rastro hasta una alcantarilla.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "inf_mordida_casi",
+      "name": "Casi mordida",
+      "family": "infectados",
+      "intensity": 3,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un infectado muerde el aire a centímetros.",
+          "effects": {
+            "damageSurvivor": 8,
+            "threatDelta": 3,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "La víctima queda en shock.",
+          "effects": {
+            "damageSurvivor": 5,
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Disparo a quemarropa. Silencio después.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                -1,
+                -1
+              ]
+            },
+            "threatDelta": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_oleada_menor",
+      "name": "Oleada menor",
+      "family": "ataques",
+      "intensity": 3,
+      "cooldown": 4,
+      "weight": 5,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 8
+      },
+      "variants": [
+        {
+          "text": "Un grupo pequeño prueba las defensas.",
+          "effects": {
+            "attackIntensity": 2,
+            "damageSurvivor": 14
+          }
+        },
+        {
+          "text": "Ruidos en la valla. Hay que aguantar.",
+          "effects": {
+            "attackIntensity": 2,
+            "damageSurvivor": 16
+          }
+        },
+        {
+          "text": "Infectados aislados empujan la puerta este.",
+          "effects": {
+            "attackIntensity": 2,
+            "damageSurvivor": 12,
+            "loot": {
+              "ammo": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_sondeo_nocturno",
+      "name": "Sondeo nocturno",
+      "family": "ataques",
+      "intensity": 3,
+      "cooldown": 5,
+      "weight": 4,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 12
+      },
+      "variants": [
+        {
+          "text": "Prueban el perímetro en silencio. Disparáis de más.",
+          "effects": {
+            "attackIntensity": 2,
+            "damageSurvivor": 12,
+            "loot": {
+              "ammo": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Sombras en el almacén exterior.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 18
+          }
+        },
+        {
+          "text": "La atalaya avisa a tiempo. Baja el daño.",
+          "effects": {
+            "attackIntensity": 1,
+            "damageSurvivor": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_oleada_fuerte",
+      "name": "Oleada fuerte",
+      "family": "ataques",
+      "intensity": 5,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 20,
+        "minPop": 2
+      },
+      "variants": [
+        {
+          "text": "La noche se llena de aullidos. La oleada es seria.",
+          "effects": {
+            "attackIntensity": 4,
+            "damageSurvivor": 28,
+            "killSurvivorChance": 0.05
+          }
+        },
+        {
+          "text": "Rompen un tramo de valla antes de rechazarlos.",
+          "effects": {
+            "attackIntensity": 4,
+            "damageSurvivor": 22,
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ]
+            },
+            "damageBuildingChance": 0.4
+          }
+        },
+        {
+          "text": "Munición y gritos. Amanece con bajas.",
+          "effects": {
+            "attackIntensity": 5,
+            "damageSurvivor": 30,
+            "killSurvivorChance": 0.05,
+            "loot": {
+              "ammo": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_presion_sostenida",
+      "name": "Presión sostenida",
+      "family": "ataques",
+      "intensity": 4,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 11,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 28,
+        "minControlled": 3
+      },
+      "variants": [
+        {
+          "text": "Durante horas empujan sin entrar del todo.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 16,
+            "loot": {
+              "ammo": [
+                -2,
+                -1
+              ],
+              "fuel": [
+                -2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "Turnos de guardia dobles. Alguien se desploma.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 20,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Aguantáis, pero el perímetro queda marcado.",
+          "effects": {
+            "attackIntensity": 3,
+            "threatDelta": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_emboscada_expedicion",
+      "name": "Emboscada",
+      "family": "ataques",
+      "intensity": 4,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 15
+      },
+      "variants": [
+        {
+          "text": "Una patrulla vuelve herida de la ruta.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 24,
+            "killSurvivorChance": 0.05
+          }
+        },
+        {
+          "text": "Perseguidos hasta la puerta. Disparos cerrados.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 18,
+            "loot": {
+              "ammo": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Logran cerrar a tiempo. El miedo queda.",
+          "effects": {
+            "attackIntensity": 2,
+            "stabilityDelta": -3,
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_falsa_alarma",
+      "name": "Falsa alarma",
+      "family": "ataques",
+      "intensity": 1,
+      "cooldown": 3,
+      "weight": 4,
+      "minDay": 2,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Gritos en la distancia. Resulta ser viento y metal.",
+          "effects": {}
+        },
+        {
+          "text": "La atalaya avisa… y no hay nada. Gastáis nervios.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Un animal en la valla. Suspiro colectivo.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "disparar",
+          "label": "Disparar a ciegas",
+          "effects": {
+            "loot": {
+              "ammo": [
+                -1,
+                -1
+              ]
+            },
+            "threatDelta": 1
+          }
+        },
+        {
+          "id": "esperar",
+          "label": "Esperar en silencio",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "atk_ataque_alba",
+      "name": "Ataque al alba",
+      "family": "ataques",
+      "intensity": 4,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 14
+      },
+      "variants": [
+        {
+          "text": "Atacan cuando cambiáis turnos.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 20,
+            "killSurvivorChance": 0.05
+          }
+        },
+        {
+          "text": "La fatiga cuesta sangre.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 24
+          }
+        },
+        {
+          "text": "Un perro alerta a tiempo. Menos daño.",
+          "effects": {
+            "attackIntensity": 2,
+            "damageSurvivor": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_piezas_valla",
+      "name": "Piezas reutilizables",
+      "family": "infraestructura",
+      "intensity": 1,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
+      "variants": [
+        {
+          "text": "Desmontáis una valla inútil y ganáis metal.",
+          "effects": {
+            "loot": {
+              "metal": [
+                2,
+                4
+              ],
+              "wood": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Tornillos y chapas de un hangar.",
+          "effects": {
+            "loot": {
+              "metal": [
+                3,
+                5
+              ]
+            }
+          }
+        },
+        {
+          "text": "Postes de madera aún firmes.",
+          "effects": {
+            "loot": {
+              "wood": [
+                3,
+                5
+              ],
+              "metal": [
+                0,
+                2
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_averia_pozo",
+      "name": "Avería en el pozo",
+      "family": "infraestructura",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "La bomba del pozo se atasca.",
+          "effects": {
+            "stabilityDelta": -2,
+            "damageBuildingChance": 0.35
+          }
+        },
+        {
+          "text": "Reparáis con alambre y paciencia.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Sin agua corriente un día entero.",
+          "effects": {
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ]
+            },
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_tejado_agujeros",
+      "name": "Tejado agujereado",
+      "family": "infraestructura",
+      "intensity": 2,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "La lluvia entra por el techo del almacén.",
+          "effects": {
+            "weather": "rain",
+            "loot": {
+              "food": [
+                -2,
+                0
+              ],
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Lonas de emergencia: solución temporal.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -1,
+                0
+              ]
+            },
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Una noche húmeda y mal humor.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_mejora_atalaya",
+      "name": "Mejora de atalaya",
+      "family": "infraestructura",
+      "intensity": 1,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
+      "variants": [
+        {
+          "text": "Reforzáis una atalaya con chapa.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ],
+              "wood": [
+                -1,
+                0
+              ]
+            },
+            "threatDelta": -2
+          }
+        },
+        {
+          "text": "Mejor ángulo de visión: menos sorpresas.",
+          "effects": {
+            "threatDelta": -1,
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "La guardia duerme más tranquila.",
+          "effects": {
+            "stabilityDelta": 2
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "reforzar",
+          "label": "Invertir materiales",
+          "effects": {
+            "loot": {
+              "metal": [
+                -3,
+                -2
+              ],
+              "wood": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": -3
+          }
+        },
+        {
+          "id": "posponer",
+          "label": "Posponer",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_red_electrica",
+      "name": "Restos de red",
+      "family": "infraestructura",
+      "intensity": 2,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Encontráis cableado urbano aprovechable.",
+          "effects": {
+            "loot": {
+              "metal": [
+                2,
+                4
+              ]
+            },
+            "researchBonus": 2
+          }
+        },
+        {
+          "text": "Un transformador muerto: chatarra útil.",
+          "effects": {
+            "loot": {
+              "metal": [
+                3,
+                5
+              ],
+              "fuel": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Riesgo de cortocircuito si forzáis la conexión.",
+          "effects": {
+            "loot": {
+              "metal": [
+                1,
+                3
+              ]
+            },
+            "damageSurvivor": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_almacen_colapsa",
+      "name": "Estantería rota",
+      "family": "infraestructura",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Una estantería cede y esparce provisiones.",
+          "effects": {
+            "loot": {
+              "food": [
+                -2,
+                0
+              ],
+              "medicine": [
+                -1,
+                0
+              ]
+            },
+            "damageSurvivor": 4
+          }
+        },
+        {
+          "text": "Reordenáis el almacén: encontráis algo perdido.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                0,
+                1
+              ],
+              "ammo": [
+                0,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Hay que reforzar con madera.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "infst_generador_falla",
+      "name": "Generador falla",
+      "family": "infraestructura",
+      "intensity": 2,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "El generador se niega a arrancar.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -1,
+                0
+              ]
+            },
+            "stabilityDelta": -2,
+            "damageBuildingChance": 0.25
+          }
+        },
+        {
+          "text": "Pieza rota: hay que fabricar otra.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Noche a oscuras. Nervios a flor de piel.",
+          "effects": {
+            "stabilityDelta": -2,
+            "threatDelta": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_trueque_furtivo",
+      "name": "Trueque furtivo",
+      "family": "comercio",
+      "intensity": 1,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Un forastero cambia metal por comida.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                4
+              ],
+              "water": [
+                1,
+                2
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Cambiáis munición sobrante por medicinas.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                1,
+                3
+              ],
+              "ammo": [
+                -1,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Trueque rápido: madera por agua embotellada.",
+          "effects": {
+            "loot": {
+              "water": [
+                2,
+                4
+              ],
+              "wood": [
+                -2,
+                -1
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_caravana",
+      "name": "Caravana",
+      "family": "comercio",
+      "intensity": 2,
+      "cooldown": 14,
+      "weight": 2,
+      "minDay": 10,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
+      "variants": [
+        {
+          "text": "Una caravana ofrece precios altos y prisa.",
+          "effects": {
+            "loot": {
+              "food": [
+                3,
+                5
+              ],
+              "fuel": [
+                -2,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Negociáis bien: medicinas a cambio de chatarra.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                2,
+                4
+              ],
+              "metal": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Se van ofendidos. Peor reputación.",
+          "effects": {
+            "stabilityDelta": -1,
+            "threatDelta": 2
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "comprar",
+          "label": "Comprar comida",
+          "effects": {
+            "loot": {
+              "food": [
+                4,
+                6
+              ],
+              "metal": [
+                -3,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "id": "vender",
+          "label": "Vender munición",
+          "effects": {
+            "loot": {
+              "ammo": [
+                -2,
+                -1
+              ],
+              "medicine": [
+                2,
+                3
+              ],
+              "food": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "id": "pasar",
+          "label": "Dejar pasar",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_mercado_negro",
+      "name": "Mercado negro",
+      "family": "comercio",
+      "intensity": 2,
+      "cooldown": 12,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Contacto dudoso ofrece munición cara.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                2,
+                4
+              ],
+              "food": [
+                -3,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Os venden mapas marcados… algunos mentira.",
+          "effects": {
+            "discoverZone": true,
+            "loot": {
+              "metal": [
+                -1,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Estafa menor: perdéis un poco y aprendéis.",
+          "effects": {
+            "loot": {
+              "food": [
+                -2,
+                -1
+              ]
+            },
+            "researchBonus": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_regalo_diplomatico",
+      "name": "Regalo diplomático",
+      "family": "comercio",
+      "intensity": 1,
+      "cooldown": 15,
+      "weight": 1,
+      "minDay": 12,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 5
+      },
+      "variants": [
+        {
+          "text": "Una facción envía un paquete de buena voluntad.",
+          "effects": {
+            "loot": {
+              "food": [
+                2,
+                3
+              ],
+              "medicine": [
+                1,
+                2
+              ]
+            },
+            "stabilityDelta": 2,
+            "setFlag": "faction_gift"
+          }
+        },
+        {
+          "text": "Agua limpia y una nota: hablemos.",
+          "effects": {
+            "loot": {
+              "water": [
+                3,
+                5
+              ]
+            },
+            "setFlag": "faction_talk"
+          }
+        },
+        {
+          "text": "El regalo viene con espías. Amenaza sutil.",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                2
+              ]
+            },
+            "threatDelta": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_escasez_precios",
+      "name": "Precios por las nubes",
+      "family": "comercio",
+      "intensity": 2,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Todo cuesta el doble en el trueque de hoy.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Rechazáis un mal trato. El mercader se va.",
+          "effects": {}
+        },
+        {
+          "text": "Pagáis de más por medicinas vitales.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                2,
+                3
+              ],
+              "food": [
+                -4,
+                -2
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_intercambio_semillas",
+      "name": "Semillas",
+      "family": "comercio",
+      "intensity": 1,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
+      "variants": [
+        {
+          "text": "Os ofrecen semillas a cambio de herramientas.",
+          "effects": {
+            "loot": {
+              "metal": [
+                -1,
+                -1
+              ]
+            },
+            "setFlag": "seeds",
+            "researchBonus": 2
+          }
+        },
+        {
+          "text": "Plantáis lo recibido: esperanza a largo plazo.",
+          "effects": {
+            "setFlag": "seeds",
+            "stabilityDelta": 2
+          }
+        },
+        {
+          "text": "Las semillas están mojadas. Pocas sirven.",
+          "effects": {
+            "loot": {
+              "food": [
+                1,
+                2
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "com_contrabando",
+      "name": "Contrabando",
+      "family": "comercio",
+      "intensity": 2,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Os ofrecen armas sin preguntar origen.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                2,
+                3
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Rechazáis el trato sucio.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Aceptáis y os mancháis las manos.",
+          "effects": {
+            "loot": {
+              "ammo": [
+                3,
+                5
+              ],
+              "food": [
+                -2,
+                -1
+              ]
+            },
+            "stabilityDelta": -2,
+            "setFlag": "black_market"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "aceptar",
+          "label": "Aceptar",
+          "effects": {
+            "loot": {
+              "ammo": [
+                3,
+                4
+              ],
+              "food": [
+                -2,
+                -1
+              ]
+            },
+            "setFlag": "black_market",
+            "threatDelta": 2
+          }
+        },
+        {
+          "id": "rechazar",
+          "label": "Rechazar",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_mapa_oral",
+      "name": "Rumores del mapa",
+      "family": "rumores",
+      "intensity": 1,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Un explorador marca un edificio lejano como prometedor.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Oís de un depósito de combustible al sur.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Hablan de un hospital vacío… o no.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "marcar",
+          "label": "Marcar en el mapa",
+          "effects": {
+            "discoverZone": true,
+            "researchBonus": 1
+          }
+        },
+        {
+          "id": "ignorar",
+          "label": "Ignorar el rumor",
+          "effects": {}
+        }
+      ]
+    },
+    {
+      "id": "rum_ciudad_segura",
+      "name": "Ciudad segura",
+      "family": "rumores",
+      "intensity": 2,
+      "cooldown": 12,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Cuentan que hay un enclave murado al oeste.",
+          "effects": {
+            "setFlag": "rumor_safe_city",
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Demasiado bueno para ser cierto. Aun así, anotáis.",
+          "effects": {
+            "setFlag": "rumor_safe_city",
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "El rumor dividirá opiniones en la colonia.",
+          "effects": {
+            "stabilityDelta": -1,
+            "setFlag": "rumor_safe_city"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "creer",
+          "label": "Preparar expedición",
+          "effects": {
+            "setFlag": "expedition_safe_city",
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "dudar",
+          "label": "Ignorar el rumor",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_traidor",
+      "name": "Rumores de traición",
+      "family": "rumores",
+      "intensity": 2,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4
+      },
+      "variants": [
+        {
+          "text": "Susurros: alguien roba raciones de noche.",
+          "effects": {
+            "stabilityDelta": -3,
+            "setFlag": "theft_suspect"
+          }
+        },
+        {
+          "text": "Acusaciones sin prueba. El ambiente se envenena.",
+          "effects": {
+            "stabilityDelta": -4
+          }
+        },
+        {
+          "text": "Una búsqueda encuentra migajas… o no.",
+          "effects": {
+            "stabilityDelta": -1,
+            "loot": {
+              "food": [
+                -1,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_oleada_proximo",
+      "name": "Oleada en camino",
+      "family": "rumores",
+      "intensity": 3,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Forasteros avisan de una manada grande.",
+          "effects": {
+            "threatDelta": 5,
+            "setFlag": "horde_warning"
+          }
+        },
+        {
+          "text": "Puede ser mentira para asustaros.",
+          "effects": {
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Preparáis la defensa por si acaso.",
+          "effects": {
+            "threatDelta": 3,
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_faccion_guerra",
+      "name": "Guerra entre facciones",
+      "family": "rumores",
+      "intensity": 2,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 10,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Dos grupos se matan entre sí más allá del río.",
+          "effects": {
+            "threatDelta": 2,
+            "setFlag": "faction_war"
+          }
+        },
+        {
+          "text": "La guerra puede traer refugiados… o saqueadores.",
+          "effects": {
+            "threatDelta": 3,
+            "spawnSurvivorChance": 0.3
+          }
+        },
+        {
+          "text": "Oportunidad de trueque con ambos bandos.",
+          "effects": {
+            "setFlag": "faction_war",
+            "researchBonus": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_cura_falsa",
+      "name": "Cura milagrosa",
+      "family": "rumores",
+      "intensity": 1,
+      "cooldown": 13,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Alguien vende la idea de una cura. Mentira probable.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "La esperanza ciega: gastáis un día buscando.",
+          "effects": {
+            "loot": {
+              "fuel": [
+                -1,
+                0
+              ]
+            },
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Desmentís el rumor a tiempo.",
+          "effects": {
+            "stabilityDelta": 1,
+            "researchBonus": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "rum_silencio_radio",
+      "name": "Silencio en la radio",
+      "family": "rumores",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Nadie emite en días. El vacío inquieta.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Algunos lo ven como buena señal.",
+          "effects": {}
+        },
+        {
+          "text": "Inventáis teorías. Ninguna ayuda.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_discusion",
+      "name": "Discusión",
+      "family": "conflictos",
+      "intensity": 1,
+      "cooldown": 4,
+      "weight": 3,
+      "minDay": 3,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Una pelea por turnos de vigilancia deja a alguien golpeado.",
+          "effects": {
+            "damageSurvivor": 10,
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Tensión por las raciones. Nadie gana, todos pierden sueño.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Separáis a los implicados. Paz frágil.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "castigar",
+          "label": "Castigar a ambos",
+          "effects": {
+            "stabilityDelta": -1,
+            "damageSurvivor": 4
+          }
+        },
+        {
+          "id": "mediar",
+          "label": "Mediar",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "id": "ignorar",
+          "label": "Ignorar",
+          "effects": {
+            "stabilityDelta": -3
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_hurtos",
+      "name": "Hurtos internos",
+      "family": "conflictos",
+      "intensity": 2,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 5
+      },
+      "variants": [
+        {
+          "text": "Alguien esconde raciones. Recuperáis parte, no todo.",
+          "effects": {
+            "loot": {
+              "food": [
+                -3,
+                -1
+              ],
+              "medicine": [
+                -1,
+                0
+              ]
+            },
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Cacheo nocturno: humillación y algo de comida.",
+          "effects": {
+            "loot": {
+              "food": [
+                0,
+                1
+              ]
+            },
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "El ladrón confiesa. Castigo simbólico.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_liderazgo",
+      "name": "Crisis de liderazgo",
+      "family": "conflictos",
+      "intensity": 3,
+      "cooldown": 12,
+      "weight": 2,
+      "minDay": 10,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 6,
+        "maxStability": 50
+      },
+      "variants": [
+        {
+          "text": "Dos voces quieren mandar. La colonia se parte.",
+          "effects": {
+            "stabilityDelta": -5
+          }
+        },
+        {
+          "text": "Una votación improvisada baja la tensión.",
+          "effects": {
+            "stabilityDelta": -1,
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Amenazas veladas en el comedor.",
+          "effects": {
+            "stabilityDelta": -4,
+            "damageSurvivor": 6
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "imponer",
+          "label": "Imponer orden",
+          "effects": {
+            "stabilityDelta": 2,
+            "damageSurvivor": 8
+          }
+        },
+        {
+          "id": "mediar",
+          "label": "Mediar",
+          "effects": {
+            "stabilityDelta": 1,
+            "loot": {
+              "food": [
+                -1,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "id": "dejar",
+          "label": "Dejar que explote",
+          "effects": {
+            "stabilityDelta": -4,
+            "killSurvivorChance": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_exilio",
+      "name": "Amenaza de exilio",
+      "family": "conflictos",
+      "intensity": 3,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 9,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 5
+      },
+      "variants": [
+        {
+          "text": "La mayoría quiere expulsar a alguien.",
+          "effects": {
+            "stabilityDelta": -3,
+            "killSurvivorChance": 0.05
+          }
+        },
+        {
+          "text": "El acusado se defiende con pruebas débiles.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "Encontráis un compromiso: vigilancia doble.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_duelo_palabras",
+      "name": "Duelo de palabras",
+      "family": "conflictos",
+      "intensity": 1,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "Una discusión pública acaba en disculpas.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "Queda rencor. La productividad baja un día.",
+          "effects": {
+            "stabilityDelta": -2
+          }
+        },
+        {
+          "text": "El grupo se ríe al final. Crisis evitada.",
+          "effects": {
+            "stabilityDelta": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_motin_hambre",
+      "name": "Motín por hambre",
+      "family": "conflictos",
+      "intensity": 4,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 12,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 6,
+        "maxStability": 35
+      },
+      "variants": [
+        {
+          "text": "Rompen la despensa. Caos y moretones.",
+          "effects": {
+            "loot": {
+              "food": [
+                -5,
+                -2
+              ]
+            },
+            "damageSurvivor": 14,
+            "stabilityDelta": -6
+          }
+        },
+        {
+          "text": "La guardia contiene el motín a duras penas.",
+          "effects": {
+            "damageSurvivor": 18,
+            "stabilityDelta": -4
+          }
+        },
+        {
+          "text": "Prometéis raciones extras mañana. Compráis tiempo.",
+          "effects": {
+            "stabilityDelta": -2,
+            "setFlag": "ration_promise"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cnf_celo_pareja",
+      "name": "Celo y tensión",
+      "family": "conflictos",
+      "intensity": 1,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4
+      },
+      "variants": [
+        {
+          "text": "Un triángulo afectivo envenena turnos.",
+          "effects": {
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Separáis guardias. Problema aparcado.",
+          "effects": {
+            "stabilityDelta": -1
+          }
+        },
+        {
+          "text": "Acaba en risas forzadas.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_nueva_zona",
+      "name": "Nueva zona visible",
+      "family": "expansion",
+      "intensity": 1,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 4,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
+      "variants": [
+        {
+          "text": "Desde la atalaya se ve un bloque intacto.",
+          "effects": {
+            "discoverZone": true
+          }
+        },
+        {
+          "text": "Humo lejano marca un posible asentamiento.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 1
+          }
+        },
+        {
+          "text": "Un camino secundario aparece en el mapa.",
+          "effects": {
+            "discoverZone": true
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "explorar",
+          "label": "Preparar exploración",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 1
+          }
+        },
+        {
+          "id": "observar",
+          "label": "Solo observar",
+          "effects": {
+            "discoverZone": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_puesto_avanzado",
+      "name": "Puesto avanzado",
+      "family": "expansion",
+      "intensity": 2,
+      "cooldown": 12,
+      "weight": 2,
+      "minDay": 8,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2
+      },
+      "variants": [
+        {
+          "text": "Montáis un puesto temporal más allá del muro.",
+          "effects": {
+            "setFlag": "outpost",
+            "threatDelta": 2,
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ],
+              "metal": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "El puesto atrae atención no deseada.",
+          "effects": {
+            "setFlag": "outpost",
+            "threatDelta": 4
+          }
+        },
+        {
+          "text": "Buen punto de vigilancia. Moral alta.",
+          "effects": {
+            "setFlag": "outpost",
+            "stabilityDelta": 2,
+            "threatDelta": 1
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "establecer",
+          "label": "Establecer puesto",
+          "effects": {
+            "setFlag": "outpost",
+            "loot": {
+              "wood": [
+                -4,
+                -2
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": 2
+          }
+        },
+        {
+          "id": "solo_marca",
+          "label": "Solo marcar en mapa",
+          "effects": {
+            "discoverZone": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_limpiar_bloque",
+      "name": "Limpiar bloque",
+      "family": "expansion",
+      "intensity": 3,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 7,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Despejáis un edificio para controlarlo.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 3,
+            "damageSurvivor": 10,
+            "loot": {
+              "ammo": [
+                -1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "text": "La limpieza cuesta sangre y gana espacio.",
+          "effects": {
+            "damageSurvivor": 16,
+            "killSurvivorChance": 0.05,
+            "setFlag": "block_cleared"
+          }
+        },
+        {
+          "text": "Os retirais a medias. Zona gris.",
+          "effects": {
+            "threatDelta": 2,
+            "stabilityDelta": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_ruta_segura",
+      "name": "Ruta segura",
+      "family": "expansion",
+      "intensity": 1,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 5,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Marcais una ruta con menos infectados.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": -1,
+            "researchBonus": 1
+          }
+        },
+        {
+          "text": "Atajos entre solares controlados.",
+          "effects": {
+            "stabilityDelta": 1
+          }
+        },
+        {
+          "text": "La ruta ahorrará combustible en expediciones.",
+          "effects": {
+            "setFlag": "safe_route"
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_colonos_nuevos",
+      "name": "Colonos nuevos",
+      "family": "expansion",
+      "intensity": 2,
+      "cooldown": 14,
+      "weight": 2,
+      "minDay": 11,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 3
+      },
+      "variants": [
+        {
+          "text": "Un pequeño grupo pide unirse a la expansión.",
+          "effects": {
+            "spawnSurvivorChance": 0.7
+          }
+        },
+        {
+          "text": "Traen herramientas y hambre.",
+          "effects": {
+            "spawnSurvivorChance": 0.6,
+            "loot": {
+              "metal": [
+                1,
+                2
+              ],
+              "wood": [
+                1,
+                2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Demasiados para el alojamiento actual.",
+          "effects": {
+            "stabilityDelta": -2,
+            "spawnSurvivorChance": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_frontera_caliente",
+      "name": "Frontera caliente",
+      "family": "expansion",
+      "intensity": 3,
+      "cooldown": 8,
+      "weight": 3,
+      "minDay": 9,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 3,
+        "minThreat": 15
+      },
+      "variants": [
+        {
+          "text": "La última zona tomada sigue activa de noche.",
+          "effects": {
+            "threatDelta": 5,
+            "attackIntensity": 2
+          }
+        },
+        {
+          "text": "Reforzáis el nuevo perímetro.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Retiráis gente al núcleo. Pierde control temporal.",
+          "effects": {
+            "stabilityDelta": -1,
+            "threatDelta": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "exp_puente_caido",
+      "name": "Puente caído",
+      "family": "expansion",
+      "intensity": 2,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 6,
+      "minEra": 0,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 1
+      },
+      "variants": [
+        {
+          "text": "El puente principal está hundido. Hay que rodear.",
+          "effects": {
+            "discoverZone": true,
+            "threatDelta": 2
+          }
+        },
+        {
+          "text": "Una pasarela improvisada es posible.",
+          "effects": {
+            "loot": {
+              "wood": [
+                -4,
+                -2
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "setFlag": "bridge_work"
+          }
+        },
+        {
+          "text": "La ruta larga gasta más combustible.",
+          "effects": {
+            "setFlag": "long_route"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_incendio_mayor",
+      "name": "Incendio mayor",
+      "family": "catastrofes",
+      "intensity": 5,
+      "cooldown": 16,
+      "weight": 1,
+      "minDay": 14,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "El fuego se come un almacén entero.",
+          "effects": {
+            "loot": {
+              "food": [
+                -6,
+                -3
+              ],
+              "wood": [
+                -5,
+                -2
+              ],
+              "fuel": [
+                -4,
+                -2
+              ]
+            },
+            "damageBuildingChance": 0.7,
+            "damageSurvivor": 20,
+            "stabilityDelta": -5
+          }
+        },
+        {
+          "text": "Salváis vidas, no provisiones.",
+          "effects": {
+            "loot": {
+              "food": [
+                -4,
+                -2
+              ],
+              "wood": [
+                -3,
+                -1
+              ]
+            },
+            "damageSurvivor": 12,
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "El humo atrae una oleada secundaria.",
+          "effects": {
+            "attackIntensity": 3,
+            "loot": {
+              "wood": [
+                -4,
+                -2
+              ]
+            },
+            "threatDelta": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_colapso_muro",
+      "name": "Colapso del muro",
+      "family": "catastrofes",
+      "intensity": 5,
+      "cooldown": 14,
+      "weight": 1,
+      "minDay": 12,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minControlled": 2,
+        "minThreat": 20
+      },
+      "variants": [
+        {
+          "text": "Un tramo de muralla cae con estruendo.",
+          "effects": {
+            "damageBuildingChance": 0.8,
+            "attackIntensity": 4,
+            "damageSurvivor": 22,
+            "killSurvivorChance": 0.05,
+            "loot": {
+              "wood": [
+                -5,
+                -2
+              ],
+              "metal": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "text": "Tapáis el hueco con vehículos y cuerpos.",
+          "effects": {
+            "damageSurvivor": 18,
+            "loot": {
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "stabilityDelta": -4
+          }
+        },
+        {
+          "text": "La brecha se defiende a tiros toda la noche.",
+          "effects": {
+            "attackIntensity": 4,
+            "loot": {
+              "ammo": [
+                -4,
+                -2
+              ]
+            },
+            "killSurvivorChance": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_epidemia",
+      "name": "Epidemia",
+      "family": "catastrofes",
+      "intensity": 5,
+      "cooldown": 15,
+      "weight": 1,
+      "minDay": 13,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 5
+      },
+      "variants": [
+        {
+          "text": "La enfermedad se propaga sin control.",
+          "effects": {
+            "damageSurvivor": 30,
+            "killSurvivorChance": 0.05,
+            "stabilityDelta": -6
+          }
+        },
+        {
+          "text": "Quemáis ropa y aisláis bloques.",
+          "effects": {
+            "loot": {
+              "medicine": [
+                -4,
+                -2
+              ],
+              "water": [
+                -3,
+                -1
+              ]
+            },
+            "damageSurvivor": 16,
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Perdéis a alguien. El resto sobrevive endurecido.",
+          "effects": {
+            "killSurvivorChance": 0.05,
+            "stabilityDelta": -5,
+            "researchBonus": 2
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cuarentena_total",
+          "label": "Cuarentena total",
+          "effects": {
+            "stabilityDelta": -3,
+            "setFlag": "epidemic_lock",
+            "damageSurvivor": 10
+          }
+        },
+        {
+          "id": "meds",
+          "label": "Gastar todas las medicinas",
+          "effects": {
+            "loot": {
+              "medicine": [
+                -5,
+                -3
+              ]
+            },
+            "killSurvivorChance": 0.05
+          }
+        },
+        {
+          "id": "sacrificio",
+          "label": "Aislar a los peores fuera",
+          "effects": {
+            "killSurvivorChance": 0.05,
+            "stabilityDelta": -8,
+            "threatDelta": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_horda_masiva",
+      "name": "Horda masiva",
+      "family": "catastrofes",
+      "intensity": 5,
+      "cooldown": 18,
+      "weight": 1,
+      "minDay": 16,
+      "minEra": 3,
+      "maxEra": 4,
+      "conditions": {
+        "minThreat": 35,
+        "minPop": 3
+      },
+      "variants": [
+        {
+          "text": "La horda no tiene fin visible.",
+          "effects": {
+            "attackIntensity": 5,
+            "damageSurvivor": 35,
+            "killSurvivorChance": 0.22,
+            "threatDelta": 10,
+            "stabilityDelta": -5
+          }
+        },
+        {
+          "text": "Aguantáis el primer choque; el segundo duele más.",
+          "effects": {
+            "attackIntensity": 5,
+            "damageSurvivor": 28,
+            "killSurvivorChance": 0.15,
+            "loot": {
+              "ammo": [
+                -5,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "La horda pasa rozando. Daños y alivio amargo.",
+          "effects": {
+            "attackIntensity": 4,
+            "damageSurvivor": 20,
+            "threatDelta": 4,
+            "stabilityDelta": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_tormenta_siglo",
+      "name": "Tormenta del siglo",
+      "family": "catastrofes",
+      "intensity": 4,
+      "cooldown": 16,
+      "weight": 1,
+      "minDay": 11,
+      "minEra": 1,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Viento y agua destrozan lonas y cultivos.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "food": [
+                -4,
+                -2
+              ],
+              "wood": [
+                -4,
+                -2
+              ],
+              "water": [
+                3,
+                6
+              ]
+            },
+            "damageBuildingChance": 0.5,
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "text": "Rayos caen cerca. Pánico en la noche.",
+          "effects": {
+            "weather": "storm",
+            "damageSurvivor": 14,
+            "threatDelta": 4
+          }
+        },
+        {
+          "text": "Al amanecer, barro y trabajo por delante.",
+          "effects": {
+            "weather": "storm",
+            "loot": {
+              "wood": [
+                -3,
+                -1
+              ]
+            },
+            "stabilityDelta": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_saqueo_organizado",
+      "name": "Saqueo organizado",
+      "family": "catastrofes",
+      "intensity": 5,
+      "cooldown": 17,
+      "weight": 1,
+      "minDay": 15,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {
+        "minPop": 4,
+        "minControlled": 2
+      },
+      "variants": [
+        {
+          "text": "Humanos armados golpean el refugio.",
+          "effects": {
+            "attackIntensity": 4,
+            "damageSurvivor": 26,
+            "killSurvivorChance": 0.18,
+            "loot": {
+              "food": [
+                -5,
+                -2
+              ],
+              "ammo": [
+                -3,
+                -1
+              ],
+              "medicine": [
+                -2,
+                -1
+              ]
+            },
+            "stabilityDelta": -5
+          }
+        },
+        {
+          "text": "Repeléis el asalto con bajas.",
+          "effects": {
+            "attackIntensity": 3,
+            "damageSurvivor": 20,
+            "killSurvivorChance": 0.1,
+            "loot": {
+              "ammo": [
+                -4,
+                -2
+              ]
+            }
+          }
+        },
+        {
+          "text": "Negociáis un peaje humillante.",
+          "effects": {
+            "loot": {
+              "food": [
+                -4,
+                -2
+              ],
+              "fuel": [
+                -3,
+                -1
+              ]
+            },
+            "stabilityDelta": -4,
+            "setFlag": "paid_raiders"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "luchar",
+          "label": "Luchar",
+          "effects": {
+            "attackIntensity": 4,
+            "damageSurvivor": 24,
+            "killSurvivorChance": 0.15,
+            "loot": {
+              "ammo": [
+                -3,
+                -1
+              ]
+            }
+          }
+        },
+        {
+          "id": "pagar",
+          "label": "Pagar peaje",
+          "effects": {
+            "loot": {
+              "food": [
+                -4,
+                -2
+              ],
+              "metal": [
+                -2,
+                -1
+              ]
+            },
+            "stabilityDelta": -3
+          }
+        },
+        {
+          "id": "negociar",
+          "label": "Negociar tregua",
+          "effects": {
+            "loot": {
+              "food": [
+                -2,
+                -1
+              ]
+            },
+            "threatDelta": 2,
+            "setFlag": "truce_raiders"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cat_contaminacion",
+      "name": "Nube tóxica",
+      "family": "catastrofes",
+      "intensity": 4,
+      "cooldown": 15,
+      "weight": 1,
+      "minDay": 14,
+      "minEra": 2,
+      "maxEra": 4,
+      "conditions": {},
+      "variants": [
+        {
+          "text": "Una nube amarillenta obliga a cerrar todo.",
+          "effects": {
+            "weather": "fog",
+            "damageSurvivor": 18,
+            "loot": {
+              "water": [
+                -3,
+                -1
+              ],
+              "medicine": [
+                -2,
+                -1
+              ]
+            },
+            "stabilityDelta": -4
+          }
+        },
+        {
+          "text": "Filtros improvisados salvan a la mayoría.",
+          "effects": {
+            "damageSurvivor": 10,
+            "researchBonus": 2
+          }
+        },
+        {
+          "text": "Quienes salieron demasiado pronto lo pagan.",
+          "effects": {
+            "damageSurvivor": 26,
+            "killSurvivorChance": 0.05
+          }
+        }
       ]
     }
   ]

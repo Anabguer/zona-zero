@@ -23,7 +23,7 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=6" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=7" />
 </head>
 <body class="zz-body zz-body--play">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -48,6 +48,10 @@ $base = zz_public_base();
           <span>Día</span>
           <strong id="zz-day">1</strong>
         </div>
+        <div class="zz-hud__pill zz-hud__pill--era">
+          <span>Era</span>
+          <strong id="zz-era">—</strong>
+        </div>
         <div class="zz-hud__pop">
           <span class="zz-hud__pop-ico" aria-hidden="true"></span>
           <div>
@@ -55,7 +59,12 @@ $base = zz_public_base();
             <small>Población / camas</small>
           </div>
         </div>
-        <div class="zz-hud__combat" aria-label="Amenaza y defensa">
+        <div class="zz-hud__combat" aria-label="Estabilidad, amenaza y defensa">
+          <div class="zz-hud__meter zz-hud__meter--stab">
+            <span>Estab.</span>
+            <span></span>
+            <strong id="zz-stability">0</strong>
+          </div>
           <div class="zz-hud__meter zz-hud__meter--threat">
             <span>Amenaza</span>
             <span></span>
@@ -75,6 +84,7 @@ $base = zz_public_base();
       <button type="button" class="zz-tab is-active" id="zz-tab-map" data-tab="map">Mapa</button>
       <button type="button" class="zz-tab" id="zz-tab-base" data-tab="base">Base</button>
       <button type="button" class="zz-tab" id="zz-tab-people" data-tab="people">Gente</button>
+      <button type="button" class="zz-tab" id="zz-tab-more" data-tab="more">Más</button>
     </nav>
 
     <main class="zz-main">
@@ -97,6 +107,10 @@ $base = zz_public_base();
         <div class="zz-people" id="zz-people"></div>
         <p class="zz-hint">Toca para formar el equipo de expedición (máx. 3).</p>
       </section>
+
+      <section class="zz-panel" data-panel="more">
+        <div id="zz-more" class="zz-more"></div>
+      </section>
     </main>
 
     <aside class="zz-log-wrap">
@@ -115,10 +129,26 @@ $base = zz_public_base();
         <a class="zz-btn zz-btn--primary" href="<?= htmlspecialchars($base) ?>">Volver a slots</a>
       </div>
     </div>
+
+    <div id="zz-victory" class="zz-victory" hidden>
+      <div class="zz-victory__card">
+        <h2>Victoria</h2>
+        <p>Zona Zero está estabilizada. Podéis continuar en modo endless.</p>
+        <button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Continuar endless</button>
+      </div>
+    </div>
+
+    <div id="zz-choice-modal" class="zz-choice" hidden>
+      <div class="zz-choice__card">
+        <h2 id="zz-choice-title">Decisión</h2>
+        <p id="zz-choice-text"></p>
+        <div id="zz-choice-actions" class="zz-choice__actions"></div>
+      </div>
+    </div>
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=6';
+    import { bootGame } from './js/main.js?v=7';
     bootGame({
       slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,

@@ -184,7 +184,7 @@ body.zz-body {
 }
 .zz-hud__row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr auto;
   gap: 0.45rem;
   align-items: stretch;
 }
@@ -259,6 +259,17 @@ body.zz-body {
   border: 1px solid rgba(90, 138, 98, 0.3);
   color: #a8d0b0;
 }
+.zz-hud__meter--stab {
+  background: rgba(120, 150, 180, 0.12);
+  border: 1px solid rgba(120, 150, 180, 0.3);
+  color: #a8c0d8;
+}
+.zz-hud__pill--era strong {
+  font-size: 0.95rem;
+  max-width: 5.5rem;
+  text-align: center;
+  line-height: 1.1;
+}
 .zz-hud__meter strong {
   font-family: var(--zz-display);
   font-size: 1.05rem;
@@ -304,7 +315,7 @@ body.zz-body {
 /* Tabs */
 .zz-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.35rem;
   padding: 0.2rem;
   background: rgba(0,0,0,0.25);
@@ -363,6 +374,17 @@ body.zz-body {
   stroke: #c06050;
 }
 
+.zz-zone--hostile .zz-zone-poly {
+  fill: #4a2818;
+  stroke: #d07040;
+  stroke-width: 0.75;
+}
+.zz-zone--hostile .zz-zone-sil {
+  fill: #5a3020;
+  stroke: #c07050;
+  stroke-width: 0.25;
+}
+
 .zz-zone--controlled .zz-zone-poly {
   fill: #2a3a2e;
   stroke: var(--zz-safe);
@@ -411,6 +433,105 @@ body.zz-body {
 }
 .zz-zone-badge--controlled { background: rgba(90,138,98,0.25); color: #a8d0b0; }
 .zz-zone-badge--discovered { background: rgba(184,144,80,0.25); color: #e0c090; }
+.zz-zone-badge--hostile { background: rgba(200,90,50,0.28); color: #f0a070; }
+
+.zz-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  overflow: hidden;
+  margin: 0.35rem 0 0.65rem;
+}
+.zz-progress > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #8a6a38, #c4a574);
+  border-radius: inherit;
+}
+
+.zz-more {
+  display: grid;
+  gap: 1rem;
+}
+.zz-more__sec h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--zz-display);
+  font-size: 1.2rem;
+}
+.zz-more__list {
+  display: grid;
+  gap: 0.45rem;
+}
+.zz-more__item {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--zz-radius);
+  border: 1px solid var(--zz-line);
+  background: rgba(0,0,0,0.22);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.zz-more__item strong { font-family: var(--zz-display); font-size: 1.05rem; }
+.zz-more__item span { color: var(--zz-muted); font-size: 0.82rem; }
+.zz-more__item.is-disabled { opacity: 0.55; }
+.zz-factions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.zz-factions li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--zz-line);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.18);
+}
+.zz-factions span { color: var(--zz-muted); font-size: 0.85rem; }
+
+.zz-build-btn--auto {
+  border-style: dashed;
+  background: rgba(90, 138, 98, 0.1);
+}
+
+.zz-choice,
+.zz-victory {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 42;
+  padding: 1rem;
+}
+.zz-choice:not([hidden]),
+.zz-victory:not([hidden]) {
+  display: grid;
+  place-items: center;
+}
+.zz-choice__card,
+.zz-victory__card {
+  background: #1c1814;
+  border: 1px solid rgba(196, 168, 116, 0.4);
+  border-radius: 16px;
+  padding: 1.25rem;
+  max-width: 400px;
+  width: min(92vw, 400px);
+  text-align: center;
+  display: grid;
+  gap: 0.75rem;
+}
+.zz-victory__card {
+  border-color: rgba(90, 138, 98, 0.45);
+}
+.zz-choice__actions {
+  display: grid;
+  gap: 0.45rem;
+}
 
 /* Base terreno */
 .zz-base-fence { stroke: #6a5a48; stroke-width: 2; stroke-dasharray: 6 4; opacity: 0.7; }
@@ -654,7 +775,7 @@ body.zz-body {
   .zz-top { grid-area: top; }
   .zz-coach { grid-area: coach; }
   .zz-hud { grid-area: hud; }
-  .zz-tabs { grid-area: tabs; max-width: 420px; }
+  .zz-tabs { grid-area: tabs; max-width: 520px; }
   .zz-main { grid-area: main; }
   .zz-log-wrap {
     grid-area: log;
@@ -671,7 +792,7 @@ body.zz-body {
   }
   .zz-hud__combat {
     grid-column: 1 / -1;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-auto-flow: column;
   }
   .zz-skills { grid-template-columns: 1fr; }
