@@ -482,7 +482,7 @@ Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\` (mismas, sustituidas)
 - ZZ-011 (cámara polish) sigue pendiente según plan (HUMAN_GATE NO).
 
 ## COMMIT
-(pendiente push de este cierre)
+`19c4f0d` — feat(ZZ-010): colonia física D1 sin GIS — solo HQ, patio y cámara
 
 ## ESTADO CURSOR
 COMPLETADA
