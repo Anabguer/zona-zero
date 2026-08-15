@@ -1,6 +1,6 @@
 # ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
-**Versión de diseño:** 2.3 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
+**Versión de diseño:** 2.4 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
 **Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana (ZZ-001)  
 **Fecha:** 2026-08-15  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
@@ -303,7 +303,7 @@ AVISO (1–3 días)
 |--------|----------|
 | Construir `house` / `insulated_house` / upgrade HQ | Subir plazas con protección ≥ umbral del clima |
 | Acumular comida/agua | Aguantar consumo↑ durante la ola |
-| Acumular combustible | Mitigar déficit de cobertura (ver abajo) |
+| Acumular **madera** | Cubrir `maderaNecesariaCalefacción` |
 | No enviar exploradores lejos | Evitar heridos/muertos por clima en ruta |
 | Tener camas médicas libres | Absorber enfermos post-ola |
 | Research `insulation` | Desbloquear vivienda aislada **antes** del primer invierno duro |
@@ -320,42 +320,37 @@ Umbrales orientativos:
 - ola de frío / blizzard → protección ≥ 2  
 - calor extremo → protección ≥ 1 mitiga; ≥ 2 casi inmune (agua consumo sigue↑)
 
-#### Mitigación con combustible (no barra de energía diaria)
+#### Mitigación térmica v2.4 = MADERA automática (decisión Neni Ronda 2)
 
-Si `déficit > 0` durante clima extremo y hay **combustible**:
-- el jugador puede activar **calefacción colectiva** (toggle/estado automático si stock > mínimo);
-- consume fuel proporcional al déficit (calibrable);
-- reduce el déficit efectivo (p. ej. 1 fuel mitiga N personas-día);
-- **no** sustituye vivienda a largo plazo: es parche caro.
+> Sustituye cualquier mención previa a fuel/toggle de calefacción.
 
-**Energía eléctrica** (§7.8) **no** es requisito de calefacción v1: evita tres sistemas para lo mismo. La energía sirve a edificios avanzados; el frío se pelea con **vivienda + fuel**.
+Ver bloque **CHATGPT: DECISIÓN NENI** inmediatamente debajo — consolidado como canónico.
 
-#### Conexiones
+### CHATGPT: DECISIÓN NENI — calefacción con MADERA, automática (Ronda 2)
 
-- Vivienda §4 ↔ Clima §11 ↔ Combustible §6 ↔ Salud §12 ↔ Alertas §21 ↔ Research aislamiento §18.
+Neni decide que **la calefacción NO use combustible/gasolina**. En v1 el frío se combate con **calidad de vivienda + reserva de madera**, y el consumo de madera es **automático** cuando la temperatura lo requiere. No existe toggle de calefacción por casa ni decisión diaria de encender/apagar.
 
-#### ¿Para qué existe cada pieza?
+**Diseño propuesto por ChatGPT para cerrar la lógica:**
+- La madera sigue siendo material de construcción y, en frío, se convierte también en **reserva térmica**. No crear un recurso separado `leña`.
+- Cada vivienda aporta una `protecciónClimática` y cada episodio de frío tiene una `severidad`. Cuanto mejor sea la vivienda, **menos madera por persona/día** necesita para mantener cobertura térmica.
+- El juego calcula diariamente `maderaNecesariaCalefacción` según población expuesta, protección de vivienda y severidad. Si hay stock, se descuenta automáticamente y el HUD/brief lo explica: “Calefacción: −6 madera”.
+- Si no hay suficiente madera, NO aplicar enfermedad instantánea. Se acumula un estado agregado `exposiciónAlFrío` por personas-día sin cobertura. La barra/estado progresa en varios días: **verde → ámbar → rojo**. La enfermedad aparece probabilísticamente cuando la exposición supera umbrales; muerte solo tras exposición grave/prolongada + mala capacidad médica.
+- Recuperar madera o mejorar viviendas reduce/limpia progresivamente la exposición. Un solo día malo no condena una partida.
+- Antes de un episodio frío, aviso comprensible: “En 3 días llega frío fuerte. Con tus viviendas actuales consumirás ~8 madera/día. Reserva estimada: 4 días.”
+- El jugador decide INDIRECTAMENTE: construir mejor vivienda, aumentar madera, parar otros consumos de madera, ampliar producción o asumir el riesgo. No decide “encender calefacción”.
 
-| Pieza | Existe para… | Si la quitamos… |
-|-------|--------------|-----------------|
-| Protección por tipo de casa | Forzar progresión de vivienda antes del invierno | Solo “más camas” sin tensión climática |
-| Aviso previo | Decisión justa | Castigo RNG |
-| Fuel como parche | Tradeoff vs vehículos/generador | O solo vivienda o solo muerte |
+### CURSOR: CONSOLIDADO 2.4 — calefacción madera
 
-## 4.3 Cobertura climática (resumen operativo)
+**Aceptada y aplicada en toda la biblia.**
 
-Ver cadena arriba. HUD en aviso: *“Frío en 3 días — alojamiento protegido 18/27. Fuel puede cubrir parte del déficit.”*
+- Calefacción: **madera automática** según `maderaNecesariaCalefacción(popExpuesta, protección, severidad)`.
+- Exposición al frío: acumulada `exposiciónAlFrío` verde→ámbar→rojo; enfermedad probabilística; muerte solo grave/prolongada + mala sanidad.
+- Aviso previo con estimación de madera/día y días de reserva.
+- **Fuel NO calienta.** Fuel = vehículos (+ reparaciones vehiculares si aplica).
+- Mejor vivienda ⇒ menos madera/día. Tech `efficient_heating` / aislamiento reduce consumo.
+- Sin toggle. Decisión indirecta: construir, stockear madera, o asumir riesgo.
 
-## 4.4 Mantenimiento
-
-Viviendas **no** pagan alquiler diario.  
-Único consumo asociado: **fuel de calefacción** solo en clima extremo con déficit (y solo si el jugador tiene stock / lo permite).  
-Sin micromanagement de “encender cada casa”.
-
-**CURSOR: PROPUESTA / DUDA (Neni + ChatGPT)**  
-¿La calefacción con fuel debe ser **automática** (gasta si hay déficit y stock) o un **toggle** “priorizar calefacción / priorizar vehículos”?  
-- **Recomendación Cursor:** toggle simple en panel colonia (default ON en primeras olas, luego el jugador aprende). Evita sorpresas de fuel a 0 el día del viaje en coche.  
-- Alternativa: automático puro (más simple, menos control).
+**Conexiones:** vivienda §4 ↔ clima §11 ↔ madera §6 ↔ aserradero §7 ↔ salud §12 ↔ alertas §21.
 
 ---
 
@@ -368,13 +363,13 @@ Solo necesidades con decisión jugable. No 40 barras.
 | Comida | D1 | Huertos, cocina, loot, raciones | hambre → bajas productividad → muertes/abandono | “comida para X días” |
 | Agua | D1 | Pozo, cisterna, loot | sed → enfermedad → muertes | igual |
 | Vivienda | D1–2 | shelters/casas/bloques | frena crecimiento → abandono | “X sin plaza” |
-| Temperatura | ~D8+ / estación | vivienda aislada, fuel, tech | frío/calor: consumo, enfermos | “ola en Y días” |
-| Salud | al haber heridos/enfermos | botiquín→enfermería→clínica | curación lenta → muertes | “camas médicas X/Y” |
+| Temperatura | ~D8+ / estación | vivienda + **madera** (calefacción auto) + tech | exposición↑ → enfermos | “ola en Y días · madera ~N/día” |
+| Salud | heridos/enfermos/brotes | botiquín→enfermería→clínica + staff | curación lenta → crisis sanitaria | “camas X/Y” / “brote” |
 | Seguridad | amenaza visible | defensa, territorio, torres | ataques peores | “amenaza alta” |
-| Almacenamiento | soft-cap | almacenes | merma de exceso | “reservas se estropean” |
-| Energía | era 1–2 | generador/solar | fuel↑, fallos eventos | “demanda > producción” |
+| Almacenamiento | soft-cap | almacenes / cisterna(agua) | merma de exceso | “reservas se estropean” |
 | Estabilidad | siempre (oculto early) | necesidades cubiertas | productividad↓, inmigración↓ | “moral baja” |
-| Combustible | con vehículos/generador | loot, eventos | sin vehículos lejanos | “fuel crítico” |
+| Combustible | con vehículos | loot, gasolinera, eventos | sin rutas lejanas / cargo | “fuel crítico” |
+| ~~Energía eléctrica~~ | — | **ELIMINADA v1** | — | — |
 | Medicinas | heridos/enfermedad | loot, botiquín | heridas largas | “sin medicinas” |
 | Munición | ataques / hostiles | armería, loot | defensa peor | “munición baja” |
 
@@ -390,18 +385,18 @@ Solo necesidades con decisión jugable. No 40 barras.
 |---------|--------|---------|------|
 | Comida | farm, greenhouse, cocina, loot | pop × rate | supervivencia |
 | Agua | well, cistern, loot | pop × rate | supervivencia, algo de food |
-| Madera | sawmill, loot, eventos | construcción, algo de calefacción | build |
-| Metal | scrapyard, workshop, loot | construcción, defensas | build |
-| Medicinas | med buildings, loot, farmacia | curación | salud |
-| Combustible | loot, gasolinera, eventos | vehículos, generador | logística/energía |
+| Madera | sawmill, loot, eventos | construcción + **calefacción automática en frío** + reparación | build / calor / repair |
+| Metal | scrapyard, workshop, loot | construcción, defensas, reparación | build / repair |
+| Medicinas | med buildings, loot, farmacia | curación + brotes | salud |
+| Combustible | loot, gasolinera, eventos | **solo vehículos** (y repair vehicular) | logística |
 | Munición | armería, loot, comisaría | defensa, expediciones hostiles | combate abstracto |
 
 ## 6.2 Secundarios
 
-| Recurso | Tipo | Nota 2.0 |
+| Recurso | Tipo | Nota 2.4 |
 |---------|------|----------|
-| Energía | **capacidad** producida/demanda, no stack | HUD cuando exista generador |
-| Piezas / tools | **eliminados como inventario** | Absorben en niveles de Taller |
+| Energía eléctrica | **ELIMINADA de v1** | No generador/solar/barra |
+| Piezas / tools | **eliminados** | Absorben en taller/research |
 
 ## 6.3 Soft-caps
 
@@ -413,15 +408,15 @@ Comida/agua: ~`pop × díasReserva` + bonus almacén. Exceso → merma. Obliga a
 
 Principio: cada edificio resuelve un problema. Si no, fuera.
 
-**Conteo diseño 2.0:** 28 edificios activos (+ 3 upgrades HQ = 30 entradas). Eliminados o fusionados vs JSON legado: radio como edificio opcional ligero; `command` fusionable con HQ L2+; no `wall`/`power_hub` huérfanos.
+**Conteo diseño 2.4:** ~26 edificios activos (+ upgrades HQ). **Eliminados v1:** `generator`, `solar`, `command` (→HQ), `wall`/`power_hub`. Radio + centro de expediciones **mantenidos** (roles distintos).
 
 ### 7.1 Núcleo
 
 | ID | Nombre | Función | Coste orient. | Jobs | Era | Notas |
 |----|--------|---------|---------------|------|-----|-------|
 | hq_central_l1 | Refugio Central I | HQ + vivienda 6 + def | gratis inicio | 1 | 0 | único |
-| hq_central_l2 | Refugio Central II | +vivienda/def/mando | wood/metal/fuel | 2 | 1 | upgrade |
-| hq_central_l3 | Refugio Central III | cuartel | alto | 3 | 2 | upgrade |
+| hq_central_l2 | Refugio Central II | +vivienda/def/mando | wood/metal (**sin fuel**) | 2 | 1 | upgrade |
+| hq_central_l3 | Refugio Central III | cuartel | wood/metal/ammo alto (**sin fuel**) | 3 | 2 | upgrade |
 
 ### 7.2 Vivienda
 
@@ -487,6 +482,18 @@ Riesgo de dos edificios mid-game que “mejoran exploración/info” sin diferen
 
 **Recomendación Cursor: A.** Si en playtest el centro se siente “+% invisible”, subir su feedback (ficha de expedición muestra riesgo↓) o pasar a B.
 
+
+### CHATGPT: DECISIÓN NENI — mantener RADIO + CENTRO DE EXPEDICIONES (Ronda 2)
+
+Neni aprueba la opción A, con roles que deben sentirse diferentes:
+- **Radio:** genera señales, llamadas de auxilio, rumores, oportunidades, contactos y misiones. Debe crear historias y sorpresa, no ser un simple +X %.
+- **Centro de expediciones:** logística de exploradores: rutas, previsión de riesgo/tiempo, preparación de salidas y desbloqueo/gestión del 2.º y 3.º explorador. Sus beneficios deben verse en la ficha de expedición.
+
+Si en playtest uno de los dos no genera decisiones propias, fusionarlo; no conservar edificios por catálogo.
+
+### CURSOR: CONSOLIDADO 2.4 — Radio + Centro
+**Aceptada opción A.** Roles canónicos arriba. Feedback obligatorio: radio → misiones/señales; centro → números visibles en ficha de expedición (riesgo/tiempo/slots).
+
 ### 7.6 Salud
 
 | ID | Nombre | Función | Era |
@@ -505,55 +512,30 @@ Riesgo de dos edificios mid-game que “mejoran exploración/info” sin diferen
 | armory | Armería | media + ammo | 1 | 2 |
 | bunker | Búnker | muy alta + algo housing | 0–1 | 3 |
 
-### 7.8 Energía
+### 7.8 Energía eléctrica — ELIMINADA DE v1
 
-**CHATGPT: REVISAR CADENA ENERGÉTICA.** Antes de mantener generador/solar hay que definir qué consume energía y qué problema concreto resuelven. Evitar una barra de energía decorativa. Conectar de forma comprensible con necesidades reales (p. ej. calefacción, clínica, instalaciones avanzadas), sin inventar consumos diarios solo para justificar edificios.
+### CHATGPT: DECISIÓN NENI — ELIMINAR SISTEMA DE ELECTRICIDAD DE v1 (Ronda 2)
+*(texto de decisión conservado arriba en historial de revisión; abajo = consolidación canónica)*
 
-### CURSOR: RESPUESTA — energía como CAPACIDAD de edificios avanzados (decisión 2.3)
+### CURSOR: CONSOLIDADO 2.4 — sin electricidad
 
-**Aceptada la crítica.** Energía **no** es barra de supervivencia diaria ni justificación circular del generador.
+**Aceptada la eliminación.** Tras auditoría de coherencia:
 
-#### Qué es
-- Contador **capacidad** `energíaDisponible` vs `energíaDemandada` (no stack inventariable).  
-- **Aparece en HUD solo cuando** existe el primer generador/solar **o** el primer edificio que demanda energía.
+| Elemento | Destino v1 |
+|----------|------------|
+| `energíaDisponible` / demanda | **Eliminado** |
+| `generator`, `solar` | **Fuera del catálogo** |
+| `power_grid`, `power_hub`, techs energía | **Fuera del árbol** |
+| Victoria `needEnergy` | **Eliminado** — sustituido por infra avanzada (clínica L2+/lab o HQ L3 + defensa) |
+| Clínica / lab / armería / mech | Funcionan por **nivel edificio + workers + recursos + repair + research** |
+| Atalayas | Workers + ammo + tech; **sin luz** |
+| Fuel | **Vehículos** (y repair vehicular) |
+| Calor | **Madera** |
 
-#### Qué CONSUME energía (demanda)
+**¿Qué decisión jugable perdemos?** El tradeoff “quemar fuel para clínica vs coche”.  
+**¿Es grave?** No: el tradeoff divertido de fuel queda en **exploración lejana**; la clínica se gana con metal/workers/medicinas/tiempo. Menos barras = más claridad.
 
-Solo edificios **avanzados** (lista cerrada v1):
-
-| Edificio / función | Demanda | Sin energía suficiente |
-|--------------------|---------|------------------------|
-| Clínica | alta | curación a ritmo de enfermería (degradado) |
-| Laboratorio | media | research más lento o pausado |
-| Taller mecánico / garaje (reparar vehículos) | media | no repara / repara muy lento |
-| Armería avanzada (si tech) | baja | produce menos ammo |
-| **No:** huertos, pozos, casas, torres básicas, HQ early | 0 | — |
-
-#### Qué NO hace la energía v1
-- No calienta casas (eso es **fuel + vivienda**, §4).  
-- No es requisito de victoria por sí sola: es requisito **indirecto** porque clínica/lab/energía estable sí entran en cadena de victoria.
-
-#### Generador vs solar (roles distintos)
-
-| | Generador | Solar |
-|--|-----------|-------|
-| Para qué | potencia alta ya | independencia de fuel a medio plazo |
-| Coste continuo | **fuel/día** si está online | 0 fuel |
-| Debilidad | compite fuel con vehículos/calefacción | menos potencia; peor en tormentas (opcional −) |
-| Decisión | “¿quemo fuel para clínica ya?” | “¿invierto metal para dejar de quemar fuel?” |
-
-#### ¿Si lo elimináramos?
-Perderíamos el arco mid/late de “infraestructura que exige potencia” y el tradeoff fuel. Si no conectamos demanda real, **mejor eliminar** generador/solar que dejarlos decorativos — por eso esta lista es obligatoria.
-
-| ID | Nombre | Oferta | Era |
-|----|--------|--------|-----|
-| generator | Generador | +4 · consume fuel si activo | 1–2 |
-| solar | Placas | +3 · sin fuel | 2–3 |
-
-**CURSOR: PROPUESTA / DUDA**  
-¿Las atalayas ganan bonus nocturno con energía?  
-- **Recomendación Cursor: NO en v1.** Torres ya tienen workers+ammo. Añadir energía diluye el mensaje “energía = edificios avanzados”.  
-- Alternativa: sí, +defensa menor de noche (más simulación, más UI).
+**CURSOR:** no propone recuperar electricidad en v1. Posible v2 opcional si Neni lo pide tras playtest.
 
 ### 7.9 Investigación
 
@@ -606,8 +588,9 @@ Cada tipo: asset WebP/SVG reconocible; estados dañado/ok; crecimiento de coloni
 | Builds caras en madera | `basic_carpentry` |
 | Ataques / amenaza sube | `watch_protocols` / torres |
 | Expediciones cortas de carga | `pack_tactics` / bike |
-| Clínica lenta sin potencia | generador + techs energía |
-| Fuel se va en generador | `solar_array` / `fuel_discipline` |
+| Clínica lenta / brotes | techs medicina + más staff sanitario |
+| Edificios rotos post-ataque | `rapid_repair` / workers en reparación |
+| Invierno caro en madera | `insulation` / `efficient_heating` |
 
 Desbloqueo por **era** solo como *techo máximo*, nunca como única causa. La causa es el problema + infra (taller/banco) + días de research.
 
@@ -679,6 +662,25 @@ Botón opcional: reparte workers a edificios productivos críticos (food/water p
 
 Mismos controles; con muchos edificios, filtros por familia + autoasignar.
 
+
+### CHATGPT: DECISIÓN NENI — gestión visible “más/menos” + vida ambiental (Ronda 2)
+
+La sensación de juego debe venir de **mover capacidad humana entre necesidades**. El control `[−] / [+]` por edificio es central: durante una plaga puedo quitar trabajadores del aserradero y ponerlos en enfermería; antes del invierno puedo priorizar madera; ante una horda puedo reforzar defensa.
+
+**Reglas de UX:**
+- Tocar edificio → muestra puestos `ocupados/máximo`, efecto actual y efecto si añado/quitar un trabajador.
+- Panel Población = resumen, no segundo sistema de asignación.
+- En crisis debe existir acceso rápido a edificios relevantes (“3 edificios sanitarios”, “4 defensas”, etc.) sin buscar por todo el mapa.
+
+**Vida visual sin individualizar colonos:**
+- Pequeños habitantes/figuras ambientales se mueven entre edificios y caminos como representación agregada. NO tienen nombre, ficha ni pathfinding estratégico.
+- Su estado visual puede usar semáforo discreto: **verde = normal**, **ámbar = problema/agotamiento/enfermedad leve**, **rojo = grave/crítico**.
+- Esto no debe convertir 100 habitantes en 100 objetos pesados. Se renderiza una muestra proporcional/capada que represente actividad y salud agregada.
+- Clima, edificios activos, reparación, construcción, enfermedad y ataques deben tener movimiento/feedback visible. Zona Zero no puede sentirse como una captura estática.
+
+### CURSOR: CONSOLIDADO 2.4 — staffing + vida ambiental
+**Aceptado.** Ver también **§32B Vida visual** (nuevo) para estados, movimiento y caps de render.
+
 ---
 
 # 11. CLIMA Y ESTACIONES
@@ -693,17 +695,16 @@ Mismos controles; con muchos edificios, filtros por familia + autoasignar.
 
 | Aviso | Acciones útiles | Sistemas tocados | Consecuencia si ignoras |
 |-------|-----------------|------------------|-------------------------|
-| Ola de frío / blizzard | viviendas↑prot, fuel, stock food, exploradores a casa, camas médicas | vivienda, fuel, comida, exploradores, salud | enfermos, consumo↑, muertes extremas |
+| Ola de frío / blizzard | viviendas↑prot, **stock madera**, stock food, exploradores a casa, camas médicas | vivienda, madera, comida, exploradores, salud | exposición↑, enfermos, muertes extremas |
 | Ola de calor | stock agua, cisterna, sombra/prot≥1, menos expediciones pesadas | agua, cisterna, salud | sed, enfermos, productividad↓ |
-| Tormenta | no enviar exploradores, reforzar (opcional), stock | exploración, accidentes | heridos, builds retrasados |
-| Sequía (si existe) | cisternas llenas, más pozos, racionar | pozo/cisterna, comida (riego abstracto leve) | agua crítica |
-| Lluvia fuerte | cisterna recoge; farms leve− | cisterna, food | — mayormente oportunidad |
+| Tormenta | no enviar exploradores; prep reparación | exploración, HP edificios | heridos, daño edificios |
+| Sequía (si existe) | cisternas llenas, más pozos, racionar | pozo/cisterna | agua crítica |
+| Lluvia fuerte | cisterna recoge; farms leve− | cisterna, food | oportunidad de stock agua |
 
-**Energía:** solo si un edificio avanzado (clínica) debe seguir a pleno en crisis; no para “pagar el clima”.  
-**Combustible:** calefacción de déficit + vehículos (tradeoff explícito).
+**Sin electricidad.** **Fuel** no entra en clima. **Madera** = calefacción.
 
 #### Feedback de aviso (ejemplo)
-> “Ola de frío en 3 días. Cobertura 18/27. Puedes: construir vivienda aislada, acumular fuel, o retirar exploradores.”
+> “Ola de frío en 3 días. Con tus viviendas: ~8 madera/día. Reserva: 4 días. Mejora casas o corta más madera.”
 
 Eso es **orientar**, no mandar (§21).
 
@@ -725,8 +726,8 @@ Día 1 arranca en **final de verano / otoño** o primavera suave (calibrable) pa
 ## 11.3 Patrón AVISO → PREPARACIÓN → CONSECUENCIA
 
 1. **Aviso** (1–3 días antes): “Se acerca una ola de frío.” + cobertura vivienda  
-2. **Preparación:** construir aisladas, stock food/water/fuel, no enviar exploradores lejos  
-3. **Consecuencia:** si déficit → enfermos, consumo↑, muertes solo si déficit grave y prolongado  
+2. **Preparación:** construir aisladas, stock food/water/**madera**, no enviar exploradores lejos  
+3. **Consecuencia:** si falta madera/cobertura → exposición↑ → enfermos probabilísticos; muertes solo grave/prolongado  
 
 ## 11.4 Impactos por clima
 
@@ -759,6 +760,52 @@ Día 1 arranca en **final de verano / otoño** o primavera suave (calibrable) pa
 
 Botiquín → Enfermería → Clínica.
 
+
+### CHATGPT: REVISAR — enfermedades y contagio como sistema probabilístico, no calendario fijo (Ronda 2)
+
+Neni quiere brotes/plagas imprevisibles pero lógicos. Diseñar un modelo agregado de enfermedad que use **pesos y probabilidades condicionadas**, nunca “cada X días hay plaga”.
+
+Factores que pueden elevar riesgo: población alta/densa, frío o calor prolongado, agua insuficiente/contaminada, heridos sin tratar, baja capacidad sanitaria, eventos específicos y estación. Factores que lo reducen: camas médicas, medicinas, edificios sanitarios, research y buenas condiciones.
+
+El brote debe tener fases y feedback: casos iniciales → contagio posible → pico → recuperación. El número de nuevos enfermos por día debe ser aleatorio dentro de una distribución condicionada por el estado real de la colonia. No todos los brotes se comportan igual.
+
+**Decisión jugable:** ante un brote, el jugador puede mover trabajadores a sanidad, gastar medicinas, sacrificar producción, cancelar expediciones o priorizar research/infraestructura. Debe existir posibilidad de que una mala preparación convierta un brote pequeño en crisis, pero también de contenerlo.
+
+**CURSOR: diseñar varios arquetipos de enfermedad/evento**, con parámetros y consecuencias diferentes, sin inventar una lista médica realista innecesaria. El objetivo es variedad jugable, no simulación epidemiológica.
+
+### CURSOR: CONSOLIDADO 2.4 — sistema de brotes (diseño completo)
+
+#### Para qué existe
+Crear crisis sanitarias **imprevisibles pero justas**, que obliguen a reasignar workers ([−]/[+]) hacia enfermería y a gastar medicinas — sin simulación médica.
+
+#### Modelo
+- Estado agregado: `sick`, `outbreakSeverity` (0–3), `outbreakType`, `daysInOutbreak`.
+- Cada día en riesgo: tirada ponderada `P(nuevosCasos | factores)` — **nunca** “día 15 = plaga”.
+- Factores ↑ riesgo: pop alta, overflow vivienda, exposición frío/calor, agua baja, heridos sin tratar, estación, evento semilla.
+- Factores ↓ riesgo: camas libres, medicinas, staff sanitario, techs medicina, estabilidad, post-protección Director.
+
+#### Fases de un brote
+1. **Germen** — 1–3 enfermos; alerta suave.  
+2. **Propagación** — casos/día aleatorios en rango; semáforo ámbar en figuras ambientales.  
+3. **Pico** — presión máxima; estabilidad↓; prod↓ por enfermos.  
+4. **Contención o crisis** — si camas+meds+staff suficientes → baja; si no → muertes + evento catástrofe sanitaria posible.  
+5. **Recuperación** — cooldown familia enfermedad; Director baja presión.
+
+#### Arquetipos (variedad, no catálogo médico)
+| ID | Sensación | Empuja al jugador a… |
+|----|-----------|----------------------|
+| `fever_wave` | Fiebre general | más camas / meds |
+| `gut_bug` | Agua/comida | filtros, cisterna, cocina |
+| `wound_infection` | Tras ataque | curar heridos ya |
+| `winter_cough` | Tras frío | madera + aislamiento + sanidad |
+| `mystery_radio` | Señal + enfermos | misión + riesgo |
+
+#### Decisión de staffing
+Durante brote, ficha enfermería muestra preview: “+1 worker → −30% riesgo mañana (est.)”. Quitar del aserradero duele en invierno (madera).
+
+#### Conexiones
+Director §19/§25 ↔ clima §11 ↔ vivienda overcrowding ↔ medicinas ↔ research medicina ↔ vida visual §32B.
+
 ---
 
 # 13. DEFENSA Y ATAQUES
@@ -788,6 +835,46 @@ Amenaza 0–100 (Director). Soft-cap early days. Tras crisis: protección tempor
 Periodo de recuperación: menos eventos graves; prioridad comida/defensa en objetivos.
 
 Ejemplo válido: 50 → ataque → 34 → recuperación → 45.
+
+
+### CHATGPT: REVISAR — daño y reparación de edificios debe ser una consecuencia visible (Ronda 2)
+
+Hordas, tormentas, incendios u otros eventos pueden dañar edificios. No basta con restar un número oculto.
+
+Propuesta:
+- Edificio con estados visuales `ok → dañado → crítico → destruido`.
+- El daño reduce producción/capacidad/defensa según severidad.
+- Tocar edificio dañado → acción **Reparar**, mostrando coste, tiempo y trabajadores.
+- Alerta agregada: “4 edificios necesitan reparación”; al tocarla, resaltar/centrar los afectados.
+- La reparación compite por madera/metal/trabajadores con expansión: decisión real post-crisis.
+- Una horda que rompe perímetro puede empezar a dañar edificios interiores; mientras el perímetro aguanta, la colonia interior está más protegida.
+
+Cursor debe conectar esto con Taller/research sin crear un segundo minijuego de herramientas/piezas.
+
+### CURSOR: CONSOLIDADO 2.4 — daño y reparación
+
+**Aceptado y ampliado.**
+
+#### Estados
+`ok → damaged → critical → destroyed` (visual + numérico HP%).
+
+| Estado | Efecto |
+|--------|--------|
+| damaged | prod/def/housing −25–40% |
+| critical | −60–80%; alerta fuerte |
+| destroyed | edificio perdido; escombros; rebuild |
+
+#### Fuentes de daño
+Ataques (perímetro roto → interiores), tormentas, incendios/eventos, accidentes raros.
+
+#### Reparar
+- Acción en ficha: coste madera/metal, tiempo, workers (pool construcción o puestos del edificio).
+- Compite con expansión nueva.
+- Tech `rapid_repair` / taller: −coste o −tiempo.
+- Alerta “N edificios necesitan reparación” → al tocar, resalta afectados.
+
+#### Perímetro
+Mientras barricadas/torres aguantan, edificios interiores reciben menos daño. Horda que rompe perímetro empieza a morder producción/vivienda → decisión de recuperación.
 
 ---
 
@@ -898,28 +985,89 @@ Reparación: abstracta (coste metal/fuel + taller mecánico), no inventario de p
 - **Recomendación:** adoptar Apéndice A como canónico; migrar JSON en ZZ-081; no implementar techs stub “para rellenar”.  
 - Alternativa: quedarse en 20 pero **todas** con efecto real (menos fantasía, más foco). Cursor prefiere **menos techs pero todas deseables** si Neni quiere ritmo más corto; si quiere arco 100+ días, 28 bien cableadas.
 
-## 18.1 Ramas (6)
+
+### CHATGPT: DECISIÓN NENI — número de tecnologías ORGÁNICO + investigación con trabajadores (Ronda 2)
+
+Neni no quiere fijar “20” o “28”. El número sale de techs **útiles**. Investigación con workers en banco/lab.
+
+### CURSOR: CONSOLIDADO 2.4 — research por utilidad + staffing
+
+#### Modelo de juego
+1. Research **no** es sistema principal hasta construir **Banco técnico**.  
+2. **Una** tech activa.  
+3. Puestos en banco (1–2) / lab (hasta 3): controles [-]/[+] iguales que cualquier edificio.  
+4. Más workers → más progreso/día (rendimiento decreciente opcional). Tradeoff real vs comida/agua/madera/defensa.  
+5. HUD: progreso %, días estimados según staffing, beneficio en lenguaje claro.  
+6. Tutorial D1: **huerto sin tech**. Techs agrícolas solo mejoran / desbloquean invernadero.
+
+#### Ramas v1 (SIN Energía)
 
 1. Supervivencia  
-2. Construcción  
+2. Construcción / Industria  
 3. Defensa  
 4. Medicina  
-5. Energía  
-6. Exploración / Logística  
+5. Exploración / Logística  
 
-(~4–5 techs/rama ≈ **24–28 tecnologías**; priorizar cablear efectos).
+#### Árbol canónico 2.4 (lista orgánica — no cuota)
 
-## 18.2 Reglas
+Cada tech: problema · req · coste orient. · días base (1 worker) · efecto · deseo.
 
-- 1 research activa  
-- Requiere banco técnico (luego lab acelera)  
-- Días + posibles costes recurso  
-- Cada tech: coste, req, beneficio **aplicado en sim**, unlock  
+##### Supervivencia
+| ID | Problema | Req | Coste | Días | Efecto | Deseo |
+|----|----------|-----|-------|------|--------|-------|
+| `rationing` | comida justa al crecer | banco | food+wood | 3 | −consumo comida ~8% | “aguantar más con lo mismo” |
+| `water_filters` | agua enferma / merma | banco | metal+water | 3 | +eficiencia agua; −riesgo brote agua | “menos sed y menos plagas” |
+| `preservation` | stock se pudre | rationing | metal+food | 4 | soft-cap food↑; merma↓ | “guardar para el invierno” |
+| `greenhouse_tech` | frío mata huertos | water_filters+farm | wood+metal | 5 | unlock invernadero | “comida estable en invierno” |
+| `efficient_heating` | madera se va en frío | insulation o house | wood | 4 | −consumo madera calefacción | “el invierno no me seca el aserradero” |
 
-## 18.3 Ejemplos de deseo
+##### Construcción / Industria
+| ID | Problema | Req | Coste | Días | Efecto | Deseo |
+|----|----------|-----|-------|------|--------|-------|
+| `basic_carpentry` | builds caras en madera | banco+taller | wood | 3 | −coste wood builds | “crecer más barato” |
+| `metalwork` | falta metal útil | carpentry+taller | metal+fuel? no: metal | 4 | +prod metal / −coste metal | “más torres y casas” |
+| `insulation` | frío avisado, shelters malos | carpentry | wood+metal | 5 | unlock `insulated_house` | “quiero eso antes del frío” |
+| `advanced_housing` | pop sin plazas buenas | insulation | wood+metal | 6 | unlock/mejora block | “densidad sin miseria” |
+| `reinforced_structures` | hordas rompen builds | metalwork | metal | 6 | +HP edificios; −daño ataques | “que no me tumben el huerto” |
+| `rapid_repair` | post-ataque lento | metalwork o taller | metal+wood | 5 | −coste/tiempo reparación | “recuperarme antes de la siguiente” |
 
-“Quiero aislamiento térmico antes del invierno.”  
-“Quiero bahía de vehículos para el almacén lejano.”
+##### Defensa
+| ID | Problema | Req | Coste | Días | Efecto | Deseo |
+|----|----------|-----|-------|------|--------|-------|
+| `watch_protocols` | amenaza sube | banco | wood+ammo | 3 | +def; mejor uso workers torre | “aguantar la noche” |
+| `ammo_craft` | ammo se acaba | watch | metal+ammo | 4 | armería +eficiencia ammo | “no pelear a piedra” |
+| `tower_optics` | ataques sorpresa | watch | metal | 5 | +def; avisos amenaza mejores | “verlos venir” |
+| `fortify` | perímetro flojo | ammo_craft+optics | wood+metal | 6 | +def; barricadas más efectivas (no unlock si ya buildable) | “que no entren” |
+| `perimeter_doctrine` | zonas fronterizas caen | fortify | — | 7 | territorio controlado reduce intensidad ataque | “el mapa me protege” |
+
+##### Medicina
+| ID | Problema | Req | Coste | Días | Efecto | Deseo |
+|----|----------|-----|-------|------|--------|-------|
+| `field_medicine` | heridos lentos | banco | medicine | 4 | +curación | “volver a tener manos” |
+| `triage` | camas saturadas | field_medicine | — | 4 | +camas efectivas | “cabemos más enfermos” |
+| `antibiotics_protocol` | brotes se disparan | triage | medicine | 6 | −spread brote | “contener la plaga” |
+| `quarantine_drill` | crisis sanitaria | antibiotics | wood | 5 | opcional: −prod leve a cambio de −spread fuerte (decisión) | “aislar para salvar” |
+| `field_surgery` | explorador herido días | triage | medicine | 6 | −1 día wounded explorador | “no perder al bueno” |
+| `public_health` | camino victoria / clínica | antibiotics+clinic | — | 7 | unlock path clínica avanzada / bonus estabilidad sanidad | “colonia sana = victoria” |
+
+##### Exploración / Logística
+| ID | Problema | Req | Coste | Días | Efecto | Deseo |
+|----|----------|-----|-------|------|--------|-------|
+| `scouting` | mapa a ciegas | banco | food+wood | 3 | −riesgo leve; +info loot | “menos sorpresas malas” |
+| `pack_tactics` | vuelvo con poco | scouting | wood+metal | 4 | +cargo | “cada viaje cuenta” |
+| `bike_tech` | a pie es lento | scouting | metal+wood | 3 | unlock bike | “más lejos sin fuel” |
+| `vehicle_bay` | rutas largas | bike+garage | metal+fuel | 6 | unlock car | “el almacén lejano” |
+| `convoy` | necesito mucho loot | vehicle_bay | metal+fuel | 7 | unlock van + cargo | “una furgoneta llena” |
+
+**Total actual árbol 2.4: 26 techs** (orgánico; se puede añadir/quitar en playtest sin “rellenar cuota”).
+
+**Eliminadas por electricidad / stubs:** `basic_generator`, `solar_array`, `power_grid`, `fuel_discipline` (como tech de generador), unlocks `wall`/`power_hub`.
+
+## 18.2 Reglas (resumen)
+- 1 research activa · staffing en banco/lab · efectos reales obligatorios · `minEra` solo techo.
+
+## 18.3 Deseo
+“Aislamiento antes del invierno.” · “Antibióticos porque hay brote.” · “Reparación rápida tras la horda.” · “Coche para la gasolinera lejana.”
 
 ---
 
@@ -941,6 +1089,18 @@ calma, hallazgos, radio, supervivientes, hambre_agua, enfermedad, accidentes, cl
 
 Flags simples (ayudaste_X, black_market, etc.) para secuelas.
 
+
+### CHATGPT: DECISIÓN NENI — aleatoriedad ponderada, nunca cadencia fija (Ronda 2)
+
+Los eventos NO salen “cada día” ni “cada 2 días”. El Director trabaja con ventanas, pesos, estado de colonia, era/estación, memoria y cooldowns. Debe haber días tranquilos, rachas tensas y momentos de recuperación.
+
+**Regla:** ningún evento importante se agenda por patrón que el jugador pueda memorizar. Se permiten avisos de consecuencias que ya están en marcha (p. ej. frente frío) porque eso es preparación, no guion.
+
+Los pesos deben cambiar según contexto: una colonia sin medicina hace más probable que un brote pequeño sea peligroso; una colonia muy fuerte puede recibir amenazas más exigentes; tras una catástrofe grave el Director baja presión temporalmente.
+
+### CURSOR: CONSOLIDADO 2.4 — Director sin cadencia fija
+**Aceptado.** Quiet nights, cooldowns, pesos contextuales, antirrepetición. Avisos de clima ≠ guion memorizable.
+
 ---
 
 # 20. MISIONES
@@ -958,6 +1118,53 @@ Flags simples (ayudaste_X, black_market, etc.) para secuelas.
 
 Director + necesidades + era. Recompensa: recursos, XP explorador, estabilidad, unlock narrativo. No pay-to-win.
 
+
+### CHATGPT: REVISAR — variedad real de misiones y expediciones (Ronda 2)
+
+No convertir misiones en “construye cada edificio de la lista”. Debe haber guía, pero también rescates, señales, decisiones ambiguas, problemas internos, amenazas, oportunidades, objetivos de investigación, recuperación post-crisis y cadenas cortas procedurales.
+
+Para expediciones, cada tipo de landmark necesita **muchas variantes de encuentro** (no una ruta fija que se memoriza). No hace falta que sean exactamente 50 por localización, pero sí suficiente profundidad combinatoria: estado del lugar + encuentro + decisión + resultado + secuela. Supermercado, hospital, gasolinera, comisaría, ferretería, etc. deben sentirse distintos.
+
+Cursor debe diseñar el sistema de plantillas/modificadores para producir decenas de resultados posibles sin escribir miles de escenas manuales inconexas.
+
+### CURSOR: CONSOLIDADO 2.4 — variedad misiones + expediciones procedurales
+
+#### Misiones: no “build checklist”
+| Capa | Rol | Ejemplos (no lista cerrada) |
+|------|-----|-------------------------------|
+| Guía (pocas) | Enseñar 1 mecánica | huerto+staff; primera expedición |
+| Contextual | Resolver necesidad actual | comida 2d; cobertura frío; reparación N |
+| Radio/historia | Sorpresa | SOS, trueque, rumor, mapa oral, hermano perdido |
+| Crisis | Recuperación | “restablece perímetro”; “contén brote” |
+| Progresión | Era / victoria | checks infra; final_chain variantes |
+| Ambigua | Tradeoff | ayudar forasteros vs riesgo; racionar vs estabilidad |
+
+Generación: Director elige **familia × peso × memoria × era**; instancia con parámetros (lugar, recurso, timer). Antirrepetición fuerte en guías.
+
+#### Expediciones: motor de plantillas
+Cada salida combina:
+
+```
+landmarkType × placeState × encounter × playerChoice × outcome × aftermath
+```
+
+**placeState:** pristine / looted / infested / contested / collapsed / radio_tagged  
+**encounter (ejemplos por tipo):**  
+- supermercado: estantes, trampa, grupo hostil, familia atrapada, almacén trasero  
+- farmacia: botiquín sellado, contagio, saqueador herido, lab casero  
+- hospital: ala segura/ala roja, generador muerto (flavor, no sistema eléctrico), pacientes, horda interna  
+- gasolinera: surtidor, coche abandonado (fuel/vehiculo), emboscada  
+- comisaría: armería, alarma, preso, francotirador abstracto  
+- ferretería: herramientas→metal/wood, derrumbe, mapa local  
+
+**playerChoice:** entrar / rodear / ayudar / retirarse / usar ammo / gastar meds  
+**outcome:** loot table ±, herida, muerte, +pop, flag memoria, daño explorador  
+**aftermath:** landmark state cambia; posible misión secuela; relación contacto
+
+Objetivo: **decenas de combinaciones** por tipo sin escribir 50 guiones lineales. Supermercado ≠ farmacia en pesos y encuentros.
+
+Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/riesgo antes de salir.
+
 ---
 
 # 21. OBJETIVOS, ALERTAS Y AYUDA
@@ -973,7 +1180,7 @@ Director + necesidades + era. Recompensa: recursos, XP explorador, estabilidad, 
 ## 21.2 Ejemplos de alertas
 
 - “Comida para 2 días”  
-- “Frío en 3 días — cobertura 18/27”  
+- “Frío en 3 días — ~8 madera/día · reserva 4 días”  
 - “Explorador herido 3 días”  
 - “Movimiento infectado al norte”  
 - “Podrías construir enfermería”  
@@ -996,7 +1203,7 @@ Sobrevivir 7 / 30 / 100 días; primer invierno; crisis y recuperación.
 5 / 15 landmarks; controlar 8 zonas; explorador nivel máx.
 
 ### Construcción
-10 / 25 edificios; HQ L3; red energética.
+10 / 25 edificios; HQ L3; clínica operativa.
 
 ### Defensa
 Repeler 5 ataques; sobrevivir horda; bunker.
@@ -1018,7 +1225,7 @@ Nombrar explorador de cierta forma; día tranquilo 10 seguidos; etc.
 | 0 | Sobrevivir | food/water/refugio | farm, well, explore cercano |
 | 1 | Estabilizar | defensa, stock, vivienda | research, radio, storage, torres |
 | 2 | Expandir | territorio, sanidad, vehículos | greenhouse, garage, clinic |
-| 3 | Consolidar | energía, hordas, logística | solar, bunker, facciones ligeras |
+| 3 | Consolidar | hordas, logística, reparación | bunker, vehículos, facciones ligeras |
 | 4 | Recuperar | estabilización regional | victoria, endless |
 
 Unlock por indicadores (pop, control, research, infra), no solo día.
@@ -1042,11 +1249,11 @@ Unlock por indicadores (pop, control, research, infra), no solo día.
 | al cumplir indicadores | Necesita eficiencia / unlocks | Banco técnico disponible | Quiere insulation/raciones… | research | — |
 | tras 1ª presión combate o stock | Info del mapa incompleta | Radio / rumores | Quiere misiones/señales | radio, misiones | — |
 | pop≥10 + control | Un explorador no basta | Slot 2 disponible | Quiere paralelizar rutas | 2º explorador | — |
-| 1ª estación dura avisada | Frío/calor en Y días | Alerta cobertura X/N | Quiere casas aisladas / cisterna / fuel | clima como arco | victoria |
-| heridos acumulados | Cola de curación | “camas X/Y” | Quiere enfermería | sanidad | — |
-| rutas lejos / fuel | A pie es lento/arriesgado | Garage/tech | Quiere vehículo | vehículos | — |
-| clínica/lab offline | Edificios avanzados flojos | “sin energía” | Quiere generador/solar | energía | — |
-| amenaza alta mid | Oleadas | Aviso amenaza | Quiere torres/ammo/búnker | hordas escaladas | — |
+| 1ª estación dura avisada | Frío/calor en Y días | Alerta madera/día + cobertura | Quiere casas aisladas / cisterna / madera | clima como arco | victoria |
+| heridos o brote | Cola sanitaria | “camas X/Y” / brote | Quiere enfermería + staff | sanidad | — |
+| rutas lejos | A pie lento | Garage/tech | Quiere vehículo (fuel) | vehículos | — |
+| post-ataque | Edificios dañados | “N por reparar” | Quiere repair + fortify | daño/reparación | — |
+| amenaza alta mid | Oleadas | Aviso amenaza | Quiere torres/ammo/búnker | hordas | — |
 | checklist visible | Falta región estable | Objetivos victoria | Quiere cerrar arco | crisis final → victoria → endless | — |
 
 **Regla:** si un sistema aparece **sin** problema previo ni info, es un error de diseño aunque el día “toque”.
@@ -1104,11 +1311,13 @@ Si en playtests no aportan, reducir a flags de evento sin UI dedicada.
 Requisitos conceptuales (todos):
 - territorio significativo controlado  
 - población estable elevada  
-- food/water sostenibles  
-- clínica/hospital  
-- energía estable  
-- defensa avanzada  
+- food/water sostenibles (producción + reservas)  
+- clínica / hospital menor operativo  
+- defensa avanzada (perímetro + ammo path)  
+- infraestructura de recuperación (capacidad de reparación / HQ alto)  
 - sobrevivir **crisis final adaptativa** (variantes por semilla)  
+
+**Sin requisito de electricidad.**  
 
 Luego: **Continuar endless** o nueva partida.
 
@@ -1161,16 +1370,55 @@ Una acción → una explicación. Sin cascadas de Continuar.
 | Acción | Feedback |
 |--------|----------|
 | Construir | aparece en mapa + toast + log |
-| Staff | producción preview en ficha |
-| Avanzar día | brief |
+| Staff +/− | producción/efecto preview en ficha |
+| Avanzar día | brief (incl. madera calefacción si frío) |
 | Explorar | ruta + estado away |
-| Retorno | card resultado |
+| Retorno | card resultado (encuentro variante) |
 | Herida/muerte | card + rail explorador |
-| Ataque | card + daños visibles |
+| Brote | alerta fases + semáforo ambiental |
+| Ataque | card + daños visibles edificios |
+| Reparar | HP visual sube; coste cobrado |
 | Tech | toast + unlock lista |
 | Era | banner |
 | Logro | badge discreto |
 | Victoria | pantalla ritual |
+
+---
+
+# 32B. VIDA VISUAL (SIN 100 UNIDADES)
+
+### CURSOR: CONSOLIDADO 2.4 — movimiento y estados
+
+#### Principio
+La colonia **se ve viva**, pero la población sigue siendo **agregada**. Figuras ambientales = theater, no Sims.
+
+#### Render
+- Cap de figuras en pantalla (p. ej. máx 12–20 sprites) proporcionales a pop/actividad.
+- Pathing simple edificio↔edificio / punto de trabajo; sin IA estratégica.
+- Sin nombres, sin selección individual de colonos.
+
+#### Semáforo
+| Color | Significado agregado |
+|-------|----------------------|
+| Verde | normal |
+| Ámbar | cansancio / enfermos leves / frío empezando |
+| Rojo | brote grave / ataque / exposición crítica |
+
+#### Por situación (feedback mínimo)
+| Situación | Qué se ve |
+|-----------|-----------|
+| Trabajo | figuras van a farm/well/taller según buildings staffed |
+| Construcción | polvo/animación en parcela; workers “de obra” |
+| Enfermedad | más ámbar/rojo cerca de edificios health; menos tráfico productivo |
+| Reparación | chispas/andamiaje en edificio dañado |
+| Clima frío | aliento/humo chimenea abstracto; menos movimiento outdoor |
+| Calor | haze; menos movimiento mediodía |
+| Ataque | flash perímetro; daño visual en builds; figuras a refugio |
+| Explorador | silueta sale por ruta; icono away; vuelve con informe |
+| Calefacción | brief “−N madera”; chimeneas activas si hay consumo |
+
+#### Conexiones
+Staffing §10 ↔ brotes §12 ↔ daño §13 ↔ clima §11 ↔ arte §33.
 
 ---
 
@@ -1234,14 +1482,20 @@ Resumen: construcción por **bloques con HUMAN_GATE**; primero experiencia D1 vi
 
 # 38. CHANGELOG DE DISEÑO
 
-## 2.3 (2026-08-15) — ronda notas CHATGPT → respuestas CURSOR
-- Cadena climática vivienda→aviso→fuel→salud cerrada (§4, §11).
+## 2.3 (2026-08-15) — ronda Neni + ChatGPT → consolidación pendiente Cursor
+- Calefacción de invierno: **madera automática**, no fuel ni toggle por casa; exposición al frío progresiva y enfermedad probabilística (§4/§11).
 - Pozo = fuente; cisterna = reserva/soft-cap/lluvia (§7.3).
-- Energía = capacidad para edificios avanzados; calefacción ≠ electricidad (§7.8).
+- Propuesta de **eliminar electricidad completa de v1** salvo dependencia jugable imprescindible (§7.8).
+- Radio + Centro de Expediciones se mantienen con roles distintos (§7.5).
 - Mejoras de colonia = research; taller no es menú paralelo (§8).
+- Número de tecnologías no se fija por cuota; research con trabajadores por edificio y máximo pequeño en laboratorio avanzado (§18).
+- Huerto básico no se bloquea por investigación; agricultura mejora/desbloquea variantes avanzadas (§18).
 - Curva por causalidad problema→info→deseo; días solo brújula (§24).
-- Test de deseo por tech; limpieza unlocks huérfanos (§18).
-- Notas `CURSOR: PROPUESTA / DUDA` pendientes de Neni/ChatGPT.
+- Gestión `[−]/[+]` por edificio reforzada; habitantes ambientales animados sin individualización (§10).
+- Enfermedades/plagas y eventos por pesos/estado, sin calendario fijo (§12/§19).
+- Daño y reparación visibles de edificios tras hordas/eventos (§13).
+- Misiones y expediciones con variedad combinatoria/antirrepetición, no checklist lineal (§20).
+- Pendiente Cursor: revisar impacto global, especialmente referencias a energía/fuel y árbol research.
 
 ## 2.2 (2026-08-15)
 - Esta biblia incorpora **el flujo de trabajo Cursor ↔ ChatGPT** (§41–§42) como contrato, no como nota aparte.
@@ -1280,6 +1534,21 @@ Sí, si: Director rítmico, exploración con peso, invierno como arco, pérdida 
 Huecos cubiertos: estaciones, misiones, logros, vivienda climática, curva D1–endgame, plan técnico separado.
 
 ---
+
+## Auditoría coherencia 2.4 (post-consolidación Ronda 2)
+
+| Sistema | ¿Para qué? | ¿Duplica? | ¿Si lo quitamos? | Veredicto |
+|---------|------------|-----------|------------------|-----------|
+| Calefacción madera | Tradeoff builds vs calor | No (no leña aparte) | Invierno sin tensión | **Keep** |
+| Electricidad | — | Inventaba demanda | Casi nada del núcleo | **Eliminada** |
+| Fuel | Vehículos lejanos | No con madera | Solo a pie late | **Keep acotado** |
+| Pozo/cisterna | Fuente vs reserva | No | Un solo agua plano | **Keep** |
+| Radio/Centro | Historias vs logística | Evitado con roles A | Menos variedad/claridad | **Keep** |
+| Research+workers | Progresión deseable | No (≠ edificios) | Sin arco mid | **Keep** |
+| Brotes | Crisis staffing | No calendario | Menos imprevisión | **Keep** |
+| Daño/repair | Consecuencia ataques | No craft piezas | Ataques sin huella | **Keep** |
+| Vida ambiental | Feedback vivo | No 100 NPCs | Mapa estático | **Keep** |
+| Plantillas expedición | Variedad | No misiones-build | Repetición | **Keep** |
 
 # 40. DECISIONES QUE CAMBIAN EL DISEÑO ANTERIOR
 
@@ -1629,10 +1898,10 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
 | ID JSON | Decisión 2.1 |
 |---------|--------------|
 | command | **Fusionar** en HQ L2+ (no edificio separado obligatorio) |
-| wall / power_hub | Referenciados por research legado; **no** en buildings — crear o quitar unlock |
-| insulated_house | **AÑADIR** (no existe aún en JSON) |
+| wall / power_hub / generator / solar | **Eliminados v1** |
+| insulated_house | **AÑADIR** |
 | block_reinforced | Mejora opcional era 3 |
-| pieces/tools | **Eliminar** como inventario |
+| pieces/tools / energía | **Eliminados** |
 
 ## G.3 Research actual en código
 
@@ -1891,8 +2160,7 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
     "minStability": 55,
     "minEra": 3,
     "needHospital": true,
-    "needEnergy": true,
-    "needDefense": 40,
+        "needDefense": 40,
     "finalCrisisSurvived": true
   },
   "quietNightChance": 0.32,
@@ -1974,8 +2242,7 @@ No es un guion fijo. Es la **curva de sistemas**: qué puede ocurrir, qué suele
 - Era 2–3.
 
 ## H.9 Día 60–75
-- Energía (generador/solar).
-- Búnker / doctrina perímetro.
+- Búnker / doctrina perímetro / reparación post-crisis.
 - Logística (van), convoy.
 - Catástrofes avisadas.
 - Población 30–50.
@@ -2040,14 +2307,14 @@ Números orientativos (calibración posterior). Protección climática solo vivi
 - Capacidad 10–12 · protección 3 · era 3 · coste alto.
 
 ## I.3 Resto del catálogo activo
-Contrato común para productivos (farm, well, greenhouse, cistern, sawmill, scrapyard, workshop, kitchen, mech_shop, storage, medkit, infirmary, clinic, barricade, fence, watchtower, armory, bunker, radio, expedition_center, garage, generator, solar, tech_bench, lab):
+Contrato común para productivos (farm, well, greenhouse, cistern, sawmill, scrapyard, workshop, kitchen, mech_shop, storage, medkit, infirmary, clinic, barricade, fence, watchtower, armory, bunker, radio, expedition_center, garage, tech_bench, lab):
 1. Sin workers → producción 0 (si aplica).
 2. Staff en ficha del edificio (modelo único §10).
 3. Soft-cap stock vía almacenes.
 4. Daño en ataques → HP/eficiencia ↓ hasta reparar (abstracto o rebuild).
 5. Baseline numérico = G.1 hasta calibración.
 
-**Fuera del catálogo activo v1:** `command` (fusionado HQ), `wall`/`power_hub` huérfanos hasta decisión explícita.
+**Fuera del catálogo activo v1:** `command`, `generator`, `solar`, `wall`, `power_hub`.
 
 ---
 
@@ -2116,7 +2383,7 @@ Campos schema: id, pattern, title, desc, status, progress, expiresDay, rewards, 
 `ach_first_barricade`, `ach_repel_1`, `ach_repel_5`, `ach_messy_survive`, `ach_horde`, `ach_bunker`, `ach_zero_ammo_win`, `ach_perimeter_clean`
 
 ### Tech / industria
-`ach_first_research`, `ach_branch_complete`, `ach_generator`, `ach_solar`, `ach_first_vehicle`, `ach_van_route`
+`ach_first_research`, `ach_branch_complete`, `ach_first_vehicle`, `ach_van_route`, `ach_winter_wood`, `ach_outbreak_contained`
 
 ### Eventos / misiones
 `ach_hard_choice`, `ach_trade`, `ach_radio_mission`, `ach_failed_rescue`, `ach_calm_10`, `ach_prepared_catastrophe`
@@ -2190,11 +2457,8 @@ Cada tech: **id · nombre · rama · req · días · coste · efecto (debe aplic
 18. `field_surgery` — Cirugía de campaña — triage — 6d — — heridos explorador −1 día  
 19. `public_health` — Salud pública — antibiotics — 7d — — unlock clínica avanzada / victoria path  
 
-## Energía (4)
-20. `basic_generator` — Generación básica — — — 4d — fuel/metal — unlock generator eficiencia  
-21. `fuel_discipline` — Disciplina de fuel — basic_generator — 4d — — −consumo fuel  
-22. `solar_array` — Captación solar — basic_generator — 6d — — unlock/bonus solar  
-23. `power_grid` — Red eléctrica — solar_array — 7d — — demanda edificios cubierta / estabilidad+  
+## Energía
+**ELIMINADA v1** — no techs de generador/solar/power_grid.
 
 ## Exploración / Logística (5)
 24. `scouting` — Exploración sistemática — — — 3d — — −riesgo leve / +info loot  
@@ -2203,7 +2467,7 @@ Cada tech: **id · nombre · rama · req · días · coste · efecto (debe aplic
 27. `vehicle_bay` — Bahía de vehículos — bike_tech + garage — 6d — — unlock car  
 28. `convoy` — Convoy — vehicle_bay — 7d — — unlock van + cargo  
 
-**Total tecnologías definidas: 28.**
+**Total tecnologías canónicas 2.4: ver §18 (~26). Apéndice A histórico parcialmente superseded.**
 
 ---
 
@@ -2268,8 +2532,8 @@ Cada tech: **id · nombre · rama · req · días · coste · efecto (debe aplic
 ## Tecnología / Industria (6)
 47. Primera research  
 48. Rama completa (cualquiera)  
-49. Generador online  
-50. Solar online  
+49. Invierno con madera suficiente  
+50. Brote contenido  
 51. Primer vehículo  
 52. Furgoneta en ruta  
 
@@ -2333,7 +2597,8 @@ Calibración vía simulador. Orden de magnitud:
 | workshop | 12 | 10 | — | — |
 | infirmary | 10 | 8 | medicine 2 | — |
 | watchtower | 10 | 8 | — | — |
-| generator | 8 | 14 | fuel 2 | — |
+| generator | ~~eliminado v1~~ | — | — | — |
+| solar | ~~eliminado v1~~ | — | — | — |
 
 Producción base (a plena plantilla): farm food 5, well water 5, etc. (ajustar en balance).
 
@@ -2601,20 +2866,25 @@ Cuando una fase pide revisión visual:
 | Implementación de juego | **PARADA** hasta ZZ-001 |
 | ZZ-001 | PENDIENTE DE REVISIÓN |
 
-## 41.13 Tablero ronda de revisión diseño (ChatGPT ↔ Cursor)
+## 41.13 Tablero revisión diseño
 
-| Nota CHATGPT | Estado Cursor | Pendiente humano |
-|--------------|---------------|------------------|
-| Cadena climática vivienda | **Aplicada** (§4) | Toggle calefacción vs automático |
-| Pozo/cisterna | **Aplicada** (§7.3) | — |
-| Cadena energética | **Aplicada** (§7.8) | ¿Energía en torres? (rec: NO) |
-| Taller/mejoras duplicadas | **Aplicada** (§8) | — |
-| Clima como cadena | **Aplicada** (§11) | — |
-| Desbloqueos research | **Aplicada** (§18) | ¿28 techs o 20 densas? |
-| Causalidad curva | **Aplicada** (§24) | — |
-| *(Cursor propio)* Radio vs centro expediciones | **Propuesta** (§7.5) | A / B / C |
+| Tema | Estado 2.4 |
+|------|------------|
+| Calefacción madera auto | **CONSOLIDADO** |
+| Sin electricidad v1 | **CONSOLIDADO** |
+| Radio + Centro | **CONSOLIDADO** |
+| Research + workers | **CONSOLIDADO** (~26 techs) |
+| Brotes probabilísticos | **CONSOLIDADO** |
+| Daño/reparación | **CONSOLIDADO** |
+| Vida ambiental | **CONSOLIDADO** §32B |
+| Misiones/expediciones plantillas | **CONSOLIDADO** |
+| Director sin cadencia fija | **CONSOLIDADO** |
 
-**ZZ-001 sigue NO aprobada** hasta que ChatGPT marque el GAME_MASTER tras esta ronda.
+**CURSOR: PROPUESTA / DUDA restantes (menores):**
+1. ¿`quarantine_drill` como tech con tradeoff −prod? (rec: sí, opcional).  
+2. ¿HQ L2/L3 debe seguir costando fuel o solo wood/metal? (rec: quitar fuel del coste HQ; fuel solo vehículos).
+
+**ZZ-001 sigue NO aprobada** hasta que ChatGPT marque el GAME_MASTER tras consolidación 2.4.
 
 ---
 

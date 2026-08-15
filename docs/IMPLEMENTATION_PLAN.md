@@ -1,3 +1,5 @@
+> **ERRATA 2.4 (obligatoria):** Electricidad eliminada de v1. Fases/techs/edificios `generator`/`solar`/`power_*`/`needEnergy` quedan **INVALIDADAS o a reescribir** como reparación/clínica/HQ. Calefacción = madera. Research = workers en banco/lab. Brotes/daño/vida visual/misiones plantilla = nuevos requisitos de diseño antes de implementar.
+
 # Zona Zero — Plan de implementación técnico (Diseño 2.1)
 
 **Estado:** Contrato de ejecución — **NO IMPLEMENTAR** hasta que ChatGPT apruebe GAME_MASTER + este plan (fase ZZ-001).  
@@ -2138,7 +2140,7 @@ ZZ-001 (GATE diseño)
 
 ## Q · Arte y audio
 
-### ZZ-160 — Assets edificios faltantes
+### ZZ-160 — Assets edificios faltantes *(revisar: sin solar assets obligatorios)*
 
 | Campo | Valor |
 |-------|-------|
