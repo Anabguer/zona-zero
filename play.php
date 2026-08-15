@@ -24,8 +24,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=35" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=35" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=36" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=36" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -93,8 +93,24 @@ $base = zz_public_base();
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Continuar</button>
     </div>
 
-    <!-- Exploradores: rail compacto overlay -->
+    <!-- Exploradores: rail compacto overlay (móvil); en desktop van al panel -->
     <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
+
+    <!-- ZZ-014: panel lateral desktop (mundo + panel; sin vacío) -->
+    <aside id="zz-desk-panel" class="zz-desk-panel" hidden aria-label="Panel colonia">
+      <header class="zz-desk-panel__head">
+        <strong id="zz-desk-colony">Refugio</strong>
+        <span id="zz-desk-day">Día 1</span>
+      </header>
+      <button type="button" class="zz-desk-panel__pop" id="zz-desk-pop" title="Población">
+        <span class="zz-desk-panel__pop-label">Población</span>
+        <strong id="zz-desk-pop-val">0/0</strong>
+      </button>
+      <ul class="zz-desk-panel__res" id="zz-desk-res" aria-label="Recursos"></ul>
+      <h3 class="zz-desk-panel__h">Exploradores</h3>
+      <div id="zz-desk-explorers" class="zz-desk-panel__ex"></div>
+      <p class="zz-desk-panel__tip" id="zz-desk-tip"></p>
+    </aside>
 
     <!-- Sheet contextual (edificio / zona / construir) -->
     <aside id="zz-sheet" class="zz-sheet" hidden>
@@ -142,7 +158,7 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=35';
+    import { bootGame } from './js/main.js?v=36';
     bootGame({
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,

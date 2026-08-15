@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness bloque 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=35" />
-  <link rel="stylesheet" href="../css/world.css?v=35" />
+  <link rel="stylesheet" href="../css/game.css?v=36" />
+  <link rel="stylesheet" href="../css/world.css?v=36" />
   <script type="importmap">
   {
     "imports": {
@@ -78,6 +78,20 @@
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Continuar</button>
     </div>
     <div class="zz-explorer-rail" id="zz-explorer-rail"></div>
+    <aside id="zz-desk-panel" class="zz-desk-panel" hidden aria-label="Panel colonia">
+      <header class="zz-desk-panel__head">
+        <strong id="zz-desk-colony">Refugio</strong>
+        <span id="zz-desk-day">Día 1</span>
+      </header>
+      <button type="button" class="zz-desk-panel__pop" id="zz-desk-pop" title="Población">
+        <span class="zz-desk-panel__pop-label">Población</span>
+        <strong id="zz-desk-pop-val">0/0</strong>
+      </button>
+      <ul class="zz-desk-panel__res" id="zz-desk-res" aria-label="Recursos"></ul>
+      <h3 class="zz-desk-panel__h">Exploradores</h3>
+      <div id="zz-desk-explorers" class="zz-desk-panel__ex"></div>
+      <p class="zz-desk-panel__tip" id="zz-desk-tip"></p>
+    </aside>
     <aside id="zz-sheet" class="zz-sheet" hidden>
       <div class="zz-sheet__handle"></div>
       <button type="button" class="zz-sheet__close" id="zz-sheet-close">×</button>
@@ -113,7 +127,7 @@
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=35';
+    import { bootGame } from '../js/main.js?v=36';
     const q = new URLSearchParams(
       (location.hash || '').replace(/^#/, '') || location.search.replace(/^\?/, '')
     );

@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019 + **019A** + **ZZ-012 APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-013 PENDIENTE DE REVISIÓN**. · No ZZ-014. No deploy.
+**Estado global:** ZZ-016…019A + **ZZ-012** + **ZZ-013 APROBADAS**. · Docs **2.8**. · **ZZ-014 PENDIENTE DE REVISIÓN (HUMAN_GATE)**. · No ZZ-015. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -251,7 +251,33 @@ OK. **Cerrada formalmente. Siguiente: ZZ-013.**
 IMPLEMENTATION_PLAN 2.8 · B · HUMAN_GATE NO · deps ZZ-012 + ZZ-019 + ZZ-019A
 
 ## ESTADO CURSOR
-COMPLETADA (código + evidencias).
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA
+
+## APROBACIÓN FINAL CHATGPT
+SÍ · OK PARA CONTINUAR
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Comida/Agua/Madera legibles en landscape; sin fuel/ammo/Au/Gu en HUD D1.  
+Recursos secundarios = contextuales (no saturar barra).  
+Evidencias archivadas en `docs/review-archive/zz-013/`.
+
+## COMMIT
+`8f57a8b` · docs `d4e3c6d`
+
+## Sync Drive/GitHub
+OK. **Cerrada. Siguiente: ZZ-014.**
+
+---
+
+# FASE ZZ-014 — Desktop 1920 D1 (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-013
+
+## ESTADO CURSOR
+COMPLETADA (código + evidencias). **PARADO HUMAN_GATE** — no ZZ-015.
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -260,26 +286,26 @@ PENDIENTE DE REVISIÓN
 NO
 
 ## CAMBIOS
-- `js/hud-resources.js`: comida/agua/madera siempre en HUD D1; nunca fuel/ammo/gold (Au/Gu).
-- `js/main.js`: usa `hudResourceKeys`; labels Comida/Agua/Madera.
-- `css/world.css`: nombres visibles en landscape (corrige deuda ZZ-016 chips sin nombre).
-- Smoke + review 7 tomas.
-- Cache `?v=35`.
+- Panel lateral desktop (≥1100px): colonia, población, recursos, exploradores, tip.
+- Mundo inset a la izquierda (no full-bleed vacío); dock centrado en columna mundo.
+- Sheet contextual ocupa la misma columna del panel.
+- Móvil landscape sin panel (rail explorador intacto).
+- Cache `?v=36`.
 
 ## AUTOCRÍTICA
-1. ¿Comida/agua/madera legibles en 844 landscape? Sí (nombre bajo el valor).
-2. ¿Sin Au/Gu/fuel/ammo en barra? Sí.
-3. Metal solo cuando build/guía off/D2+ — OK supervivencia D1.
+1. ¿Panel + mundo sin vacío a 1920? Sí.
+2. ¿Móvil intacto? Sí (panel hidden &lt;1100).
+3. ¿Ficha no pelea con panel? Sheet reemplaza columna derecha.
 
 ## EVIDENCIA
-`docs/review/` · Drive Review\ · `review-contact-sheet.jpg`  
-Archivo ZZ-012: `docs/review-archive/zz-012/`
+`docs/review/` (8 + contact sheet) · Drive Review\  
+Archivo ZZ-013: `docs/review-archive/zz-013/`
 
 ## COMMIT
-`8f57a8b`
+_(tras commit)_
 
 ## Sync Drive/GitHub
-OK · Review/ · **No ZZ-014** hasta revisión. No deploy.
+Pendiente.
 
 ---
 
@@ -375,8 +401,8 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-013 | HUD recursos D1 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-013 | HUD recursos D1 | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-014 | Desktop 1920 D1 | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-020 | Brief diario ritual | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-021 | Staffing por edificio canónico | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

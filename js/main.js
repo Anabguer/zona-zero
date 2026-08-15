@@ -182,6 +182,8 @@ function openSheet(html) {
   if (!sheet || !body) return;
   body.innerHTML = html;
   sheet.hidden = false;
+  document.body.classList.add('zz-sheet-open');
+  syncDeskLayout();
   body.querySelectorAll('[data-thumb]').forEach((el) => {
     const type = el.getAttribute('data-thumb');
     try {
@@ -227,6 +229,8 @@ function openSheet(html) {
 function closeSheet() {
   const sheet = $('zz-sheet');
   if (sheet) sheet.hidden = true;
+  document.body.classList.remove('zz-sheet-open');
+  syncDeskLayout();
 }
 
 function handleSheetAction(action, btn) {
@@ -873,6 +877,115 @@ function fmtRes(n) {
   return String(v);
 }
 
+/** ZZ-014: layout escritorio = mundo + panel lateral (no vacío). */
+function isDeskLayout() {
+  return typeof window !== 'undefined' && window.matchMedia('(min-width: 1100px)').matches;
+}
+
+function syncDeskLayout() {
+  const on = isDeskLayout();
+  document.body.classList.toggle('zz-desk-layout', on);
+  const panel = $('zz-desk-panel');
+  if (panel) panel.hidden = !on;
+}
+
+function paintDeskPanel() {
+  const panel = $('zz-desk-panel');
+  if (!panel || panel.hidden || !state) return;
+  const pop = state.population;
+  const cap = housingCapacity(state, content.buildings);
+  if ($('zz-desk-colony')) $('zz-desk-colony').textContent = state.colonyName || 'Refugio';
+  if ($('zz-desk-day')) $('zz-desk-day').textContent = `Día ${state.day}`;
+  if ($('zz-desk-pop-val')) $('zz-desk-pop-val').textContent = `${pop.total}/${cap}`;
+  const resEl = $('zz-desk-res');
+  if (resEl) {
+    resEl.innerHTML = '';
+    hudResourceKeys(state).forEach((k) => {
+      const li = document.createElement('li');
+      const label = RES_LABEL_UI[k] || k;
+      const img = document.createElement('img');
+      img.src = artUrl(RES_ART[k]) || '';
+      img.alt = '';
+      img.width = 16;
+      img.height = 16;
+      const name = document.createElement('span');
+      name.textContent = label;
+      const strong = document.createElement('strong');
+      strong.textContent = fmtRes(state.resources[k] || 0);
+      li.appendChild(img);
+      li.appendChild(name);
+      li.appendChild(strong);
+      resEl.appendChild(li);
+    });
+  }
+  const tip = $('zz-desk-tip');
+  if (tip) {
+    const coach = coachMessage(state);
+    const obj = currentObjective(state, content);
+    tip.textContent =
+      coach ||
+      obj?.text ||
+      'El mundo está a la izquierda. Usá el panel para población y exploradores.';
+  }
+}
+
+function fillExplorerHost(host) {
+  if (!host || !state || !content) return;
+  host.innerHTML = '';
+  const slots = explorerSlotsUnlocked(state, content.balance);
+  livingExplorers(state).forEach((e) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className =
+      'zz-ex-card' +
+      (state.selectedExplorerId === e.id ? ' is-selected' : '') +
+      (e.status === 'away' ? ' is-away' : '') +
+      (e.status === 'ready' ? ' is-ready' : '') +
+      (e.status === 'dead' ? ' is-dead' : '');
+    const img = document.createElement('img');
+    img.className = 'zz-ex-portrait';
+    img.src = portraitArtUrl(e);
+    img.alt = '';
+    img.width = 40;
+    img.height = 40;
+    btn.appendChild(img);
+    const meta = document.createElement('div');
+    meta.innerHTML = `<div class="zz-ex-card__name">${escapeHtml(e.name)}</div>
+      <div class="zz-ex-card__st">${e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : 'Herido'} · Nv.${e.level || 1}</div>`;
+    btn.appendChild(meta);
+    btn.addEventListener('click', () => {
+      sfx.click?.();
+      openExplorerSheet(e.id);
+    });
+    host.appendChild(btn);
+  });
+  if (livingExplorers(state).length < slots) {
+    const tip = document.createElement('button');
+    tip.type = 'button';
+    tip.className = 'zz-ex-card';
+    tip.style.opacity = '0.7';
+    tip.innerHTML = `<div></div><div><div class="zz-ex-card__name">Plaza libre</div><div class="zz-ex-card__st">Reclutar · ${livingExplorers(state).length}/${slots}</div></div>`;
+    tip.addEventListener('click', () => {
+      sfx.click?.();
+      openMoreSheet();
+    });
+    host.appendChild(tip);
+  }
+}
+
+function paintExplorers() {
+  const desk = isDeskLayout();
+  const rail = $('zz-explorer-rail');
+  const deskEx = $('zz-desk-explorers');
+  if (desk) {
+    if (rail) rail.innerHTML = '';
+    fillExplorerHost(deskEx);
+  } else {
+    if (deskEx) deskEx.innerHTML = '';
+    fillExplorerHost(rail);
+  }
+}
+
 function paintHud() {
   const pop = state.population;
   const cap = housingCapacity(state, content.buildings);
@@ -950,51 +1063,6 @@ function paintHud() {
   }
   const popLabel = $('zz-pop-label');
   if (popLabel) popLabel.textContent = 'hab.';
-}
-
-function paintExplorers() {
-  const rail = $('zz-explorer-rail');
-  if (!rail) return;
-  rail.innerHTML = '';
-  const slots = explorerSlotsUnlocked(state, content.balance);
-  livingExplorers(state).forEach((e) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className =
-      'zz-ex-card' +
-      (state.selectedExplorerId === e.id ? ' is-selected' : '') +
-      (e.status === 'away' ? ' is-away' : '') +
-      (e.status === 'ready' ? ' is-ready' : '') +
-      (e.status === 'dead' ? ' is-dead' : '');
-    const img = document.createElement('img');
-    img.className = 'zz-ex-portrait';
-    img.src = portraitArtUrl(e);
-    img.alt = '';
-    img.width = 40;
-    img.height = 40;
-    btn.appendChild(img);
-    const meta = document.createElement('div');
-    meta.innerHTML = `<div class="zz-ex-card__name">${escapeHtml(e.name)}</div>
-      <div class="zz-ex-card__st">${e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : 'Herido'} · Nv.${e.level || 1}</div>`;
-    btn.appendChild(meta);
-    btn.addEventListener('click', () => {
-      sfx.click?.();
-      openExplorerSheet(e.id);
-    });
-    rail.appendChild(btn);
-  });
-  if (livingExplorers(state).length < slots) {
-    const tip = document.createElement('button');
-    tip.type = 'button';
-    tip.className = 'zz-ex-card';
-    tip.style.opacity = '0.7';
-    tip.innerHTML = `<div></div><div><div class="zz-ex-card__name">Plaza libre</div><div class="zz-ex-card__st">Reclutar · ${livingExplorers(state).length}/${slots}</div></div>`;
-    tip.addEventListener('click', () => {
-      sfx.click?.();
-      openMoreSheet();
-    });
-    rail.appendChild(tip);
-  }
 }
 
 function focusBuildingCamera(id) {
@@ -1120,8 +1188,10 @@ function paint() {
   syncLaborFromColony(state, content);
   if (state.uiMode === 'build' && state.buildMode) ensureBuildGhost(state);
   syncGhostValidity();
+  syncDeskLayout();
   paintHud();
   paintExplorers();
+  paintDeskPanel();
   paintObjective();
   paintCoach();
   paintModeBanner();
@@ -1513,6 +1583,18 @@ function bindChrome() {
   $('zz-open-pop')?.addEventListener('click', () => {
     sfx.click?.();
     openPopulationSheet();
+  });
+  $('zz-desk-pop')?.addEventListener('click', () => {
+    sfx.click?.();
+    openPopulationSheet();
+  });
+  window.addEventListener('resize', () => {
+    const was = document.body.classList.contains('zz-desk-layout');
+    syncDeskLayout();
+    if (was !== document.body.classList.contains('zz-desk-layout') && state) {
+      clampCamera(state);
+      paint();
+    }
   });
   $('zz-open-build')?.addEventListener('click', () => {
     sfx.click?.();

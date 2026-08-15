@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 **APROBADO** (016–019A). **ZZ-012 APROBADA**. **ZZ-013** PENDIENTE DE REVISIÓN. No ZZ-014 sin revisión.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012/013 APROBADAS**. **ZZ-014** HUMAN_GATE PENDIENTE DE REVISIÓN. No ZZ-015.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -80,7 +80,8 @@
 | Caminos / muros | Solo visual/estructura ahora; mecánicas futuras si sistémicas (§9.4) — **sin fase inventada** |
 | ZZ-019 | **APROBADA** — no reabrir ghost/✓/semilibre |
 | ZZ-012 | **APROBADA** · tips 2.8 |
-| ZZ-013 | HUD comida/agua/madera · PENDIENTE DE REVISIÓN |
+| ZZ-013 | **APROBADA** · HUD comida/agua/madera |
+| ZZ-014 | Desktop panel+mundo · **HUMAN_GATE PENDIENTE** |
 | Integración arte edificios | Deuda artística no bloqueante |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
