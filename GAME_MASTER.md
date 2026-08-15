@@ -1,5 +1,7 @@
 # ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
+> **SYNC VERIFY GAME_MASTER** · stamp=2026-08-15 19:41:46 · sha256_16=E699961EE3D959BF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
+
 **Versión de diseño:** 2.5 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
 **Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana (ZZ-001)  
 **Fecha:** 2026-08-15  

@@ -1,5 +1,7 @@
 # Zona Zero — Plan de implementación técnico (GAME_MASTER 2.5)
 
+> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-15 19:41:46 · sha256_16=BDBEEACC6D1B5B7E · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
+
 **Versión plan:** 2.5  
 **Estado:** Contrato de ejecución — **NO IMPLEMENTAR** hasta ZZ-001 APROBADA (`APROBADA` + `SÍ`).  
 **Biblia:** GAME_MASTER **2.5** (Drive + repo idénticos).  
