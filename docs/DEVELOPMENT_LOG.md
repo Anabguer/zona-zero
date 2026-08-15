@@ -870,7 +870,7 @@ Coach en mundo (§31.4): sin cascada Continuar; una pista (comida→staff→agua
 COMPLETADA
 
 ## COMMIT
-(pendiente)
+`0cf3b70` — feat(ZZ-012)
 
 ## REVISIÓN CHATGPT
 Pendiente — HUMAN_GATE.
