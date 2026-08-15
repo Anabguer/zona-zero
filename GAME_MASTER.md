@@ -1598,17 +1598,12 @@ Detalle exhaustivo de fases/subfases (`ZZ-XXX`), dependencias, tests, HUMAN_GATE
 
 → `docs/IMPLEMENTATION_PLAN.md` (**versión 2.6**) / Drive `ZONA_ZERO_IMPLEMENTATION_PLAN.md`
 
-Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) + experiencia D1 visual; luego sistemas capa a capa; **nunca “MVP rápido”** que salte esta biblia. Gobernanza completa en §41.
-
-→ Drive: `ZONA_ZERO_IMPLEMENTATION_PLAN.md`  
-→ Repo: `docs/IMPLEMENTATION_PLAN.md`
-
 Ejecución y revisiones fase a fase:
 
 → Drive: `ZONA_ZERO_DEVELOPMENT_LOG.md`  
 → Repo: `docs/DEVELOPMENT_LOG.md`
 
-Resumen: construcción por **bloques con HUMAN_GATE**; primero experiencia D1 visual; luego sistemas capa a capa; **nunca “MVP rápido”** que salte esta biblia. Gobernanza completa en §41.
+Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) + experiencia D1 visual; luego sistemas capa a capa; **nunca “MVP rápido”** que salte esta biblia. Gobernanza completa en §41.
 
 ---
 
