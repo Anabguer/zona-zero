@@ -1,5 +1,7 @@
 {
   "saveVersion": 4,
+  "designVersion": "2.5",
+  "laborModel": "per_building",
   "startingPopulation": 3,
   "maxPopulation": 150,
   "startingResources": {
@@ -64,18 +66,47 @@
   "postDisasterProtectionDays": 4,
   "tensionStart": 16,
   "softCapThreatEarlyDays": 10,
-  "ammoDefenseCap": 8,
   "directorMinDay": 1,
   "foodSoftCapDays": 10,
   "resourceOrder": ["food", "water", "wood", "metal", "medicine", "fuel", "ammo"],
   "secondaryResources": ["parts", "tools"],
+  "woodHeating": {
+    "enabled": false,
+    "comment": "Activar en ZZ-043+. Calefacción = madera automática; no fuel.",
+    "woodPerUnprotectedPersonPerSeverity": 0.4,
+    "protectionMitigation": [1, 0.65, 0.35, 0.1],
+    "exposureThresholds": { "amber": 2, "red": 5 },
+    "warnDaysBefore": [1, 2, 3]
+  },
+  "outbreaks": {
+    "enabled": false,
+    "comment": "Activar en ZZ-053+. Sin calendario fijo. quarantine_protocol pasivo.",
+    "noFixedCalendar": true,
+    "archetypes": ["fever_wave", "gut_bug", "wound_infection", "winter_cough", "mystery_radio"]
+  },
+  "buildingDamage": {
+    "enabled": false,
+    "comment": "Activar en ZZ-066+.",
+    "states": ["ok", "damaged", "critical", "destroyed"],
+    "outputMult": { "ok": 1, "damaged": 0.65, "critical": 0.3, "destroyed": 0 }
+  },
+  "ambientLife": {
+    "enabled": false,
+    "comment": "Activar en ZZ-166+.",
+    "maxSprites": 16,
+    "semaphore": ["green", "amber", "red"]
+  },
+  "deprecatedV1": {
+    "electricity": true,
+    "note": "generator/solar/needEnergy/energyDemand fuera de alcance v1 (GM 2.5). Remoción código en fases P0 posteriores."
+  },
   "victory": {
     "minPop": 40,
     "minControlled": 8,
     "minStability": 55,
     "minEra": 3,
     "needHospital": true,
-    "needEnergy": true,
+    "needEnergy": false,
     "needDefense": 40,
     "finalCrisisSurvived": true
   },
