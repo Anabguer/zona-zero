@@ -471,7 +471,7 @@ Ver §4 (`shelter`, `house`, `insulated_house`, `block`, `block_reinforced`).
 | storage | Almacén | soft-cap stock | 0–1 |
 | expedition_center | Centro de expediciones | bonus info/riesgo exploradores | 1 |
 | garage | Garaje | requiere para vehículos ≥ coche | 2 |
-| radio | Radio | misiones/radio events más frecuentes | 1 |
+| radio | Radio | misiones/radio events más frecuentes · **max = 1** (infraestructura única §9.7) | 1 |
 
 **CURSOR: PROPUESTA / DUDA — radio vs centro de expediciones** *(CERRADA Ronda 2 → opción A)*
 
@@ -601,11 +601,11 @@ Desbloqueo por **era** solo como *techo máximo*, nunca como única causa. La ca
 
 # 9. CONSTRUCCIÓN Y MODELO ESPACIAL DE COLONIA
 
-### CURSOR: CONSOLIDADO 2.7 — decisión Neni + ChatGPT (2026-08-15)
+### CURSOR: CONSOLIDADO 2.7 — decisión Neni + ChatGPT (2026-08-15) · cierre decisiones
 
-**Dirección definitiva:** sectores orgánicos + colocación semilibre + snap invisible + colonia > viewport + **móvil landscape**.
+**Dirección definitiva (APROBADA):** sectores orgánicos + colocación semilibre + snap invisible + colonia > viewport + **móvil landscape**.
 
-**Prohibido:** pantalla fija · patio 2×2 · solares preasignados · imagen decorativa a rellenar · GIS visible · editor pixel-perfect · construir con segundo tap accidental.
+**Prohibido:** pantalla fija · patio 2×2 · solares preasignados · imagen decorativa a rellenar · GIS visible · editor pixel-perfect · construir con segundo tap accidental · **macrocuadrícula de sectores** · **capacidad máxima artificial por sector** · **receta universal de recuperación** · **RNG punitivo al final de una recuperación cumplida**.
 
 ## 9.1 Orientación (landscape-first)
 
@@ -636,39 +636,44 @@ HQ (ya), shelter, farm, well, barricade (opcional), storage (si recursos).
 
 El viewport muestra **una parte**. Pan, zoom (pinch), Recentrar. La colonia puede superar claramente una pantalla.
 
-### Sectores orgánicos
+### Sectores orgánicos (geometría del mundo)
 
 - **D1:** solo **Sector Núcleo** recuperado (alrededor del HQ).  
 - El resto del entorno cercano **existe** como mundo (ruinas, coches, escombros, vegetación, calles rotas, obstáculos) — **no** como casillas bloqueadas.  
 - Ampliar = **recuperar sectores colindantes** (gameplay), no “subes de nivel y aparece vacío”.
 
+**Regla dura — no macrogrid:** los sectores **NO** son una cuadrícula/hexes ocultos del mismo tamaño.  
+Cada sector tiene **tamaño, forma y orientación propios** derivados del entorno:
+
+ejemplos: antiguo aparcamiento · parcela entre ruinas · patio industrial · manzana parcial · terreno tras carretera · zona verde abandonada · hueco entre estructuras.
+
+Al mirar la colonia debe percibirse **ciudad/entorno recuperado**, no Civilization con celdas escondidas.
+
+### Capacidad de un sector = física, no cupo
+
+**Prohibido** “este sector admite máximo N edificios”.  
+La capacidad surge de: tamaño · forma · footprints · obstáculos · caminos · separaciones mínimas · edificios ya colocados · suelo no construible.  
+Si caben tres huertos y el jugador asume coste/staffing/mantenimiento → **puede construir tres**.
+
 ### Recuperar territorio (§9.5)
 
 Acción del mundo: «Hemos recuperado esta parte de la ciudad.»  
-Costes vía sistemas **existentes** (sin reintroducir electricidad/fuel/etc.):
+**No** hay una tasa administrativa global (X madera + Y metal + Z días fijos para todos).  
+Cada sector declara **componentes de recuperación** según su situación física (§9.5).  
+Solo sistemas/recursos admitidos por esta biblia (sin reintroducir electricidad, etc.).
 
-| Ingrediente típico | Sistema |
-|--------------------|---------|
-| Exploración / descubrimiento del área | §15–§16 |
-| Tiempo (días de trabajo) | Avanzar día |
-| Supervivientes / labor construcción | §10 |
-| Madera / metal | §6 |
-| Limpiar escombros / asegurar acceso | Acción de recuperación |
-| Hostiles residuales si el sector está contaminado | §14 / defensa |
-| Asegurar perímetro tras abrir | §13 |
-
-Resultado: sector pasa a **recuperado** → suelo construible. Expandir **aumenta perímetro vulnerable** (§9.8).
+Resultado: sector → **recuperado** → suelo construible. Expandir **aumenta perímetro vulnerable** (§9.8).
 
 ### Colocación semilibre + snap invisible
 
-- Interno: ancla discreta (celda/hex oculta o puntos densos).  
+- Interno: ancla discreta densa (puntos/celdas **ocultas** al jugador; no se enseña grid ni hex).  
 - Externo: sensación de colocación libre; **sin** cuadrícula, coordenadas ni GIS.  
 - Válido: footprint cabe · no solapa · dentro de sector recuperado · no sobre obstáculo · no corta conectividad mínima al HQ / acceso.
 
 ### Edificios repetibles
 
 Si el catálogo lo permite, Neni elige **dónde** integrar el 2º/3º huerto (u otro).  
-Límites naturales: coste, workers, producción/consumo, espacio de sectores, progresión, balance.  
+Límites naturales: coste, workers, producción/consumo, **espacio físico**, progresión, balance.  
 `max` solo con razón de diseño (§9.7).
 
 ### Arte base (purga)
@@ -692,20 +697,45 @@ Permitido: ruinas, coches, árboles, basura, escombros, vallas rotas, carreteras
 ### Organización sin zoning artificial
 
 No forzar «zona residencial / industrial».  
-Ayudas suaves: footprints, separación mínima, snap/orientación, corredores orgánicos, props, requisitos reales de edificios, capacidad blanda de sector («patio saturado»), conectividad al HQ.
+Ayudas suaves: footprints, separación mínima, snap/orientación, corredores orgánicos, props, requisitos reales de edificios, conectividad al HQ.  
+**Sin** cupos numéricos por sector.
 
-### Navegación colonia grande (§9.9)
+### Navegación colonia grande
 
 Con 30–50 edificios: lista/filtros en Más · avisos → centrar · «Localizar» desde ficha/alerta.  
 **Sin** minimapa GIS permanente salvo necesidad demostrada en playtest.
 
-## 9.5 Recuperar un sector — reglas
+### Criterio de fantasía del bloque B0 (PLAN)
+
+B0 **no** se aprueba porque “la cámara funciona” o “puedo colocar un edificio”.  
+Debe demostrar: **estoy construyendo mi propia colonia dentro de un mundo** (recorrer · decidir dónde · repetir edificios · quedarse sin espacio · recuperar territorio que parece ciudad · expansión con consecuencias · imaginar D1→D100 · cómodo en móvil horizontal).
+
+## 9.5 Recuperar un sector — plantillas / componentes
+
+### Reglas base
 
 1. Solo sectores **colindantes** a recuperados (crecimiento contiguo).  
-2. Requisitos visibles en UI (días/labor/recursos/estado del sector).  
-3. Feedback: limpieza visual progresiva + mensaje humano.  
+2. Antes de empezar, UI clara: **problema del sector** · **qué necesita** · **tiempo/trabajo aproximado** · **qué gana al recuperarlo**.  
+3. Feedback: limpieza visual progresiva + mensaje humano («Hemos recuperado…»).  
 4. Tras recuperar: suelo válido + perímetro se recalcula.  
-5. Puede fallar/parcial si hay amenaza no resuelta (opcional calibrable).
+5. **v1 — sin fracaso aleatorio punitivo:** si el jugador conoce requisitos, los cumple, dedica labor/tiempo y resuelve amenazas requeridas → **éxito**.  
+   Puede haber eventos, descubrimientos, amenazas o complicaciones **antes/durante** como gameplay visible.  
+   **Prohibido:** invertir todo → dado oculto → fallo → pérdida arbitraria de la inversión correcta.
+
+### Sistema de componentes (no receta universal)
+
+Cada sector instancia una **plantilla** con 1..N componentes. El coste/tiempo se **deriva** de esos componentes (content + sim), no de una fórmula global fija.
+
+| Componente | Significado | Coste típico (solo sistemas existentes) |
+|------------|-------------|------------------------------------------|
+| `debris` | Escombros / basura densa | labor + tiempo |
+| `heavy_wreck` | Vehículos / estructuras pesadas | labor + tiempo + wood/metal si procede |
+| `blocked_access` | Acceso cortado | limpieza / reparación ligera (labor + recursos menores) |
+| `hostiles` | Infectados / amenaza residual | asegurar la zona primero (§14 / defensa) |
+| `unsafe_perimeter` | Borde inseguro al abrir | trabajo defensivo o barricadas/torres adicionales (§13) cuando corresponda |
+| `explore_local` | Área no reconocida | exploración/descubrimiento local (§15–§16) |
+
+**UI de decisión:** el jugador elige *si* y *cuándo* abrir ese sector según su situación concreta — no “comprar parcela genérica”.
 
 ## 9.6 UX móvil landscape — pan vs ghost
 
@@ -725,28 +755,28 @@ Ghost inválido: no habilita ✓ (o ✓ deshabilitado + tint).
 
 | Clasificación | Significado |
 |---------------|-------------|
-| **JUSTIFICADO** | Único por diseño (HQ, lab, centro expediciones, command stub…) o tope por escala real |
-| **HEREDADO** | Tope alto de plantilla JSON; revisar en balance |
-| **ARBITRARIO** | Límite temprano sin razón de sistema → **eliminar o bajar solo con justificación** |
+| **JUSTIFICADO** | Único por función de sistema (HQ, lab, centro expediciones, **radio**, command stub…) |
+| **HEREDADO** | Tope alto de plantilla JSON; **no** freno de diseño temprano; limpiar en balance/content |
+| **ARBITRARIO** | Límite numérico sin razón de sistema → **eliminar** |
 
-| ID | Nombre | max | Clase | Nota 2.7 |
-|----|--------|-----|-------|----------|
+| ID | Nombre | max contrato 2.7 | Clase | Decisión |
+|----|--------|------------------|-------|----------|
 | hq_central_l* | Refugio Central | 1 | JUSTIFICADO | Único HQ |
 | expedition_center | Centro expediciones | 1 | JUSTIFICADO | Único hub logística |
 | lab | Laboratorio | 1 | JUSTIFICADO | Único lab avanzado |
+| radio | Radio | **1** | JUSTIFICADO | Infraestructura central de señales (§7.5); **no** duplicar sin función sistémica documentada |
 | command | Puesto mando | 1 | JUSTIFICADO | Stub/legado; no reintroducir si fuera de catálogo activo |
-| farm | Huerto | 12 | HEREDADO | **No** max temprano arbitrario; freno = coste/workers/espacio |
-| well | Pozo | 8 | HEREDADO | Igual; pozo≠cisterna |
-| greenhouse | Invernadero | 6 | HEREDADO | Tech/era puede gatear |
-| shelter / house / block | Vivienda | 40/20/8 | HEREDADO | Soft por housing need + espacio |
-| barricade / fence | Defensa lineal | 20/12 | HEREDADO | Perímetro / longitud |
-| watchtower | Atalaya | 6 | HEREDADO | Calibrar con defensa |
-| clinic | Clínica | 2 | JUSTIFICADO* | Escala late; *revisar si 2 es soft |
-| radio | Radio | 2 | HEREDADO | Preferible 1 si rol único §7.5 |
-| generator / solar | Energía | * | — | **Fuera v1** |
-| resto production/health/logistics | — | varios | HEREDADO | Revisar en ZZ de balance; no usar como “solo N solares” |
+| clinic | Clínica | **sin max arbitrario** | HEREDADO→limpiar | Colonia grande puede necesitar más sanidad; límite = coste + staffing + camas + espacio + progresión. `max=2` del JSON = **ARBITRARIO** → eliminar en limpieza content |
+| farm | Huerto | alto / sin freno temprano | HEREDADO | Freno = coste/workers/espacio físico |
+| well | Pozo | alto / sin freno temprano | HEREDADO | Igual; pozo≠cisterna |
+| greenhouse | Invernadero | HEREDADO | HEREDADO | Tech/era puede gatear |
+| shelter / house / block | Vivienda | altos | HEREDADO | Soft por need + espacio |
+| barricade / fence / watchtower | Defensa | altos | HEREDADO | Perímetro / longitud / balance defensa |
+| infirmary / medkit | Salud early | HEREDADO | HEREDADO | Misma lógica que clinic (capacidad sanitaria, no cupo mágico) |
+| garage / armory / bunker | Varios | 2 en JSON | HEREDADO | Revisar en balance: solo mantener 2 si hay función dual real |
+| generator / solar | Energía | — | — | **Fuera v1** |
 
-**Regla:** huertos (y análogos) se limitan por economía y espacio de sectores, no por “3 huecos D1”.
+**Regla:** huertos y clínicas (y análogos) se limitan por economía, staffing y espacio físico — no por “N huecos” ni “máximo 2 porque sí”.
 
 ## 9.8 Expansión y defensa
 
@@ -760,7 +790,7 @@ Decisión: «¿me expandiré ahora o aún no puedo defenderlo?»
 - Workers de construcción: ≥1 idle/build.  
 - Upgrade HQ in-place.  
 - Mover edificios: no en v1; reconstruir.  
-- Save: versionar sectores + posiciones.
+- Save: versionar sectores (geometría/plantilla/componentes) + posiciones.
 
 ---
 
@@ -1115,8 +1145,9 @@ No “pintar verde”: reduce amenaza local, revela vecinos, bonus defensa/perí
 
 ## 16.4 Recuperación de sectores de colonia
 
-Distinto de controlar un landmark lejano: es **ampliar el patio construible** junto al camp (§9.5).  
-Puede exigir exploración local / limpieza / recursos / labor / tiempo.
+Distinto de controlar un landmark lejano: es **ampliar el patio construible** junto al camp mediante **plantillas/componentes** (§9.5), no una tasa global.  
+Geometría **orgánica del mundo** (§9.4) — sin macrogrid ni cupo N edificios/sector.  
+v1: recuperación cumplida → **éxito** (sin RNG punitivo final).
 
 ---
 
@@ -1781,6 +1812,7 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 - Expansión = más perímetro vulnerable (§9.8, §13).  
 - Auditoría `max` edificios (§9.7); huertos sin max temprano arbitrario.  
 - PLAN 2.7: HUMAN_GATE espacial temprano; ZZ-012 replanificada (pendiente).
+- **Cierre decisiones:** plantillas de recuperación (no receta universal); sin cupo artificial por sector; sectores sin macrogrid; radio max=1; clinic sin max arbitrario; recuperación v1 sin RNG punitivo; REVIEW_STOP tras ZZ-018; criterio fantasía B0.
 
 ## 2.6 (2026-08-15) — arranque, tutorial contextual, save v1 (Neni)
 - **Portada / inicio:** Continuar (principal si hay partida) · Nueva partida · sin slots (§31.5).  
@@ -2067,9 +2099,9 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
 
 ### `clinic` — Clínica
 - **Categoría:** health
-- **Descripción:** Centro médico completo. Genera medicinas y cura avanzada.
+- **Descripción:** Centro médico completo. Genera medicinas y cura avanzada. Límite por coste/staffing/camas/espacio (§9.7); **no** max=2 arbitrario.
 - **Coste:** metal: 8, wood: 5, medicine: 3, fuel: 1
-- **Tamaño:** 2×1 · **max:** 2
+- **Tamaño:** 2×1 · **max:** — (sin tope arbitrario; limpiar JSON)
 - **Jobs:** 3 · **Housing:** 0 · **Defense:** 0
 - **Produce:** medicine: 2
 - **minEra:** 1
@@ -2126,9 +2158,9 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
 
 ### `radio` — Radio
 - **Categoría:** logistics
-- **Descripción:** Escucha señales y contacta supervivientes. Apoyo a exploración.
+- **Descripción:** Escucha señales y contacta supervivientes. Apoyo a exploración. **Única** infraestructura central de comunicaciones (§9.7).
 - **Coste:** metal: 5, wood: 2, fuel: 1
-- **Tamaño:** 1×1 · **max:** 2
+- **Tamaño:** 1×1 · **max:** 1
 - **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
 - **minEra:** 0
 - **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
@@ -3135,8 +3167,14 @@ En esas fases Cursor **NO** avanza a fases dependientes hasta:
 - `ESTADO REVISIÓN: APROBADA`
 - `APROBACIÓN FINAL CHATGPT: SÍ`
 
-Lista canónica actual (plan 2.1/2.2):  
-`ZZ-001`, `ZZ-010`, `ZZ-012`, `ZZ-014`, `ZZ-015`, `ZZ-021`, `ZZ-023`, `ZZ-032`, `ZZ-045`, `ZZ-065`, `ZZ-073`, `ZZ-082`, `ZZ-106`, `ZZ-125`, `ZZ-133`, `ZZ-144`, `ZZ-150`, `ZZ-154`, `ZZ-161`, `ZZ-165`, `ZZ-173`, `ZZ-183`.
+Lista canónica vigente: ver **IMPLEMENTATION_PLAN 2.7** § HUMAN_GATE (incluye ZZ-016, ZZ-019, etc.).
+
+### 41.7.1 REVIEW_STOP (revisión humana intermedia, no gate canónico extra)
+
+Algunas fases marcan `REVIEW_STOP: YES` (p. ej. **ZZ-018**).  
+Tras completar la fase: tests → capturas/evidencia → commit → log `PENDIENTE DE REVISIÓN` → **PARAR**.  
+**No** ejecutar la fase siguiente (p. ej. ZZ-019) hasta autorización explícita Neni/ChatGPT.  
+No cuenta como HUMAN_GATE adicional en el total canónico, pero **bloquea** igual que un gate a efectos de avance.
 
 ## 41.8 Cuando ChatGPT pide cambios
 

@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-15 · source=repo
 
 **Versión plan:** 2.7  
-**Estado:** Replanificación por **modelo espacial / landscape / sectores** (contrato GAME_MASTER **2.7**).  
+**Estado:** Contrato espacial 2.7 **cerrado** (decisiones recuperación/sectores/max/REVIEW_STOP). Esperando autorización para implementar B0.
 **Biblia:** GAME_MASTER **2.7**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -23,7 +23,12 @@
 5. Balance solo en content.  
 6. Deploy solo ZZ-183 bajo orden.  
 7. Sync Drive = GitHub en docs maestros.  
-8. **No implementar sistemas D1+ encima del patio fijo 10×8** tras 2.7: primero gate espacial ZZ-019.
+8. **No implementar sistemas D1+ encima del patio fijo 10×8** tras 2.7: primero B0 completo (016→019).  
+9. Si `REVIEW_STOP: YES`: PARAR tras la fase; no continuar hasta autorización explícita (aunque no sea HUMAN_GATE canónico).
+
+### REVIEW_STOP (2.7)
+
+- **ZZ-018** · Sectores + recuperar territorio → evidencia espacial → **PARAR** (Neni+ChatGPT) antes de ZZ-019.
 
 ### HUMAN_GATE (canónica 2.7)
 
@@ -68,7 +73,10 @@
 |------|--------|
 | Landscape móvil | Nuevo ZZ-016 (GATE) |
 | Arte patio / cámara > viewport | Nuevo ZZ-017 |
-| Sectores + recuperar territorio | Nuevo ZZ-018 |
+| Sectores + recuperar territorio | Nuevo ZZ-018 + **REVIEW_STOP** |
+| Plantillas recuperación / sin cupo sector / sin macrogrid | Contrato §9.4–§9.5 (cierre 2.7) |
+| radio max=1 · clinic sin max arbitrario | §9.7 |
+| Recuperación sin RNG punitivo v1 | §9.5 |
 | Construcción semilibre + snap + ✓ | Nuevo **ZZ-019 (GATE espacial temprano)** |
 | ZZ-010 | Completada históricamente; **no** es el modelo espacial final |
 | ZZ-011 | Absorbida/ampliada por ZZ-017 |
@@ -85,7 +93,7 @@
 |--------|-------|-------|
 | A · Fundación | ZZ-001…ZZ-006 (6) | ZZ-001 |
 | A2 · Arranque y persistencia | ZZ-009, ZZ-007, ZZ-008 (3) | ZZ-007, ZZ-008 |
-| **B0 · Modelo espacial landscape** | **ZZ-016, ZZ-017, ZZ-018, ZZ-019 (4)** | **ZZ-016, ZZ-019** |
+| **B0 · Modelo espacial landscape** | **ZZ-016, ZZ-017, ZZ-018, ZZ-019 (4)** | **ZZ-016, ZZ-019** + **REVIEW_STOP ZZ-018** |
 | B · Experiencia D1 | ZZ-010…ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
 | C · Loop D2–D5 | ZZ-020…ZZ-027 (8) | ZZ-021, ZZ-023 |
 | D · Vivienda y agua | ZZ-030…ZZ-036 (7) | ZZ-032 |
@@ -315,7 +323,8 @@
 
 ## B0 · Modelo espacial y landscape (2.7)
 
-> **Crítico:** HUMAN_GATE ZZ-019 antes de dar por bueno el tutorial/HUD D1 definitivo.
+> **Flujo:** ZZ-016 (HUMAN_GATE) → ZZ-017 → ZZ-018 (**REVIEW_STOP** · PARAR) → autorización → ZZ-019 (HUMAN_GATE espacial).  
+> **Criterio:** demostrar *«estoy construyendo mi colonia dentro de un mundo»* — no solo cámara/colocación (§9.4).
 
 ### ZZ-016 — Landscape móvil + rotate gate
 
@@ -323,6 +332,7 @@
 |-------|-------|
 | **Bloque** | B0 · Modelo espacial landscape |
 | **HUMAN_GATE** | **YES** |
+| **REVIEW_STOP** | NO |
 | **Objetivo** | Gameplay landscape-first; pantalla «Gira tu dispositivo» cuidada en portrait; portada/intro vertical OK. |
 | **Sistemas** | UX shell, orientación |
 | **Dependencias** | ZZ-008 |
@@ -346,6 +356,7 @@
 |-------|-------|
 | **Bloque** | B0 · Modelo espacial landscape |
 | **HUMAN_GATE** | NO |
+| **REVIEW_STOP** | NO |
 | **Objetivo** | Purgar pozo/huerto falsos del terreno; cámara pan/zoom/recenter con espacio > pantalla; save schema posiciones/sectores stub. |
 | **Sistemas** | arte, cámara, save |
 | **Dependencias** | ZZ-016 |
@@ -368,21 +379,30 @@
 |-------|-------|
 | **Bloque** | B0 · Modelo espacial landscape |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Sector Núcleo D1; sectores colindantes recuperables con costes de sistemas existentes; perímetro vulnerable al expandir. |
+| **REVIEW_STOP** | **YES** |
+| **Objetivo** | Sectores de geometría orgánica (sin macrogrid); plantillas/componentes de recuperación (§9.5); perímetro vulnerable; UI de decisión clara. |
 | **Sistemas** | sectors, construcción, defensa |
 | **Dependencias** | ZZ-017 |
 | **Archivos approx.** | js/sectors, sim, UI recuperar |
-| **Datos** | sectors[] en state |
-| **Assets** | ruinas/escombros por sector |
+| **Datos** | sectors[] (geometría + plantilla + componentes) |
+| **Assets** | ruinas/escombros por sector (formas distintas) |
 | **Pruebas auto** | smoke-sectors |
-| **Pruebas funcionales** | Recuperar 1 sector; no construir fuera; expandir aumenta exposición |
-| **Revisión visual** | Sí |
+| **Pruebas funcionales** | Recuperar 1 sector con componentes visibles; no construir fuera; sin cupo N; sin RNG punitivo |
+| **Revisión visual** | Sí (obligatoria + PARAR) |
 
-**Tareas:** Modelo datos sectores; acción Recuperar; feedback «hemos recuperado…»; link §9.5/§9.8.
+**Tareas:** Modelo datos sectores orgánicos; componentes de recuperación; feedback «hemos recuperado…»; link §9.5/§9.8; **generar evidencia REVIEW_STOP**.
+
+**Evidencia REVIEW_STOP (mínimo):**
+- tamaño real del mundo + pan/zoom landscape
+- lectura de límites orgánicos (recuperado vs no)
+- ausencia de macrogrid visible/sugerida
+- composición móvil landscape + desktop
+- sensación de espacio / ciudad parcial
 
 **Aceptación:**
-- No casillas bloqueadas tipo GIS
-- Recuperar = gameplay, no level-up vacío
+- No casillas bloqueadas tipo GIS ni hexes uniformes
+- Recuperar = decisión situacional, no level-up vacío
+- **PARAR** — no ZZ-019 sin autorización Neni/ChatGPT
 
 ### ZZ-019 — Construcción semilibre landscape (GATE ESPACIAL TEMPRANO)
 
@@ -390,20 +410,21 @@
 |-------|-------|
 | **Bloque** | B0 · Modelo espacial landscape |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Ghost + snap invisible + manchas válidas + ✓/✕; pan vs mover ghost (§9.6); 2º/3º huerto donde el jugador quiera; demo jugable landscape. |
+| **REVIEW_STOP** | NO |
+| **Objetivo** | Ghost + snap invisible + ✓/✕; pan vs ghost (§9.6); edificios repetibles donde quepan; demo fantasía B0 completa. |
 | **Sistemas** | construcción, touch, sectores |
-| **Dependencias** | ZZ-018, ZZ-016 |
+| **Dependencias** | ZZ-018 **autorizada tras REVIEW_STOP**, ZZ-016 |
 | **Archivos approx.** | main/build UX, render |
 | **Datos** | — |
 | **Assets** | — |
 | **Pruebas auto** | smoke-build-place |
-| **Pruebas funcionales** | Colocar 3 huertos distintos; cancelar; pan en build; sin segundo-tap build |
+| **Pruebas funcionales** | 3 huertos distintos; quedarse sin espacio físico; cancelar; pan en build; sin segundo-tap |
 | **Revisión visual** | Sí |
 
-**Tareas:** Implementar §9.2–§9.6; navegación básica lista→centrar; contact sheet landscape D1 build.
+**Tareas:** Implementar §9.2–§9.6; navegación básica lista→centrar; contact sheet landscape; validar criterio fantasía §9.4.
 
 **Aceptación:**
-- Sensación «yo construyo esta colonia»
+- Fantasía B0 demostrable (§9.4)
 - UX móvil landscape inequívoca
 - **Gate humano obligatorio antes de ZZ-012+**
 

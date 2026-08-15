@@ -2,9 +2,9 @@
 
 > **SYNC VERIFY DEVELOPMENT_LOG** · stamp=2026-08-15 19:41:46 · sha256_16=B66C6C0B88D974CF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
-**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
+**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.7 + PLAN 2.7** (modelo espacial / landscape). · ZZ-007/008/010 APROBADAS. · **ZZ-012 PENDIENTE** (bloqueada hasta ZZ-019). · **PARADO en reforma documental espacial** — sin implementar B0 aún. No deploy.
+**Estado global:** Contrato **2.7 cerrado** (decisiones recuperación/sectores/max/REVIEW_STOP). · ZZ-012 PENDIENTE (bloqueada hasta ZZ-019). · **PARADO — sin implementar B0** hasta autorización. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -33,20 +33,25 @@ APROBACIÓN FINAL CHATGPT: SÍ
 # REFORMA DOCUMENTAL 2.7 — MODELO ESPACIAL / LANDSCAPE (2026-08-15)
 
 ## DECISIÓN NENI + CHATGPT
-Aprobada dirección: sectores orgánicos + semilibre + snap invisible + colonia > viewport + móvil landscape.
+Dirección general **APROBADA**. Cierre de decisiones definitivas antes de B0:
+1. Recuperación por **plantillas/componentes** (no receta universal).
+2. **Sin** capacidad artificial por sector.
+3. Sectores **orgánicos** (sin macrogrid).
+4. `radio` max=1 · `clinic` sin max arbitrario.
+5. Recuperación v1 **sin RNG punitivo** al final.
+6. **REVIEW_STOP** tras ZZ-018 (PARAR antes de ZZ-019).
+7. Criterio fantasía B0 explícito.
 
 ## RESULTADO CURSOR (solo docs)
-- GAME_MASTER **2.7**: §9 contrato definitivo; §16; §31.8; §13 expansión; §9.7 auditoría max; changelog.
-- IMPLEMENTATION_PLAN **2.7**: bloque **B0** ZZ-016…ZZ-019; gate temprano **ZZ-019**; ZZ-012 replanificada.
-- ZZ-012: permanece PENDIENTE DE REVISIÓN / APROBACIÓN NO — **no implementar** hasta ZZ-019.
+- GAME_MASTER **2.7** actualizado (§9.4–§9.7, §16.4, §7.5/7.6, apéndice radio/clinic, §41.7.1 REVIEW_STOP, changelog).
+- IMPLEMENTATION_PLAN **2.7**: flujo B0 con REVIEW_STOP ZZ-018; ZZ-019 depende de autorización post-018.
+- ZZ-012: sigue PENDIENTE / NO — bloqueada hasta ZZ-019.
 
 ## ESTADO
-Documentación sincronizada. **NO código de juego.** Esperando aprobación de la reforma antes de implementar B0.
+Docs sincronizados. **NO código.** Esperando autorización explícita para empezar B0 (ZZ-016).
 
-## APROBACIÓN DE ESTA REFORMA
-PENDIENTE Neni/ChatGPT (leer Drive).
-
----
+## APROBACIÓN DIRECCIÓN 2.7
+APROBADA (dirección). Cierre decisiones incorporado — pendiente autorización de **implementación B0**.
 
 ---
 
