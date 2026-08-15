@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 COMPLETADA → HUMAN_GATE PENDIENTE DE REVISIÓN** (RONDA CAMBIOS SOLICITADOS aplicada; sin APROBACIÓN FINAL). No ZZ-011+ / no deploy.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA (SÍ)**. Siguiente: ZZ-011 → A2 (ZZ-009 → ZZ-007 GATE). No deploy.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -42,7 +42,7 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-009 | Save v1: 1 partida + autosave + backup | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-007 | Portada / Continuar · Nueva partida | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-008 | Nueva partida: confirmación + mini-intro | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -558,10 +558,25 @@ Repo `docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` (hash contac
 COMPLETADA (correcciones aplicadas)
 
 ### ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ### APROBACIÓN FINAL CHATGPT
-NO — a la espera de nueva revisión. **PARADO en ZZ-010.** No ZZ-011+ / no deploy.
+SÍ
+
+---
+
+## REVISIÓN CHATGPT — RONDA FINAL (ZZ-010 APROBADA)
+**RESULTADO:** APROBADA · **APROBACIÓN FINAL CHATGPT: SÍ**  
+Ronda CAMBIOS SOLICITADOS **cerrada**. Base visual de colonia física aprobada (no acabado artístico final). Conservar evidencias ZZ-010. Continuar PLAN 2.6 → siguiente HUMAN_GATE canónico.
+
+**Notas de aprobación (Neni/ChatGPT):**
+1. Se lee como colonia física construible.
+2. Patio/solares/huerto/pozo/vallas/restos OK.
+3. Sin city.webp / óvalo / GIS.
+4. HQ integrado; jobs 0 pasivo correcto.
+5. HUD 3/6 = población/capacidad — mantener semántica.
+6. Fases visuales posteriores ampliarán vida/animación/crecimiento — no estática permanente.
+7. Arte edificios actuales = referencia de calidad.
 
 ---
 
