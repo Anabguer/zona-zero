@@ -23,8 +23,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=17" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=17" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=18" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=18" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -125,7 +125,7 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=17';
+    import { bootGame } from './js/main.js?v=18';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,

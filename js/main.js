@@ -619,13 +619,13 @@ function openBuildSheet() {
       return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''}" data-action="build-pick" data-build="${b.id}" ${
         locked ? 'disabled' : ''
       }>
-        <img src="${buildingArtUrl(b.id)}" alt="" width="56" height="56" />
+        <img class="zz-build-card__thumb" src="${buildingArtUrl(b.id)}" alt="" width="48" height="48" />
         <span class="zz-build-card__body">
           <strong>${escapeHtml(b.name)}</strong>
-          <em>${escapeHtml((b.desc || '').slice(0, 60))}</em>
-          <span class="zz-build-card__meta">${jobs}${benefit ? ` · ${escapeHtml(String(benefit).slice(0, 48))}` : ''}</span>
-          <span class="zz-build-cost">${cost || 'Gratis'}</span>
-          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar</span>'}
+          <span class="zz-build-row zz-build-row--cost"><i>Coste</i> ${cost || 'Gratis'}</span>
+          <span class="zz-build-row zz-build-row--gain"><i>Beneficio</i> ${escapeHtml(String(benefit || '—').slice(0, 56))}</span>
+          <span class="zz-build-row zz-build-row--jobs"><i>Trabajo</i> ${jobs}</span>
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar →</span>'}
         </span>
       </button>`;
     })
@@ -702,6 +702,13 @@ function slotHint(slots, living) {
   return `3ª plaza: población ≥${s3.minPop || 24}, zonas ≥${s3.minControlled || 5}, era ≥${s3.minEra || 2}.`;
 }
 
+function fmtRes(n) {
+  const v = Math.round(Number(n) || 0);
+  if (v >= 10000) return `${Math.round(v / 1000)}k`;
+  if (v >= 1000) return `${(v / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  return String(v);
+}
+
 function paintHud() {
   const pop = state.population;
   const cap = housingCapacity(state, content.buildings);
@@ -725,9 +732,11 @@ function paintHud() {
   const res = $('zz-resources');
   if (res) {
     const order = content.balance.resourceOrder || Object.keys(RES_LABEL_UI);
+    const primary = ['food', 'water', 'wood', 'metal', 'medicine'];
     const popN = Math.max(1, pop.total || 1);
     res.innerHTML = '';
-    order.forEach((k) => {
+    const show = primary.filter((k) => order.includes(k));
+    show.forEach((k) => {
       const li = document.createElement('li');
       const val = state.resources[k] || 0;
       const days = k === 'food' || k === 'water' ? val / popN : Infinity;
@@ -735,17 +744,19 @@ function paintHud() {
       else if (days < 4) li.classList.add('is-low');
       const img = document.createElement('img');
       img.src = artUrl(RES_ART[k]) || '';
-      img.alt = RES_LABEL_UI[k] || k;
-      img.width = 16;
-      img.height = 16;
+      img.alt = '';
+      img.width = 13;
+      img.height = 13;
       const strong = document.createElement('strong');
-      strong.textContent = String(val);
+      strong.textContent = fmtRes(val);
       li.appendChild(img);
       li.appendChild(strong);
-      li.title = RES_LABEL_UI[k] || k;
+      li.title = `${RES_LABEL_UI[k] || k}: ${val}`;
       res.appendChild(li);
     });
   }
+  if ($('zz-threat')) $('zz-threat').title = `Amenaza: ${Math.round(state.director?.threat || 0)}`;
+  if ($('zz-defense')) $('zz-defense').title = `Defensa: ${Math.round(defenseValue(state, content.buildings, content.balance))}`;
 }
 
 function paintExplorers() {
@@ -918,7 +929,12 @@ function paintModeBanner() {
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
-    el.textContent = `Colocá ${content.buildings[state.buildMode]?.name || 'edificio'} · tocá una parcela libre`;
+    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> · tocá parcela válida · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
+    el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
+      state.buildMode = null;
+      state.uiMode = null;
+      paint();
+    });
   } else if (state.uiMode === 'explore') {
     el.hidden = false;
     el.textContent = 'Tocá una zona del mapa para explorar';

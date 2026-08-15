@@ -1289,13 +1289,13 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.3.0 — Replanteo UX mundo-primero (tocar el mundo)  
+**Versión técnica:** 1.3.1 — Reforma visual del mapa (colonia física)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=17`
+**save_version / v:** **4** · cache assets `?v=18`
 
 ## Arquitectura real (1.2)
 - Cliente: `js/` state, sim, director, population, **colony**, explorers, render-map, render-base, icons, sound, api, main, rng, util
@@ -1315,9 +1315,10 @@ Y periódicamente el juego debe responder:
 
 ## Pendiente
 - Recalibración de dificultad **después** de validar el loop de gestión con jugadoras
-- Más landmarks raster por tipo de zona (hoy supermercado + siluetas)
+- Más landmarks raster por tipo de zona (hoy supermercado/hospital/estación + siluetas)
 - Equipamiento de exploradores (cuando GAME_MASTER lo active)
-- Deploy de 1.3.0 (explícitamente aplazado)
+- Deploy de 1.3.x (explícitamente aplazado)
+- Ciudad de fondo todavía es terreno ilustrado + bloques suaves (no arte block-a-block)
 
 ## Decisiones consolidadas 1.3.0 (experiencia)
 - **Jugar = tocar el mundo.** Overlay full-bleed; HUD/dock/sheet flotan sobre el mapa
@@ -1330,6 +1331,13 @@ Y periódicamente el juego debe responder:
 - Mobile first; desktop = mismo principio, sheet lateral
 
 ## Changelog técnico
+### 1.3.1 — Reforma visual del mapa
+- Elimina ruido GIS: círculos de control, lluvia de puntos, labels gigantes, overlays de polígono, números flotantes permanentes
+- Colonia como lugar físico (terreno, caminos, props, valla, cultivos, defensas) con lectura D1→D15→D30 por objetos
+- Landmarks raster (supermercado/hospital/estación); niebla irregular con máscara; HUD compacto (`fmtRes`)
+- Construir: tarjetas coste/beneficio/trabajo + preview de colocación; assets WebP con transparencia limpia
+- Capturas `docs/review/131-*` + contact sheet · cache `?v=18` · **sin deploy** · motor/balance intactos
+
 ### 1.3.0 — Replanteo UX / interfaz mundo-primero
 - Layout overlay: mapa 100% viewport; sin bandas negras ni mapa encogido
 - Arte raster: edificios, terreno, supermercado, retratos, iconos HUD

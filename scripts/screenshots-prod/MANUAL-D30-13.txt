@@ -8,7 +8,7 @@ D8 tier=2 bld=10 pop=4 food=50 · OK storage; OK medkit
 D12 tier=2 bld=11 pop=4 food=50 · OK fence
 D15 tier=2 bld=12 pop=4 food=50 · OK watchtower
 D18 tier=2 bld=12 pop=4 food=50 · FAIL greenhouse: Aún no desbloqueado (era)
-D22 tier=2 bld=14 pop=5 food=50 · OK cistern; OK sawmill
-D25 tier=2 bld=15 pop=5 food=50 · OK infirmary
+D22 tier=3 bld=14 pop=5 food=50 · OK cistern; OK sawmill
+D25 tier=3 bld=15 pop=5 food=50 · OK infirmary
 D28 tier=3 bld=16 pop=5 food=50 · OK house
 D30 tier=3 bld=16 pop=5 food=44 · —
