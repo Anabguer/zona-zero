@@ -1,0 +1,45 @@
+# Dependencias / build
+node_modules/
+dist/
+build/
+.cache/
+.vite/
+
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+*.local.php
+*.local.json
+secrets.*
+credentials*
+hostalia.publish.local.json
+**/database.local.php
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs y temporales
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Deploy local (scripts sí; logs/credenciales no)
+deploy/logs/
+
+# APK / nativo (este proyecto es web)
+*.apk
+android/
+ios/
+
+# Copias de seguridad
+*.bak
+*_backup/
+.backups/
