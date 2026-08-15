@@ -56,18 +56,18 @@ function coreSurfacesAndStructure() {
       [10, 3],
       [9, 4],
       [10, 4],
-      [9, 5],
-      [10, 5],
     ],
   };
   const surfC = {
     id: 'patio_sur',
     name: 'Patio sur',
     cells: [
+      [4, 7],
       [5, 7],
       [6, 7],
       [7, 7],
       [8, 7],
+      [4, 8],
       [5, 8],
       [6, 8],
       [7, 8],

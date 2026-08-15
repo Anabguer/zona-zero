@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019 **APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-019A COMPLETADA · PENDIENTE DE REVISIÓN (REVIEW_STOP)**. · ZZ-012 **CAMBIOS SOLICITADOS** (no iniciar). · No ZZ-013. No deploy.
+**Estado global:** ZZ-016…019 **APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-019A RONDA CAMBIOS · PENDIENTE DE REVISIÓN (REVIEW_STOP)**. · ZZ-012 **CAMBIOS SOLICITADOS** (no iniciar). · No ZZ-013. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -310,32 +310,29 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN CONTINUACIÓN CHATGPT
 NO
 
-## CAMBIOS
-- `js/sectors.js`: superficies 1..N por sector; núcleo con explanadas E/O + patio sur + pad HQ; estructura carretera no edificable; `layoutVersion` 3.
-- `js/build-place.js` / `sim`: buildable = superficie recuperada (no todo el sector).
-- `js/render-map.js`: carretera arterial diseñada; vallas/restos visuales; **hints de superficie solo en modo Construir**.
-- CSS pads/roads; cache `?v=32`.
-- Tests: smoke-d1 / smoke-build-place / smoke-sectors (+ asserts superficies/carretera).
-- Review: 16 tomas + contact sheet → `docs/review/` + Drive.
+## RONDA CAMBIOS SOLICITADOS (post review visual contact sheet)
+Problemas: (1) mundo aún leído como textura+props; (2) superficies celulares; (3) carretera shape de prueba.
+Correcciones:
+- 3 identidades de entorno en coords mundo: asfalto/oeste · urbano/ruinas · abierto/verde (árboles).
+- Superficies = **blob orgánico continuo** por superficie (no óvalos/celda).
+- Carretera: relleno irregular + grietas + suciedad de borde.
+- Yard art atenuado para dejar leer composición.
+- Review regenerada (16 tomas).
 
-## AUTOCRÍTICA
-1. ¿Sin Construir = lugar (no parcelas)? Sí — hints solo en build.
-2. ¿Con Construir = dónde cabe? Sí — pads por celda de superficie.
-3. ¿Varias superficies disjuntas? Sí (4 en núcleo).
-4. ¿Ghost inválido en carretera? Sí (evidencia 09 + smoke).
-5. ¿Layouts múltiples en patio sur? Sí (evidencia 10).
-6. Arte no final; composición espacial es el objetivo.
-7. Deuda: pads aún algo “celulares”; refinar blob orgánico por superficie en arte posterior.
+## AUTOCRÍTICA (ronda)
+1. ¿Pan muestra lugares distintos? Mejorado (clusters mundo + tonos); aún arte SVG provisional.
+2. ¿Superficie = área continua? Sí (hull orgánico); formas aún derivadas del grid interno.
+3. ¿Carretera integrada? Mejor; no arte final.
+4. Ghost/✓/landscape intactos.
 
 ## EVIDENCIA
 `docs/review/` · Drive Review\ · `review-contact-sheet.jpg`
 
 ## COMMIT
-`36795fd` — feat(ZZ-019A): escenario diseñado + superficies edificables (REVIEW_STOP)
-Registro: `ffe962e`.
+`36795fd` (entrega inicial) · ronda CAMBIOS: _(tras commit)_
 
 ## Sync Drive/GitHub
-OK · Review/ · **PARADO REVIEW_STOP**. No ZZ-012.
+Pendiente push ronda.
 
 ---
 

@@ -639,23 +639,96 @@ body.zz-body {
 .zz-prop-barrel { fill: #2e3a42; opacity: 0.85; }
 .zz-prop-fire-glow { fill: #c06020; opacity: 0.45; }
 .zz-prop-fire { fill: #e08030; opacity: 0.8; }
+.zz-settle-road-fill {
+  fill: #35322e;
+  opacity: 0.78;
+  pointer-events: none;
+}
+.zz-settle-road-dirt {
+  fill: #4a4338;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.zz-settle-road-crack {
+  stroke: #1e1c18;
+  stroke-width: 0.12;
+  opacity: 0.55;
+  pointer-events: none;
+}
 .zz-settle-road-asphalt {
   stroke: #3a3834;
   stroke-width: 2.4;
-  opacity: 0.72;
+  opacity: 0.45;
   stroke-linecap: round;
 }
 .zz-settle-road-edge {
   stroke: #5a564c;
   stroke-width: 2.8;
-  opacity: 0.28;
+  opacity: 0.2;
   stroke-linecap: round;
 }
-.zz-settle-surface-pad {
-  fill: rgba(196, 168, 96, 0.22);
-  stroke: rgba(220, 190, 110, 0.45);
-  stroke-width: 0.12;
+.zz-settle-surface-area {
+  fill: rgba(196, 168, 96, 0.2);
+  stroke: rgba(220, 190, 110, 0.42);
+  stroke-width: 0.14;
   pointer-events: none;
+}
+.zz-settle-surface-pad {
+  display: none;
+}
+.zz-world-road-fill {
+  fill: #2f2c28;
+  opacity: 0.52;
+  pointer-events: none;
+}
+.zz-world-road-spur {
+  fill: #34312c;
+  opacity: 0.28;
+  pointer-events: none;
+}
+.zz-world-road-grime {
+  fill: #4a4338;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.zz-world-road-crack {
+  stroke: #1a1814;
+  stroke-width: 0.18;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.zz-env-tone {
+  pointer-events: none;
+}
+.28;
+}
+.26;
+}
+.24;
+}
+.zz-env-tone--alley {
+  fill: #322e28;
+  opacity: 0.28;
+}
+.zz-env-tone--industrial {
+  fill: #343230;
+  opacity: 0.3;
+}
+.zz-env-tone--scrap {
+  fill: #3a3228;
+  opacity: 0.32;
+}
+.zz-prop-tree-trunk {
+  fill: #3a3024;
+  opacity: 0.9;
+}
+.zz-prop-tree-crown {
+  fill: #3a4a30;
+  opacity: 0.55;
+}
+.zz-sector-scrub-wild {
+  fill: #3a4a32;
+  opacity: 0.4;
 }
 .zz-map-street-path--arterial {
   stroke: #2c2a26;
