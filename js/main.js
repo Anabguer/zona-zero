@@ -293,7 +293,9 @@ export async function bootGame(opts) {
     if (first) state.selectedSurvivorIds = [first.id];
   }
   if (!state.selectedZoneId) {
-    const z = state.zones.find((x) => x.state === 'discovered' || x.state === 'controlled');
+    const z =
+      state.zones.find((x) => x.state === 'discovered' && x.id !== 'camp') ||
+      state.zones.find((x) => x.state === 'discovered' || (x.state === 'controlled' && x.id !== 'camp'));
     if (z) state.selectedZoneId = z.id;
   }
   // Arrancar en Gente para que se vean los 3 supervivientes de inmediato

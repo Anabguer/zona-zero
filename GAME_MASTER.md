@@ -96,6 +96,7 @@ Estas reglas guían el juego. No deben cambiarse unilateralmente en código sin 
 - **Fix crítico UI:** `display:grid/flex` anulaba el atributo HTML `hidden` → overlay **Derrota** visible al iniciar y hub podía quedarse en «Cargando slots»
 - CSS: `[hidden]{display:none!important}` + `.zz-defeat/.zz-boot/.zz-app/.zz-toast:not([hidden])`
 - Arranque: partida nueva abre en pestaña **Gente**, guía con nº de supervivientes, errores de boot/API visibles con reintento
+- Preselección de zona: evita el campamento (expedición imposible) y elige Mercado/Bloques
 - Cache bust assets `?v=5`
 - Pruebas: `scripts/e2e-play.mjs`, `scripts/e2e-hidden-dom.mjs`, harness `dev/` + Playwright UI
 

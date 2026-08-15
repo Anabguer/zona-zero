@@ -110,14 +110,16 @@ try {
 
   // Mapa → enviar expedición
   await page.click('#zz-tab-map');
-  await page.waitForSelector('#zz-send-exp');
+  await page.waitForSelector('#zz-send-exp:not([disabled])');
   await page.click('#zz-send-exp');
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(500);
   const expSent = await page.evaluate(() => {
-    const log = document.getElementById('zz-log');
-    return /expedici/i.test(log?.textContent || '') || /Expedición/.test(document.body.innerText);
+    const panel = document.getElementById('zz-zone-panel');
+    const toast = document.getElementById('zz-toast');
+    const text = (panel?.textContent || '') + ' ' + (toast?.textContent || '');
+    return /en curso|enviada/i.test(text);
   });
-  assert(expSent, 'expedición enviada (log/UI)');
+  assert(expSent, 'expedición enviada (panel/toast)');
 
   // Avanzar varios días
   for (let i = 0; i < 5; i++) {
