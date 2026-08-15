@@ -394,15 +394,13 @@
 **Tareas:** Modelo datos sectores orgánicos; componentes de recuperación; feedback «hemos recuperado…»; link §9.5/§9.8; **generar evidencia REVIEW_STOP**.
 
 **Evidencia REVIEW_STOP (mínimo):**
-- tamaño real del mundo + pan/zoom landscape
-- lectura de límites orgánicos (recuperado vs no)
-- ausencia de macrogrid visible/sugerida
-- composición móvil landscape + desktop
-- sensación de espacio / ciudad parcial
-- **mismo mundo** con cámara en varias posiciones (continúa fuera del viewport)
-- zoom cercano · zoom alejado · recenter a Núcleo/HQ
-- pan horizontal · pan vertical/diagonal si la geometría lo permite
-- 740×360 manejable **sin** empequeñecer artificialmente el mundo
+- D1 normal cercano **sin overlays** = «es un lugar» (no plano de sectores)
+- pan a zonas distintas con identidad ambiental (ruinas, aparcamiento, etc.)
+- zoom cercano · zoom alejado · recenter
+- modo expansión (límites tenues, no GIS) · sector seleccionado
+- Núcleo fundido con el entorno (no isla)
+- 844×390 · 740×360 · desktop
+- Contrato: avisos UI → foco cámara (§9.4) documentado aunque UI completa sea posterior
 
 **Aceptación:**
 - No casillas bloqueadas tipo GIS ni hexes uniformes

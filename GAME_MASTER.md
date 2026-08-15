@@ -658,6 +658,25 @@ El viewport es una **ventana** sobre un mundo físico mayor — no un marco dond
 
 Referencia de sensación (no copia de sistemas): mundos/bases navegables tipo Day R — escala y perspectiva.
 
+### Lectura visual: mundo físico, no plano de sectores
+
+- El fondo/escenario existe **debajo** de cualquier lectura de sector: calles rotas, ruinas, solares, coches, muros, vegetación, escombros, accesos.
+- En **vista normal** los sectores **no** se representan como polígonos rellenos permanentes. CONTROLADO / NO CONTROLADO / EN RECUPERACIÓN se lee por tratamiento ambiental (limpieza, escombros, luz, perímetro, actividad).
+- Límites explícitos de sector: preferentemente en **modo expansión/recuperación** (o selección), con estética integrada (contorno tenue / resplandor / borde de suelo) — **no** GIS (líneas discontinuas, relleno plano de tablero).
+- **Núcleo** = parte ya recuperada del mismo mundo (más limpia/iluminada), **no** una isla/placa sobre negro.
+- **No recuperado ≠ vacío/negro**: el lugar existe y se recorre; no es construible aún.
+
+### Avisos UI → foco en el mundo (navegación)
+
+**Principio:** los paneles informan; el mundo es donde se resuelve el problema.
+
+La UI de avisos debe servir como **navegación por la colonia** cuando esta supera el viewport. Al tocar un aviso (p. ej. «Huerto dañado», «Valla rota», «Enfermería saturada», «Sector listo para recuperar»):
+
+1. La **cámara viaja / centra** el elemento o zona relacionada.  
+2. Lo **resalta** de forma breve.
+
+Implementación concreta puede llegar en fases posteriores de UI/alertas; el contrato espacial ya lo exige para colonias grandes.
+
 ### Sectores orgánicos (geometría del mundo)
 
 - **D1:** solo **Sector Núcleo** recuperado (alrededor del HQ).  
@@ -1838,6 +1857,7 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 - PLAN 2.7: HUMAN_GATE espacial temprano; ZZ-012 replanificada (pendiente).
 - **Cierre decisiones:** plantillas de recuperación (no receta universal); sin cupo artificial por sector; sectores sin macrogrid; radio max=1; clinic sin max arbitrario; recuperación v1 sin RNG punitivo; REVIEW_STOP tras ZZ-018; criterio fantasía B0.
 - **Aclaración escala:** viewport = ventana; mundo mayor que 844×390/932×430; pan/zoom/recenter; no caber toda la colonia en pantalla (§9.4).
+- **Mundo físico vs plano:** sectores = estado ambiental (no placas GIS permanentes); límites en modo expansión; avisos UI → foco cámara (§9.4).
 
 ## 2.6 (2026-08-15) — arranque, tutorial contextual, save v1 (Neni)
 - **Portada / inicio:** Continuar (principal si hay partida) · Nueva partida · sin slots (§31.5).  

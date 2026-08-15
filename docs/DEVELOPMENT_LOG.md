@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **COMPLETADA · REVIEW_STOP · PARADO** (no ZZ-019). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
+**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **CAMBIOS SOLICITADOS → ronda entregada · REVIEW_STOP · PARADO** (no ZZ-019). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -129,46 +129,50 @@ OK · Review sustituida.
 IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE NO · **REVIEW_STOP YES** · deps ZZ-017 APROBADA
 
 ## ESTADO CURSOR
-COMPLETADA. **PARADO** — ZZ-019 **NO iniciada**.
+COMPLETADA (ronda CAMBIOS SOLICITADOS). **PARADO** — ZZ-019 **NO iniciada**.
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN (REVIEW_STOP)
+CAMBIOS SOLICITADOS → ronda entregada · **PENDIENTE DE REVISIÓN** (REVIEW_STOP)
 
 ## APROBACIÓN FINAL CHATGPT
 NO
 
 ## CONTRATO ESCALA (antes de evidencia)
-GM §9.4 aclarado: viewport = ventana; mundo > 844×390 y 932×430; pan/pinch/recenter; no caber toda la colonia; sectores pueden quedar fuera; pregunta correcta = comodidad de recorrer/gestionar.
+GM §9.4: viewport = ventana; mundo > 844×390/932×430; pan/pinch/recenter; sectores fuera OK.
+**+** lectura mundo físico (no plano GIS); avisos UI → foco cámara (§9.4).
 
-## CAMBIOS
-- `js/sectors.js`: 7 sectores orgánicos (formas/áreas distintas); componentes situacionales; recuperación sin RNG punitivo.
-- Geometría ampliada (offsets ~±20–30): no caben todos a la vez en móvil.
-- `baseGrid` 14×12; SAVE_VERSION 6; `placeBuilding` solo en recuperado; tick recovery + amenaza perímetro.
-- Render: fills por sector (sin macrogrid); overlays solo expand/selección; yard clipado al núcleo.
-- UI: Más → Recuperar territorio; ficha sector + requisitos; `__zz.selectSector` / `setExpandMode` / `startRecovery`.
-- Tests: `smoke-sectors` (+ span fuera de viewport D1).
-- Review: pan H/V-diagonal, zoom cerca/lejos, recenter, 844×390, 740×360, desktop.
+## CAMBIOS (entrega inicial `54d7946`)
+- `js/sectors.js`: 7 sectores orgánicos; componentes; sin RNG punitivo.
+- Render/UI/tests/review pan-zoom.
 
-## AUTOCRÍTICA (10)
-1. **¿Macrogrid?** No: polígonos irregulares distintos; sin hexes uniformes.
-2. **¿Caben todos en pantalla?** No — evidencia pan este/oeste/sur lo demuestra.
-3. **¿Edificios empequeñecidos?** No: zoom D1 legible; 740×360 sin minificar mundo.
-4. **¿Cupo N por sector?** No implementado (prohibido).
-5. **¿RNG punitivo al recuperar?** No: avance por días de componentes → recovered.
-6. **¿Solo núcleo D1?** Sí.
-7. **¿Recuperación situacional?** Sí: componentes por sector (debris/wreck/acceso…).
-8. **¿Mundo continúa fuera?** Sí: capturas 05–07 / 13.
-9. **¿Recentrar útil?** Sí → Núcleo/HQ (10).
-10. **¿Deudas?** Dock full-width / chips HUD; blending yard aún mejorable; ZZ-019 no tocado.
+## RONDA CAMBIOS SOLICITADOS (post review visual ChatGPT)
+Problema: lectura “plano/tablero” (placas beige, dashes, isla núcleo, vacío negro).
+Correcciones:
+- Sin rellenos-polígono permanentes; identidad ambiental por zona (asfalto/pecios, ruinas, callejón, scrap, verde).
+- Yard art continuo bajo colonia (pan sigue viendo suelo texturizado).
+- Overlays solo expand/selección/recovering; sin contorno del recuperado en expand; sin dash GIS.
+- Cámara D1 más cerca (~3.05).
+- GM §9.4: mundo continuo + sectores=estado + avisos→cámara.
+- Review regenerada (12 tomas + contact sheet → Drive).
+
+## AUTOCRÍTICA (checklist ronda)
+1. ¿Sin overlays hay mundo interesante? Mejorado (textura continua + props); aún dependiente de art SVG vs foto.
+2. ¿Núcleo parte del mundo? Sí más que antes (sin placa clip); foundation HQ aún puede leerse algo “pegada”.
+3. ¿Pan muestra lugares distintos? Sí (oeste aparcamiento/pecios; este ruinas).
+4. ¿GIS reducido? Sí (sin fills/dash permanentes); expand aún tiene contornos tenues necesarios.
+5. ¿Límites solo cuando aportan? Sí (expand/selección/recovering).
+6. ¿Cámara cercana? Sí (~3.05).
+7. ¿Mundo continúa fuera? Sí.
+8. ¿Zonas reconocibles al volver? Parcial — aparcamiento vs ruinas sí; identidad aún mejorable con art dedicado.
 
 ## EVIDENCIA
-`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos, sin acumular).
+`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos).
 
 ## COMMIT
-`54d7946` — feat(ZZ-018): sectores orgánicos + mundo > viewport (REVIEW_STOP)
+*(ver hash tras commit de ronda)*
 
 ## Sync Drive/GitHub
-Masters + Review a Drive. **ZZ-019 NO iniciada. PARAR.**
+Masters + Review. **ZZ-019 NO. No deploy. PARAR.**
 
 ---
 

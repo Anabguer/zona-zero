@@ -1,5 +1,5 @@
 /**
- * ZZ-018 REVIEW_STOP — sectores orgánicos + mundo > viewport.
+ * ZZ-018 Ronda CAMBIOS SOLICITADOS — mundo físico > plano de sectores.
  * Requires: npx --yes serve -l 8765 .
  * Uso: node scripts/review-shots-zz018.mjs
  */
@@ -29,7 +29,7 @@ const gallery = [];
 const addShot = (file, title, note) => gallery.push({ file, title, note });
 
 async function shot(page, file, title, note) {
-  await page.waitForTimeout(380);
+  await page.waitForTimeout(400);
   await page.screenshot({ path: join(out, file), fullPage: false });
   addShot(file, title, note);
 }
@@ -44,20 +44,26 @@ async function boot(page) {
   if (err) throw new Error(err);
   await page.waitForSelector('#zz-app:not([hidden])', { timeout: 15000 });
   await page.waitForTimeout(500);
-  await page.evaluate(() => {
-    const s = window.__zz.getState();
-    s.resources.wood = Math.max(40, s.resources.wood || 0);
-    s.resources.metal = Math.max(40, s.resources.metal || 0);
-    if (s.population?.labor) s.population.labor.idle = Math.max(5, s.population.labor.idle || 0);
-  });
 }
 
 async function quietUi(page) {
   await page.evaluate(() => {
+    const s = window.__zz.getState?.();
+    if (s?.flags) {
+      s.flags.onboardingDone = true;
+      s.flags.onboardingActive = false;
+    }
+    if (s) {
+      s.selectedBuildingId = null;
+      s.selectedSectorId = null;
+      s.selectedZoneId = null;
+    }
     ['zz-coach', 'zz-day-brief', 'zz-sheet'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.hidden = true;
     });
+    window.__zz.setExpandMode?.(false);
+    window.__zz.paint?.();
   });
 }
 
@@ -75,74 +81,61 @@ const browser = await chromium.launch({ headless: true });
   await boot(page);
   await quietUi(page);
 
-  await shot(page, '01-d1-normal-no-overlays.png', '01 · D1 normal', 'Núcleo + entorno; sin overlays');
+  await shot(page, '01-d1-close-no-overlays.png', '01 · D1 cercano', 'HQ + entorno · sin overlays · es un lugar');
 
   await page.evaluate(() => {
-    window.__zz.selectSector('core');
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
+    window.__zz.panBy(-18, 2);
   });
-  await shot(page, '02-d1-core-selected.png', '02 · Sector Núcleo', 'Lectura del núcleo');
+  await quietUi(page);
+  await shot(page, '02-pan-west-place.png', '02 · Pan oeste', 'Aparcamiento / ruinas reales — no polígono vacío');
 
   await page.evaluate(() => {
-    document.getElementById('zz-sheet').hidden = true;
+    window.__zz.recenter();
+    window.__zz.panBy(16, -4);
+  });
+  await quietUi(page);
+  await shot(page, '03-pan-east-place.png', '03 · Pan este', 'Otra zona con identidad (ruinas)');
+
+  await page.evaluate(() => {
+    window.__zz.recenter();
+    window.__zz.zoomBy(1.28);
+  });
+  await quietUi(page);
+  await shot(page, '04-zoom-close.png', '04 · Zoom cercano', 'Detalle HQ / entorno');
+
+  await page.evaluate(() => {
+    window.__zz.zoomBy(1 / 1.55);
+  });
+  await quietUi(page);
+  await shot(page, '05-zoom-out.png', '05 · Zoom alejado', 'Lectura más global · mundo continúa');
+
+  await page.evaluate(() => {
+    window.__zz.recenter();
+  });
+  await quietUi(page);
+  await shot(page, '06-recenter.png', '06 · Recentrar', 'Vuelve a Núcleo/HQ');
+
+  await page.evaluate(() => {
     window.__zz.setExpandMode(true);
     document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
   });
-  await shot(page, '03-expand-mode-partial.png', '03 · Modo expansión', 'No caben todos los sectores a la vez');
+  await shot(page, '07-expand-mode.png', '07 · Modo expansión', 'Límites tenues · sin GIS de tablero');
 
   await page.evaluate(() => {
     window.__zz.selectSector('lot_west');
     document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
   });
-  await shot(page, '04-sector-selected-requirements.png', '04 · Sector + requisitos', 'Aparcamiento / componentes');
+  await shot(page, '08-sector-selected.png', '08 · Sector seleccionado', 'Remarcado claro; resto secundario');
 
   await page.evaluate(() => {
     document.getElementById('zz-sheet').hidden = true;
-    window.__zz.panBy(-20, 2);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '05-pan-west-continues.png', '05 · Pan oeste', 'El mundo continúa fuera del viewport');
-
-  await page.evaluate(() => {
-    window.__zz.recenter();
-    window.__zz.panBy(18, -6);
-    window.__zz.selectSector('ruins_east');
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '06-pan-east-other-shape.png', '06 · Pan este', 'Otra geometría (ruinas)');
-
-  await page.evaluate(() => {
-    document.getElementById('zz-sheet').hidden = true;
-    window.__zz.recenter();
-    window.__zz.panBy(-8, 16);
-    window.__zz.setExpandMode(true);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '07-pan-south-diagonal.png', '07 · Pan sur/diagonal', 'Callejón / scrap fuera del centro');
-
-  await page.evaluate(() => {
-    window.__zz.recenter();
-    window.__zz.zoomBy(1.35);
     window.__zz.setExpandMode(false);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '08-zoom-close.png', '08 · Zoom cercano', 'Edificios legibles; no empequeñecidos');
-
-  await page.evaluate(() => {
-    window.__zz.zoomBy(1 / 1.55);
-    window.__zz.setExpandMode(true);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '09-zoom-out-global.png', '09 · Zoom alejado', 'Lectura más global (sigue > viewport)');
-
-  await page.evaluate(() => {
     window.__zz.recenter();
-    window.__zz.setExpandMode(false);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
   });
-  await shot(page, '10-recenter-core.png', '10 · Recentrar', 'Vuelve al Núcleo/HQ');
+  await quietUi(page);
+  await shot(page, '09-core-blended.png', '09 · Núcleo fundido', 'Sin isla · parte del mundo');
 
-  await shot(page, '11-844x390.png', '11 · 844×390', 'Composición landscape');
+  await shot(page, '10-844x390.png', '10 · 844×390', 'Landscape');
   await ctx.close();
 }
 
@@ -156,12 +149,7 @@ const browser = await chromium.launch({ headless: true });
   const page = await ctx.newPage();
   await boot(page);
   await quietUi(page);
-  await shot(page, '12-740x360-normal.png', '12 · 740×360', 'Manejable sin empequeñecer el mundo');
-  await page.evaluate(() => {
-    window.__zz.panBy(-16, 4);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '13-740x360-pan.png', '13 · 740×360 pan', 'Mismo mundo, cámara desplazada');
+  await shot(page, '11-740x360.png', '11 · 740×360', 'Manejable · mundo no empequeñecido');
   await ctx.close();
 }
 
@@ -170,12 +158,7 @@ const browser = await chromium.launch({ headless: true });
   const page = await ctx.newPage();
   await boot(page);
   await quietUi(page);
-  await shot(page, '14-desktop-normal.png', '14 · Desktop normal', 'Sin overlays');
-  await page.evaluate(() => {
-    window.__zz.setExpandMode(true);
-    document.getElementById('zz-coach') && (document.getElementById('zz-coach').hidden = true);
-  });
-  await shot(page, '15-desktop-expand.png', '15 · Desktop expansión', 'Sectores orgánicos');
+  await shot(page, '12-desktop.png', '12 · Desktop', 'Mundo continuo sin overlays');
   await ctx.close();
 }
 
@@ -187,7 +170,7 @@ writeFileSync(
 <html lang="es"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ZZ-018 Review · Sectores + mundo &gt; viewport</title>
+<title>ZZ-018 Ronda · Mundo físico (no plano)</title>
 <style>
 body{margin:0;background:#12100c;color:#e8e0d0;font-family:system-ui,sans-serif}
 header{padding:1.25rem 1.5rem;border-bottom:1px solid #333}
@@ -201,8 +184,8 @@ figcaption strong{display:block}
 figcaption span{opacity:.7;font-size:.78rem}
 </style></head><body>
 <header>
-  <h1>ZZ-018 · Sectores orgánicos + mundo &gt; viewport (REVIEW_STOP)</h1>
-  <p>ZZ-019 NO iniciada · No deploy · Viewport = ventana</p>
+  <h1>ZZ-018 · CAMBIOS SOLICITADOS — mundo físico recorrible</h1>
+  <p>REVIEW_STOP · ZZ-019 NO · Sin overlays = lugar · Expand = qué recuperar</p>
 </header>
 <div class="grid">
 ${gallery
@@ -215,7 +198,7 @@ ${gallery
 
 {
   const b2 = await chromium.launch({ headless: true });
-  const p = await b2.newPage({ viewport: { width: 1800, height: 2600 } });
+  const p = await b2.newPage({ viewport: { width: 1800, height: 2400 } });
   await p.goto(`file://${out.replace(/\\/g, '/')}/index.html`, { waitUntil: 'networkidle' });
   await p.waitForTimeout(900);
   await p.screenshot({
@@ -230,4 +213,4 @@ ${gallery
 for (const f of readdirSync(out)) {
   copyFileSync(join(out, f), join(drive, f));
 }
-console.log('ZZ-018 review OK', gallery.map((g) => g.file).join(', '));
+console.log('ZZ-018 ronda review OK', gallery.map((g) => g.file).join(', '));

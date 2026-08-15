@@ -485,8 +485,8 @@ body.zz-body {
   pointer-events: none;
 }
 .zz-settle-foundation {
-  fill: #3c342c;
-  opacity: 0.92;
+  fill: #2e2822;
+  opacity: 0.55;
   stroke: none;
   pointer-events: none;
 }
@@ -516,62 +516,94 @@ body.zz-body {
   pointer-events: none;
 }
 
-/* ZZ-018 sectores orgánicos */
+/* ZZ-018 sectores — estado ambiental, no placas GIS */
 .zz-sector-fill {
+  display: none !important;
+}
+.zz-sector-soil {
   pointer-events: none;
   stroke: none;
 }
-.zz-sector-fill--core {
-  fill: rgba(90, 72, 48, 0.42);
+.zz-sector-soil--clean {
+  fill: rgba(60, 54, 42, 0.14);
 }
-.zz-sector-fill--recovered {
-  fill: rgba(70, 78, 52, 0.28);
+.zz-sector-soil--wild {
+  fill: rgba(55, 48, 38, 0.12);
 }
-.zz-sector-fill--recovering {
-  fill: rgba(120, 95, 45, 0.35);
+.zz-sector-asphalt {
+  fill: #4a453c;
+  opacity: 0.18;
+  pointer-events: none;
+}
+.zz-sector-park-mark {
+  fill: #b8a888;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.zz-settle-yard-art--wide {
+  opacity: 0.48;
+}
+.zz-sector-alley {
+  stroke: #4a4438;
+  stroke-width: 1.1;
+  opacity: 0.55;
+}
+.zz-sector-scrub-wild {
+  fill: #2a3828;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.zz-sector-recovering-glow {
+  fill: rgba(180, 130, 50, 0.14);
+  pointer-events: none;
+}
+.zz-settle-yard-blend {
+  display: none;
 }
 .zz-sector-hit {
   pointer-events: all;
 }
 .zz-sector-outline {
   fill: none;
-  stroke: rgba(200, 170, 100, 0.0);
-  stroke-width: 0.35;
+  stroke: transparent;
+  stroke-width: 0.4;
   pointer-events: none;
 }
-.zz-sector-outline--recovered.is-selected,
+/* Expand: contorno tenue, sin dash GIS */
 .zz-sector-outline--recovered.is-expand {
-  fill: rgba(120, 150, 90, 0.12);
-  stroke: rgba(160, 190, 120, 0.55);
-  stroke-dasharray: 1.2 0.8;
+  fill: rgba(90, 110, 70, 0.04);
+  stroke: rgba(140, 160, 110, 0.2);
+  stroke-dasharray: none;
 }
 .zz-sector-outline--locked.is-expand {
-  fill: rgba(40, 36, 30, 0.18);
-  stroke: rgba(200, 160, 90, 0.65);
-  stroke-dasharray: 1.4 1.1;
-}
-.zz-sector-outline--locked.is-selected {
-  fill: rgba(90, 70, 40, 0.28);
-  stroke: rgba(230, 190, 110, 0.9);
+  fill: rgba(20, 18, 14, 0.04);
+  stroke: rgba(190, 150, 90, 0.22);
   stroke-dasharray: none;
-  stroke-width: 0.45;
+}
+.zz-sector-outline--locked.is-selected,
+.zz-sector-outline--recovered.is-selected {
+  fill: rgba(100, 80, 45, 0.12);
+  stroke: rgba(230, 190, 120, 0.62);
+  stroke-width: 0.48;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 0.45px rgba(230, 190, 110, 0.35));
 }
 .zz-sector-outline--recovering {
-  fill: rgba(160, 120, 50, 0.22);
-  stroke: rgba(220, 170, 80, 0.85);
-  stroke-dasharray: 0.9 0.7;
+  fill: rgba(160, 120, 50, 0.14);
+  stroke: rgba(220, 170, 80, 0.55);
+  stroke-dasharray: none;
 }
 .zz-sector-outline.is-selected {
-  stroke-width: 0.5;
+  stroke-width: 0.55;
 }
 .zz-sector-label {
   fill: #e8dcc0;
-  font-size: 1.35px;
+  font-size: 1.2px;
   font-family: var(--zz-display);
   font-weight: 700;
   paint-order: stroke;
-  stroke: rgba(0, 0, 0, 0.75);
-  stroke-width: 0.35px;
+  stroke: rgba(0, 0, 0, 0.7);
+  stroke-width: 0.3px;
   pointer-events: none;
 }
 .zz-sector-problems {
@@ -584,7 +616,7 @@ body.zz-body {
   margin: 0.2rem 0;
 }
 .zz-ground-camp-halo {
-  fill: rgba(55, 48, 36, 0.35);
+  fill: rgba(48, 42, 32, 0.1);
   pointer-events: none;
 }
 .zz-settle-yard-patch {
@@ -835,7 +867,11 @@ body.zz-body {
 .zz-prop-fire { fill: #f0a040; }
 .zz-prop-fire-glow { fill: #f0a040; opacity: 0.28; filter: blur(0.35px); }
 .zz-prop-lamp { fill: #e8c070; opacity: 0.7; }
-.zz-prop-vehicle { fill: #3a4548; stroke: #8a9aa0; stroke-width: 0.12; }
+.zz-prop-vehicle { fill: #5a4538; stroke: #2a1e16; stroke-width: 0.08; opacity: 0.92; }
+.zz-prop-vehicle-cab { fill: #3e3228; stroke: #1a1410; stroke-width: 0.06; opacity: 0.9; }
+.zz-prop-vehicle-wheel { fill: #12100e; stroke: #2a2420; stroke-width: 0.05; }
+.zz-prop-vehicle-rust { fill: #8a5a38; opacity: 0.55; }
+.zz-prop-shadow { fill: rgba(0, 0, 0, 0.28); pointer-events: none; }
 .zz-settle-person-body { fill: #8a6a48; }
 .zz-landmark-park { fill: #2a4030; opacity: 0.7; }
 .zz-landmark-ind { fill: #3a3a42; stroke: #6a6a72; stroke-width: 0.15; }
