@@ -775,7 +775,7 @@ Tras corrección: **comienzo de videojuego**. Primera versión dejaba la portada
 COMPLETADA
 
 ## COMMIT
-(pendiente push en este cierre)
+`8110b34` � feat(ZZ-008) intro + cierre ZZ-007
 
 ## REVISIÓN CHATGPT
 Pendiente — HUMAN_GATE.
