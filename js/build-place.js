@@ -1,7 +1,7 @@
 /**
  * ZZ-019 — colocación semilibre + snap invisible (§9.2 / §9.6).
  */
-import { isCellBuildable, ensureSectors } from './sectors.js';
+import { isCellBuildable, ensureSectors, sectorForCell } from './sectors.js';
 import { canAfford } from './sim.js';
 
 export function settlementScale(state) {
@@ -59,7 +59,11 @@ export function ghostPlacementOk(state, content, type, x, y) {
   if (x < 0 || y < 0 || x >= state.base.w || y >= state.base.h) {
     return { ok: false, reason: 'Fuera de la base' };
   }
-  if (!isCellBuildable(state, x, y)) return { ok: false, reason: 'Terreno no recuperado' };
+  if (!isCellBuildable(state, x, y)) {
+    const sec = sectorForCell(state, x, y);
+    if (sec?.status === 'recovered') return { ok: false, reason: 'Terreno no edificable (camino/ruina)' };
+    return { ok: false, reason: 'Terreno no recuperado' };
+  }
   if (!isCellFree(state, x, y)) return { ok: false, reason: 'Celda ocupada' };
   if (!canAfford(state, def.cost)) return { ok: false, reason: 'Recursos insuficientes' };
   const count = (state.base.buildings || []).filter((b) => b.type === type && b.hp > 0).length;

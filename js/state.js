@@ -200,7 +200,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     uiMode: null, // 'build' | 'explore' | null
     buildMode: null,
     mapCamera: { x: 50, y: 48, zoom: 1.15 },
-    layoutVersion: 2,
+    layoutVersion: 3,
     sectors: createColonySectors(zones.find((z) => z.type === 'camp') || { x: 48, y: 62 }),
     lastDayBrief: null,
     equipment: { weapon: 'none', armor: 'none', vehicleId: null },

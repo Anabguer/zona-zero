@@ -8,6 +8,7 @@ import {
   ensureSectors,
   ptsStr as sectorPtsStr,
   getSector,
+  recoveredSurfaces,
 } from './sectors.js';
 
 const VB_SQ = 100;
@@ -226,15 +227,35 @@ function drawPlayableTerrain(parent, camp, tier, day) {
     const halo = irregularPatch(camp.x, camp.y + 1.0, early ? 28 : 18, early ? 22 : 14, rngH, 11);
     g.appendChild(svgEl('polygon', { points: ptsStr(halo), class: 'zz-ground-camp-halo' }));
   }
-  // Calles rotas cerca del camp (continuidad ciudad)
+  // Calles diseñadas cerca del camp (estructura visual del mundo — no jugables)
   if (camp && early) {
+    // Eje E–W principal (carretera apocalíptica)
+    g.appendChild(
+      svgEl('path', {
+        d: `M${(camp.x - 26).toFixed(1)} ${(camp.y + 0.4).toFixed(1)} Q${camp.x.toFixed(1)} ${(camp.y + 1.2).toFixed(1)} ${(camp.x + 26).toFixed(1)} ${(camp.y + 0.2).toFixed(1)}`,
+        class: 'zz-map-street-path zz-map-street-path--arterial',
+        fill: 'none',
+        'stroke-width': '3.2',
+        opacity: '0.55',
+      })
+    );
+    // Ramal N–S débil
+    g.appendChild(
+      svgEl('path', {
+        d: `M${(camp.x + 0.6).toFixed(1)} ${(camp.y - 18).toFixed(1)} Q${(camp.x - 0.5).toFixed(1)} ${camp.y.toFixed(1)} ${(camp.x + 1.2).toFixed(1)} ${(camp.y + 18).toFixed(1)}`,
+        class: 'zz-map-street-path',
+        fill: 'none',
+        'stroke-width': '2.2',
+        opacity: '0.42',
+      })
+    );
     const roadRng = createRng(hashSeed(`roads-near:${camp.id || 'c'}`));
-    for (let i = 0; i < 5; i++) {
-      const ang = roadRng.float(0, Math.PI * 2);
-      const x1 = camp.x + Math.cos(ang) * roadRng.float(6, 10);
-      const y1 = camp.y + Math.sin(ang) * roadRng.float(5, 8);
-      const x2 = camp.x + Math.cos(ang) * roadRng.float(18, 28);
-      const y2 = camp.y + Math.sin(ang) * roadRng.float(14, 24);
+    for (let i = 0; i < 3; i++) {
+      const ang = roadRng.float(0.2, Math.PI * 2);
+      const x1 = camp.x + Math.cos(ang) * roadRng.float(8, 12);
+      const y1 = camp.y + Math.sin(ang) * roadRng.float(6, 10);
+      const x2 = camp.x + Math.cos(ang) * roadRng.float(20, 30);
+      const y2 = camp.y + Math.sin(ang) * roadRng.float(16, 26);
       const mx = (x1 + x2) / 2 + roadRng.float(-2, 2);
       const my = (y1 + y2) / 2 + roadRng.float(-2, 2);
       g.appendChild(
@@ -242,8 +263,8 @@ function drawPlayableTerrain(parent, camp, tier, day) {
           d: `M${x1.toFixed(1)} ${y1.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`,
           class: 'zz-map-street-path',
           fill: 'none',
-          'stroke-width': '1.8',
-          opacity: '0.4',
+          'stroke-width': '1.6',
+          opacity: '0.35',
         })
       );
     }
@@ -513,20 +534,42 @@ function drawSectorIdentity(layer, sec, rng) {
 
   switch (sec.id) {
     case 'core': {
-      // Caminos suaves + restos ligeros — mismo mundo, más limpio
-      for (let i = 0; i < 3; i++) {
-        const a = (i / 3) * Math.PI * 2 + 0.4;
-        layer.appendChild(
-          svgEl('path', {
-            d: `M0 0 Q${Math.cos(a) * 4.5} ${Math.sin(a) * 3.2} ${Math.cos(a) * 7} ${Math.sin(a) * 5}`,
-            class: 'zz-settle-path-dirt',
-            fill: 'none',
-          })
-        );
-      }
+      // Carretera E–W estructural (solo visual) — parte el núcleo; superficies a lados/sur
+      layer.appendChild(
+        svgEl('path', {
+          d: 'M-11 0.35 Q-2 1.1 0 0.2 Q3 -0.4 11 0.15',
+          class: 'zz-settle-road-asphalt',
+          fill: 'none',
+        })
+      );
+      layer.appendChild(
+        svgEl('path', {
+          d: 'M-10.5 0.35 Q-2 1.1 0 0.2 Q3 -0.4 10.5 0.15',
+          class: 'zz-settle-road-edge',
+          fill: 'none',
+        })
+      );
+      // Vallas rotas / restos (futuro perímetro — solo visual)
+      layer.appendChild(
+        svgEl('path', {
+          d: 'M-8.5 -5.2 L-5.5 -5.5 L-2.8 -4.8',
+          class: 'zz-settle-fence-seg',
+          fill: 'none',
+        })
+      );
+      layer.appendChild(
+        svgEl('path', {
+          d: 'M6.5 -5.0 L9.2 -4.6 L11.0 -5.4',
+          class: 'zz-settle-fence-seg',
+          fill: 'none',
+        })
+      );
+      placeWall(-1.2, -3.6, 2.4, 0.32, -8);
+      placeWall(0.8, -3.2, 1.6, 0.28, 12);
+      placeDebris(-0.4, -2.8, 0.9);
+      placeDebris(1.1, -2.4, 0.7);
       drawProp(layer, 'lamp', 3.2, -2.4, 0.85);
       drawProp(layer, 'crate', -4.5, 2.8, 0.75);
-      placeWall(-6.5, -3.2, 2.8, 0.28, 18);
       placeDebris(-5.2, 4.1, 0.65);
       placeDebris(5.5, 3.2, 0.7);
       placeDebris(4.8, -4.5, 0.6);
@@ -800,6 +843,29 @@ function drawBuildingFoundation(wrap, cell, rng) {
   wrap.appendChild(svgEl('polygon', { points: ptsStr(pad), class: 'zz-settle-foundation' }));
 }
 
+/** Solo en modo Construir: revelar superficies edificables (no parcelas permanentes). */
+function drawBuildableSurfaceHints(layer, state, scale, bw, bh) {
+  const group = svgEl('g', { class: 'zz-settle-surfaces', 'aria-hidden': 'true' });
+  recoveredSurfaces(state).forEach(({ surface }) => {
+    const cells = surface.cells || [];
+    if (!cells.length) return;
+    cells.forEach(([cx, cy]) => {
+      const lx = (cx - bw / 2 + 0.5) * scale;
+      const ly = (cy - bh / 2 + 0.5) * scale;
+      const s = scale * 0.92;
+      group.appendChild(
+        svgEl('ellipse', {
+          cx: lx,
+          cy: ly + s * 0.12,
+          rx: s * 0.46,
+          ry: s * 0.28,
+          class: 'zz-settle-surface-pad',
+        })
+      );
+    });
+  });
+  layer.appendChild(group);
+}
 
 function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPointer } = {}) {
   const buildings = (state.base?.buildings || []).filter((b) => b.hp > 0);
@@ -841,6 +907,9 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPoi
   drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day, state, camp);
 
   const buildMode = state.uiMode === 'build' && state.buildMode;
+  if (buildMode) {
+    drawBuildableSurfaceHints(layer, state, scale, bw, bh);
+  }
   if (buildMode && state.buildGhost) {
     const gx = state.buildGhost.x;
     const gy = state.buildGhost.y;

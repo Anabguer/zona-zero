@@ -1,7 +1,7 @@
 /**
- * ZZ-018 — Sectores orgánicos de colonia (sin macrogrid).
- * Geometría irregular en coords de mapa + celdas de base asignadas.
- * Escala: mundo > viewport móvil — sectores NO caben todos a la vez (§9.4).
+ * ZZ-018 / ZZ-019A — Sectores orgánicos + superficies edificables.
+ * Geometría irregular en coords de mapa. SECTOR ≠ PARCELA (§9.4 2.8).
+ * Escala: mundo > viewport móvil — sectores NO caben todos a la vez.
  */
 import { clamp } from './util.js';
 
@@ -17,12 +17,98 @@ export const COMPONENT_LABEL = {
   explore_local: 'Zona poco reconocida',
 };
 
+/** Unión de celdas de superficies (+ opcionales estructura). */
+function unionCells(...lists) {
+  const seen = new Set();
+  const out = [];
+  lists.flat().forEach((c) => {
+    const k = `${c[0]},${c[1]}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push([c[0], c[1]]);
+  });
+  return out;
+}
+
+/**
+ * Núcleo 2.8: mundo primero (carretera E–W + resto norte),
+ * luego superficies disjuntas A/B/C + pad HQ.
+ * HQ spawn = (7,5) en grid 14×12.
+ */
+function coreSurfacesAndStructure() {
+  const surfA = {
+    id: 'explanada_oeste',
+    name: 'Explanada oeste',
+    cells: [
+      [4, 3],
+      [5, 3],
+      [4, 4],
+      [5, 4],
+      [4, 5],
+      [5, 5],
+    ],
+  };
+  const surfB = {
+    id: 'explanada_este',
+    name: 'Explanada este',
+    cells: [
+      [9, 3],
+      [10, 3],
+      [9, 4],
+      [10, 4],
+      [9, 5],
+      [10, 5],
+    ],
+  };
+  const surfC = {
+    id: 'patio_sur',
+    name: 'Patio sur',
+    cells: [
+      [5, 7],
+      [6, 7],
+      [7, 7],
+      [8, 7],
+      [5, 8],
+      [6, 8],
+      [7, 8],
+      [8, 8],
+    ],
+  };
+  const surfHq = {
+    id: 'nucleo_hq',
+    name: 'Plataforma del refugio',
+    cells: [[7, 5]],
+  };
+  // Estructura del mundo (NO edificable): carretera E–W + resto norte + borde
+  const structure = [
+    [6, 5],
+    [8, 5],
+    [6, 4],
+    [7, 4],
+    [8, 4],
+    [6, 3],
+    [7, 3],
+    [8, 3],
+    [6, 6],
+    [7, 6],
+    [8, 6],
+  ];
+  const surfaces = [surfA, surfB, surfC, surfHq];
+  const cells = unionCells(...surfaces.map((s) => s.cells), structure);
+  return { surfaces, cells, structure };
+}
+
+function singleSurfaceFromCells(id, cells) {
+  return [{ id, name: id, cells: cells.map((c) => [...c]) }];
+}
+
 /**
  * Offsets en unidades de mapa (camp-local).
  * Núcleo compacto y legible; vecinos lejos → pan obligatorio en 844×390.
  */
 function sectorBlueprints() {
-  return [
+  const core = coreSurfacesAndStructure();
+  const bps = [
     {
       id: 'core',
       name: 'Sector Núcleo',
@@ -41,7 +127,9 @@ function sectorBlueprints() {
         [-8.5, 1.5],
       ],
       components: [],
-      cells: compactCoreCells(),
+      surfaces: core.surfaces,
+      cells: core.cells,
+      structureCells: core.structure,
     },
     {
       id: 'lot_west',
@@ -50,7 +138,6 @@ function sectorBlueprints() {
       gain: 'Suelo alargado — buen sitio para huertos o almacenes en fila.',
       adjacent: ['core', 'scrap_sw', 'yard_north'],
       status: 'locked',
-      // Centro ~−22: fuera del viewport D1 centrado
       polyOff: [
         [-28.0, -6.0],
         [-12.0, -7.5],
@@ -100,17 +187,17 @@ function sectorBlueprints() {
         { type: 'blocked_access', days: 1, labor: 1, wood: 3 },
       ],
       cells: [
-        [10, 2],
         [11, 2],
         [12, 2],
-        [10, 3],
+        [13, 2],
         [11, 3],
         [12, 3],
+        [13, 3],
         [11, 4],
         [12, 4],
-        [12, 5],
-        [13, 3],
         [13, 4],
+        [12, 5],
+        [13, 5],
       ],
     },
     {
@@ -133,16 +220,14 @@ function sectorBlueprints() {
         { type: 'unsafe_perimeter', days: 1, labor: 1, wood: 3, metal: 1 },
       ],
       cells: [
-        [5, 8],
-        [6, 8],
-        [7, 8],
-        [8, 8],
         [5, 9],
         [6, 9],
         [7, 9],
         [8, 9],
+        [5, 10],
         [6, 10],
         [7, 10],
+        [8, 10],
       ],
     },
     {
@@ -250,25 +335,12 @@ function sectorBlueprints() {
       ],
     },
   ];
-}
-
-function compactCoreCells() {
-  return [
-    [5, 3],
-    [6, 3],
-    [7, 3],
-    [8, 3],
-    [5, 4],
-    [6, 4],
-    [7, 4],
-    [8, 4],
-    [5, 5],
-    [6, 5],
-    [7, 5],
-    [8, 5],
-    [6, 6],
-    [7, 6],
-  ];
+  return bps.map((bp) => {
+    if (!bp.surfaces) {
+      bp.surfaces = singleSurfaceFromCells(`${bp.id}_main`, bp.cells);
+    }
+    return bp;
+  });
 }
 
 export function pointInPoly(x, y, poly) {
@@ -288,6 +360,14 @@ export function absPoly(camp, polyOff) {
   return polyOff.map(([dx, dy]) => [camp.x + dx, camp.y + dy]);
 }
 
+function hydrateSurfaces(bp) {
+  return (bp.surfaces || singleSurfaceFromCells(`${bp.id}_main`, bp.cells || [])).map((s) => ({
+    id: s.id,
+    name: s.name || s.id,
+    cells: (s.cells || []).map((c) => [...c]),
+  }));
+}
+
 export function createColonySectors(camp) {
   const c = camp || { x: 48, y: 62 };
   return sectorBlueprints().map((bp) => ({
@@ -300,10 +380,20 @@ export function createColonySectors(camp) {
     poly: absPoly(c, bp.polyOff),
     polyOff: bp.polyOff.map((p) => [...p]),
     components: (bp.components || []).map((comp) => ({ ...comp })),
+    surfaces: hydrateSurfaces(bp),
     cells: (bp.cells || []).map((cell) => [...cell]),
+    structureCells: (bp.structureCells || []).map((cell) => [...cell]),
     clearBonus: bp.clearBonus ? { ...bp.clearBonus } : null,
     recover: null,
   }));
+}
+
+function needsSurfaceRehydrate(sectors) {
+  if (!Array.isArray(sectors) || !sectors.length) return true;
+  const core = sectors.find((s) => s.id === 'core');
+  if (!core) return true;
+  if (!Array.isArray(core.surfaces) || core.surfaces.length < 2) return true;
+  return false;
 }
 
 export function ensureSectors(state) {
@@ -319,7 +409,6 @@ export function ensureSectors(state) {
     });
     state.sectors = list;
   }
-  // Rehidratar geometría si viene de save antiguo con polys demasiado compactos
   if (Array.isArray(state.sectors) && state.sectors[0]?.polyOff) {
     const span = state.sectors.reduce((m, s) => {
       (s.polyOff || []).forEach(([x, y]) => {
@@ -327,7 +416,7 @@ export function ensureSectors(state) {
       });
       return m;
     }, 0);
-    if (span < 18) {
+    if (span < 18 || needsSurfaceRehydrate(state.sectors) || (state.layoutVersion || 0) < 3) {
       const statuses = Object.fromEntries(state.sectors.map((s) => [s.id, s.status]));
       const recovering = Object.fromEntries(
         state.sectors.filter((s) => s.recover).map((s) => [s.id, s.recover])
@@ -339,7 +428,12 @@ export function ensureSectors(state) {
       }));
     }
   }
-  state.layoutVersion = Math.max(2, state.layoutVersion || 1);
+  state.sectors.forEach((s) => {
+    if (!Array.isArray(s.surfaces) || !s.surfaces.length) {
+      s.surfaces = singleSurfaceFromCells(`${s.id}_main`, s.cells || []);
+    }
+  });
+  state.layoutVersion = Math.max(3, state.layoutVersion || 1);
   return state.sectors;
 }
 
@@ -353,9 +447,29 @@ export function sectorForCell(state, x, y) {
   return state.sectors.find((s) => (s.cells || []).some((c) => c[0] === x && c[1] === y)) || null;
 }
 
+export function surfaceForCell(state, x, y) {
+  ensureSectors(state);
+  for (const sec of state.sectors) {
+    if (sec.status !== 'recovered') continue;
+    const surf = (sec.surfaces || []).find((s) => (s.cells || []).some((c) => c[0] === x && c[1] === y));
+    if (surf) return { sector: sec, surface: surf };
+  }
+  return null;
+}
+
+/** Celda dentro de una superficie edificable de sector recuperado (2.8). */
 export function isCellBuildable(state, x, y) {
-  const sec = sectorForCell(state, x, y);
-  return !!(sec && sec.status === 'recovered');
+  return !!surfaceForCell(state, x, y);
+}
+
+export function recoveredSurfaces(state) {
+  ensureSectors(state);
+  const out = [];
+  state.sectors.forEach((sec) => {
+    if (sec.status !== 'recovered') return;
+    (sec.surfaces || []).forEach((surf) => out.push({ sector: sec, surface: surf }));
+  });
+  return out;
 }
 
 export function recoveredSectorIds(state) {

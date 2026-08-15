@@ -32,6 +32,8 @@ const { ensureOnboarding, checkOnboardingProgress, onboardingStatus } = await im
 const { recenterCamera, clampCamera, zoomCameraBy, panCameraBy } = await import(
   pathToFileURL(join(root, 'js', 'render-map.js')).href
 );
+const { freeBuildableCells } = await import(pathToFileURL(join(root, 'js', 'build-place.js')).href);
+const { recoveredSurfaces, isCellBuildable } = await import(pathToFileURL(join(root, 'js', 'sectors.js')).href);
 
 let fails = 0;
 function assert(c, m) {
@@ -73,14 +75,14 @@ assert(/Núcleo|huerto/i.test(onboardingStatus(state)?.step?.text || ''), 'tip m
 function free() {
   const cx = Math.floor(state.base.w / 2);
   const cy = Math.floor(state.base.h / 2);
-  const cells = [];
-  for (let y = 0; y < state.base.h; y++)
-    for (let x = 0; x < state.base.w; x++)
-      if (!state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0))
-        cells.push([x, y, Math.abs(x - cx) + Math.abs(y - cy)]);
+  const cells = freeBuildableCells(state).map(([x, y]) => [x, y, Math.abs(x - cx) + Math.abs(y - cy)]);
   cells.sort((a, b) => a[2] - b[2]);
   return cells[0];
 }
+
+assert(recoveredSurfaces(state).length >= 3, 'núcleo con varias superficies');
+assert(!isCellBuildable(state, 7, 4), 'carretera/estructura no edificable');
+assert(isCellBuildable(state, 5, 3), 'explanada oeste edificable');
 
 const [fx, fy] = free();
 assert(placeBuilding(state, content, 'farm', fx, fy).ok, 'huerto');

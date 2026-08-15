@@ -639,6 +639,27 @@ body.zz-body {
 .zz-prop-barrel { fill: #2e3a42; opacity: 0.85; }
 .zz-prop-fire-glow { fill: #c06020; opacity: 0.45; }
 .zz-prop-fire { fill: #e08030; opacity: 0.8; }
+.zz-settle-road-asphalt {
+  stroke: #3a3834;
+  stroke-width: 2.4;
+  opacity: 0.72;
+  stroke-linecap: round;
+}
+.zz-settle-road-edge {
+  stroke: #5a564c;
+  stroke-width: 2.8;
+  opacity: 0.28;
+  stroke-linecap: round;
+}
+.zz-settle-surface-pad {
+  fill: rgba(196, 168, 96, 0.22);
+  stroke: rgba(220, 190, 110, 0.45);
+  stroke-width: 0.12;
+  pointer-events: none;
+}
+.zz-map-street-path--arterial {
+  stroke: #2c2a26;
+}
 .zz-settle-path-dirt {
   stroke: #564838;
   stroke-width: 0.75;

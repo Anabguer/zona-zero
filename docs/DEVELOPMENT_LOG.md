@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019 **APROBADAS**. · Reforma docs **2.8** entregada · **PENDIENTE DE REVISIÓN**. · ZZ-012 **CAMBIOS SOLICITADOS** (bloqueada hasta ZZ-019A). · **No ZZ-013**. No deploy. · **PARADO en documentación**.
+**Estado global:** ZZ-016…019 **APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-019A COMPLETADA · PENDIENTE DE REVISIÓN (REVIEW_STOP)**. · ZZ-012 **CAMBIOS SOLICITADOS** (no iniciar). · No ZZ-013. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -280,19 +280,61 @@ Colonia > viewport · sectores orgánicos · sin macrogrid · sin cupo N · semi
 - Caminos/muros como notas de contrato (sin mecánicas nuevas).
 - Fase ZZ-019A.
 
-## DUDAS REALES NENI/CHATGPT (PARAR Y PREGUNTAR)
-1. ¿ZZ-019A debe ser también **HUMAN_GATE**, o basta **REVIEW_STOP**? (propuesta Cursor: solo REVIEW_STOP).
-2. ¿Un sector recuperado puede tener **varias** superficies disjuntas? (propuesta Cursor: sí, si el escenario lo justifica).
-3. ¿Algún camino/valla debe ser **reparable en v1**, o queda solo visual hasta fases C/defensa? (propuesta Cursor: solo visual en ZZ-019A).
+## DUDAS REALES NENI/CHATGPT
+**CERRADAS 2026-08-16:**
+1. ZZ-019A = **REVIEW_STOP** (no HUMAN_GATE extra).
+2. Varias superficies por sector = **SÍ** (SECTOR ≠ PARCELA).
+3. Caminos/vallas en 019A = **solo visual**.
 
 ## ESTADO
-Reforma docs **entregada · PENDIENTE DE REVISIÓN**. Sin implementación. Sin deploy. Sin ZZ-012/013.
-
-## COMMIT
-`e3af894` — docs(2.8): superficies edificables + escenario diseñado (PARAR)
+Docs **2.8 APROBADO**. Implementación → fase ZZ-019A abajo.
 
 ## APROBACIÓN REFORMA 2.8
-NO (pendiente Neni/ChatGPT)
+SÍ (Neni+ChatGPT)
+
+## COMMIT
+`e3af894` / `d8616d0` (docs). Implementación: ver ZZ-019A.
+
+---
+
+# FASE ZZ-019A — Escenario diseñado + superficies edificables (REVIEW_STOP)
+
+IMPLEMENTATION_PLAN 2.8 · B0 · **REVIEW_STOP YES** · deps ZZ-019 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA (código + evidencias). **PARADO** — no ZZ-012.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+## APROBACIÓN CONTINUACIÓN CHATGPT
+NO
+
+## CAMBIOS
+- `js/sectors.js`: superficies 1..N por sector; núcleo con explanadas E/O + patio sur + pad HQ; estructura carretera no edificable; `layoutVersion` 3.
+- `js/build-place.js` / `sim`: buildable = superficie recuperada (no todo el sector).
+- `js/render-map.js`: carretera arterial diseñada; vallas/restos visuales; **hints de superficie solo en modo Construir**.
+- CSS pads/roads; cache `?v=32`.
+- Tests: smoke-d1 / smoke-build-place / smoke-sectors (+ asserts superficies/carretera).
+- Review: 16 tomas + contact sheet → `docs/review/` + Drive.
+
+## AUTOCRÍTICA
+1. ¿Sin Construir = lugar (no parcelas)? Sí — hints solo en build.
+2. ¿Con Construir = dónde cabe? Sí — pads por celda de superficie.
+3. ¿Varias superficies disjuntas? Sí (4 en núcleo).
+4. ¿Ghost inválido en carretera? Sí (evidencia 09 + smoke).
+5. ¿Layouts múltiples en patio sur? Sí (evidencia 10).
+6. Arte no final; composición espacial es el objetivo.
+7. Deuda: pads aún algo “celulares”; refinar blob orgánico por superficie en arte posterior.
+
+## EVIDENCIA
+`docs/review/` · Drive Review\ · `review-contact-sheet.jpg`
+
+## COMMIT
+_(tras commit)_
+
+## Sync Drive/GitHub
+Pendiente push.
 
 ---
 

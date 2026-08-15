@@ -88,6 +88,14 @@ assert(!ghostPlacementOk(state, content, 'farm', 1, 4).ok, 'celda no recuperada 
 const bad = placeBuilding(state, content, 'farm', 1, 4);
 assert(!bad.ok, 'no construir fuera');
 
+// Inválido: estructura/carretera dentro del núcleo recuperado
+assert(!ghostPlacementOk(state, content, 'farm', 7, 4).ok, 'carretera núcleo inválida');
+assert(!placeBuilding(state, content, 'farm', 7, 4).ok, 'no construir en carretera');
+
+// Varias superficies en núcleo
+const { recoveredSurfaces } = await import(pathToFileURL(join(root, 'js', 'sectors.js')).href);
+assert(recoveredSurfaces(state).length >= 3, 'varias superficies núcleo: ' + recoveredSurfaces(state).length);
+
 // Sin espacio físico: llenar resto del núcleo (mezcla tipos — farm tiene max)
 let guard = 0;
 const fillers = ['shelter', 'storage', 'barricade', 'farm'];

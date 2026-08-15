@@ -127,7 +127,8 @@ A–N. Apéndices (techs, logros, misiones, costes, save, gates, inventario moto
 Juego de **gestión de colonia + supervivencia + expansión + exploración + eventos imprevisibles + progresión a largo plazo**.
 
 Referencias conceptuales (no clones): Infection Free Zone, Final Outpost, Banished (gestión indirecta), juegos donde construir poco a poco obliga a nuevas soluciones.  
-**Legibilidad espacial** (no copia de arte/sistemas): city builders tipo Townsmen / bases de supervivencia móvil — el escenario es parte de la jugabilidad; el jugador lee el mundo, no un patio ni un fondo decorativo.
+**Legibilidad espacial** (no copia de arte/sistemas): city builders tipo Townsmen / bases de supervivencia móvil — el escenario es parte de la jugabilidad.  
+**Composición espacial (2.8 · referencia, no copia):** *The Walking Dead: Survivors* (móvil) — mapa/base > viewport, cámara navegable, carreteras que estructuran el asentamiento, mezcla de zonas (verde/urbana/tierra/ruinas/abiertas), áreas reconocibles, edificios en un escenario. **No** copiar arte, UI, edificios, economía, 4X ni monetización. Zona Zero conserva identidad postapocalíptica propia.
 
 ## 1.2 Qué NO es
 
@@ -720,7 +721,20 @@ Dentro del territorio recuperado existen **superficies edificables** de geometr�
 La capacidad emerge de: **geometría de la superficie** · footprint del edificio · obstáculos · separaciones · suelo no edificable · edificios ya colocados.  
 Ejemplo conceptual: superficie ≈ 6×5 unidades internas; huerto 2×2; casa 2×2; casa superior / enfermería footprints mayores → decisiones espaciales reales.
 
-Un mismo sector recuperado **puede** contener una o varias superficies (p. ej. explanada + hueco tras ruinas) sin convertirse en solares pintados permanentes.
+Un mismo sector recuperado **puede** (y a menudo **debe**) contener **una o varias superficies edificables disjuntas**.  
+**SECTOR ≠ PARCELA.** Entre superficies puede haber carretera, ruina, árboles, escombros permanentes, muro, terreno inutilizable.  
+Cada superficie grande admite **múltiples configuraciones** — no un solar para un edificio concreto.
+
+### Orden de diseño del escenario (2.8 · ZZ-019A)
+
+1. Diseñar un fragmento de **mundo creíble** (carreteras, caminos, ruinas, vegetación, escombros, vallas…).  
+2. Esa estructura da forma al lugar.  
+3. De la geometría **restante** surgen naturalmente superficies donde construir.  
+4. Esas zonas se registran como superficies edificables internas.  
+5. En juego normal **no** parecen parcelas.  
+6. Solo al entrar en **Construir** se revela dónde cabe el edificio seleccionado.
+
+**Prohibido** el orden inverso: pintar primero “zonas edificables” y decorar alrededor.
 
 ### Capacidad = física, no cupo
 
@@ -754,8 +768,10 @@ Límites naturales: coste, workers, producción/consumo, **espacio físico**, pr
 Los caminos y carreteras **preexistentes** (a menudo destruidos) dan **estructura visual** al escenario.  
 **No** convertir Zona Zero en un simulador de carreteras.
 
-Fases futuras **pueden** considerar reparar ciertos tramos, abrir accesos o conectar zonas **solo** si hay función sistémica real (p. ej. acceso bloqueado §9.5, rutas de exploración, perímetro).  
-**Prohibido** mecánicas decorativas sin propósito. Cualquier diseño concreto de “reparar camino” exige decisión Neni/ChatGPT y enlace a sistemas existentes — **no inventado aquí**.
+**ZZ-019A:** caminos/vallas/muros = **solo visuales/estructurales**.  
+**Prohibido en 019A:** construir/reparar carreteras, reparar vallas, construir muralla, bonuses de carretera, costes nuevos, sistemas paralelos.
+
+Fases futuras **pueden** integrar reparar tramos / abrir accesos / reforzar perímetro **solo** si hay función sistémica real enlazada a §9.5 / §13 / exploración — sin duplicar sistemas. Cualquier mecánica concreta exige decisión Neni/ChatGPT.
 
 ### Muros / vallas / perímetro (absorber en defensa existente)
 
@@ -1904,12 +1920,14 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 ## 2.8 (2026-08-16) — superficies edificables + escenario diseñado (Neni+ChatGPT)
 - **No descarta** B0 ni ZZ-019 (ghost/✓/semilibre APROBADO).
 - **Refina el dónde:** superficies edificables orgánicas dentro de territorio recuperado; al construir solo esas superficies; capacidad = geometría+footprint (sin cupo N).
-- Mapa **finito diseñado** (no infinito procedural); zonas reconocibles; props solo con enlace sistémico.
+- **SECTOR ≠ PARCELA:** un sector puede tener **varias** superficies disjuntas.
+- Orden de diseño: mundo → estructura → superficies (no al revés).
+- Mapa **finito diseñado**; refs composición: TWD Survivors (no copia) + Townsmen (legibilidad).
 - Avisos → cámara + resalte + **abrir ficha** (§9.4 / §21).
-- Caminos: estructura visual; mecánicas futuras solo si sistémicas (sin inventar aquí).
-- Muros/vallas: absorber en §13 / perímetro existente.
+- Caminos/muros: **solo visual en ZZ-019A**; mecánicas futuras vía §13/§9.5 si procede.
 - Arte: integración sombra/perspectiva = fase posterior no bloqueante.
-- PLAN 2.8: fase **ZZ-019A**; ZZ-012 en CAMBIOS SOLICITADOS / bloqueada hasta 2.8+019A.
+- PLAN 2.8: **ZZ-019A = REVIEW_STOP** (no HUMAN_GATE extra); ZZ-012 CAMBIOS SOLICITADOS hasta 019A APROBADA.
+- **Decisiones cerradas 2026-08-16:** (1) 019A=REVIEW_STOP · (2) varias superficies=SÍ · (3) caminos/vallas 019A=solo visual.
 
 ## 2.7 (2026-08-15) — modelo espacial / landscape / sectores (Neni+ChatGPT)
 - **Landscape-first** gameplay; rotate gate; portada/intro pueden ser vertical (§9.1, §31.8).  

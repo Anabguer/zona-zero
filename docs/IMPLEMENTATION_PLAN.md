@@ -67,7 +67,7 @@
 **Total fases:** 136 *(+ ZZ-019A)*  
 **Con HUMAN_GATE:** 29  
 
-> **Duda Neni (no inventada):** ¿ZZ-019A debe ser también HUMAN_GATE, o basta REVIEW_STOP? Propuesta Cursor: **solo REVIEW_STOP** (como ZZ-018), salvo que Neni quiera gate canónico extra.
+> **Duda Neni:** ~~¿ZZ-019A HUMAN_GATE?~~ **CERRADA:** solo **REVIEW_STOP** (Neni+ChatGPT 2026-08-16).
 ---
 
 ## 0.1 Enmienda 2.8 — qué cambia respecto a 2.7
@@ -453,9 +453,9 @@
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B0 · Modelo espacial landscape |
-| **HUMAN_GATE** | NO *(¿elevar a YES? → duda Neni)* |
+| **HUMAN_GATE** | NO |
 | **REVIEW_STOP** | **YES** |
-| **Objetivo** | Mapa grande finito con zonas reconocibles; superficies edificables orgánicas; en modo Construir solo esas superficies; capacidad = geometría+footprint; mantener ghost/✓ de ZZ-019. |
+| **Objetivo** | Mapa grande finito con zonas reconocibles; superficies edificables orgánicas (1..N por sector); en modo Construir solo esas superficies; capacidad = geometría+footprint; mantener ghost/✓ de ZZ-019. Caminos/vallas solo visuales. |
 | **Sistemas** | mapa/arte colonia, build-place, sectores |
 | **Dependencias** | ZZ-019 APROBADA |
 | **Archivos approx.** | render-map, sectors/surfaces data, build-place, assets escenario |
