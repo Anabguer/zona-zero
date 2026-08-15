@@ -359,15 +359,81 @@ body.zz-body {
 .zz-base { width: 100%; height: auto; display: block; touch-action: manipulation; }
 
 /* Mapa ciudad — tejido urbano + vida en territorio recuperado */
-/* Ciudad de fondo: atmósfera, no grid GIS técnico */
-.zz-map-avenue { fill: #3a3630; opacity: 0.55; }
-.zz-map-street-fill { fill: #2e2c28; opacity: 0.5; }
-.zz-map-street { fill: none; stroke: #4a4438; stroke-width: 0.18; opacity: 0.22; }
-.zz-map-block { fill: #1e2224; stroke: transparent; stroke-width: 0; opacity: 0.18; }
-.zz-map-bldg { fill: #262a2c; stroke: transparent; stroke-width: 0; opacity: 0.28; }
-.zz-map-bldg--tall { fill: #2a3034; opacity: 0.32; }
-.zz-map-bldg--mid { fill: #262a2e; opacity: 0.26; }
-.zz-map-bldg--low { fill: #222628; opacity: 0.22; }
+/* Ciudad abandonada (no GIS) */
+.zz-map-street-path {
+  stroke: #3a3630;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.zz-map-ruin-foot {
+  fill: #1a1c1e;
+  opacity: 0.45;
+  stroke: none;
+}
+.zz-map-scrub {
+  fill: #2a3a28;
+  opacity: 0.4;
+  stroke: none;
+}
+.zz-map-avenue { fill: #3a3630; opacity: 0.35; }
+.zz-map-street-fill { fill: #2e2c28; opacity: 0.3; }
+.zz-map-street { fill: none; stroke: #4a4438; stroke-width: 0.18; opacity: 0.15; }
+.zz-map-block { fill: #1e2224; stroke: transparent; opacity: 0.12; }
+.zz-map-bldg { fill: #262a2c; stroke: transparent; opacity: 0.32; }
+.zz-map-bldg--tall { fill: #2a3034; opacity: 0.36; }
+.zz-map-bldg--mid { fill: #262a2e; opacity: 0.3; }
+.zz-map-bldg--low { fill: #222628; opacity: 0.26; }
+
+/* Patio de colonia — orgánico, sin círculo */
+.zz-settle-rubble {
+  fill: #2a2824;
+  opacity: 0.4;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-fence-seg {
+  stroke: #4a4034;
+  stroke-width: 0.3;
+  stroke-linecap: round;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.zz-prop-crate { fill: #3a3228; opacity: 0.7; }
+.zz-prop-barrel { fill: #2e3a40; opacity: 0.65; }
+.zz-prop-fire-glow { fill: #c06020; opacity: 0.35; }
+.zz-prop-fire { fill: #e08030; opacity: 0.7; }
+.zz-settle-path-dirt {
+  stroke: #4a4034;
+  stroke-width: 1.0;
+  stroke-linecap: round;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.zz-settle-soil,
+.zz-settle-soil-patch {
+  display: none !important;
+}
+.zz-settle-bldg {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.zz-settle-bldg:hover .zz-settle-bldg-img {
+  filter: brightness(1.14) drop-shadow(0 0 0.7px #f0d080);
+}
+.zz-settle-bldg.is-selected .zz-settle-bldg-img {
+  filter: drop-shadow(0 0 1.5px #f0d080) brightness(1.16);
+}
+.zz-settle-warn-dot { display: none !important; }
+.zz-settle-slot {
+  fill: rgba(70, 55, 35, 0.18);
+  stroke: rgba(210, 180, 120, 0.28);
+  stroke-width: 0.12;
+  stroke-dasharray: none;
+}
+.zz-settle-slot:hover {
+  fill: rgba(110, 90, 45, 0.35);
+  stroke: rgba(230, 200, 120, 0.7);
+}
 .zz-map-park { fill: #2a3a28; stroke: #4a6a40; stroke-width: 0.2; opacity: 0.8; }
 .zz-map-tree { fill: #3a5a34; opacity: 0.65; }
 .zz-map-life-tree { fill: #5a9a48; opacity: 0.75; }

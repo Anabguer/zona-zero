@@ -778,6 +778,11 @@ function paintHud() {
       const daysLeft = k === 'food' || k === 'water' ? val / popN : Infinity;
       if (daysLeft < 2) li.classList.add('is-crit');
       else if (daysLeft < 4) li.classList.add('is-low');
+      const label = RES_LABEL_UI[k] || k;
+      li.title = `${label}: ${val}`;
+      li.setAttribute('aria-label', `${label}: ${val}`);
+      const row = document.createElement('span');
+      row.className = 'zz-hud__res-row';
       const img = document.createElement('img');
       img.src = artUrl(RES_ART[k]) || '';
       img.alt = '';
@@ -785,11 +790,23 @@ function paintHud() {
       img.height = 14;
       const strong = document.createElement('strong');
       strong.textContent = fmtRes(val);
-      li.appendChild(img);
-      li.appendChild(strong);
-      li.title = `${RES_LABEL_UI[k] || k}: ${val}`;
+      row.appendChild(img);
+      row.appendChild(strong);
+      const name = document.createElement('em');
+      name.className = 'zz-hud__res-name';
+      name.textContent = label;
+      li.appendChild(row);
+      li.appendChild(name);
+      li.addEventListener('click', () => {
+        toast(`${label}: ${val}`, 'info');
+      });
       res.appendChild(li);
     });
+    const popBtn = $('zz-open-pop');
+    if (popBtn) {
+      popBtn.title = `Población ${pop.total}/${cap}`;
+      popBtn.setAttribute('aria-label', `Población ${pop.total} de ${cap}`);
+    }
   }
 }
 
@@ -941,6 +958,8 @@ function paintCoach() {
   const card = $('zz-coach');
   const text = $('zz-coach-text');
   const cta = $('zz-coach-next');
+  const buildBtn = $('zz-open-build');
+  if (buildBtn) buildBtn.classList.remove('is-guide-pulse');
   if (!card || !text) return;
   ensureOnboarding(state);
   checkOnboardingProgress(state);
@@ -954,13 +973,23 @@ function paintCoach() {
     return;
   }
   card.hidden = false;
-  text.textContent = st.step.text;
+  let msg = st.step.text;
+  // Mientras coloca: instrucción concreta
+  if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
+    msg = 'Colócalo dentro del refugio.';
+  }
+  text.textContent = msg;
+  if (st.step.highlight === 'build' && !state.buildMode) {
+    buildBtn?.classList.add('is-guide-pulse');
+  }
   if (cta) {
-    if (st.step.cta) {
+    if (st.step.cta && !state.buildMode) {
       cta.hidden = false;
       cta.textContent = st.step.cta;
+    } else if (st.step.highlight === 'build' && !state.buildMode) {
+      cta.hidden = false;
+      cta.textContent = 'Construir';
     } else {
-      // Paso que espera acción del jugador: sin botón vacío
       cta.hidden = true;
     }
   }
@@ -1019,7 +1048,7 @@ function paintModeBanner() {
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
-    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> · tocá parcela válida · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
+    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> en el refugio · tocá una parcela · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
     el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
       state.buildMode = null;
       state.uiMode = null;
@@ -1283,13 +1312,13 @@ function bindChrome() {
   // zoom buttons
   $('zz-zoom-in')?.addEventListener('click', () => {
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = Math.min(1.95, (state.mapCamera.zoom || 1) * 1.12);
+    state.mapCamera.zoom = (state.mapCamera.zoom || 1) * 1.12;
     clampCamera(state);
     paint();
   });
   $('zz-zoom-out')?.addEventListener('click', () => {
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = Math.max(0.9, (state.mapCamera.zoom || 1) / 1.12);
+    state.mapCamera.zoom = (state.mapCamera.zoom || 1) / 1.12;
     clampCamera(state);
     paint();
   });
