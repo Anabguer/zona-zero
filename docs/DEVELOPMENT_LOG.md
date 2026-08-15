@@ -252,10 +252,10 @@ NO
 `docs/review/` · Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` · `review-contact-sheet.jpg`.
 
 ## COMMIT
-_(se rellena tras commit)_
+`b86f356` — feat(ZZ-012): tutorial D1 landscape + ghost/✓ (HUMAN_GATE)
 
 ## Sync Drive/GitHub
-Pendiente sync masters + push.
+OK (masters + Review/). **PARADO en ZZ-012** — PENDIENTE DE REVISIÓN Neni/ChatGPT. No ZZ-013.
 
 ---
 
