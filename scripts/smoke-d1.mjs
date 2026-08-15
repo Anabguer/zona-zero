@@ -26,7 +26,7 @@ const content = {
 
 const { createNewState } = await import(pathToFileURL(join(root, 'js', 'state.js')).href);
 const { placeBuilding, adjustBuildingWorkers } = await import(pathToFileURL(join(root, 'js', 'sim.js')).href);
-const { ensureOnboarding, advanceOnboarding, checkOnboardingProgress, onboardingStatus } = await import(
+const { ensureOnboarding, checkOnboardingProgress, onboardingStatus } = await import(
   pathToFileURL(join(root, 'js', 'onboarding.js')).href
 );
 const { recenterCamera, clampCamera, zoomCameraBy, panCameraBy } = await import(
@@ -61,10 +61,9 @@ assert(Math.abs(state.mapCamera.x - camp.x) < 0.01, 'recenter x');
 assert((state.mapCamera.zoom || 0) >= 2.4, 'recenter zoom D1');
 const startB = state.base.buildings.filter((b) => b.hp > 0);
 assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo HQ (capacidad, no 1 casa/habitante)');
-assert(onboardingStatus(state)?.step?.id === 'welcome', 'welcome');
-advanceOnboarding(state);
-assert(onboardingStatus(state)?.step?.id === 'build_farm', 'build_farm');
+assert(onboardingStatus(state)?.step?.id === 'need_food', 'need_food contextual');
 assert(onboardingStatus(state)?.step?.highlight === 'build', 'highlight construir');
+assert(!onboardingStatus(state)?.step?.cta, 'sin CTA Continuar');
 
 function free() {
   const cx = Math.floor(state.base.w / 2);
@@ -85,8 +84,17 @@ assert(onboardingStatus(state)?.step?.id === 'staff_farm', 'staff_farm');
 const farm = state.base.buildings.find((b) => b.type === 'farm');
 assert(adjustBuildingWorkers(state, content, farm.id, 1).ok, 'asignar');
 checkOnboardingProgress(state);
-assert(onboardingStatus(state)?.step?.id === 'build_well', 'build_well');
+assert(onboardingStatus(state)?.step?.id === 'need_water', 'need_water');
 assert(state.day === 1, 'sigue en D1');
+
+const [wx, wy] = free();
+assert(placeBuilding(state, content, 'well', wx, wy).ok, 'pozo');
+checkOnboardingProgress(state);
+assert(onboardingStatus(state)?.step?.id === 'staff_well', 'staff_well');
+const well = state.base.buildings.find((b) => b.type === 'well');
+assert(adjustBuildingWorkers(state, content, well.id, 1).ok, 'asignar pozo');
+checkOnboardingProgress(state);
+assert(onboardingStatus(state)?.step?.id === 'ready', 'ready tip avanzar día');
 
 if (fails) process.exit(1);
 console.log('Smoke D1 OK');

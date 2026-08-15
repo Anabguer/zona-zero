@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA**. · **ZZ-011 + ZZ-009 hechas**. · **ZZ-007 APROBADA**. · **PARADO en ZZ-008 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-012+ / no deploy.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 / ZZ-007 / ZZ-008 APROBADAS**. · **ZZ-011 + ZZ-009 hechas**. · **PARADO en ZZ-012 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-013+ / no deploy.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -41,10 +41,10 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-009 | Save v1: 1 partida + autosave + backup | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-007 | Portada / Continuar · Nueva partida | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -804,12 +804,22 @@ Ver feedback HUMAN_GATE R1 (presentación intro, no rehacer portada/ZZ-010/ZZ-01
 Review regenerada + Drive. Smoke boot/d1 OK.
 
 ## COMMIT
-`f18a872` � fix(ZZ-008) intro R2 arte + ritmo
+`f18a872` � fix(ZZ-008) intro R2 arte + ritmo
 
 ## ESTADO CURSOR
 COMPLETADA
 
-**PARADO en ZZ-008.** No ZZ-012+ · no deploy.
+## REVISIÓN CHATGPT — RONDA FINAL
+**RESULTADO:** APROBADA · **APROBACIÓN FINAL CHATGPT: SÍ**  
+Estructura + presentación aprobadas. No pulir más intro. No convertir en tutorial.
+
+## ESTADO REVISIÓN
+APROBADA
+
+## APROBACIÓN FINAL CHATGPT
+SÍ
+
+**Cerrada ZZ-008.** Evidencias en `docs/review-archive/zz-008/`. Siguiente HUMAN_GATE: ZZ-012.
 
 ---
 
@@ -821,54 +831,58 @@ Incorporada a GAME_MASTER **2.6** + IMPLEMENTATION_PLAN **2.6**.
 | Tema | Dónde en GM | Fases PLAN |
 |------|-------------|------------|
 | Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) — **APROBADA** |
-| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) — **RONDA 2 en revisión** |
+| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) — **APROBADA** |
 | Tutorial contextual | §31.4 | ZZ-012 (ampliada) |
 | Ayuda consultable | §21.3 | ZZ-152 (ampliada) |
 | Save 1+autosave+backup | §31.7 + Ap. E | ZZ-009 (hecha), ZZ-180 |
 
 ---
 
-# FASE ZZ-012 — Tutorial D1 por acciones
+# FASE ZZ-012 — Tutorial D1 contextual en el mundo
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.6 (§ ZZ-012).
+IMPLEMENTATION_PLAN 2.6 § ZZ-012 · GAME_MASTER §31.4. Dependencias ZZ-011 + ZZ-008 APROBADAS.
+
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Coach en mundo (§31.4): sin cascada Continuar; una pista (comida→staff→agua→staff→avanzar día); avance por acción; pulso Construir/Avanzar; sugerencia huerto/pozo; ayuda ? filtrada; tras intro coach activo.
 
 ## ARCHIVOS MODIFICADOS
-—
+- `js/onboarding.js`, `js/intro.js`, `js/main.js`, `css/world.css`
+- `play.php`, `dev/harness.html`
+- `scripts/smoke-d1.mjs`, `scripts/smoke-boot.mjs`, `scripts/review-shots-zz012.mjs`
+- `docs/review/*` (+ archivo ZZ-008)
 
 ## PRUEBAS
-—
+- smoke-boot OK · smoke-d1 OK (need_food→ready)
 
 ## CAPTURAS
-—
+`docs/review/` + Drive · contact sheet regenerado.
+
+## CURSOR — REVISIÓN VISUAL / JUGABILIDAD
+**¿Entiende el jugador qué hacer y por qué?** Sí: tip de comida + Construir + huerto «ahora»; tip staffing sin Continuar; tip agua; tip avanzar día.
+**¿Guía sin jugar por Neni?** Sí: no auto-build; no cadena Continuar.
 
 ## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+- HUD Au/Gu = ZZ-013 (tras GATE).
+- Ayuda profunda = ZZ-152.
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
+
+## COMMIT
+(pendiente)
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente — HUMAN_GATE.
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
 
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
-
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
+**PARADO en ZZ-012.** No ZZ-013+ sin APROBADA + SÍ. No deploy.
+
 
 # FASE ZZ-013 — HUD recursos D1
 

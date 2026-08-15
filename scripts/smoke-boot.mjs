@@ -73,10 +73,19 @@ assert(!mainSrc.includes("window.prompt('Nombre de la colonia'"), 'sin prompt no
 const fresh = createNewState(content, 'IntroTest');
 markIntroSeen(fresh);
 assert(fresh.flags.introSeen === true, 'markIntroSeen');
-assert(fresh.flags.onboardingActive === false, 'coach diferido ZZ-012');
+assert(fresh.flags.onboardingActive === true, 'coach contextual activo tras intro');
+assert(fresh.flags.onboardingStep === 0, 'empieza en need_food');
+
+const { GUIDE_STEPS, onboardingStatus, ensureOnboarding } = await import(
+  pathToFileURL(join(root, 'js', 'onboarding.js')).href
+);
+assert(!GUIDE_STEPS.some((s) => s.cta || s.advance === 'next'), 'sin cascada Continuar en guía');
+ensureOnboarding(fresh);
+assert(onboardingStatus(fresh)?.step?.id === 'need_food', 'pista comida');
 
 const worldCss = readFileSync(join(root, 'css', 'world.css'), 'utf8');
 assert(worldCss.includes('zz-from-intro'), 'fade D1 en world.css');
+assert(worldCss.includes('zz-coach-card--tip'), 'coach tip visual');
 
 if (fails) {
   console.error('Smoke boot FAIL', fails);

@@ -270,11 +270,11 @@ function showIntro(root, index, onDone, assetBase) {
 
 export function markIntroSeen(state) {
   if (!state.flags) state.flags = {};
+  // ZZ-012: tras intro, coach contextual en el mundo (sin welcome Continuar).
   state.flags.introSeen = true;
-  if (state.flags.onboardingStep == null || state.flags.onboardingStep === 0) {
-    state.flags.onboardingStep = 1;
-  }
-  state.flags.onboardingActive = false;
+  state.flags.onboardingDone = false;
+  state.flags.onboardingActive = true;
+  state.flags.onboardingStep = 0;
 }
 
 /** Fade-in del mundo tras la intro (play / harness). */

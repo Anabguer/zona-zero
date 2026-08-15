@@ -59,6 +59,7 @@ import {
   markGuideDayAdvanced,
   markGuideExplored,
   maybeRevealEarlyLandmarks,
+  suggestedBuildType,
 } from './onboarding.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
@@ -610,6 +611,7 @@ function openZoneSheet(zoneId) {
 }
 
 function openBuildSheet() {
+  const suggest = suggestedBuildType(state);
   const list = Object.values(content.buildings)
     .filter((b) => (b.minEra || 0) <= state.era)
     .filter((b) => {
@@ -648,12 +650,13 @@ function openBuildSheet() {
       else if (!afford) lockReason = `Falta: ${missing}`;
       else if ((state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1)
         lockReason = 'Asignad gente a construcción';
-      return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''}" data-action="build-pick" data-build="${b.id}" ${
+      const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
+      return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''} ${guided ? 'is-guide-suggest' : ''}" data-action="build-pick" data-build="${b.id}" ${
         locked ? 'disabled' : ''
       }>
         <img class="zz-build-card__thumb" src="${buildingArtUrl(b.id)}" alt="" width="48" height="48" />
         <span class="zz-build-card__body">
-          <strong>${escapeHtml(b.name)}</strong>
+          <strong>${escapeHtml(b.name)}${guided ? ' · ahora' : ''}</strong>
           <span class="zz-build-row zz-build-row--cost"><i>Coste</i> ${cost || 'Gratis'}</span>
           <span class="zz-build-row zz-build-row--gain"><i>Beneficio</i> ${escapeHtml(String(benefit || '—').slice(0, 56))}</span>
           <span class="zz-build-row zz-build-row--jobs"><i>Trabajo</i> ${jobs}</span>
@@ -981,7 +984,9 @@ function paintCoach() {
   const text = $('zz-coach-text');
   const cta = $('zz-coach-next');
   const buildBtn = $('zz-open-build');
+  const advanceBtn = $('zz-advance');
   if (buildBtn) buildBtn.classList.remove('is-guide-pulse');
+  if (advanceBtn) advanceBtn.classList.remove('is-guide-pulse');
   if (!card || !text) return;
   ensureOnboarding(state);
   checkOnboardingProgress(state);
@@ -995,20 +1000,21 @@ function paintCoach() {
     return;
   }
   card.hidden = false;
+  card.classList.add('zz-coach-card--tip');
   let msg = st.step.text;
-  // Mientras coloca: instrucción concreta
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
-    msg = 'Colócalo dentro del refugio.';
+    msg = 'Colocadlo dentro del refugio.';
   }
   text.textContent = msg;
   if (st.step.highlight === 'build' && !state.buildMode) {
     buildBtn?.classList.add('is-guide-pulse');
   }
+  if (st.step.highlight === 'advance') {
+    advanceBtn?.classList.add('is-guide-pulse');
+  }
+  // Sin cascada Continuar: solo CTA de acción (abrir Construir).
   if (cta) {
-    if (st.step.cta && !state.buildMode) {
-      cta.hidden = false;
-      cta.textContent = st.step.cta;
-    } else if (st.step.highlight === 'build' && !state.buildMode) {
+    if (st.step.highlight === 'build' && !state.buildMode) {
       cta.hidden = false;
       cta.textContent = 'Construir';
     } else {
@@ -1305,16 +1311,26 @@ function bindChrome() {
     scheduleSave();
   });
   $('zz-help')?.addEventListener('click', () => {
+    const day = state.day || 1;
+    const explored = !!state.flags?.guideExplored || day >= 3;
+    const staffed = (state.base?.buildings || []).some((b) => (b.workers || 0) > 0);
+    const lines = [
+      '<li><strong>Construir</strong> — coloca edificios en el refugio.</li>',
+      '<li><strong>Avanzar día</strong> — produce, consume y resuelve el día.</li>',
+      '<li><strong>Recentrar / zoom</strong> — mirad el refugio de cerca.</li>',
+    ];
+    if (staffed || state.flags?.onboardingDone) {
+      lines.push('<li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>');
+    }
+    if (explored) {
+      lines.push('<li><strong>Tocar un lugar</strong> — envía exploradores.</li>');
+    }
+    lines.push('<li><strong>Comida / agua / madera</strong> — lo que veis en la barra superior.</li>');
     openSheet(`
       <div class="zz-ctx">
-        <h2>Ayuda rápida</h2>
-        <ul class="zz-help-list">
-          <li><strong>Construir</strong> — coloca edificios en el refugio.</li>
-          <li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>
-          <li><strong>Avanzar día</strong> — produce, consume y resuelve expediciones.</li>
-          <li><strong>Tocar un lugar</strong> — envía exploradores.</li>
-          <li><strong>Recentrar</strong> — vuelve la cámara al refugio.</li>
-        </ul>
+        <h2>Ayuda</h2>
+        <p class="zz-muted" style="font-size:0.82rem">Solo lo que ya podéis usar.</p>
+        <ul class="zz-help-list">${lines.join('')}</ul>
       </div>
     `);
   });
@@ -1426,6 +1442,14 @@ export async function bootGame(opts) {
     },
     place: (type, x, y) => {
       const r = placeBuilding(state, content, type, x, y);
+      if (r.ok) {
+        checkOnboardingProgress(state);
+        paint();
+      }
+      return r;
+    },
+    adjustWorkers: (buildingId, delta) => {
+      const r = adjustBuildingWorkers(state, content, buildingId, delta);
       if (r.ok) {
         checkOnboardingProgress(state);
         paint();

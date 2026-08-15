@@ -1,44 +1,36 @@
 /**
- * Guía D1 — una acción, una explicación.
- * Tras el intro, la UI lleva al jugador (sin cascada de Continuar).
+ * ZZ-012 — Tutorial contextual en el mundo (§31.4).
+ * Una pista a la vez; avanza al completar la acción; sin cascada Continuar.
  */
 export const GUIDE_STEPS = [
   {
-    id: 'welcome',
-    text: 'Este es vuestro refugio. Un puñado de supervivientes en medio de la ciudad muerta.',
-    cta: 'Empezar',
-    advance: 'next',
-  },
-  {
-    id: 'build_farm',
-    text: 'Necesitamos comida y agua. Construye un huerto.',
-    cta: null,
+    id: 'need_food',
+    text: 'Las reservas no durarán. Necesitamos una fuente estable de comida.',
     highlight: 'build',
+    suggestBuild: 'farm',
     wait: 'hasFarm',
   },
   {
     id: 'staff_farm',
-    text: 'El huerto necesita gente. Tócalo para asignar un trabajador.',
-    cta: null,
+    text: 'El huerto no produce solo. Tocadlo y asignad a alguien.',
     wait: 'farmStaffed',
   },
   {
-    id: 'build_well',
-    text: 'Ahora el agua. Construye un pozo.',
-    cta: null,
+    id: 'need_water',
+    text: 'También hace falta agua. Construid un pozo.',
     highlight: 'build',
+    suggestBuild: 'well',
     wait: 'hasWell',
   },
   {
     id: 'staff_well',
-    text: 'Asigna un trabajador al pozo.',
-    cta: null,
+    text: 'Asignad un trabajador al pozo.',
     wait: 'wellStaffed',
   },
   {
     id: 'ready',
-    text: 'El refugio empieza a funcionar. Cuando queráis, avanzad el día.',
-    cta: null,
+    text: 'El refugio empieza a producir. Cuando estéis listos, avanzad el día.',
+    highlight: 'advance',
     wait: null,
   },
 ];
@@ -52,6 +44,15 @@ export function ensureOnboarding(state) {
     state.flags.onboardingStep = 0;
     state.flags.onboardingActive = true;
   }
+}
+
+/** Tras mini-intro: activar coach contextual (sin welcome Continuar). */
+export function activateWorldCoach(state) {
+  if (!state.flags) state.flags = {};
+  state.flags.introSeen = true;
+  state.flags.onboardingDone = false;
+  state.flags.onboardingActive = true;
+  state.flags.onboardingStep = 0;
 }
 
 export function onboardingStatus(state) {
@@ -92,7 +93,7 @@ export function maybeRevealEarlyLandmarks(state) {
 
 export function checkOnboardingProgress(state) {
   ensureOnboarding(state);
-  if (state.flags.onboardingDone) return false;
+  if (state.flags.onboardingDone || !state.flags.onboardingActive) return false;
   let changed = false;
   for (let guard = 0; guard < 8; guard++) {
     const i = state.flags.onboardingStep || 0;
@@ -102,39 +103,28 @@ export function checkOnboardingProgress(state) {
       changed = true;
       break;
     }
-    // Paso final sin wait: permanece hasta que el jugador avance el día o cierre
+    // Paso final sin wait: permanece hasta avanzar día
     if (!step.wait) break;
     if (!stepWaitMet(state, step.wait)) break;
     state.flags.onboardingStep = i + 1;
     changed = true;
     if (state.flags.onboardingStep >= GUIDE_STEPS.length) {
-      state.flags.onboardingDone = true;
-      state.flags.onboardingActive = false;
+      dismissOnboarding(state);
       break;
     }
   }
   return changed;
 }
 
+/**
+ * Solo acciones de UI (abrir construir). Nunca avanza la guía por «Continuar».
+ */
 export function advanceOnboarding(state) {
   ensureOnboarding(state);
-  const i = state.flags.onboardingStep || 0;
-  const step = GUIDE_STEPS[i];
-  if (!step) {
-    dismissOnboarding(state);
-    return { kind: 'finish' };
-  }
-  if (step.advance === 'finish' || i >= GUIDE_STEPS.length - 1) {
-    dismissOnboarding(state);
-    return { kind: 'finish' };
-  }
-  if (step.advance === 'next' && !step.wait) {
-    state.flags.onboardingStep = i + 1;
-    checkOnboardingProgress(state);
-    return { kind: 'next' };
-  }
-  if (step.action) return { kind: 'action', action: step.action };
-  if (step.highlight === 'build') return { kind: 'action', action: 'openBuild' };
+  const st = onboardingStatus(state);
+  if (!st) return { kind: 'finish' };
+  if (st.step.highlight === 'build') return { kind: 'action', action: 'openBuild' };
+  if (st.step.highlight === 'advance') return { kind: 'noop' };
   return { kind: 'noop' };
 }
 
@@ -146,11 +136,15 @@ export function dismissOnboarding(state) {
 export function markGuideDayAdvanced(state) {
   if (!state.flags) state.flags = {};
   state.flags.guideDayAdvanced = true;
-  // Al avanzar día tras el tutorial D1, cerrar guía
   if (state.flags.onboardingActive) dismissOnboarding(state);
 }
 
 export function markGuideExplored(state) {
   if (!state.flags) state.flags = {};
   state.flags.guideExplored = true;
+}
+
+export function suggestedBuildType(state) {
+  const st = onboardingStatus(state);
+  return st?.step?.suggestBuild || null;
 }
