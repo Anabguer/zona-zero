@@ -551,6 +551,9 @@ Gate presentado de nuevo para revisión Neni/ChatGPT.
 ### Capturas (sustituyen set anterior)
 Repo `docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` (hash contact sheet idéntico).
 
+### COMMIT
+`c06b14e` — fix(ZZ-010): colonia isométrica, HQ sin staffing y HUD hab.
+
 ### ESTADO CURSOR
 COMPLETADA (correcciones aplicadas)
 
