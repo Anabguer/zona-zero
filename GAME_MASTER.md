@@ -6,6 +6,7 @@
 **Copia de trabajo Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md`  
 **Copia repo:** `GAME_MASTER.md` (idénticas)  
 **Plan técnico Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` · **Repo:** `docs/IMPLEMENTATION_PLAN.md`  
+**Development log Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md` · **Repo:** `docs/DEVELOPMENT_LOG.md`  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
 **URL objetivo:** `/juegos/zona-zero/`
@@ -58,6 +59,7 @@
 38. Changelog de diseño 2.0  
 39. Auditoría del documento (pasadas 2 y 3)  
 40. Decisiones que cambian o eliminan el diseño anterior  
+41. Flujo Cursor ↔ ChatGPT (gobernanza)  
 
 ---
 
@@ -2107,3 +2109,34 @@ Compat: migrar saves 1.3 → 2.x con defaults seguros.
 ---
 
 *Apéndices A–N incluidos en la biblia 2.1 — documento maestro completo.*
+
+
+---
+
+# 41. FLUJO CURSOR ↔ CHATGPT (GOBERNANZA)
+
+## 41.1 Documentos maestros (Drive = GitHub)
+
+| Doc | Rol |
+|-----|-----|
+| GAME_MASTER | Biblia funcional |
+| IMPLEMENTATION_PLAN | Fases ZZ-XXX |
+| DEVELOPMENT_LOG | Ejecución + revisiones + aprobaciones |
+
+## 41.2 Regla de oro
+
+Una fase solo está cerrada si el log contiene literalmente:
+
+- `ESTADO REVISIÓN: APROBADA`
+- `APROBACIÓN FINAL CHATGPT: SÍ`
+
+Silencio, elogios o tests verdes **no** autorizan.
+
+## 41.3 HUMAN_GATE
+
+Fases marcadas `HUMAN_GATE: YES` bloquean el avance a dependientes hasta aprobación.
+
+## 41.4 Prohibición actual
+
+**No implementar código de juego** hasta ZZ-001 (aprobación GAME_MASTER + PLAN) esté APROBADA.
+
