@@ -85,11 +85,17 @@ function renderHud() {
     res.appendChild(li);
   });
   $('zz-colony').textContent = state.colonyName;
-  if (state.flags.defeated) {
-    $('zz-defeat').hidden = false;
-    $('zz-defeat-msg').textContent = state.flags.defeatReason || 'Habéis perdido.';
-  } else {
-    $('zz-defeat').hidden = true;
+  const defeat = $('zz-defeat');
+  if (defeat) {
+    if (state.flags.defeated) {
+      defeat.removeAttribute('hidden');
+      const msg = $('zz-defeat-msg');
+      if (msg) msg.textContent = state.flags.defeatReason || 'Habéis perdido.';
+    } else {
+      defeat.setAttribute('hidden', '');
+      const msg = $('zz-defeat-msg');
+      if (msg) msg.textContent = '';
+    }
   }
 }
 
@@ -242,21 +248,79 @@ function setTab(name) {
 }
 
 export async function bootGame(opts) {
-  content = await loadContent();
+  const boot = $('zz-boot');
+  const app = $('zz-app');
+  const defeat = $('zz-defeat');
+  if (defeat) {
+    defeat.hidden = true;
+    const msg = $('zz-defeat-msg');
+    if (msg) msg.textContent = '';
+  }
+  try {
+    content = await loadContent();
+  } catch (e) {
+    throw new Error('No se pudo cargar content/ (JSON). Revisa red o deploy.');
+  }
   slot = opts.slot;
   if (opts.mode === 'new') {
     state = createNewState(content, opts.name || 'Refugio 0');
-    await saveNow();
+    if (!livingSurvivors(state).length) {
+      throw new Error('Estado inicial sin supervivientes');
+    }
+    if (state.flags.defeated) {
+      throw new Error('Estado inicial marcado como derrota (bug)');
+    }
+    try {
+      const saved = await api.saveSlot(slot, state, state.colonyName, summarizeState(state));
+      if (!saved.ok) {
+        throw new Error(saved.error || 'save_failed');
+      }
+      dirty = false;
+      if ($('zz-save-state')) $('zz-save-state').textContent = 'Guardado';
+    } catch (e) {
+      if (e.message === 'auth') throw e;
+      throw new Error('No se pudo guardar la partida nueva: ' + (e.message || e));
+    }
   } else {
     const res = await api.loadSlot(slot);
     if (!res.ok) throw new Error(res.error || 'load');
     state = migrateState(res.state, content.balance);
   }
   bindChrome();
-  setTab('map');
+  // Primera selección útil: primer vivo + zona descubierta
+  if (!state.selectedSurvivorIds.length) {
+    const first = livingSurvivors(state)[0];
+    if (first) state.selectedSurvivorIds = [first.id];
+  }
+  if (!state.selectedZoneId) {
+    const z = state.zones.find((x) => x.state === 'discovered' || x.state === 'controlled');
+    if (z) state.selectedZoneId = z.id;
+  }
+  // Arrancar en Gente para que se vean los 3 supervivientes de inmediato
+  setTab(opts.mode === 'new' && !state.flags.defeated ? 'people' : 'map');
   paint();
-  $('zz-app').hidden = false;
-  $('zz-boot').hidden = true;
+  if (defeat && !state.flags.defeated) {
+    defeat.setAttribute('hidden', '');
+  }
+  if (app) app.removeAttribute('hidden');
+  if (boot) boot.setAttribute('hidden', '');
+  const howto = $('zz-howto');
+  if (howto && !state.flags.defeated) {
+    const n = livingSurvivors(state).length;
+    howto.innerHTML =
+      `<strong>Cómo jugar:</strong> Tienes <em>${n} supervivientes</em>. ` +
+      `1) Aquí en <em>Gente</em> elige equipo (hasta 3) · ` +
+      `2) <em>Mapa</em> → zona amarilla/verde · ` +
+      `3) <em>Enviar expedición</em> · ` +
+      `4) <em>Avanzar día</em> · ` +
+      `5) <em>Base</em> → construye.`;
+  }
+  toast(
+    state.flags.defeated
+      ? 'Esta partida ya terminó en derrota'
+      : `Día ${state.day} · ${livingSurvivors(state).length} supervivientes`,
+    state.flags.defeated ? 'bad' : 'good'
+  );
 }
 
 // Hub de slots en index
@@ -304,6 +368,8 @@ export async function bootHub() {
     });
     boot.hidden = true;
     hub.hidden = false;
+    if (boot) boot.setAttribute('hidden', '');
+    if (hub) hub.removeAttribute('hidden');
   } catch (e) {
     const msg = String(e && e.message ? e.message : e);
     if (msg === 'auth') {
@@ -316,11 +382,13 @@ export async function bootHub() {
     else if (msg === 'db_connection' || msg === 'db_schema') human = 'Error de base de datos. Reintenta en un momento.';
     else if (msg && msg !== 'slots') human += ' (' + msg + ')';
     if (boot) {
+      boot.removeAttribute('hidden');
       boot.innerHTML =
         human +
         ' <button type="button" class="zz-btn zz-btn--primary" id="zz-retry-slots">Reintentar</button>';
       const btn = document.getElementById('zz-retry-slots');
       if (btn) btn.addEventListener('click', () => bootHub());
     }
+    if (hub) hub.setAttribute('hidden', '');
   }
 }

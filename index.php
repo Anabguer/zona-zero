@@ -17,7 +17,7 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=2" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=5" />
 </head>
 <body class="zz-body zz-body--hub">
   <div id="zz-hub-boot" class="zz-boot">Cargando slots…</div>
@@ -34,19 +34,29 @@ $base = zz_public_base();
       </div>
       <p class="zz-user">Hola, <strong id="zz-user"><?= htmlspecialchars((string) ($user['nombre'] ?? 'Jugador')) ?></strong></p>
     </header>
+    <p class="zz-howto">Elige un slot vacío para <strong>Nueva partida</strong>, o <strong>Continuar</strong> una guardada. Tienes 3 slots.</p>
     <section class="zz-slots" id="zz-slots" aria-label="Slots de partida"></section>
   </div>
   <script type="module">
-    import { bootHub } from './js/main.js?v=3';
+    import { bootHub } from './js/main.js?v=5';
     bootHub().catch((err) => {
       const el = document.getElementById('zz-hub-boot');
-      if (el) el.textContent = 'Error al iniciar: ' + (err && err.message ? err.message : err);
+      const hub = document.getElementById('zz-hub');
+      if (hub) hub.setAttribute('hidden', '');
+      if (el) {
+        el.removeAttribute('hidden');
+        el.innerHTML =
+          '<p><strong>Error al iniciar</strong></p><p>' +
+          String(err && err.message ? err.message : err) +
+          '</p><button type="button" class="zz-btn zz-btn--primary" onclick="location.reload()">Reintentar</button>';
+      }
     });
   </script>
   <script>
     window.addEventListener('error', function (ev) {
       var el = document.getElementById('zz-hub-boot');
-      if (el && el.textContent.indexOf('Cargando') === 0) {
+      if (el && String(el.textContent || '').indexOf('Cargando') === 0) {
+        el.removeAttribute('hidden');
         el.textContent = 'Error JS: ' + (ev.message || 'módulo no cargó');
       }
     });

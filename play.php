@@ -23,7 +23,7 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=2" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=5" />
 </head>
 <body class="zz-body zz-body--play">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -36,6 +36,15 @@ $base = zz_public_base();
       </div>
       <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
     </header>
+
+    <p class="zz-howto" id="zz-howto">
+      <strong>Cómo jugar:</strong>
+      1) Pestaña <em>Gente</em> → elige hasta 3 ·
+      2) Pestaña <em>Mapa</em> → toca una zona descubierta ·
+      3) <em>Enviar expedición</em> ·
+      4) <em>Avanzar día</em> hasta que vuelvan ·
+      5) Pestaña <em>Base</em> → construye.
+    </p>
 
     <section class="zz-hud" aria-label="Estado">
       <div class="zz-hud__stat"><span>Día</span><strong id="zz-day">1</strong></div>
@@ -92,13 +101,22 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=3';
+    import { bootGame } from './js/main.js?v=5';
     bootGame({
       slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>
     }).catch((err) => {
-      document.getElementById('zz-boot').textContent = 'Error al iniciar: ' + (err.message || err);
+      const boot = document.getElementById('zz-boot');
+      const app = document.getElementById('zz-app');
+      if (app) app.setAttribute('hidden', '');
+      if (boot) {
+        boot.removeAttribute('hidden');
+        boot.innerHTML =
+          '<p><strong>Error al iniciar</strong></p><p>' +
+          String(err && err.message ? err.message : err) +
+          '</p><p><a class="zz-btn zz-btn--primary" href="<?= htmlspecialchars($base) ?>">Volver a slots</a></p>';
+      }
     });
   </script>
 </body>
