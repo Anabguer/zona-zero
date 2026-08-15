@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness bloque 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=20" />
-  <link rel="stylesheet" href="../css/world.css?v=20" />
+  <link rel="stylesheet" href="../css/game.css?v=22" />
+  <link rel="stylesheet" href="../css/world.css?v=22" />
   <script type="importmap">
   {
     "imports": {
@@ -102,8 +102,22 @@
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=20';
-    bootGame({ mode: 'new', name: 'Refugio Norte', clearExisting: true }).then(() => {
+    import { bootGame } from '../js/main.js?v=22';
+    const q = new URLSearchParams(
+      (location.hash || '').replace(/^#/, '') || location.search.replace(/^\?/, '')
+    );
+    const isLoad = q.get('load') === '1' && q.get('new') !== '1';
+    const clearExisting =
+      !isLoad &&
+      (q.get('clear') === '1' ||
+        q.get('new') === '1' ||
+        (!q.has('new') && !q.has('load')));
+    bootGame({
+      mode: isLoad ? 'load' : 'new',
+      name: q.get('name') || 'Refugio Norte',
+      clearExisting,
+      fromIntro: q.get('intro') === '1',
+    }).then(() => {
       window.__zzOk = true;
     }).catch((e) => {
       window.__zzErr = String(e?.message || e);

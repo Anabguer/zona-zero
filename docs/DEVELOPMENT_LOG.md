@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA**. · **ZZ-011 + ZZ-009 hechas**. · **PARADO en ZZ-007 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-008+ / no deploy.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA**. · **ZZ-011 + ZZ-009 hechas**. · **ZZ-007 APROBADA**. · **PARADO en ZZ-008 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-012+ / no deploy.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -40,8 +40,8 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-009 | Save v1: 1 partida + autosave + backup | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-007 | Portada / Continuar · Nueva partida | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-008 | Nueva partida: confirmación + mini-intro | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-007 | Portada / Continuar · Nueva partida | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -716,6 +716,68 @@ COMPLETADA
 `be8071d` — feat(ZZ-011/009/007): cámara D1, save main+backup y portada GATE
 
 ## REVISIÓN CHATGPT
+ChatGPT revisó evidencias Drive (hub vacío/continuar móvil+desktop + contact sheet).
+
+## ESTADO REVISIÓN
+APROBADA
+
+## APROBACIÓN FINAL CHATGPT
+SÍ
+
+**Cerrada ZZ-007.** Siguiente: ZZ-008 HUMAN_GATE.
+
+---
+
+# FASE ZZ-008 — Nueva partida: confirmación + mini-intro → D1
+
+## PLAN
+IMPLEMENTATION_PLAN 2.6 § ZZ-008 · GAME_MASTER §31.6. Dependencia ZZ-007 (APROBADA).
+
+## RESULTADO CURSOR
+Secuencia cinemática full-bleed (no `confirm`/`prompt` nativos, no modal-caja sobre portada):
+
+1. Portada → **Nueva partida**
+2. Si hay colonia → confirmación GM («sustituirá esta partida») con Cancelar / Empezar de nuevo
+3. Mini-intro **3 pasos** saltables (colapso → colonia → misión: sobrevivir/estabilizar/explorar/recuperar)
+4. **Entrar al Día 1** (o Saltar intro → D1)
+5. `flags.introSeen`; coach welcome diferido (`onboardingActive=false` hasta ZZ-012)
+
+Portada no gana elementos nuevos.
+
+## ARCHIVOS MODIFICADOS
+- `js/intro.js` (nuevo)
+- `js/main.js`, `js/state.js`
+- `css/hub.css` (capa `.zz-cine`)
+- `index.php`, `play.php`, `dev/hub-*.html`, `dev/harness.html`
+- `scripts/smoke-boot.mjs`, `scripts/review-shots-zz008.mjs`
+- `docs/review/*` (+ archivo ZZ-007 en `docs/review-archive/zz-007/`)
+
+## PRUEBAS
+- `node scripts/smoke-boot.mjs` OK
+- `node scripts/smoke-d1.mjs` OK
+- `node scripts/smoke-save.mjs` OK
+
+## CAPTURAS
+`docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\`:
+01–06 móvil (portada→confirm→intro×3→D1), 07–10 desktop, 11–12 skip, 13 confirm desktop, `review-contact-sheet.jpg`, `index.html`.
+
+## CURSOR — REVISIÓN VISUAL ZZ-008 (autocrítica)
+
+**¿Parece el comienzo de un videojuego terminado o una sucesión de modales de una web?**
+
+Tras corrección: **comienzo de videojuego**. Primera versión dejaba la portada (CTAs/brand) transparentes detrás → aspecto overlay web; se ocultó el hero y se cerró el velo a escena full-bleed. Confirmación e intro son pantallas de atmósfera con tipografía corta, dots y un CTA; D1 entra limpio sin cascada Continuar.
+
+## PROBLEMAS / LIMITACIONES
+- Tutorial contextual en mundo = ZZ-012 (no en estas pantallas).
+- Harness demo usa `#hash` porque `serve` pierde query al reescribir `.html`; `play.php` usa query normal.
+
+## ESTADO CURSOR
+COMPLETADA
+
+## COMMIT
+(pendiente push en este cierre)
+
+## REVISIÓN CHATGPT
 Pendiente — HUMAN_GATE.
 
 ## ESTADO REVISIÓN
@@ -724,7 +786,7 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-**PARADO en ZZ-007.** No ZZ-008+ sin APROBADA + SÍ.
+**PARADO en ZZ-008.** No ZZ-012+ sin APROBADA + SÍ. No deploy.
 
 ---
 
@@ -735,8 +797,8 @@ Incorporada a GAME_MASTER **2.6** + IMPLEMENTATION_PLAN **2.6**.
 
 | Tema | Dónde en GM | Fases PLAN |
 |------|-------------|------------|
-| Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) — **en revisión** |
-| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) |
+| Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) — **APROBADA** |
+| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) — **en revisión** |
 | Tutorial contextual | §31.4 | ZZ-012 (ampliada) |
 | Ayuda consultable | §21.3 | ZZ-152 (ampliada) |
 | Save 1+autosave+backup | §31.7 + Ap. E | ZZ-009 (hecha), ZZ-180 |

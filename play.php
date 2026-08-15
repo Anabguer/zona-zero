@@ -6,6 +6,7 @@ zz_page_require_login();
 
 $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
 $clear = isset($_GET['clear']) && (string) $_GET['clear'] === '1';
+$fromIntro = isset($_GET['intro']) && (string) $_GET['intro'] === '1';
 $name = trim((string) ($_GET['name'] ?? 'Refugio Norte'));
 if ($name === '') {
     $name = 'Refugio Norte';
@@ -23,8 +24,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=20" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=20" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=22" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=22" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -130,11 +131,12 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=21';
+    import { bootGame } from './js/main.js?v=22';
     bootGame({
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
       clearExisting: <?= $clear ? 'true' : 'false' ?>,
+      fromIntro: <?= $fromIntro ? 'true' : 'false' ?>,
     }).catch((e) => {
       const boot = document.getElementById('zz-boot');
       if (boot) boot.textContent = 'Error: ' + (e?.message || e);

@@ -34,6 +34,7 @@ import {
   recruitExplorer,
   explorerSlotsUnlocked,
 } from './explorers.js';
+import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME } from './intro.js';
 import { workforce } from './population.js';
 import {
   currentObjective,
@@ -1371,6 +1372,9 @@ export async function bootGame(opts) {
       await api.clearGame().catch(() => {});
     }
     state = createNewState(content, opts.name || 'Refugio 0');
+    if (opts.fromIntro) {
+      markIntroSeen(state);
+    }
     const saved = await api.saveGame(state, state.colonyName, summarizeState(state));
     if (!saved.ok) throw new Error(saved.error || 'save_failed');
     dirty = false;
@@ -1465,11 +1469,22 @@ export async function bootHub(opts = {}) {
     const hasSave = !!save;
     const actions = $('zz-hub-actions');
     if (!actions) return;
+    const hubRoot = hub || document.body;
+    const playUrl = opts.playUrl || 'play.php';
+    const beginNew = () =>
+      startNewGameFlow(hubRoot, {
+        hasSave,
+        playUrl,
+        colonyName: DEFAULT_COLONY_NAME,
+      });
+
     actions.innerHTML = '';
     if (hasSave) {
       const cont = document.createElement('a');
       cont.className = 'zz-btn zz-btn--primary zz-btn--hero';
-      cont.href = 'play.php';
+      cont.href = opts.playUrl
+        ? `${String(opts.playUrl).split(/[?#]/)[0]}#load=1`
+        : 'play.php';
       cont.textContent = 'Continuar';
       actions.appendChild(cont);
 
@@ -1482,24 +1497,14 @@ export async function bootHub(opts = {}) {
       neu.type = 'button';
       neu.className = 'zz-btn zz-btn--ghost';
       neu.textContent = 'Nueva partida';
-      neu.addEventListener('click', () => {
-        const ok = window.confirm(
-          'Ya tienes una colonia en curso. Empezar de nuevo sustituirá esta partida.'
-        );
-        if (!ok) return;
-        const name = window.prompt('Nombre de la colonia', 'Refugio Norte') || 'Refugio Norte';
-        window.location.href = `play.php?new=1&clear=1&name=${encodeURIComponent(name)}`;
-      });
+      neu.addEventListener('click', beginNew);
       actions.appendChild(neu);
     } else {
       const neu = document.createElement('button');
       neu.type = 'button';
       neu.className = 'zz-btn zz-btn--primary zz-btn--hero';
       neu.textContent = 'Nueva partida';
-      neu.addEventListener('click', () => {
-        const name = window.prompt('Nombre de la colonia', 'Refugio Norte') || 'Refugio Norte';
-        window.location.href = `play.php?new=1&name=${encodeURIComponent(name)}`;
-      });
+      neu.addEventListener('click', beginNew);
       actions.appendChild(neu);
     }
 

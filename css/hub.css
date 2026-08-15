@@ -137,3 +137,206 @@
     opacity: 0.18;
   }
 }
+
+/* ZZ-008 — secuencia cinemática (confirmación + intro), no modal web */
+body.zz-cine-open {
+  overflow: hidden;
+}
+body.zz-cine-open .zz-hub__hero {
+  visibility: hidden;
+  pointer-events: none;
+}
+body.zz-cine-open .zz-hub__top {
+  opacity: 0.4;
+  pointer-events: none;
+}
+body.zz-cine-open .zz-hub__atmosphere::after {
+  opacity: 0.08;
+  filter: saturate(0.5) blur(2px);
+}
+.zz-cine {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 1.25rem 1.35rem calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  color: #f0e8dc;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.zz-cine.is-open {
+  opacity: 1;
+}
+.zz-cine[hidden] {
+  display: none !important;
+}
+.zz-cine__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 75% 50% at 50% 28%, rgba(55, 42, 28, 0.45), transparent 68%),
+    linear-gradient(180deg, #12100c 0%, #0c0a08 38%, #080705 100%);
+  pointer-events: none;
+}
+.zz-cine__motif {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.zz-cine__motif[data-motif="ash"] {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 22%, rgba(160, 90, 40, 0.35), transparent 65%),
+    radial-gradient(ellipse 90% 60% at 20% 80%, rgba(40, 30, 20, 0.5), transparent 70%);
+}
+.zz-cine__motif[data-motif="colony"] {
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 55%, rgba(180, 140, 70, 0.28), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 70% 20%, rgba(70, 90, 60, 0.2), transparent 60%);
+}
+.zz-cine__motif[data-motif="horizon"] {
+  background:
+    linear-gradient(180deg, transparent 30%, rgba(120, 80, 35, 0.25) 70%, transparent 100%),
+    radial-gradient(ellipse 100% 40% at 50% 100%, rgba(200, 140, 60, 0.22), transparent 55%);
+}
+.zz-cine__motif[data-motif="warn"] {
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 40%, rgba(140, 50, 30, 0.28), transparent 70%);
+}
+.zz-cine__skip {
+  position: relative;
+  z-index: 2;
+  align-self: flex-end;
+  margin-bottom: auto;
+  background: transparent;
+  border: none;
+  color: rgba(232, 224, 212, 0.72);
+  font: 500 0.9rem/1 "IBM Plex Sans", system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.35rem;
+  cursor: pointer;
+}
+.zz-cine__skip:hover,
+.zz-cine__skip:focus-visible {
+  color: #f4ebe0;
+  outline: none;
+}
+.zz-cine__stage {
+  position: relative;
+  z-index: 2;
+  max-width: 28rem;
+  width: 100%;
+  margin: 0 auto;
+  text-align: left;
+}
+.zz-cine__stage--in {
+  animation: zzCineIn 0.55s ease-out both;
+}
+@keyframes zzCineIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.zz-cine__kicker {
+  margin: 0 0 0.4rem;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c4a574;
+}
+.zz-cine__title {
+  margin: 0 0 0.75rem;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.85rem, 7vw, 2.55rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+}
+.zz-cine__body {
+  margin: 0 0 1.35rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: rgba(240, 232, 220, 0.88);
+  max-width: 26rem;
+}
+.zz-cine__dots {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0 1.1rem;
+}
+.zz-cine__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: rgba(232, 224, 212, 0.28);
+}
+.zz-cine__dot.is-on {
+  background: #c4a574;
+  box-shadow: 0 0 0 3px rgba(196, 165, 116, 0.2);
+}
+.zz-cine__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+.zz-cine__btn {
+  width: 100%;
+  min-height: 2.85rem;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.zz-cine__btn--hero {
+  min-height: 3.1rem;
+  font-size: 1.1rem;
+}
+.zz-cine__btn--danger {
+  background: #8a3a28;
+  border-color: #a44a34;
+}
+.zz-cine__btn--danger:hover {
+  filter: brightness(1.08);
+}
+
+@media (min-width: 900px) {
+  .zz-cine {
+    justify-content: center;
+    padding: 2.5rem 3rem;
+  }
+  .zz-cine__stage {
+    max-width: 32rem;
+    margin-left: 8vw;
+    margin-right: auto;
+  }
+  .zz-cine__skip {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    margin: 0;
+  }
+  .zz-cine__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 22rem;
+  }
+  .zz-cine__btn {
+    width: auto;
+    min-width: 10rem;
+    flex: 1;
+  }
+}

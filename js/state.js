@@ -228,6 +228,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       endless: false,
       finalCrisisDone: false,
       finalCrisisActive: false,
+      introSeen: false,
       narrative: {},
       coach: { explore: false, labor: false, build: false, dismissed: false },
     },
