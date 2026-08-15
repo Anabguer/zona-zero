@@ -38,7 +38,7 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-003 | Schemas content 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-010 | Colonia física D1 sin GIS | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-011 | Cámara D1 protagonista | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
