@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **CAMBIOS SOLICITADOS → ronda entregada · REVIEW_STOP · PARADO** (no ZZ-019). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
+**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **APROBADA**. · ZZ-019 **COMPLETADA · HUMAN_GATE · PENDIENTE DE REVISIÓN**. · ZZ-012 bloqueada hasta ZZ-019 APROBADA. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -129,13 +129,13 @@ OK · Review sustituida.
 IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE NO · **REVIEW_STOP YES** · deps ZZ-017 APROBADA
 
 ## ESTADO CURSOR
-COMPLETADA (ronda CAMBIOS SOLICITADOS). **PARADO** — ZZ-019 **NO iniciada**.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-CAMBIOS SOLICITADOS → ronda entregada · **PENDIENTE DE REVISIÓN** (REVIEW_STOP)
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ## CONTRATO ESCALA (antes de evidencia)
 GM §9.4: viewport = ventana; mundo > 844×390/932×430; pan/pinch/recenter; sectores fuera OK.
@@ -157,7 +157,7 @@ Correcciones:
 
 ## AUTOCRÍTICA (checklist ronda)
 1. ¿Sin overlays hay mundo interesante? Mejorado (textura continua + props); aún dependiente de art SVG vs foto.
-2. ¿Núcleo parte del mundo? Sí más que antes (sin placa clip); foundation HQ aún puede leerse algo “pegada”.
+2. ¿Núcleo parte del mundo? Sí más que antes (sin isla clipada); foundation HQ aún puede leerse algo “pegada”.
 3. ¿Pan muestra lugares distintos? Sí (oeste aparcamiento/pecios; este ruinas).
 4. ¿GIS reducido? Sí (sin fills/dash permanentes); expand aún tiene contornos tenues necesarios.
 5. ¿Límites solo cuando aportan? Sí (expand/selección/recovering).
@@ -166,14 +166,56 @@ Correcciones:
 8. ¿Zonas reconocibles al volver? Parcial — aparcamiento vs ruinas sí; identidad aún mejorable con art dedicado.
 
 ## EVIDENCIA
-`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos).
+`docs/review/` (histórico ronda en git) · Drive sustituido en entrega.
 
 ## COMMIT
 `5f06c1d` — fix(ZZ-018): mundo físico continuo, no plano GIS (CAMBIOS SOLICITADOS)
-Entrega previa: `54d7946` / registro `2210582`.
+Registro: `d21771b`. Entrega previa: `54d7946` / `2210582`.
 
 ## Sync Drive/GitHub
-Masters + Review. **ZZ-019 NO. No deploy. PARAR.**
+OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT.**
+
+---
+
+# FASE ZZ-019 — Construcción semilibre landscape (HUMAN_GATE espacial)
+
+IMPLEMENTATION_PLAN 2.7 · B0 · **HUMAN_GATE YES** · deps ZZ-018 APROBADA + ZZ-016
+
+## ESTADO CURSOR
+COMPLETADA. **PARADO** — no ZZ-012 ni fases siguientes.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+## APROBACIÓN FINAL CHATGPT
+NO
+
+## CAMBIOS
+- `js/build-place.js`: snap invisible, ghost cell, validación, freeCells.
+- Colocación §9.2/§9.6: ghost arrastrable · pan fuera del ghost · **✓ Construir / ✕** en dock · **no** construye al soltar.
+- Sin rejilla de slots visibles; tint válido/inválido.
+- Lista→centrar: al abrir ficha de edificio, cámara enfoca el edificio.
+- Tests: `smoke-build-place` (3 huertos, cancel, inválido, sin espacio).
+- Review 12 tomas + contact sheet → Drive.
+
+## AUTOCRÍTICA
+1. ¿Ghost + ✓/✕ inequívoco en landscape? Sí (dock sustituye Avanzar día).
+2. ¿Pan vs ghost? Sí (handle ghost vs pan mapa).
+3. ¿Sin segundo-tap / sin construir al soltar? Sí.
+4. ¿Snap invisible sin GIS? Sí (sin celdas pintadas).
+5. ¿3 huertos distintos? Sí (evidencia 08).
+6. ¿Sin espacio físico demostrable? Sí (smoke).
+7. ¿Fantasía B0 (colonia en mundo)? Parcial-dependiente de ZZ-018; construcción encaja en sectores recuperados.
+8. ¿Deudas? Ghost SVG aún simple; drag en touch real a validar en device; onboarding copy actualizada.
+
+## EVIDENCIA
+`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg`
+
+## COMMIT
+*(hash tras commit)*
+
+## Sync Drive/GitHub
+Masters + Review. **No deploy. PARAR.**
 
 ---
 

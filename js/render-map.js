@@ -7,13 +7,12 @@ import { artUrl, buildingArtUrl, zoneArtUrl, TERRAIN_ART, FOG_ART, COLONY_YARD_A
 import {
   ensureSectors,
   ptsStr as sectorPtsStr,
-  isCellBuildable,
   getSector,
 } from './sectors.js';
 
 const VB_SQ = 100;
 
-function mapMetrics(svg) {
+export function mapMetrics(svg) {
   // Mundo lógico 100×100; el SVG llena el viewport (slice) — sin bandas negras.
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
@@ -802,7 +801,7 @@ function drawBuildingFoundation(wrap, cell, rng) {
 }
 
 
-function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCell } = {}) {
+function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPointer } = {}) {
   const buildings = (state.base?.buildings || []).filter((b) => b.hp > 0);
   if (!buildings.length && state.uiMode !== 'build') return;
   const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
@@ -842,58 +841,58 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day, state, camp);
 
   const buildMode = state.uiMode === 'build' && state.buildMode;
-  let ghost = null;
-  if (buildMode) {
-    const gw = scale * 1.15;
-    ghost = svgEl('image', {
-      href: buildingArtUrl(state.buildMode),
-      x: 0,
-      y: 0,
-      width: gw,
-      height: gw,
-      opacity: '0.7',
-      class: 'zz-settle-ghost',
-      style: 'pointer-events:none',
-      preserveAspectRatio: 'xMidYMid meet',
+  if (buildMode && state.buildGhost) {
+    const gx = state.buildGhost.x;
+    const gy = state.buildGhost.y;
+    const lx = (gx - bw / 2 + 0.5) * scale;
+    const ly = (gy - bh / 2 + 0.5) * scale;
+    const cell = scale * 1.28;
+    const valid = !!state.buildGhostValid;
+    const wrap = svgEl('g', {
+      class: `zz-settle-ghost-handle${valid ? ' is-valid' : ' is-invalid'}`,
+      transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
+      'data-ghost': '1',
     });
-    ghost.setAttribute('visibility', 'hidden');
-    layer.appendChild(ghost);
-    for (let y = 0; y < bh; y++) {
-      for (let x = 0; x < bw; x++) {
-        if (buildings.some((b) => b.x === x && b.y === y)) continue;
-        if (!isCellBuildable(state, x, y)) continue;
-        const near = buildings.some((b) => Math.abs(b.x - x) + Math.abs(b.y - y) <= 2);
-        if (!near && buildings.length) continue;
-        const lx = (x - bw / 2 + 0.5) * scale;
-        const ly = (y - bh / 2 + 0.5) * scale;
-        const cell = scale * 0.92;
-        const slot = svgEl('rect', {
-          x: lx - cell / 2,
-          y: ly - cell / 2,
-          width: cell,
-          height: cell,
-          class: 'zz-settle-slot',
-          rx: 0.35,
-        });
-        slot.style.cursor = 'pointer';
-        slot.addEventListener('pointerenter', () => {
-          ghost.setAttribute('visibility', 'visible');
-          ghost.setAttribute('x', String(lx - gw / 2));
-          ghost.setAttribute('y', String(ly - gw / 2));
-          slot.classList.add('is-hot');
-        });
-        slot.addEventListener('pointerleave', () => {
-          ghost.setAttribute('visibility', 'hidden');
-          slot.classList.remove('is-hot');
-        });
-        slot.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          onPlaceCell && onPlaceCell(x, y);
-        });
-        layer.appendChild(slot);
-      }
+    wrap.appendChild(
+      svgEl('ellipse', {
+        cx: cell / 2,
+        cy: cell * 0.78,
+        rx: cell * 0.42,
+        ry: cell * 0.16,
+        class: valid ? 'zz-settle-ghost-pad is-valid' : 'zz-settle-ghost-pad is-invalid',
+      })
+    );
+    wrap.appendChild(
+      svgEl('image', {
+        href: buildingArtUrl(state.buildMode),
+        x: 0,
+        y: 0,
+        width: cell,
+        height: cell,
+        opacity: valid ? '0.78' : '0.45',
+        class: 'zz-settle-ghost',
+        preserveAspectRatio: 'xMidYMid meet',
+      })
+    );
+    // Handle amplio para arrastrar el ghost (no construye al soltar)
+    wrap.appendChild(
+      svgEl('rect', {
+        x: -cell * 0.08,
+        y: -cell * 0.08,
+        width: cell * 1.16,
+        height: cell * 1.16,
+        class: 'zz-settle-ghost-hit',
+        fill: 'transparent',
+      })
+    );
+    if (onGhostPointer) {
+      wrap.addEventListener('pointerdown', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        onGhostPointer(ev, { phase: 'down', camp, scale, bw, bh });
+      });
     }
+    layer.appendChild(wrap);
   }
 
   [...buildings]
@@ -1018,7 +1017,7 @@ function drawInfectedMarkers(g, z, rng) {
 }
 
 function drawZone(layer, z, state, tier, handlers) {
-  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector } = handlers || {};
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer } = handlers || {};
   const selected = state.selectedZoneId === z.id;
   const attacked = state.flags?.lastAttackZoneId === z.id || z._attackFlash;
   const exploreMode = state.uiMode === 'explore';
@@ -1073,7 +1072,7 @@ function drawZone(layer, z, state, tier, handlers) {
   }
 
   if (z.type === 'camp') {
-    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onPlaceCell });
+    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onGhostPointer });
     drawSectorOverlays(g, state, z, { onSelectSector });
   } else if (z.state === 'unknown') {
     drawIrregularFog(g, z, rng, (state.day || 1) <= 2);
@@ -1338,8 +1337,13 @@ export function bindMapCamera(wrap, getState, onChange) {
 
   wrap.addEventListener('pointerdown', (ev) => {
     if (ev.button != null && ev.button !== 0) return;
-    // no pan si tocamos edificio/zona interactiva (salvo fondo)
     const t = ev.target;
+    // Ghost: mover edificio, no pan (§9.6)
+    if (t?.closest?.('.zz-settle-ghost-handle')) {
+      dragging = false;
+      wrap.dataset.zzGhostDrag = '1';
+      return;
+    }
     if (t?.closest?.('.zz-settle-bldg, .zz-settle-slot, .zz-zone-hit, .zz-zone-poly, .zz-ex-card')) {
       // zonas sí permiten pan con drag: marcamos y vemos si hay movimiento
     }
@@ -1350,6 +1354,7 @@ export function bindMapCamera(wrap, getState, onChange) {
     wrap.setPointerCapture?.(ev.pointerId);
   });
   wrap.addEventListener('pointermove', (ev) => {
+    if (wrap.dataset.zzGhostDrag === '1') return;
     if (!dragging) return;
     const state = getState();
     const el = svg();
@@ -1370,6 +1375,9 @@ export function bindMapCamera(wrap, getState, onChange) {
     applyMapCamera(el, state);
   });
   const endDrag = (ev) => {
+    if (wrap.dataset.zzGhostDrag === '1') {
+      delete wrap.dataset.zzGhostDrag;
+    }
     if (!dragging) return;
     dragging = false;
     wrap.releasePointerCapture?.(ev.pointerId);
@@ -1387,7 +1395,7 @@ export function bindMapCamera(wrap, getState, onChange) {
 
 export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
-  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector } = handlers;
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   const m = mapMetrics(svg);
   if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
@@ -1429,7 +1437,7 @@ export function renderMap(svg, state, handlers = {}) {
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
   ordered.forEach((z) =>
-    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector })
+    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onSelectSector, onGhostPointer })
   );
   world.appendChild(layer);
 

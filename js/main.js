@@ -26,7 +26,16 @@ import {
   syncLaborFromColony,
 } from './sim.js';
 import { resolvePendingChoice } from './director.js';
-import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy } from './render-map.js';
+import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox } from './render-map.js';
+import {
+  ensureBuildGhost,
+  setBuildGhostCell,
+  snapGhostToWorld,
+  ghostPlacementOk,
+  clearBuildMode,
+  cellToWorld,
+  freeBuildableCells,
+} from './build-place.js';
 import {
   readyExplorers,
   livingExplorers,
@@ -247,9 +256,11 @@ function handleSheetAction(action, btn) {
     state.uiMode = 'build';
     state.selectedBuildingId = null;
     state.selectedSectorId = null;
+    state.buildGhost = null;
+    ensureBuildGhost(state);
     closeSheet();
     paint();
-    toast(`Coloca ${def?.name || type} en terreno recuperado`, 'info');
+    toast(`Mové el fantasma · confirmá con ✓`, 'info');
     return;
   }
   if (action === 'expand-mode') {
@@ -289,10 +300,13 @@ function handleSheetAction(action, btn) {
     return;
   }
   if (action === 'cancel-build') {
-    state.buildMode = null;
-    state.uiMode = null;
+    clearBuildMode(state);
     toast('Construcción cancelada', 'info');
     paint();
+    return;
+  }
+  if (action === 'confirm-build') {
+    confirmBuildPlacement();
     return;
   }
   if (action === 'start-explore') {
@@ -479,6 +493,7 @@ function openBuildingSheet(id) {
   const b = state.base.buildings.find((x) => x.id === id && x.hp > 0);
   if (!b) return;
   state.selectedBuildingId = id;
+  focusBuildingCamera(b.id);
   const def = content.buildings[b.type];
   if (!def) return;
   const key = laborKeyForBuilding(def);
@@ -992,16 +1007,135 @@ function paintExplorers() {
   }
 }
 
+function focusBuildingCamera(id) {
+  const b = state.base?.buildings?.find((x) => x.id === id && x.hp > 0);
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  if (!b || !camp) return;
+  const w = cellToWorld(state, camp, b.x, b.y);
+  state.mapCamera = state.mapCamera || {};
+  state.mapCamera.x = w.x;
+  state.mapCamera.y = w.y;
+  clampCamera(state);
+}
+
+function clientToWorld(ev) {
+  const el = $('zz-map');
+  if (!el) return null;
+  const m = mapMetrics(el);
+  const vb = cameraViewBox(state, m);
+  const rect = el.getBoundingClientRect();
+  return {
+    x: vb.x + ((ev.clientX - rect.left) / Math.max(1, rect.width)) * vb.w,
+    y: vb.y + ((ev.clientY - rect.top) / Math.max(1, rect.height)) * vb.h,
+  };
+}
+
+function syncGhostValidity() {
+  if (!state.buildMode || !state.buildGhost) {
+    state.buildGhostValid = false;
+    return;
+  }
+  state.buildGhostValid = ghostPlacementOk(
+    state,
+    content,
+    state.buildMode,
+    state.buildGhost.x,
+    state.buildGhost.y
+  ).ok;
+}
+
+function confirmBuildPlacement() {
+  if (!state.buildMode || !state.buildGhost) {
+    toast('Nada que construir', 'warn');
+    return;
+  }
+  const type = state.buildMode;
+  const { x, y } = state.buildGhost;
+  const check = ghostPlacementOk(state, content, type, x, y);
+  if (!check.ok) {
+    toast(check.reason || 'Ubicación inválida', 'warn');
+    paint();
+    return;
+  }
+  const r = placeBuilding(state, content, type, x, y);
+  if (!r.ok) {
+    toast(r.error || 'No se pudo construir', 'warn');
+    return;
+  }
+  sfx.build?.();
+  toast(`${content.buildings[type]?.name || type} construido`, 'good');
+  clearBuildMode(state);
+  checkOnboardingProgress(state);
+  scheduleSave();
+  paint();
+  const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
+  if (b) openBuildingSheet(b.id);
+}
+
+function paintBuildDock() {
+  const advance = $('zz-advance');
+  const openBuild = $('zz-open-build');
+  const ok = $('zz-build-ok');
+  const cancel = $('zz-build-cancel');
+  const building = state.uiMode === 'build' && state.buildMode;
+  if (ok) ok.hidden = !building;
+  if (cancel) cancel.hidden = !building;
+  if (advance) advance.hidden = !!building;
+  if (openBuild) openBuild.hidden = !!building;
+  if (building && ok) {
+    syncGhostValidity();
+    ok.disabled = !state.buildGhostValid;
+    ok.classList.toggle('is-disabled', !state.buildGhostValid);
+  }
+}
+
+function handleGhostPointer(ev) {
+  if (ev.type !== 'pointerdown' && arguments[1]?.phase !== 'down') {
+    /* called from render with phase */
+  }
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  if (!camp || !state.buildMode) return;
+  const wrap = document.querySelector('.zz-world-map-wrap');
+  if (wrap) wrap.dataset.zzGhostDrag = '1';
+  let lastPaint = 0;
+  const move = (e) => {
+    const w = clientToWorld(e);
+    if (!w) return;
+    snapGhostToWorld(state, camp, w.x, w.y);
+    const now = performance.now();
+    if (now - lastPaint > 50) {
+      lastPaint = now;
+      syncGhostValidity();
+      paint();
+    }
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    window.removeEventListener('pointercancel', up);
+    if (wrap) delete wrap.dataset.zzGhostDrag;
+    syncGhostValidity();
+    paint();
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up);
+  window.addEventListener('pointercancel', up);
+  move(ev);
+}
+
 function paint() {
   if (!state || !content) return;
   maybeRevealEarlyLandmarks(state);
   checkOnboardingProgress(state);
   syncLaborFromColony(state, content);
+  if (state.uiMode === 'build' && state.buildMode) ensureBuildGhost(state);
+  syncGhostValidity();
   paintHud();
   paintExplorers();
   paintObjective();
   paintCoach();
   paintModeBanner();
+  paintBuildDock();
   const banner = $('zz-recover-banner');
   if (banner) {
     const recovering = state.day < (state.director?.protectionUntil || 0);
@@ -1017,13 +1151,13 @@ function paint() {
   renderMap($('zz-map'), state, {
     onSelectZone: (id) => {
       if (wrap?.dataset.zzPanned) return;
-      if (state.uiMode === 'expand') return;
+      if (state.uiMode === 'expand' || state.uiMode === 'build') return;
       sfx.click?.();
       openZoneSheet(id);
     },
     onSelectBuilding: (id) => {
       if (wrap?.dataset.zzPanned) return;
-      if (state.uiMode === 'expand') return;
+      if (state.uiMode === 'expand' || state.uiMode === 'build') return;
       sfx.click?.();
       openBuildingSheet(id);
     },
@@ -1033,23 +1167,8 @@ function paint() {
       openSectorSheet(id);
       paint();
     },
-    onPlaceCell: (x, y) => {
-      if (!state.buildMode) return;
-      const type = state.buildMode;
-      const r = placeBuilding(state, content, type, x, y);
-      if (!r.ok) {
-        toast(r.error || 'No se pudo construir', 'warn');
-        return;
-      }
-      sfx.build?.();
-      toast(`${content.buildings[type]?.name || type} colocado`, 'good');
-      state.buildMode = null;
-      state.uiMode = null;
-      checkOnboardingProgress(state);
-      scheduleSave();
-      paint();
-      const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
-      if (b) openBuildingSheet(b.id);
+    onGhostPointer: (ev) => {
+      handleGhostPointer(ev);
     },
   });
   renderChoiceModal();
@@ -1123,7 +1242,7 @@ function paintCoach() {
   card.classList.add('zz-coach-card--tip');
   let msg = st.step.text;
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
-    msg = 'Colocadlo dentro del refugio.';
+    msg = 'Arrastrá el fantasma y confirmá con ✓ Construir.';
   }
   text.textContent = msg;
   if (st.step.highlight === 'build' && !state.buildMode) {
@@ -1196,10 +1315,13 @@ function paintModeBanner() {
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
-    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> en terreno recuperado · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
+    const name = content.buildings[state.buildMode]?.name || 'edificio';
+    const hint = state.buildGhostValid
+      ? 'posición válida'
+      : 'posición no válida · arrastrá el fantasma';
+    el.innerHTML = `Colocá <strong>${escapeHtml(name)}</strong> · ${hint} · arrastrá el fantasma · <button type="button" class="zz-linkish" data-cancel-build>✕ Cancelar</button>`;
     el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
-      state.buildMode = null;
-      state.uiMode = null;
+      clearBuildMode(state);
       paint();
     });
   } else if (state.uiMode === 'explore') {
@@ -1405,6 +1527,16 @@ function bindChrome() {
     sfx.click?.();
     openBuildSheet();
   });
+  $('zz-build-ok')?.addEventListener('click', () => {
+    sfx.click?.();
+    confirmBuildPlacement();
+  });
+  $('zz-build-cancel')?.addEventListener('click', () => {
+    sfx.click?.();
+    clearBuildMode(state);
+    toast('Construcción cancelada', 'info');
+    paint();
+  });
   $('zz-open-more')?.addEventListener('click', () => {
     sfx.click?.();
     openMoreSheet();
@@ -1577,6 +1709,34 @@ export async function bootGame(opts) {
         paint();
       }
       return r;
+    },
+    startBuild: (type) => {
+      state.buildMode = type;
+      state.uiMode = 'build';
+      state.buildGhost = null;
+      ensureBuildGhost(state);
+      syncGhostValidity();
+      paint();
+      return state.buildGhost;
+    },
+    setGhost: (x, y) => {
+      setBuildGhostCell(state, x, y);
+      syncGhostValidity();
+      paint();
+      return { ghost: state.buildGhost, valid: state.buildGhostValid };
+    },
+    confirmBuild: () => {
+      confirmBuildPlacement();
+      return { ok: !state.buildMode };
+    },
+    cancelBuild: () => {
+      clearBuildMode(state);
+      paint();
+    },
+    freeCells: () => freeBuildableCells(state),
+    focusBuilding: (id) => {
+      focusBuildingCamera(id);
+      paint();
     },
     adjustWorkers: (buildingId, delta) => {
       const r = adjustBuildingWorkers(state, content, buildingId, delta);

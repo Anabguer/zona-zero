@@ -24,8 +24,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=29" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=29" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=30" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=30" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -110,7 +110,9 @@ $base = zz_public_base();
 
     <footer class="zz-world-dock">
       <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build">Construir</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar">✕</button>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
       <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more">Más</button>
     </footer>
 
@@ -140,7 +142,7 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=29';
+    import { bootGame } from './js/main.js?v=30';
     bootGame({
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,

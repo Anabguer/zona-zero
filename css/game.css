@@ -845,11 +845,33 @@ body.zz-body {
   opacity: 0.7;
   stroke-linecap: round;
 }
-.zz-settle-slot {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 0.14;
-  stroke-dasharray: none;
+.zz-settle-ghost-handle {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+.zz-settle-ghost-handle:active {
+  cursor: grabbing;
+}
+.zz-settle-ghost-hit {
+  pointer-events: all;
+}
+.zz-settle-ghost-pad {
+  pointer-events: none;
+}
+.zz-settle-ghost-pad.is-valid {
+  fill: rgba(120, 160, 90, 0.35);
+}
+.zz-settle-ghost-pad.is-invalid {
+  fill: rgba(160, 70, 50, 0.4);
+}
+.zz-settle-ghost {
+  pointer-events: none;
+}
+#zz-build-ok.is-disabled,
+#zz-build-ok:disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 .zz-settle-slot.is-hot,
 .zz-settle-slot:hover {
