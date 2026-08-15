@@ -1,0 +1,14 @@
+Inicio D1 pop=3 food=28
+Construidos: huerto, pozo, refugio
+Expedición enviada
+D2 pop=3 food=27 water=31 era=0 ctrl=1 known=3 bld=6 | Noche tranquila. Nada digno de anotar.
+D5 pop=3 food=29 water=31 era=0 ctrl=1 known=3 bld=6 | Noche tranquila. Nada digno de anotar.
+Mid: almacén, torre, taller
+D8 pop=3 food=26 water=28 era=0 ctrl=1 known=3 bld=9 | Noche tranquila. Nada digno de anotar.
+D11 pop=3 food=19 water=25 era=0 ctrl=1 known=3 bld=9 | Plaga y ratas: Montáis trampas; el hedor persiste.
+Investigación iniciada
+D14 pop=3 food=9 water=22 era=0 ctrl=1 known=4 bld=9 | Día claro: Secáis ropa y leña al sol.
+D17 pop=4 food=2 water=17 era=0 ctrl=1 known=5 bld=9 | Descubrís Estación Sur.
+FIN D19 pop=4 era=0 ctrl=1 bld=9 defeated=false
+Duración script: 0.5 min (wall-clock)
+Notas jugables: mapa ciudad+niebla; base con edificios distintos; coach; expedición visible; progreso eras; sin popups de calma.

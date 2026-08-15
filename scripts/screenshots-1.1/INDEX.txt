@@ -1,0 +1,14 @@
+01-mobile-gente
+02-mobile-mapa-dia1
+03-mobile-base-dia1
+05-mobile-construccion
+04-mobile-expedicion
+06-mobile-progreso
+07-mobile-investigacion
+08-mobile-mapa-desarrollado
+09-mobile-base-desarrollada
+10-mobile-evento
+10b-mobile-ataque
+11-desktop-mapa
+12-desktop-base
+13-desktop-gente

@@ -23,7 +23,7 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=7" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=9" />
 </head>
 <body class="zz-body zz-body--play">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -34,7 +34,10 @@ $base = zz_public_base();
         <strong id="zz-colony">Zona Zero</strong>
         <span id="zz-save-state" class="zz-save-state">Listo</span>
       </div>
-      <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
+      <div class="zz-top__actions">
+        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound" aria-pressed="true">Sonido</button>
+        <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
+      </div>
     </header>
 
     <p class="zz-coach" id="zz-coach" hidden>
@@ -59,6 +62,7 @@ $base = zz_public_base();
             <small>Población / camas</small>
           </div>
         </div>
+        <div class="zz-weather" id="zz-weather" data-weather="clear" hidden>Despejado</div>
         <div class="zz-hud__combat" aria-label="Estabilidad, amenaza y defensa">
           <div class="zz-hud__meter zz-hud__meter--stab">
             <span>Estab.</span>
@@ -80,10 +84,11 @@ $base = zz_public_base();
       <ul class="zz-resources" id="zz-resources"></ul>
     </section>
 
-    <nav class="zz-tabs" aria-label="Vistas">
+    <nav class="zz-tabs zz-tabs--dock" aria-label="Vistas">
       <button type="button" class="zz-tab is-active" id="zz-tab-map" data-tab="map">Mapa</button>
       <button type="button" class="zz-tab" id="zz-tab-base" data-tab="base">Base</button>
       <button type="button" class="zz-tab" id="zz-tab-people" data-tab="people">Gente</button>
+      <button type="button" class="zz-tab" id="zz-tab-progress" data-tab="progress">Progreso</button>
       <button type="button" class="zz-tab" id="zz-tab-more" data-tab="more">Más</button>
     </nav>
 
@@ -104,8 +109,13 @@ $base = zz_public_base();
       </section>
 
       <section class="zz-panel" data-panel="people">
+        <div id="zz-people-filters" class="zz-people-filters" aria-label="Filtros"></div>
         <div class="zz-people" id="zz-people"></div>
-        <p class="zz-hint">Toca para formar el equipo de expedición (máx. 3).</p>
+        <p class="zz-hint">Toca para formar el equipo de expedición. Usa «Sugerir equipo».</p>
+      </section>
+
+      <section class="zz-panel" data-panel="progress">
+        <div id="zz-progress-panel" class="zz-progress-panel"></div>
       </section>
 
       <section class="zz-panel" data-panel="more">
@@ -117,6 +127,10 @@ $base = zz_public_base();
       <h2>Diario</h2>
       <ul class="zz-log" id="zz-log"></ul>
     </aside>
+
+    <div id="zz-pulse-layer" class="zz-pulse-layer" aria-hidden="true"></div>
+    <div id="zz-event-card" class="zz-event-card" hidden></div>
+    <div id="zz-attack-card" class="zz-attack-card" hidden></div>
 
     <footer class="zz-dock">
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
@@ -140,6 +154,7 @@ $base = zz_public_base();
 
     <div id="zz-choice-modal" class="zz-choice" hidden>
       <div class="zz-choice__card">
+        <div class="zz-choice__head" id="zz-choice-head"></div>
         <h2 id="zz-choice-title">Decisión</h2>
         <p id="zz-choice-text"></p>
         <div id="zz-choice-actions" class="zz-choice__actions"></div>
@@ -148,7 +163,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=7';
+    import { bootGame } from './js/main.js?v=9';
     bootGame({
       slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,

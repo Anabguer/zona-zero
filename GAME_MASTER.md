@@ -1,109 +1,1397 @@
-# ZONA ZERO — GAME_MASTER
+# ZONA ZERO — GAME MASTER / MEGA PLAN
 
-**Fuente de verdad compartida** (Cursor ↔ ChatGPT)  
-**Versión de diseño:** 1.0 · **Versión técnica objetivo:** **1.0.0**  
-**Repositorio:** `Anabguer/zona-zero` · rama `main`  
-**URL:** https://intocables13.com/juegos/zona-zero/  
-**Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables
+**Versión de diseño:** 1.0  
+**Estado:** Diseño integral aprobado para implementación  
+**Plataforma:** Web responsive (móvil + escritorio)  
+**Stack objetivo:** HTML/CSS/JS + PHP + MySQL, sin APK  
+**Repositorio:** `Anabguer/zona-zero`  
+**Hosting:** Intocables / Hostalia  
+**URL objetivo:** `/juegos/zona-zero/`
 
 ---
 
 ## 0. REGLA MAESTRA
 
-Zona Zero es un juego de **gestión indirecta, expansión territorial y supervivencia emergente**.
+Zona Zero debe ser un juego de **gestión indirecta, expansión territorial y supervivencia emergente**.
 
-> Empiezo con 3 supervivientes y casi nada. Veo algo que necesito. Asigno gente. Arriesgo. Consigo recursos. Construyo. Ocupo edificios. Mi zona crece. Llega más gente. Cuando creo que lo tengo controlado, sucede algo inesperado. Pierdo recursos, edificios o población. Me reorganizo y sigo creciendo.
+La experiencia que debe provocar es:
 
-No es un RPG. No se controla directamente a ningún personaje. No hay campaña lineal.
+> Empiezo con 3 supervivientes y casi nada. Veo algo que necesito. Asigno gente. Arriesgo. Consigo recursos. Construyo. Ocupo edificios. Mi zona crece. Llega más gente. Cuando creo que lo tengo controlado, sucede algo inesperado. Pierdo recursos, edificios o población. Me reorganizo y sigo creciendo. Nunca sé exactamente qué ocurrirá en la siguiente partida.
 
----
-
-## 1–35. DISEÑO APROBADO (PRODUCTO)
-
-Las reglas de diseño, sistemas, contenido mínimo, arte, Director, eras, victoria/endless, balance, simulador y criterio de entrega están definidas en el diseño integral v1.0 aprobado (documento MEGA PLAN fusionado). Resumen operativo:
-
-### Pilares
-Gestión indirecta · crecimiento visible · riesgo real · imprevisibilidad controlada · poca microgestión.
-
-### Inicio
-3 supervivientes · Refugio Central N1 · capacidad ~4 · reservas mínimas · sector inicial seguro · 2–4 localizaciones próximas conocidas · semilla procedural.
-
-### Recursos (7)
-comida, agua, madera, metal, medicinas, combustible, munición (+ energía como capacidad, no inventario basura).
-
-### Habilidades (5)
-Explorar · Recolectar · Construir · Producir · Defender. Escala 1–5, suben con uso. 1–2 rasgos ligeros.
-
-### Sistemas v1 (mínimos)
-- Base visual + 20+ edificios/mejoras
-- Mapa urbano 15+ tipos de localización + estados territoriales
-- Expediciones automáticas + equipamiento rápido + vehículos
-- Infectados (pocos tipos) + ataques a base
-- Director adaptativo (fuerza/fragilidad/momentum/tensión + presupuesto)
-- **≥80 eventos base / ≥15 familias** + variantes + antirrepetición
-- Clima/catástrofes · facciones 3–6 · investigación 4 ramas · 5 eras
-- Victoria + endless · muerte permanente · 3 slots MySQL
-- Arte SVG propio (sin emojis como arte principal)
-- Tutorial contextual corto
-- Simulador headless + tests E2E
-- Móvil primero
-
-### Familias de eventos
-hallazgos, radio, supervivientes, hambre_agua, enfermedad, accidentes, clima, infectados, ataques, infraestructura, comercio, rumores, conflictos, expansion, catastrofes (+ calma).
-
-### Eras
-0 Sobrevivir · 1 Asegurar · 2 Expandir · 3 Consolidar · 4 Estabilizar (por indicadores, no por día fijo).
-
-### Victoria
-Estabilizar Zona Zero (territorio, población, sostenibilidad, sanidad, energía, defensa, logística, crisis final). Luego endless o nueva partida.
-
-### Prohibido
-Campaña lineal · control directo · combate manual · Excel-UI · emojis como arte · APK · hardcodes de balance en lógica · monetización.
-
-### Criterio de entrega
-No basta con que compile: partida manual jugable, simulaciones largas, derrota/recuperación/victoria verificables, móvil+escritorio, deploy, commit/push.
+No es un RPG. No se controla directamente a ningún personaje. No hay campaña lineal. No hay misiones idénticas en todas las partidas.
 
 ---
 
-## TÉCNICO — IMPLEMENTACIÓN
+# 1. PILARES DE DISEÑO
 
-| Campo | Valor |
-|-------|--------|
-| Versión técnica | **1.0.0** |
-| Ubicación local | `W:\juegos\zona-zero\` |
-| Biblioteca | https://intocables13.com/juegos/ |
-| Prefijo SQL | `zona_zero_*` |
-| Auth | Intocables (`/intocables/includes` local, `/includes` prod) |
-| `save_version` / `v` | **3** |
-| Eventos | **110** (15 familias ×7 + 5 calma) |
-| Edificios | **32** |
-| Localizaciones mapa | **18** |
+## 1.1 Gestión indirecta
 
-### Arquitectura
-- Cliente: `js/` (state, sim, director, render, icons, api, main)
-- Contenido: `content/*.json` (balance, buildings, locations, events, survivors, research, vehicles, infected, factions, eras)
-- API PHP: `api/` + `zona_zero_saves`
-- Assets SVG generados en proyecto
-- Tools: `scripts/balance-sim.mjs`, E2E Playwright/harness
+El jugador decide **qué**, **quién** y **dónde**. El sistema resuelve la acción.
 
-### Persistencia
-3 slots · autosave + guardado explícito · migraciones versionadas (v1/v2 → v3).
+Acciones típicas:
+- asignar trabajadores;
+- elegir supervivientes para una expedición;
+- seleccionar destino;
+- construir;
+- producir;
+- defender;
+- investigar;
+- ocupar una zona;
+- comerciar;
+- responder a eventos.
+
+No hay movimiento manual de personajes ni combate táctico controlado unidad por unidad.
+
+## 1.2 Crecimiento visible
+
+La evolución debe verse físicamente:
+- más edificios;
+- más territorio controlado;
+- más población;
+- mejores defensas;
+- carreteras/rutas utilizadas;
+- vehículos;
+- zonas iluminadas/seguras;
+- edificios reparados;
+- actividad en la base.
+
+## 1.3 Riesgo real
+
+La colonia puede retroceder mucho.
+
+Ejemplo válido:
+- población 52 → ataque + enfermedad → población 31 → escasez → población 24 → recuperación → población 40.
+
+No debe existir crecimiento garantizado.
+
+## 1.4 Imprevisibilidad controlada
+
+No usar aleatoriedad absurda ni guion fijo.
+
+El Director analiza el estado real de la colonia y escoge situaciones apropiadas dentro de un rango de intensidad.
+
+## 1.5 Poca microgestión, muchas decisiones
+
+Debe haber bastantes sistemas y recursos, pero la interfaz debe permitir entenderlos de un vistazo.
 
 ---
 
-## CHANGELOG
+# 2. ESTRUCTURA DE PARTIDA
+
+## 2.1 Inicio
+
+Nueva partida:
+- 3 supervivientes;
+- Refugio Central nivel 1;
+- capacidad aproximada 4;
+- pequeña reserva de comida y agua;
+- materiales mínimos;
+- equipamiento pobre;
+- solo el sector inicial es seguro;
+- 2–4 localizaciones próximas parcialmente conocidas;
+- resto cubierto por niebla/incertidumbre.
+
+El mapa, localizaciones, distribución de recursos, nombres, eventos y parte de las amenazas se generan por semilla.
+
+## 2.2 Escala esperada
+
+Orientación, NO límites rígidos:
+- Inicio: 3–8 habitantes.
+- Comunidad pequeña: 8–20.
+- Asentamiento: 20–50.
+- Zona consolidada: 50–100.
+- Gran comunidad: 100+.
+
+La capacidad depende de infraestructura, no de un hardcode pequeño.
+
+## 2.3 Victoria
+
+Existe un objetivo de victoria lejano: **Estabilizar Zona Zero**.
+
+Requisitos conceptuales:
+- controlar una parte importante del mapa principal;
+- alcanzar población estable elevada;
+- garantizar comida y agua sostenibles;
+- disponer de hospital/sanidad avanzada;
+- energía estable;
+- defensa avanzada;
+- mantener rutas/logística;
+- completar una cadena final variable de estabilización regional;
+- sobrevivir a una crisis final adaptativa.
+
+La cadena final tendrá variantes para no ser idéntica en todas las partidas.
+
+Tras la victoria:
+
+**ZONA ZERO ESTÁ ESTABILIZADA**
+
+Opciones:
+- Continuar partida (endless);
+- Nueva partida.
+
+---
+
+# 3. TIEMPO Y RITMO
+
+## 3.1 Unidad temporal
+
+El juego trabaja en días, con acciones que pueden durar fracciones de día/tiempo real según interfaz.
+
+El jugador puede avanzar el tiempo, pero las expediciones también deben ser apropiadas para sesiones móviles cortas.
+
+## 3.2 Expediciones
+
+Duraciones escaladas por distancia:
+- cercanas: rápidas;
+- medias: moderadas;
+- lejanas: largas;
+- vehículo + combustible: reduce duración y aumenta alcance/carga.
+
+No convertir los temporizadores en monetización ni esperas artificiales.
+
+## 3.3 Ritmo de presión
+
+El Director alterna:
+- calma;
+- señales;
+- presión;
+- crisis;
+- recuperación.
+
+Nunca evento grave tras evento grave indefinidamente salvo que la propia situación del jugador haya creado una espiral de crisis.
+
+---
+
+# 4. RECURSOS
+
+## 4.1 Recursos principales
+
+1. **Comida** — consumo poblacional, expediciones, reservas.
+2. **Agua** — consumo crítico, agricultura, ciertos edificios.
+3. **Madera** — construcción temprana, reparaciones, calefacción eventual.
+4. **Metal** — construcción avanzada, herramientas, defensas.
+5. **Medicinas** — heridas, enfermedades, eventos sanitarios.
+6. **Combustible** — vehículos, generadores y logística avanzada.
+7. **Munición** — defensa y expediciones peligrosas.
+
+## 4.2 Recursos secundarios desbloqueables
+
+Solo cuando tengan función clara:
+- energía (capacidad producida/consumida, no necesariamente inventario);
+- piezas mecánicas;
+- herramientas/equipamiento como categorías;
+- protección.
+
+Evitar recursos basura.
+
+## 4.3 Escasez
+
+Cada recurso debe poder provocar decisiones.
+
+Ejemplos:
+- falta agua → mortalidad/abandono/producción reducida;
+- falta comida → hambre y caída de población;
+- falta medicina → heridas duran más;
+- falta combustible → expediciones lejanas a pie;
+- falta munición → defensa menos eficaz;
+- falta madera/metal → expansión frenada.
+
+---
+
+# 5. SUPERVIVIENTES
+
+## 5.1 Filosofía
+
+Son población funcional, no protagonistas narrativos.
+
+Cada uno tiene:
+- nombre procedural/gracioso;
+- retrato procedural sencillo;
+- salud;
+- estado (ok/herido/enfermo/ocupado);
+- habilidades visibles y simples;
+- posible rasgo ligero.
+
+## 5.2 Habilidades
+
+Cinco habilidades base:
+- Explorar;
+- Recolectar;
+- Construir;
+- Producir;
+- Defender.
+
+Medicina puede aparecer como especialidad/rasgo o sexta habilidad si el balance lo justifica.
+
+Escala recomendada 1–5, visible con icono + barra/puntos.
+
+Las habilidades suben con uso.
+
+## 5.3 Aptitud natural
+
+Cada superviviente nace/aparece con pequeñas diferencias.
+
+Ejemplo:
+- +1 inicial a Recolectar;
+- aprendizaje de Construir ligeramente mayor;
+- rasgo “resistente”;
+- rasgo “rápido”.
+
+No más de 1–2 rasgos por persona.
+
+## 5.4 Muerte
+
+Permanente.
+
+Puede producirse por:
+- expedición;
+- ataque;
+- hambre/sed;
+- enfermedad;
+- catástrofe;
+- evento.
+
+## 5.5 Población natural
+
+No gestionar parejas.
+
+El sistema global calcula nacimientos cuando existen:
+- población suficiente;
+- vivienda;
+- estabilidad;
+- comida/agua;
+- seguridad razonable.
+
+Los niños no requieren micromanejo. Pueden representarse como población dependiente hasta alcanzar edad funcional mediante una abstracción temporal acelerada compatible con el juego.
+
+También llegan supervivientes por rescates, radio, migración y eventos.
+
+---
+
+# 6. VIVIENDA, MORAL Y ESTABILIDAD
+
+## 6.1 Vivienda
+
+Cada alojamiento aporta capacidad.
+
+Sin plazas:
+- se frena inmigración;
+- disminuye crecimiento natural;
+- puede bajar estabilidad;
+- en situaciones graves algunos abandonan.
+
+## 6.2 Estabilidad comunitaria
+
+Usar un indicador global sencillo, no Sims individual.
+
+Factores positivos:
+- comida/agua;
+- vivienda;
+- seguridad;
+- sanidad;
+- victorias/descubrimientos.
+
+Negativos:
+- hambre;
+- muchas muertes;
+- hacinamiento;
+- ataques;
+- enfermedad;
+- crisis prolongadas.
+
+Puede afectar productividad, llegadas y abandono.
+
+---
+
+# 7. BASE / CONSTRUCCIÓN
+
+## 7.1 Vista
+
+La base es un terreno visual, no una tabla.
+
+Internamente puede usar grid, pero visualmente debe mostrar:
+- suelo;
+- caminos;
+- vallas;
+- vegetación/ruinas;
+- edificios ilustrados;
+- actividad ambiental ligera.
+
+## 7.2 Colocación
+
+Flujo:
+1. elegir edificio;
+2. ver coste y beneficio;
+3. mostrar footprint fantasma;
+4. tocar/clicar ubicación;
+5. construir si hay recursos/espacio.
+
+Permitir mover edificios cuando sea razonable, con coste cero o pequeño según balance.
+
+## 7.3 Edificios iniciales y progresión
+
+### Núcleo
+- Refugio Central N1–N3: centro, capacidad/funciones generales.
+
+### Vivienda
+- Choza/refugio improvisado;
+- Vivienda;
+- Bloque acondicionado.
+
+### Recursos
+- Huerto;
+- Pozo/colector;
+- Leñera/aserradero;
+- Recuperador de metal;
+- Almacén.
+
+### Producción
+- Taller;
+- Cocina/comedor;
+- Depósito de agua;
+- Invernadero;
+- Taller mecánico.
+
+### Salud
+- Botiquín/puesto médico;
+- Enfermería;
+- Clínica/hospital.
+
+### Seguridad
+- Barricada;
+- Valla;
+- Torre de vigilancia;
+- Armería;
+- Puesto defensivo.
+
+### Información/logística
+- Radio;
+- Centro de expediciones;
+- Garaje;
+- Centro de mando.
+
+### Energía
+- Generador;
+- instalación mejorada/alternativa renovable en progresión avanzada.
+
+### Investigación
+- Mesa técnica;
+- Laboratorio/centro técnico.
+
+Cada familia tendrá 2–3 niveles o mejoras claras, no 15.
+
+---
+
+# 8. TRABAJADORES Y PRODUCCIÓN
+
+Los edificios productivos tienen plazas de trabajo.
+
+Interacción rápida:
+- 0/2 trabajadores;
+- botones +/- o asignación automática/manual;
+- sugerencia de mejores trabajadores sin obligar a aceptarla.
+
+La producción depende de:
+- trabajadores;
+- habilidad;
+- edificio;
+- mejoras;
+- estabilidad;
+- eventos/clima.
+
+Debe existir botón/función opcional **Autoasignar** para reducir microgestión con poblaciones grandes.
+
+---
+
+# 9. MAPA DE CIUDAD
+
+## 9.1 Objetivo visual
+
+Mapa SVG estilizado y responsive con sensación de ciudad real simplificada.
+
+Debe incluir:
+- carreteras;
+- manzanas;
+- edificios;
+- solares;
+- parques/vegetación;
+- ruinas;
+- sectores.
+
+No usar círculos genéricos como diseño final.
+
+## 9.2 Estados territoriales
+
+- Desconocido: niebla/silueta.
+- Detectado: información parcial.
+- Explorado: información conocida.
+- Hostil: peligro claro.
+- Controlado: halo/iluminación/identidad Zona Zero.
+- Perdido/contestado: control degradado.
+
+La transformación a controlado debe ser visualmente satisfactoria.
+
+## 9.3 Tipos de localización
+
+- viviendas;
+- supermercado;
+- farmacia;
+- hospital;
+- taller;
+- gasolinera;
+- almacén;
+- ferretería;
+- comisaría;
+- estación/bus;
+- colegio;
+- parque;
+- nave industrial;
+- edificio de oficinas;
+- centro comercial;
+- depósito de agua;
+- subestación/infraestructura;
+- localizaciones especiales procedurales.
+
+Cada tipo define tendencias de botín, riesgo y eventos, nunca resultado fijo.
+
+## 9.4 Control territorial
+
+Explorar no equivale automáticamente a conquistar.
+
+Una zona puede requerir:
+- limpiar infectados;
+- asegurar accesos;
+- completar expedición;
+- gastar recursos;
+- instalar puesto de control.
+
+Controlar zonas amplía seguridad, alcance y posibilidades.
+
+---
+
+# 10. EXPEDICIONES
+
+## 10.1 Flujo
+
+1. tocar localización;
+2. ver estimación simple: distancia, peligro, botín probable;
+3. elegir 1–3+ supervivientes según desbloqueos;
+4. opcional: equipamiento rápido;
+5. enviar;
+6. resolver automáticamente;
+7. recibir informe/botín/consecuencias.
+
+## 10.2 Riesgo
+
+La probabilidad considera:
+- peligro local;
+- número de expedicionarios;
+- habilidad Explorar/Defender;
+- salud;
+- armas/munición;
+- protección;
+- distancia;
+- vehículo;
+- clima/eventos;
+- información previa.
+
+Mostrar al usuario una categoría, no fórmula exacta:
+- Bajo;
+- Moderado;
+- Alto;
+- Extremo.
+
+## 10.3 Botín
+
+Tablas por tipo de lugar + modificadores + rareza.
+
+Nunca “farmacia siempre = exactamente 4 medicinas”.
+
+Puede encontrarse:
+- recursos;
+- supervivientes;
+- equipamiento;
+- pistas;
+- amenazas;
+- eventos;
+- nada útil.
+
+## 10.4 Equipamiento rápido
+
+No inventario RPG.
+
+Categorías:
+- sin arma / arma básica / arma mejorada;
+- sin protección / ligera / reforzada;
+- vehículo si disponible.
+
+Botón opcional “Equipar recomendado”.
+
+---
+
+# 11. VEHÍCULOS
+
+Desbloqueo medio.
+
+Tipos simplificados:
+- bicicleta/carrito (sin combustible, carga limitada);
+- coche;
+- furgoneta;
+- vehículo reforzado avanzado.
+
+Aportan:
+- velocidad;
+- alcance;
+- capacidad de carga;
+- posible protección.
+
+Consumen combustible y pueden averiarse.
+
+No simulación mecánica compleja.
+
+---
+
+# 12. INFECTADOS Y COMBATE ABSTRACTO
+
+## 12.1 Tipos
+
+Pocos tipos claramente diferenciados:
+- común;
+- rápido;
+- resistente;
+- horda;
+- especial raro.
+
+No crear bestiario enorme.
+
+## 12.2 Resolución
+
+Combate automático basado en fuerza de ambos grupos + variabilidad limitada.
+
+Resultado:
+- victoria limpia;
+- heridas;
+- bajas;
+- retirada;
+- pérdida de equipo;
+- fracaso;
+- zona limpiada.
+
+## 12.3 Ataques a base
+
+El jugador prepara, no controla.
+
+Defensa depende de:
+- población asignada;
+- habilidad;
+- estructuras;
+- munición;
+- armas;
+- alertas previas;
+- intensidad.
+
+Mostrar visualmente el ataque y después un informe claro.
+
+---
+
+# 13. DIRECTOR DE PARTIDA
+
+## 13.1 Función
+
+Es el cerebro que evita campaña fija y aleatoriedad injusta.
+
+## 13.2 Índices internos
+
+Calcular al menos:
+
+### Fuerza de colonia
+Combina:
+- población funcional;
+- defensa;
+- armamento;
+- edificios;
+- territorio;
+- reservas;
+- tecnología.
+
+### Fragilidad
+- hambre/sed;
+- heridos;
+- escasez medicina;
+- baja estabilidad;
+- daños;
+- pérdidas recientes.
+
+### Momentum
+Mide si el jugador lleva demasiado tiempo creciendo sin presión o encadenando derrotas.
+
+### Tensión
+Valor dinámico 0–100.
+
+## 13.3 Presupuesto de amenaza
+
+Cada evento tiene coste/intensidad.
+
+El Director genera un presupuesto permitido según:
+- progreso;
+- fuerza;
+- fragilidad;
+- tensión;
+- tiempo desde última crisis.
+
+No seleccionar eventos fuera de rango salvo eventos especiales con advertencia/preparación.
+
+## 13.4 Cooldowns
+
+- global de crisis;
+- por familia;
+- por evento;
+- protección relativa tras desastre grave.
+
+## 13.5 Noches/días tranquilos
+
+Debe ser posible que no pase nada importante.
+
+La ausencia de evento también forma parte del ritmo.
+
+---
+
+# 14. EVENTOS — SISTEMA DE CONTENIDO
+
+## 14.1 Volumen objetivo inicial
+
+Implementar **mínimo 80 eventos base**, organizados en al menos 15 familias, con variantes/resultados procedurales. Esto debe producir cientos de combinaciones reales sin escribir cientos de historias completas.
+
+Familias mínimas:
+1. hallazgos;
+2. radio;
+3. supervivientes;
+4. hambre/agua;
+5. enfermedad;
+6. accidentes;
+7. clima;
+8. infectados;
+9. ataques;
+10. infraestructura;
+11. comercio;
+12. rumores/pistas;
+13. conflictos comunitarios abstractos;
+14. oportunidades de expansión;
+15. catástrofes.
+
+## 14.2 Plantillas variables
+
+Cada evento puede parametrizar:
+- localización;
+- recurso;
+- cantidad;
+- peligro;
+- participantes;
+- duración;
+- resultado;
+- secuela.
+
+## 14.3 Decisiones
+
+Algunos eventos ofrecen 2–3 decisiones.
+
+No todos. Evitar fatiga de ventanas.
+
+## 14.4 Memoria narrativa
+
+Flags simples permiten consecuencias futuras.
+
+Ejemplo:
+- ayudaste a grupo desconocido → flag;
+- semanas después aparece comercio/rescate/problema relacionado.
+
+No crear novela rígida.
+
+## 14.5 Antirrepetición
+
+- cooldown;
+- historial de familias;
+- penalización de peso por repetición reciente;
+- variantes;
+- exclusiones mutuas.
+
+---
+
+# 15. CLIMA Y CATÁSTROFES
+
+Sistema progresivo, desbloqueado tras primeros días.
+
+Tipos:
+- lluvia fuerte;
+- ola de calor;
+- frío;
+- tormenta;
+- incendio;
+- contaminación/niebla peligrosa;
+- fallo de infraestructura;
+- gran horda.
+
+Las catástrofes fuertes pueden destruir edificios y matar población.
+
+Deben existir contramedidas:
+- reservas;
+- mejoras;
+- defensas;
+- energía;
+- medicina;
+- información previa.
+
+Algunas llegan con señales, otras son más repentinas.
+
+---
+
+# 16. OTROS ASENTAMIENTOS / FACCIONES
+
+Desbloqueo medio-tardío.
+
+Generar 3–6 grupos por partida con rasgos globales:
+- amistoso;
+- comerciante;
+- aislacionista;
+- oportunista;
+- hostil;
+- variable.
+
+Relación simplificada: hostil / tensa / neutral / amistosa / aliada.
+
+Acciones:
+- comerciar;
+- ayudar;
+- pedir ayuda;
+- intercambiar información;
+- negociar paso;
+- conflicto/ataque abstracto.
+
+No diplomacia 4X profunda.
+
+---
+
+# 17. INVESTIGACIÓN Y DESBLOQUEOS
+
+No árbol gigantesco.
+
+Cuatro ramas:
+- Supervivencia;
+- Construcción;
+- Logística;
+- Defensa.
+
+Ejemplos:
+- mejores cultivos;
+- almacenamiento;
+- filtros de agua;
+- construcción reforzada;
+- expediciones mayores;
+- reparación de vehículos;
+- radio avanzada;
+- defensas;
+- energía;
+- sanidad.
+
+Los desbloqueos requieren combinación de tiempo/recursos/infraestructura, no solo puntos abstractos.
+
+---
+
+# 18. PROGRESIÓN POR ERAS (NO GUION FIJO)
+
+Las eras desbloquean sistemas, NO eventos obligatorios.
+
+## Era 0 — Sobrevivir
+3–8 personas. Agua/comida/refugio/exploración cercana.
+
+## Era 1 — Asegurar
+8–20. Producción básica, defensa, primeras zonas controladas, radio.
+
+## Era 2 — Expandir
+20–50. Varias expediciones, sanidad, talleres, vehículos básicos, amenazas mayores.
+
+## Era 3 — Consolidar
+50–100. Infraestructura, facciones, energía, producción avanzada, grandes ataques.
+
+## Era 4 — Estabilizar
+100+. Red territorial, logística, crisis regionales, condiciones de victoria.
+
+La entrada en era depende de varios indicadores, no de “día 20”.
+
+---
+
+# 19. DERROTA Y RECUPERACIÓN
+
+Derrota cuando:
+- población llega a 0;
+- o el Refugio Central queda perdido y no existe posibilidad válida de recuperación.
+
+No perder automáticamente por quedarse temporalmente sin un recurso si aún existe una vía real de supervivencia.
+
+Antes de derrota pueden existir estados críticos.
+
+Pantalla de derrota muestra:
+- días sobrevividos;
+- máxima población;
+- territorio máximo;
+- causa principal;
+- estadísticas curiosas;
+- semilla;
+- Nueva partida.
+
+---
+
+# 20. INTERFAZ / UX
+
+## 20.1 Filosofía
+
+Debe parecer videojuego, NO dashboard.
+
+## 20.2 HUD
+
+Siempre visibles de forma compacta:
+- día;
+- población/capacidad;
+- recursos;
+- amenaza/tensión aproximada si procede;
+- defensa.
+
+Iconos SVG propios.
+
+## 20.3 Navegación principal
+
+- Ciudad;
+- Base;
+- Gente;
+- Expediciones;
+- Investigación (cuando se desbloquee).
+
+En móvil: dock inferior o navegación táctil clara.
+
+## 20.4 Gente
+
+Lista compacta. Cada persona muestra:
+- retrato;
+- nombre;
+- salud;
+- ocupación;
+- habilidades mediante iconos/barras.
+
+Nada como `E3 C2 B2 R4` sin explicación.
+
+Filtros cuando población sea grande:
+- disponibles;
+- heridos;
+- trabajando;
+- expedición;
+- habilidad.
+
+## 20.5 Diario
+
+Secundario y plegable.
+
+Eventos importantes mediante cards/toasts/modales ligeros.
+
+## 20.6 Tutorial
+
+Contextual y corto.
+
+Primera partida guía solo:
+1. seleccionar gente;
+2. explorar;
+3. conseguir materiales;
+4. construir;
+5. avanzar.
+
+Después desaparece.
+
+---
+
+# 21. DIRECCIÓN ARTÍSTICA
+
+## 21.1 Paleta
+
+No monocromo verde.
+
+Usar:
+- carbón/negro verdoso para fondos;
+- tierra/ocre;
+- hormigón/grises;
+- metal;
+- vegetación apagada;
+- luces cálidas;
+- verde luminoso SOLO para seguro/controlado/éxito;
+- ámbar para advertencia;
+- rojo/coral para peligro.
+
+## 21.2 Estilo
+
+- indie moderno;
+- minimalista;
+- formas limpias;
+- ligera vista isométrica o pseudoisométrica para edificios si resulta viable;
+- sin realismo pesado;
+- legible a tamaño móvil.
+
+## 21.3 Assets obligatorios
+
+Cursor debe crear un set coherente de SVG/arte propio para:
+
+### Recursos
+7 iconos principales + secundarios usados.
+
+### Edificios
+Ilustración individual para cada edificio y nivel visual relevante.
+
+### Mapa
+- carreteras;
+- edificios urbanos por categoría;
+- solares;
+- vegetación;
+- ruinas;
+- niebla;
+- marcadores;
+- control/peligro.
+
+### Base
+- suelos;
+- caminos;
+- vallas;
+- parcelas;
+- cada construcción;
+- estados construcción/dañado/mejorado.
+
+### Personas
+Sistema procedural de retratos combinando:
+- varias cabezas;
+- pelo;
+- ropa;
+- tonos/rasgos gráficos;
+- accesorios mínimos.
+
+Objetivo: decenas de combinaciones sin dibujar cientos de retratos.
+
+### Enemigos
+Siluetas/figuras para tipos de infectado y hordas.
+
+### Vehículos
+Cada categoría.
+
+### UI
+- botones;
+- alertas;
+- salud;
+- habilidades;
+- estados;
+- investigación;
+- expediciones.
+
+No emojis como arte principal.
+
+---
+
+# 22. SONIDO
+
+Opcional pero recomendado si puede hacerse con assets propios/licencia segura:
+- click suave;
+- construcción;
+- expedición enviada/regresa;
+- alerta;
+- ataque;
+- éxito;
+- ambiente sutil.
+
+Control de volumen/mute.
+
+No bloquear implementación si sonido complica licencias.
+
+---
+
+# 23. BALANCE — PRINCIPIOS
+
+## 23.1 Inicio difícil pero legible
+
+El jugador debe tener varias necesidades desde el inicio, pero una ruta viable.
+
+## 23.2 No snowball infinito
+
+Más población implica:
+- más producción;
+- pero también más consumo;
+- mayor territorio;
+- mayor exposición;
+- amenazas potencialmente mayores.
+
+## 23.3 No death spiral automática
+
+Después de pérdidas graves, el Director reduce temporalmente presión extrema para permitir recuperación, sin regalar recursos automáticamente.
+
+## 23.4 Números configurables
+
+TODOS los números importantes fuera de la lógica:
+- consumos;
+- costes;
+- producción;
+- botín;
+- riesgos;
+- cooldowns;
+- probabilidades;
+- capacidad;
+- daños;
+- tiempos;
+- umbrales de era;
+- Director.
+
+---
+
+# 24. SIMULACIÓN AUTOMÁTICA OBLIGATORIA
+
+Cursor debe crear un **simulador/headless** del motor para balance.
+
+Debe poder ejecutar cientos/miles de partidas automatizadas con estrategias simples.
+
+Perfiles mínimos:
+- conservador;
+- expansivo;
+- equilibrado;
+- mala gestión intencionada.
+
+Métricas:
+- supervivencia a 10/30/60/120 días;
+- población media/máxima;
+- causas de derrota;
+- recursos que bloquean demasiado;
+- frecuencia de eventos;
+- pérdidas;
+- tiempo hasta eras;
+- posibilidad de victoria.
+
+Objetivo inicial de calibración, ajustable tras juego humano:
+- jugador razonable puede perder partidas;
+- primeras partidas no deben morir sistemáticamente en 2–3 días;
+- mala gestión debe castigarse claramente;
+- llegar a endgame debe requerir una partida larga y competente.
+
+No falsear pruebas para alcanzar porcentajes: ajustar balance y documentar resultados.
+
+---
+
+# 25. TESTS OBLIGATORIOS
+
+## Automatizados
+- estado inicial;
+- consumos;
+- producción;
+- construcción;
+- capacidad;
+- expediciones;
+- riesgo;
+- muerte;
+- control territorial;
+- Director;
+- cooldowns;
+- eventos;
+- guardado/migración;
+- derrota;
+- victoria;
+- continuidad post-victoria.
+
+## E2E navegador
+- crear cada slot;
+- guardar/cargar;
+- jugar flujo completo;
+- construir;
+- expedición;
+- evento;
+- avanzar;
+- derrota;
+- responsive móvil y escritorio.
+
+No considerar “probado” un juego solo por smoke tests unitarios.
+
+---
+
+# 26. GUARDADO
+
+3 slots.
+
+Servidor/MySQL como fuente fiable vinculada a auth Intocables.
+
+Guardar:
+- versión;
+- semilla;
+- estado;
+- mapa;
+- población;
+- edificios;
+- expediciones;
+- eventos/flags;
+- relaciones;
+- investigación;
+- historial necesario;
+- victoria/endless.
+
+Autosave + guardado explícito.
+
+Migraciones versionadas y pequeñas.
+
+---
+
+# 27. ARQUITECTURA
+
+Mantener separación clara:
+
+- `state/` estado y selectores;
+- `sim/` simulación;
+- `director/` eventos/dificultad;
+- `render/` UI/mapa/base;
+- `api/` cliente servidor;
+- `content/` datos/balance/eventos;
+- `assets/` arte;
+- `tests/`;
+- `tools/sim/` simulador headless.
+
+Evitar monolitos gigantes.
+
+PHP fino para auth/save/load.
+
+---
+
+# 28. CONTENIDO INICIAL OBJETIVO
+
+Para considerar Zona Zero “juego completo v1” antes de entregarlo a la jugadora:
+
+- 7 recursos principales funcionales;
+- 20+ edificios/mejoras contando niveles/variantes útiles;
+- 15+ tipos de localización;
+- 5 habilidades/especialidades simples;
+- sistema procedural de supervivientes;
+- crecimiento natural + llegadas;
+- 4+ tipos de infectado;
+- ataques;
+- 4+ vehículos/categorías;
+- 4 ramas de investigación;
+- 80+ eventos base en 15+ familias;
+- clima/catástrofes;
+- 3–6 facciones procedurales;
+- 5 eras de progreso;
+- victoria + endless;
+- arte propio completo para todo lo visible;
+- tutorial contextual;
+- simulador de balance;
+- tests E2E.
+
+Estos son mínimos de contenido, no obligación de inflar artificialmente el juego.
+
+---
+
+# 29. COSAS PROHIBIDAS
+
+- campaña lineal idéntica;
+- misión obligatoria idéntica en cada partida;
+- controlar personaje directamente;
+- combate manual;
+- 200 recursos sin función;
+- árbol tecnológico gigantesco;
+- hojas RPG complejas;
+- emojis como arte principal;
+- interfaz tipo Excel/admin;
+- dificultad basada solo en día;
+- amenazas imposibles sin preparación razonable;
+- proteger siempre al jugador;
+- monetización, anuncios, energía premium;
+- APK;
+- dependencias servidor Node innecesarias;
+- hardcodes importantes dispersos por JS.
+
+---
+
+# 30. FLUJO CURSOR ↔ CHATGPT
+
+`GAME_MASTER.md` en GitHub es la fuente de verdad.
+
+Cursor:
+- implementa;
+- mantiene estado técnico/changelog;
+- no cambia reglas aprobadas unilateralmente;
+- commit/push.
+
+ChatGPT:
+- revisa repo;
+- diseña cambios con la usuaria;
+- convierte decisiones en especificaciones;
+- revisa coherencia.
+
+Las propuestas nuevas se marcan como PROPUESTA hasta aprobación.
+
+---
+
+# 31. ORDEN DE IMPLEMENTACIÓN INTERNA PARA CURSOR
+
+Cursor puede dividir internamente el trabajo como necesite, pero NO debe pedir aprobación fase por fase.
+
+Orden recomendado:
+1. auditar MVP actual contra este documento;
+2. plan de migración sin romper saves si es viable;
+3. consolidar arquitectura/config;
+4. motor de población/recursos/producción;
+5. base y edificios;
+6. ciudad/control territorial;
+7. expediciones/equipamiento;
+8. combate/ataques;
+9. Director/eventos;
+10. clima/catástrofes;
+11. vehículos;
+12. investigación;
+13. facciones;
+14. eras/victoria/endless;
+15. UX completa;
+16. arte/assets;
+17. tutorial;
+18. simulador y balance;
+19. tests E2E;
+20. optimización móvil;
+21. deploy;
+22. documentación/commit/push.
+
+Puede trabajar por bloques técnicos, pero la entrega al usuario debe hacerse al terminar el conjunto, salvo bloqueo real.
+
+---
+
+# 32. CRITERIO DE ENTREGA
+
+NO entregar simplemente porque “compila”.
+
+Antes de decir que está terminado, Cursor debe:
+- jugar manualmente una partida real durante suficiente tiempo para alcanzar varios desbloqueos;
+- ejecutar simulaciones largas;
+- comprobar que puede perder;
+- comprobar que puede recuperarse de crisis;
+- comprobar que la progresión no se bloquea;
+- verificar victoria mediante test/simulación;
+- probar móvil y escritorio;
+- comprobar que visualmente parece juego;
+- desplegar producción;
+- revisar consola/API;
+- guardar/cargar;
+- actualizar GAME_MASTER;
+- commit/push.
+
+---
+
+# 33. RESULTADO DESEADO
+
+Zona Zero v1 debe permitir que una persona pueda jugar durante muchas horas sin conocer de memoria la partida.
+
+La diversión no depende de una historia fija sino de la combinación de:
+- mapa procedural;
+- necesidades;
+- gestión;
+- expansión;
+- población;
+- riesgo;
+- Director;
+- eventos variables;
+- pérdidas;
+- recuperación;
+- progresión.
+
+La pregunta constante del jugador debe ser:
+
+> “Vale… ¿qué necesito ahora y a quién mando a por ello?”
+
+Y periódicamente el juego debe responder:
+
+> “Pues ahora tienes otro problema.”
+
+---
+
+# 34. DECISIONES APROBADAS DE PRODUCTO
+
+- Nombre: **Zona Zero**.
+- Web, no APK.
+- Móvil + escritorio.
+- 3 slots.
+- Login/guardado persistente mediante ecosistema Intocables.
+- Inicio con aproximadamente 3 supervivientes.
+- Población escalable a 50/100+ si infraestructura lo permite.
+- Supervivientes funcionales, no protagonistas.
+- Muerte permanente.
+- Habilidades simples y progresivas.
+- Bastantes recursos, sin exceso absurdo.
+- Construcción física/visual de base.
+- Ciudad visual minimalista.
+- Conquista territorial satisfactoria.
+- Expediciones automáticas: elegir quién + dónde, sin control manual.
+- Sorpresas en resultados.
+- Enemigos/ataques.
+- Catástrofes.
+- Posibilidad de pérdidas masivas y derrota.
+- No partidas cortas por diseño.
+- Eventos no lineales.
+- Director adaptativo.
+- Victoria lejana + opción de continuar infinitamente.
+- Arte propio, no emojis.
+- GitHub como fuente compartida.
+
+---
+
+# 35. CHANGELOG DE DISEÑO
+
+## v1.0
+- Consolidación del diseño integral.
+- Define juego completo, no MVP incremental.
+- Añade victoria + endless.
+- Define eras, facciones, vehículos, investigación, clima y catástrofes.
+- Define Director adaptativo y volumen mínimo de contenido.
+- Define dirección artística y set de assets.
+- Añade simulador headless y criterios de balance/prueba.
+
+
+---
+
+# ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
+
+**Versión técnica:** 1.1.0 — Game Experience  
+**Repo:** Anabguer/zona-zero · `main`  
+**Local:** `W:\juegos\zona-zero\`  
+**URL:** https://intocables13.com/juegos/zona-zero/  
+**Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
+**Prefijo SQL:** `zona_zero_*`  
+**save_version / v:** **3** · cache assets `?v=9`
+
+## Arquitectura real
+- Cliente: `js/` (state, sim, director, render-map, render-base, icons, sound, api, main, rng, util)
+- Contenido: `content/*.json` (balance, buildings×32, locations×18, events×110/15 familias, survivors, research, vehicles, infected, factions, eras)
+- API PHP: `api/` + tabla `zona_zero_saves`
+- Tools: `scripts/balance-sim.mjs`, E2E Playwright, `scripts/screenshots-1.1.mjs`, `scripts/manual-play-1.1.mjs`
+- Harness: `dev/harness.html` (sin login)
+
+## Decisiones implementadas (v1 → v1.1)
+- Gestión indirecta, 5 skills, población procedural, muerte permanente
+- 32 edificios, 18 localizaciones, Director adaptativo, clima, ataques abstractos
+- Investigación 4 ramas, vehículos, facciones 3–6, eras 0–4, victoria + endless
+- Arte SVG propio; sin emojis como arte principal
+- **v1.1 Game Experience:** mapa ciudad (manzanas/calles/niebla/control), base terreno ilustrada por tipo/nivel, HUD móvil dock, onboarding jugable, sonido ON/OFF, cards de evento (sin rutina vacía), progreso de eras, expediciones visibles en mapa, filtros de gente, overlays clima, ataques como acontecimiento
+
+## Balance (simulador headless, última calibración v1)
+- ~360 partidas (4 perfiles ×80 @60d + 40 @120d)
+- balanced@60 ~80% supervivencia; mismanaged@60 ~42%; balanced@120 ~87%
+- Victoria forzada OK; victoria natural larga a propósito
+- Ver `scripts/balance-report.json`
+
+## Changelog técnico
+### 1.1.0 — Game Experience
+- GAME_MASTER conserva MEGA PLAN completo + apéndice técnico
+- Mapa ciudad SVG (no diagrama de nodos); niebla sin “?”; control verde perceptible
+- Base terreno; glifos por edificio/nivel; densidad ambiental con población
+- Expediciones/eventos/eras/investigación/vehículos/facciones/ataques en UI
+- Clima visual, sonido Web Audio, onboarding, dock móvil, feedback toast/pulse
+- Screenshots + partida manual automatizada Día 1→19
 
 ### 1.0.0
-- Fusión GAME_MASTER con diseño integral v1 (MEGA PLAN)
-- Implementación v1: save v3, 5 skills, 32 edificios, 18 localizaciones, 110 eventos / 15 familias + calma
-- Sistemas: producción con puestos, expediciones+equipo, combate/ataques, Director (tensión/fuerza/fragilidad), investigación, vehículos, facciones, clima, eras, victoria+endless
-- Arte/UX: HUD, mapa urbano, base, retratos, tips; móvil-first
-- Simulador `scripts/balance-sim.mjs`: 360 partidas (4 perfiles × 80 @60d + 40 @120d) + test victoria
-  - balanced@60 supervivencia ~80%; mismanaged@60 ~42%; balanced@120 ~87%; victoria forzada OK
-- E2E motor + Playwright UI OK
+- Implementación completa según diseño integral v1 (save v3)
 
-### 0.3.0
-- Pasada UX/UI MVP (paleta tierra/metal, mapa/base visual, skills, tips)
+### 0.3.x–0.1.0
+- MVP + UX temprana + fix `[hidden]`/Derrota
 
-### 0.2.x – 0.1.0
-- MVP jugable inicial, recursos ampliados, fix `[hidden]`/Derrota, repo GitHub
