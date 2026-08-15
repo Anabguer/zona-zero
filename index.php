@@ -35,7 +35,7 @@ $base = zz_public_base();
       <p class="zz-user">Hola, <strong id="zz-user"><?= htmlspecialchars((string) ($user['nombre'] ?? 'Jugador')) ?></strong></p>
     </header>
     <p class="zz-howto">Elige un slot vacío para <strong>Nueva partida</strong>, o <strong>Continuar</strong> una guardada. Tienes 3 slots.</p>
-    <section class="zz-slots" id="zz-slots" aria-label="Slots de partida"></section>
+    <section class="zz-slots" id="zz-slots" aria-label="Partidas"></section>
   </div>
   <script type="module">
     import { bootHub } from './js/main.js?v=18';

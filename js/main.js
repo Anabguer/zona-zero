@@ -26,7 +26,7 @@ import {
   syncLaborFromColony,
 } from './sim.js';
 import { resolvePendingChoice } from './director.js';
-import { renderMap, bindMapCamera } from './render-map.js';
+import { renderMap, bindMapCamera, recenterCamera, clampCamera } from './render-map.js';
 import {
   readyExplorers,
   livingExplorers,
@@ -55,6 +55,9 @@ import {
   advanceOnboarding,
   ensureOnboarding,
   dismissOnboarding,
+  markGuideDayAdvanced,
+  markGuideExplored,
+  maybeRevealEarlyLandmarks,
 } from './onboarding.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
@@ -172,6 +175,7 @@ function openSheet(html) {
       if (!r.ok) toast(r.error || 'No', 'warn');
       else {
         sfx.click?.();
+        checkOnboardingProgress(state);
         scheduleSave();
         paint();
         openBuildingSheet(id);
@@ -196,7 +200,9 @@ function handleSheetAction(action, btn) {
     if (!r.ok) toast(r.error, 'bad');
     else {
       sfx.expedition?.();
-      toast(`${r.preview.explorerName} en ruta`, 'good');
+      toast(`${r.preview.explorerName} en ruta · ${r.preview.days} día(s) · riesgo ${r.preview.category}`, 'good');
+      markGuideExplored(state);
+      checkOnboardingProgress(state);
       state.uiMode = null;
       scheduleSave();
       closeSheet();
@@ -499,6 +505,9 @@ function openExplorerSheet(id) {
 }
 
 function openZoneSheet(zoneId) {
+  // No competir con el brief diario
+  const brief = $('zz-day-brief');
+  if (brief && !brief.hidden) brief.hidden = true;
   const z = state.zones.find((x) => x.id === zoneId);
   if (!z || z.state === 'unknown') return;
   state.selectedZoneId = zoneId;
@@ -560,16 +569,19 @@ function openZoneSheet(zoneId) {
       </div>
       ${
         preview
-          ? `<div class="zz-ctx__stat"><span>Distancia</span><strong>${preview.distance}</strong></div>
-             <div class="zz-ctx__stat"><span>Tiempo</span><strong>${preview.days} día(s)</strong></div>
-             <div class="zz-ctx__stat"><span>Riesgo</span><strong>${preview.category}</strong></div>
-             <div><span class="zz-muted" style="font-size:0.8rem">Posible</span>
-               <div class="zz-loot-row" style="margin-top:0.25rem">${lootIcons || '¿?'}</div>
+          ? `<div class="zz-ctx__stats">
+               <div class="zz-ctx__stat"><span>Distancia</span><strong>${preview.distance} tramos</strong></div>
+               <div class="zz-ctx__stat"><span>Tiempo</span><strong>${preview.days} día${preview.days === 1 ? '' : 's'}</strong></div>
+               <div class="zz-ctx__stat"><span>Riesgo</span><strong>${escapeHtml(preview.category || 'medio')}</strong></div>
              </div>
-             <p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · Nv.${ex.level || 1}</p>
+             <div class="zz-ctx__loot">
+               <span class="zz-muted">Botín posible</span>
+               <div class="zz-loot-row">${lootIcons || '<span>¿?</span>'}</div>
+             </div>
+             <p class="zz-ctx__explorer">Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · nivel ${ex.level || 1}</p>
              <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
                ex.status !== 'ready' ? 'disabled' : ''
-             }>Explorar</button>`
+             }>Enviar explorador</button>`
           : '<p>No hay explorador disponible.</p>'
       }
     </div>
@@ -714,14 +726,27 @@ function paintHud() {
   const cap = housingCapacity(state, content.buildings);
   if ($('zz-pop')) $('zz-pop').textContent = `${pop.total}/${cap}`;
   if ($('zz-day-label')) $('zz-day-label').textContent = `Día ${state.day}`;
-  if ($('zz-colony')) $('zz-colony').textContent = state.colonyName;
+  if ($('zz-colony')) $('zz-colony').textContent = state.colonyName || 'Refugio';
   if ($('zz-era')) {
     const eraName = content.erasDoc?.eras?.[state.era]?.name || `Era ${state.era}`;
     $('zz-era').textContent = eraName;
   }
   if ($('zz-stability')) $('zz-stability').textContent = String(Math.round(state.stability));
-  if ($('zz-threat')) $('zz-threat').textContent = String(Math.round(state.director?.threat || 0));
-  if ($('zz-defense')) $('zz-defense').textContent = String(Math.round(defenseValue(state, content.buildings, content.balance)));
+  const threat = Math.round(state.director?.threat || 0);
+  const def = Math.round(defenseValue(state, content.buildings, content.balance));
+  if ($('zz-threat')) {
+    $('zz-threat').textContent = String(threat);
+    $('zz-threat').title = `Amenaza: ${threat}`;
+  }
+  if ($('zz-defense')) {
+    $('zz-defense').textContent = String(def);
+    $('zz-defense').title = `Defensa: ${def}`;
+  }
+  const threatWrap = document.querySelector('.zz-hud__threat');
+  if (threatWrap) {
+    // Amenaza visible desde D6 o si ya es relevante
+    threatWrap.hidden = (state.day || 1) < 6 && threat < 18;
+  }
   document.body.dataset.weather = state.weather || 'clear';
   const w = $('zz-weather');
   if (w) {
@@ -731,22 +756,33 @@ function paintHud() {
   }
   const res = $('zz-resources');
   if (res) {
-    const order = content.balance.resourceOrder || Object.keys(RES_LABEL_UI);
-    const primary = ['food', 'water', 'wood', 'metal', 'medicine'];
+    const day = state.day || 1;
+    const guideOn = !!(state.flags?.onboardingActive && !state.flags?.onboardingDone);
+    // D1: solo supervivencia. Madera/metal al construir o desde D2. Medicina cuando hace falta.
+    let show = ['food', 'water'];
+    if (day >= 2 || state.uiMode === 'build' || state.buildMode || !guideOn) {
+      show = ['food', 'water', 'wood', 'metal'];
+    }
+    if (
+      (state.explorers || []).some((e) => e.status === 'wounded' || (e.wounds || 0) > 0) ||
+      day >= 4 ||
+      (state.resources.medicine || 0) < 2
+    ) {
+      if (!show.includes('medicine') && day >= 3) show.push('medicine');
+    }
     const popN = Math.max(1, pop.total || 1);
     res.innerHTML = '';
-    const show = primary.filter((k) => order.includes(k));
     show.forEach((k) => {
       const li = document.createElement('li');
       const val = state.resources[k] || 0;
-      const days = k === 'food' || k === 'water' ? val / popN : Infinity;
-      if (days < 2) li.classList.add('is-crit');
-      else if (days < 4) li.classList.add('is-low');
+      const daysLeft = k === 'food' || k === 'water' ? val / popN : Infinity;
+      if (daysLeft < 2) li.classList.add('is-crit');
+      else if (daysLeft < 4) li.classList.add('is-low');
       const img = document.createElement('img');
       img.src = artUrl(RES_ART[k]) || '';
       img.alt = '';
-      img.width = 13;
-      img.height = 13;
+      img.width = 14;
+      img.height = 14;
       const strong = document.createElement('strong');
       strong.textContent = fmtRes(val);
       li.appendChild(img);
@@ -755,8 +791,6 @@ function paintHud() {
       res.appendChild(li);
     });
   }
-  if ($('zz-threat')) $('zz-threat').title = `Amenaza: ${Math.round(state.director?.threat || 0)}`;
-  if ($('zz-defense')) $('zz-defense').title = `Defensa: ${Math.round(defenseValue(state, content.buildings, content.balance))}`;
 }
 
 function paintExplorers() {
@@ -806,6 +840,8 @@ function paintExplorers() {
 
 function paint() {
   if (!state || !content) return;
+  maybeRevealEarlyLandmarks(state);
+  checkOnboardingProgress(state);
   syncLaborFromColony(state, content);
   paintHud();
   paintExplorers();
@@ -867,8 +903,17 @@ function paint() {
 function paintObjective() {
   const btn = $('zz-mission');
   const text = $('zz-mission-text');
-  const obj = currentObjective(state, content);
   if (!btn || !text) return;
+  // Durante la guía y el bloque D1–D5 no competir con coach/brief
+  if (state.flags?.onboardingActive && !state.flags?.onboardingDone) {
+    btn.hidden = true;
+    return;
+  }
+  if ((state.day || 1) <= 5) {
+    btn.hidden = true;
+    return;
+  }
+  const obj = currentObjective(state, content);
   if (!obj || state.flags?.objectivesOff) {
     btn.hidden = true;
     return;
@@ -878,50 +923,95 @@ function paintObjective() {
   btn.dataset.objId = obj.id || '';
 }
 
+function overlayBlocksGuide() {
+  const choice = $('zz-choice-modal');
+  const brief = $('zz-day-brief');
+  const event = $('zz-event-card');
+  const attack = $('zz-attack-card');
+  return (
+    (choice && !choice.hidden) ||
+    (brief && !brief.hidden) ||
+    (event && !event.hidden) ||
+    (attack && !attack.hidden) ||
+    !!state.pendingChoice
+  );
+}
+
 function paintCoach() {
   const card = $('zz-coach');
   const text = $('zz-coach-text');
+  const cta = $('zz-coach-next');
   if (!card || !text) return;
   ensureOnboarding(state);
   checkOnboardingProgress(state);
-  const st = onboardingStatus(state, content);
-  if (!st || state.day > 8) {
-    if (state.day > 8) dismissOnboarding(state);
+  if (overlayBlocksGuide()) {
+    card.hidden = true;
+    return;
+  }
+  const st = onboardingStatus(state);
+  if (!st) {
     card.hidden = true;
     return;
   }
   card.hidden = false;
   text.textContent = st.step.text;
+  if (cta) {
+    if (st.step.cta) {
+      cta.hidden = false;
+      cta.textContent = st.step.cta;
+    } else {
+      // Paso que espera acción del jugador: sin botón vacío
+      cta.hidden = true;
+    }
+  }
 }
 
 function showDayBrief(brief) {
   const el = $('zz-day-brief');
   if (!el || !brief) return;
-  const lines = (brief.lines || brief.items || []).slice(0, 6);
-  if (!brief.important && lines.length === 0) {
-    el.hidden = true;
-    return;
-  }
-  const lis = lines
-    .map((L) => {
-      if (typeof L === 'string') return `<li>${escapeHtml(L)}</li>`;
-      const cls = L.kind || L.type || '';
-      return `<li class="${escapeHtml(cls)}">${escapeHtml(L.text || L.msg || '')}</li>`;
-    })
-    .join('');
+  const food = brief.food || {};
+  const water = brief.water || {};
+  const facts = brief.facts || [];
+  const fmt = (n) => {
+    const v = Math.round((Number(n) || 0) * 10) / 10;
+    return Number.isInteger(v) ? String(v) : v.toFixed(1);
+  };
+  const balClass = (n) => ((n || 0) >= 0 ? 'is-pos' : 'is-neg');
+  const factLis = facts.map((f) => `<li class="zz-brief-fact zz-brief-fact--${escapeHtml(f.kind || '')}">${escapeHtml(f.text)}</li>`).join('');
   el.innerHTML = `
-    <h3>DÍA ${state.day}</h3>
-    <ul>${lis || '<li>La colonia aguanta otro día.</li>'}</ul>
+    <h3>Día ${brief.day || state.day}</h3>
+    <div class="zz-brief-balance">
+      <div class="zz-brief-row">
+        <span class="zz-brief-label">Comida</span>
+        <span>+${fmt(food.produced)}</span>
+        <span>−${fmt(food.consumed)}</span>
+        <strong class="${balClass(food.balance)}">${(food.balance || 0) >= 0 ? '+' : ''}${fmt(food.balance)}</strong>
+      </div>
+      <div class="zz-brief-row">
+        <span class="zz-brief-label">Agua</span>
+        <span>+${fmt(water.produced)}</span>
+        <span>−${fmt(water.consumed)}</span>
+        <strong class="${balClass(water.balance)}">${(water.balance || 0) >= 0 ? '+' : ''}${fmt(water.balance)}</strong>
+      </div>
+    </div>
+    ${factLis ? `<ul class="zz-brief-facts">${factLis}</ul>` : '<p class="zz-muted zz-brief-quiet">Un día tranquilo en el refugio.</p>'}
     <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-brief-ok">Continuar</button>
   `;
   el.hidden = false;
+  // Ocultar guía mientras el brief está abierto
+  const coach = $('zz-coach');
+  if (coach) coach.hidden = true;
   $('zz-brief-ok')?.addEventListener('click', () => {
     el.hidden = true;
+    paint();
   });
   clearTimeout(showDayBrief._t);
+  // No auto-cerrar demasiado rápido: el brief es ritual
   showDayBrief._t = setTimeout(() => {
-    el.hidden = true;
-  }, 7000);
+    if (!el.hidden) {
+      /* dejar al jugador; no forzar */
+    }
+  }, 20000);
 }
 
 function paintModeBanner() {
@@ -1056,26 +1146,58 @@ function handleAdvanceDay() {
     toast(r.error || 'No', 'warn');
     return;
   }
-  if (r.director?.quiet) {
-    /* silencio intencional */
-  } else if (r.director?.event && !r.director.choice && !state.pendingChoice) {
-    const ev = r.director.event;
-    const brief = r.director.variant?.text || (ev.variants && ev.variants[0]?.text) || ev.name;
-    showEventCard({
-      name: ev.name,
-      family: ev.family,
-      intensity: ev.intensity,
-      brief,
-    });
-  }
-  if (r.attack) {
-    showAttackCard(r.attack);
-    sfx.attack?.();
+  markGuideDayAdvanced(state);
+  maybeRevealEarlyLandmarks(state);
+  checkOnboardingProgress(state);
+  // Durante guía temprana, no apilar eventos encima del brief
+  const guideOn = state.flags?.onboardingActive && !state.flags?.onboardingDone;
+  if (!guideOn) {
+    if (r.director?.event && !r.director.choice && !state.pendingChoice) {
+      const ev = r.director.event;
+      const brief = r.director.variant?.text || (ev.variants && ev.variants[0]?.text) || ev.name;
+      showEventCard({
+        name: ev.name,
+        family: ev.family,
+        intensity: ev.intensity,
+        brief,
+      });
+    }
+    if (r.attack) {
+      showAttackCard(r.attack);
+      sfx.attack?.();
+    }
   }
   if (r.brief) showDayBrief(r.brief);
   sfx.click?.();
   scheduleSave();
   paint();
+}
+
+function runGuideAction(action) {
+  if (action === 'openBuild') {
+    openBuildSheet();
+    return;
+  }
+  if (action === 'advanceDay') {
+    handleAdvanceDay();
+    return;
+  }
+  if (action === 'focusMarket') {
+    const z =
+      state.zones.find((x) => x.id === 'market' || x.type === 'supermarket') ||
+      state.zones.find((x) => x.state === 'discovered' && x.type !== 'camp');
+    if (z) {
+      if (z.state === 'unknown') z.state = 'discovered';
+      state.selectedZoneId = z.id;
+      state.mapCamera = state.mapCamera || {};
+      state.mapCamera.x = (z.x + (state.zones.find((c) => c.type === 'camp')?.x || z.x)) / 2;
+      state.mapCamera.y = (z.y + (state.zones.find((c) => c.type === 'camp')?.y || z.y)) / 2;
+      state.mapCamera.zoom = 1.35;
+      clampCamera(state);
+      openZoneSheet(z.id);
+    }
+    paint();
+  }
 }
 
 function bindChrome() {
@@ -1107,23 +1229,51 @@ function bindChrome() {
     if (!obj) return;
     openSheet(`
       <div class="zz-ctx">
-        <h2>${escapeHtml(obj.title || 'Misión')}</h2>
+        <h2>${escapeHtml(obj.title || 'Objetivo')}</h2>
         <p>${escapeHtml(obj.text)}</p>
-        ${obj.hint ? `<p class="zz-muted">${escapeHtml(obj.hint)}</p>` : ''}
-        <p class="zz-muted" style="font-size:0.8rem">Tocá el mundo: edificios, zonas y Construir.</p>
+        <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" id="zz-objective-dismiss">Ocultar objetivo</button>
       </div>
     `);
+    $('zz-objective-dismiss')?.addEventListener('click', () => {
+      state.flags.objectivesOff = true;
+      closeSheet();
+      paint();
+    });
   });
   $('zz-coach-next')?.addEventListener('click', () => {
-    advanceOnboarding(state);
-    const st = onboardingStatus(state, content);
-    if (!st) dismissOnboarding(state);
+    const result = advanceOnboarding(state);
+    if (result?.kind === 'action') {
+      runGuideAction(result.action);
+      return;
+    }
     paint();
+  });
+  $('zz-recenter')?.addEventListener('click', () => {
+    recenterCamera(state);
+    paint();
+    scheduleSave();
+  });
+  $('zz-help')?.addEventListener('click', () => {
+    openSheet(`
+      <div class="zz-ctx">
+        <h2>Ayuda rápida</h2>
+        <ul class="zz-help-list">
+          <li><strong>Construir</strong> — coloca edificios en el refugio.</li>
+          <li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>
+          <li><strong>Avanzar día</strong> — produce, consume y resuelve expediciones.</li>
+          <li><strong>Tocar un lugar</strong> — envía exploradores.</li>
+          <li><strong>Recentrar</strong> — vuelve la cámara al refugio.</li>
+        </ul>
+      </div>
+    `);
   });
   $('zz-map')?.addEventListener('click', (ev) => {
     if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) {
       if (state.uiMode === 'build' || state.uiMode === 'explore') return;
       closeSheet();
+      state.selectedZoneId = null;
+      state.selectedBuildingId = null;
+      paint();
     }
   });
   $('zz-objective-dismiss')?.addEventListener('click', () => {
@@ -1133,12 +1283,14 @@ function bindChrome() {
   // zoom buttons
   $('zz-zoom-in')?.addEventListener('click', () => {
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = Math.min(2.4, (state.mapCamera.zoom || 1) * 1.15);
+    state.mapCamera.zoom = Math.min(1.95, (state.mapCamera.zoom || 1) * 1.12);
+    clampCamera(state);
     paint();
   });
   $('zz-zoom-out')?.addEventListener('click', () => {
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = Math.max(0.55, (state.mapCamera.zoom || 1) / 1.15);
+    state.mapCamera.zoom = Math.max(0.9, (state.mapCamera.zoom || 1) / 1.12);
+    clampCamera(state);
     paint();
   });
   $('zz-endless')?.addEventListener('click', () => {
@@ -1177,26 +1329,12 @@ export async function bootGame(opts) {
   if (!state.selectedExplorerId) {
     state.selectedExplorerId = livingExplorers(state)[0]?.id || null;
   }
-  // Cámara inicial: refugio a zoom cercano (móvil = colonia protagonista)
-  const camp = state.zones?.find((z) => z.type === 'camp');
-  if (camp) {
-    state.mapCamera = state.mapCamera || {};
-    state.mapCamera.x = camp.x;
-    state.mapCamera.y = camp.y;
-    state.mapCamera.zoom = state.day <= 3 ? 1.55 : state.mapCamera.zoom || 1.25;
-  }
-  seedZone();
+  state.selectedZoneId = null;
+  state.selectedBuildingId = null;
+  recenterCamera(state);
   paint();
   if (app) app.hidden = false;
   if (boot) boot.hidden = true;
-  toast(
-    state.flags.defeated
-      ? 'Esta partida ya terminó en derrota'
-      : state.flags.victory && !state.flags.endless
-        ? 'Victoria alcanzada'
-        : `Día ${state.day} · ${state.population.total} habitantes`,
-    state.flags.defeated ? 'bad' : 'good'
-  );
 
   window.__zz = {
     getState: () => state,
@@ -1204,22 +1342,26 @@ export async function bootGame(opts) {
     paint,
     place: (type, x, y) => {
       const r = placeBuilding(state, content, type, x, y);
-      if (r.ok) paint();
+      if (r.ok) {
+        checkOnboardingProgress(state);
+        paint();
+      }
       return r;
     },
     sendExpedition: (zoneId, explorerId) => {
       const r = startExpedition(state, content, zoneId, explorerId);
-      if (r.ok) paint();
+      if (r.ok) {
+        markGuideExplored(state);
+        checkOnboardingProgress(state);
+        paint();
+      }
       return r;
     },
+    recenter: () => {
+      recenterCamera(state);
+      paint();
+    },
   };
-}
-
-function seedZone() {
-  const z =
-    state.zones.find((x) => x.state === 'discovered' && x.type !== 'camp') ||
-    state.zones.find((x) => x.state !== 'unknown' && x.type !== 'camp');
-  if (z) state.selectedZoneId = z.id;
 }
 
 export async function bootHub() {
@@ -1238,7 +1380,7 @@ export async function bootHub() {
       const card = document.createElement('article');
       card.className = 'zz-slot' + (s.empty ? ' is-empty' : '') + (!s.alive && !s.empty ? ' is-dead' : '');
       card.innerHTML = s.empty
-        ? `<h2>Slot ${s.slot}</h2><p>Vacío</p><button type="button" class="zz-btn zz-btn--primary" data-new="${s.slot}">Nueva partida</button>`
+        ? `<h2>Partida ${s.slot}</h2><p>Vacía</p><button type="button" class="zz-btn zz-btn--primary" data-new="${s.slot}">Nueva partida</button>`
         : `<h2>${escapeHtml(s.title || 'Zona Zero')}</h2>
            <p>${escapeHtml(s.summary || '')}</p>
            <div class="zz-slot__actions">

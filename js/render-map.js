@@ -289,57 +289,58 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
       maxY = Math.max(maxY, ly);
     });
   }
-  const pad = scale * 1.35;
-  const groundRx = Math.max(camp.r * 0.32, (maxX - minX) / 2 + pad);
-  const groundRy = Math.max(camp.r * 0.26, (maxY - minY) / 2 + pad * 0.9);
+  const pad = scale * 1.15;
+  const groundRx = Math.max(scale * 2.2, (maxX - minX) / 2 + pad);
+  const groundRy = Math.max(scale * 1.8, (maxY - minY) / 2 + pad * 0.85);
   const ox = buildings.length ? (minX + maxX) / 2 : 0;
   const oy = buildings.length ? (minY + maxY) / 2 : 0;
 
-  const groundPts = [];
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2 - 0.15;
-    const wobble = 0.86 + ((i * 37) % 5) * 0.04 + (i % 2) * 0.05;
-    groundPts.push([ox + Math.cos(a) * groundRx * wobble, oy + Math.sin(a) * groundRy * wobble]);
-  }
+  // Suelo integrado: manchas de tierra sin borde GIS
   layer.appendChild(
-    svgEl('polygon', {
-      points: groundPts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' '),
-      class: `zz-settle-ground zz-settle-ground--t${tier}`,
+    svgEl('ellipse', {
+      cx: ox,
+      cy: oy,
+      rx: groundRx,
+      ry: groundRy,
+      class: `zz-settle-soil zz-settle-soil--t${tier}`,
     })
   );
   layer.appendChild(
     svgEl('ellipse', {
-      cx: ox - groundRx * 0.2,
-      cy: oy + groundRy * 0.1,
-      rx: groundRx * 0.3,
-      ry: groundRy * 0.22,
-      class: 'zz-settle-dirt',
+      cx: ox - groundRx * 0.25,
+      cy: oy + groundRy * 0.12,
+      rx: groundRx * 0.42,
+      ry: groundRy * 0.32,
+      class: 'zz-settle-soil-patch',
     })
   );
   layer.appendChild(
     svgEl('ellipse', {
-      cx: ox + groundRx * 0.25,
-      cy: oy - groundRy * 0.08,
-      rx: groundRx * 0.24,
-      ry: groundRy * 0.18,
-      class: 'zz-settle-dirt',
+      cx: ox + groundRx * 0.28,
+      cy: oy - groundRy * 0.1,
+      rx: groundRx * 0.35,
+      ry: groundRy * 0.28,
+      class: 'zz-settle-soil-patch',
     })
   );
 
-  layer.appendChild(
-    svgEl('path', {
-      d: `M ${(ox - groundRx * 0.55).toFixed(2)} ${(oy + groundRy * 0.12).toFixed(2)} Q ${ox.toFixed(2)} ${oy.toFixed(2)} ${(ox + groundRx * 0.5).toFixed(2)} ${(oy - groundRy * 0.08).toFixed(2)}`,
-      class: 'zz-settle-path-line',
-      fill: 'none',
-    })
-  );
-  layer.appendChild(
-    svgEl('path', {
-      d: `M ${(ox - groundRx * 0.08).toFixed(2)} ${(oy - groundRy * 0.5).toFixed(2)} Q ${(ox + 0.2).toFixed(2)} ${oy.toFixed(2)} ${(ox + groundRx * 0.12).toFixed(2)} ${(oy + groundRy * 0.48).toFixed(2)}`,
-      class: 'zz-settle-path-line',
-      fill: 'none',
-    })
-  );
+  // Caminos entre edificios (conexiones, no cruz +)
+  if (buildings.length >= 2) {
+    const pts = buildings.map((b) => [(b.x - bw / 2 + 0.5) * scale, (b.y - bh / 2 + 0.5) * scale]);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      layer.appendChild(
+        svgEl('line', {
+          x1: a[0],
+          y1: a[1],
+          x2: b[0],
+          y2: b[1],
+          class: 'zz-settle-path-line',
+        })
+      );
+    }
+  }
 
   drawProp(layer, 'crate', ox - groundRx * 0.42, oy + groundRy * 0.28, 0.95);
   drawProp(layer, 'barrel', ox + groundRx * 0.4, oy + groundRy * 0.22, 0.95);
@@ -378,6 +379,9 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
     for (let y = 0; y < bh; y++) {
       for (let x = 0; x < bw; x++) {
         if (buildings.some((b) => b.x === x && b.y === y)) continue;
+        // Solo parcelas cercanas al cluster existente (no rejilla completa)
+        const near = buildings.some((b) => Math.abs(b.x - x) + Math.abs(b.y - y) <= 2);
+        if (!near && buildings.length) continue;
         const lx = (x - bw / 2 + 0.5) * scale;
         const ly = (y - bh / 2 + 0.5) * scale;
         const cell = scale * 0.88;
@@ -609,19 +613,19 @@ function drawZone(layer, z, state, tier, handlers) {
   const polyPts = ptsStr(plot);
   const rng = createRng(hashSeed(`zvis:${z.id}:${tier}`));
 
-  // Hit area casi invisible — sin overlays de control verdes
-  g.appendChild(svgEl('polygon', { points: polyPts, class: 'zz-zone-plot zz-zone-poly' }));
+  // Hit area invisible (nunca stroke/fill visibles)
+  g.appendChild(svgEl('polygon', { points: polyPts, class: 'zz-zone-hit', fill: 'transparent', stroke: 'none' }));
 
   if (z.state === 'hostile' || attacked) {
     g.appendChild(
       svgEl('ellipse', {
         cx: z.x,
         cy: z.y,
-        rx: z.r * 0.7,
-        ry: z.r * 0.55,
+        rx: z.r * 0.55,
+        ry: z.r * 0.42,
         fill: attacked ? 'url(#zzAttackGlow)' : 'url(#zzHostTint)',
         class: 'zz-zone-tint',
-        opacity: '0.55',
+        opacity: '0.4',
       })
     );
   }
@@ -630,8 +634,8 @@ function drawZone(layer, z, state, tier, handlers) {
       svgEl('ellipse', {
         cx: z.x,
         cy: z.y,
-        rx: z.r * 0.75,
-        ry: z.r * 0.6,
+        rx: z.r * 0.5,
+        ry: z.r * 0.4,
         class: 'zz-zone-explore-ring',
         fill: 'none',
       })
@@ -664,7 +668,7 @@ function drawZone(layer, z, state, tier, handlers) {
           width: s,
           height: s,
           preserveAspectRatio: 'xMidYMid meet',
-          class: `zz-zone-landmark${z.state === 'controlled' ? ' is-owned' : ''}`,
+          class: `zz-zone-landmark${z.state === 'controlled' ? ' is-owned' : ''}${selected ? ' is-selected' : ''}`,
           style: 'pointer-events:none',
         })
       );
@@ -672,23 +676,36 @@ function drawZone(layer, z, state, tier, handlers) {
       const kind =
         z.type === 'park' ? 'park' : z.type === 'industrial' || z.type === 'warehouse' ? 'industrial' : 'blocks';
       drawLandmarkSilhouette(g, z, kind);
+      if (selected) {
+        g.appendChild(
+          svgEl('ellipse', {
+            cx: z.x,
+            cy: z.y,
+            rx: s * 0.42,
+            ry: s * 0.32,
+            class: 'zz-landmark-focus',
+            fill: 'none',
+          })
+        );
+      }
       if (z.state === 'controlled') {
-        g.appendChild(svgEl('circle', { cx: z.x + 1.8, cy: z.y - 1.2, r: 0.4, class: 'zz-prop-lamp' }));
+        g.appendChild(svgEl('circle', { cx: z.x + 1.8, cy: z.y - 1.2, r: 0.35, class: 'zz-prop-lamp' }));
       }
     }
-    // Etiqueta solo al seleccionar (la ficha lleva el nombre completo)
+    // Etiqueta discreta solo al seleccionar
     if (selected) {
       const markH = zArt ? s : Math.min(6.5, z.r * 0.85);
+      const short = (z.name || 'Lugar').split(/\s+/).slice(0, 2).join(' ');
       g.appendChild(
         svgEl(
           'text',
           {
             x: z.x,
-            y: z.y + markH / 2 + 1.2,
+            y: z.y + markH / 2 + 1.1,
             'text-anchor': 'middle',
             class: 'zz-zone-mark-label is-focus',
           },
-          [z.name || 'Zona']
+          [short]
         )
       );
     }
@@ -720,22 +737,21 @@ function drawExpeditions(svg, state) {
     const dest = state.zones.find((z) => z.id === ex.zoneId);
     if (!dest) return;
     const explorer = (state.explorers || []).find((e) => e.id === ex.explorerId);
-    const label = explorer ? `${explorer.name} · vuelve D${ex.returnDay}` : `Expedición · D${ex.returnDay}`;
+    const label = explorer ? explorer.name : 'Expedición';
     const g = svgEl('g', { class: 'zz-map-expedition' });
     const bend = (idx % 2 === 0 ? 1 : -1) * (0.08 + idx * 0.02);
     const mx = (camp.x + dest.x) / 2 + (dest.y - camp.y) * bend;
     const my = (camp.y + dest.y) / 2 - (dest.x - camp.x) * bend;
     const d = `M${camp.x} ${camp.y} Q${mx} ${my} ${dest.x} ${dest.y}`;
     g.appendChild(svgEl('path', { d, class: 'zz-map-route', fill: 'none' }));
-    const t = 0.45 + idx * 0.08;
+    const t = 0.5;
     const px = (1 - t) * (1 - t) * camp.x + 2 * (1 - t) * t * mx + t * t * dest.x;
     const py = (1 - t) * (1 - t) * camp.y + 2 * (1 - t) * t * my + t * t * dest.y;
-    // Marcador explorador (figura simple)
     const fig = svgEl('g', { transform: `translate(${px},${py})`, class: 'zz-map-explorer-marker' });
     fig.appendChild(svgEl('circle', { cx: 0, cy: -1.1, r: 1.1, fill: '#e8c090', stroke: '#5a4030', 'stroke-width': 0.35 }));
     fig.appendChild(svgEl('path', { d: 'M-1.2 0.3 Q0 2.2 1.2 0.3', fill: '#6a5040' }));
     g.appendChild(fig);
-    g.appendChild(svgEl('text', { x: px, y: py - 3.2, 'text-anchor': 'middle', class: 'zz-map-route-label' }, [label]));
+    g.appendChild(svgEl('text', { x: px, y: py - 3.0, 'text-anchor': 'middle', class: 'zz-map-route-label' }, [label]));
     svg.appendChild(g);
   });
 }
@@ -770,21 +786,58 @@ function drawLegend() {
   /* Leyenda retirada: el estado de zona se lee por luz/borde/niebla */
 }
 
+const ZOOM_MIN = 0.9;
+const ZOOM_MAX = 1.95;
+
+export function recenterCamera(state) {
+  if (!state) return;
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  state.mapCamera = state.mapCamera || {};
+  if (camp) {
+    state.mapCamera.x = camp.x;
+    state.mapCamera.y = camp.y;
+  } else {
+    state.mapCamera.x = 50;
+    state.mapCamera.y = 50;
+  }
+  const day = state.day || 1;
+  state.mapCamera.zoom = day <= 2 ? 1.65 : day <= 5 ? 1.45 : 1.25;
+}
+
+export function clampCamera(state) {
+  if (!state?.mapCamera) return;
+  state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, ZOOM_MIN, ZOOM_MAX);
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  if (camp) {
+    // No alejar el foco demasiado del refugio
+    const maxDist = 28;
+    const dx = (state.mapCamera.x || camp.x) - camp.x;
+    const dy = (state.mapCamera.y || camp.y) - camp.y;
+    const d = Math.hypot(dx, dy);
+    if (d > maxDist) {
+      state.mapCamera.x = camp.x + (dx / d) * maxDist;
+      state.mapCamera.y = camp.y + (dy / d) * maxDist;
+    }
+  }
+  state.mapCamera.x = clamp(state.mapCamera.x ?? 50, 8, 92);
+  state.mapCamera.y = clamp(state.mapCamera.y ?? 50, 8, 92);
+}
+
 export function cameraViewBox(state, m) {
-  const cam = state.mapCamera || { x: 50, y: 48, zoom: 1 };
-  const zoom = clamp(cam.zoom || 1, 0.55, 2.4);
+  clampCamera(state);
+  const cam = state.mapCamera || { x: 50, y: 48, zoom: 1.4 };
+  const zoom = clamp(cam.zoom || 1.4, ZOOM_MIN, ZOOM_MAX);
   const vw = m.vbW / zoom;
   const vh = m.vbH / zoom;
-  // Mundo lógico ~0–100 (+ offset desktop en el group)
   const worldW = 100;
   const worldH = 100;
   let cx = cam.x ?? 50;
   let cy = cam.y ?? 48;
-  cx = clamp(cx, vw / 2 - (m.ox || 0), worldW - vw / 2 + (m.ox || 0) + 20);
-  cy = clamp(cy, vh / 2 - (m.oy || 0), worldH - vh / 2 + 20);
+  cx = clamp(cx, vw / 2, worldW - vw / 2);
+  cy = clamp(cy, vh / 2, worldH - vh / 2);
   return {
-    x: cx - vw / 2 - (m.ox || 0),
-    y: cy - vh / 2 - (m.oy || 0),
+    x: cx - vw / 2,
+    y: cy - vh / 2,
     w: vw,
     h: vh,
     zoom,
@@ -818,7 +871,8 @@ export function bindMapCamera(wrap, getState, onChange) {
       if (!state?.mapCamera) return;
       ev.preventDefault();
       const factor = ev.deltaY > 0 ? 0.9 : 1.1;
-      state.mapCamera.zoom = clamp((state.mapCamera.zoom || 1) * factor, 0.55, 2.4);
+      state.mapCamera.zoom = clamp((state.mapCamera.zoom || 1) * factor, ZOOM_MIN, ZOOM_MAX);
+      clampCamera(state);
       applyMapCamera(svg(), state);
       onChange && onChange();
     },
@@ -829,7 +883,7 @@ export function bindMapCamera(wrap, getState, onChange) {
     if (ev.button != null && ev.button !== 0) return;
     // no pan si tocamos edificio/zona interactiva (salvo fondo)
     const t = ev.target;
-    if (t?.closest?.('.zz-settle-bldg, .zz-settle-slot, .zz-zone-poly, .zz-ex-card')) {
+    if (t?.closest?.('.zz-settle-bldg, .zz-settle-slot, .zz-zone-hit, .zz-zone-poly, .zz-ex-card')) {
       // zonas sí permiten pan con drag: marcamos y vemos si hay movimiento
     }
     dragging = true;
@@ -855,6 +909,7 @@ export function bindMapCamera(wrap, getState, onChange) {
     const scaleY = vb.h / Math.max(1, rect.height);
     state.mapCamera.x = (state.mapCamera.x || 50) - dx * scaleX;
     state.mapCamera.y = (state.mapCamera.y || 48) - dy * scaleY;
+    clampCamera(state);
     applyMapCamera(el, state);
   });
   const endDrag = (ev) => {

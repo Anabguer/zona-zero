@@ -1,84 +1,28 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Revisión visual · Zona Zero 1.3.1</title>
-  <style>
-    :root { color-scheme: dark; --bg:#12100e; --card:#1a1612; --line:#3a342c; --text:#e8e0d4; --muted:#9a9080; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--text); padding:1.25rem 1rem 2.5rem; }
-    header { max-width:1100px; margin:0 auto 1.5rem; }
-    h1 { font-size:1.35rem; margin:0 0 0.35rem; }
-    header p { margin:0; color:var(--muted); font-size:0.92rem; }
-    .gallery { max-width:1100px; margin:0 auto; display:grid; gap:1.25rem; grid-template-columns:1fr; }
-    @media (min-width:720px) { .gallery { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    figure { margin:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-    img { display:block; width:100%; height:auto; background:#0a0908; }
-    figcaption { padding:0.65rem 0.85rem 0.8rem; font-weight:600; border-top:1px solid var(--line); }
-    figcaption span { display:block; margin-top:0.15rem; font-size:0.78rem; font-weight:400; color:var(--muted); }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Revisión visual · Zona Zero 1.3.1</h1>
-    <p>Reforma visual del mapa. Se sustituyen en cada entrega.</p>
-  </header>
-  <main class="gallery">
-    <figure>
-      <a class="shot" href="131-d1.png" target="_blank" rel="noopener">
-        <img src="131-d1.png" alt="Día 1" loading="lazy" />
-      </a>
-      <figcaption>Día 1<span>131-d1.png · campamento precario</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-mobile.png" target="_blank" rel="noopener">
-        <img src="131-mobile.png" alt="Móvil" loading="lazy" />
-      </a>
-      <figcaption>Móvil<span>131-mobile.png · mundo full-bleed</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-poblacion.png" target="_blank" rel="noopener">
-        <img src="131-poblacion.png" alt="Población" loading="lazy" />
-      </a>
-      <figcaption>Población<span>131-poblacion.png · reparto trabajadores</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-construir.png" target="_blank" rel="noopener">
-        <img src="131-construir.png" alt="Construir" loading="lazy" />
-      </a>
-      <figcaption>Construir<span>131-construir.png · coste / beneficio / trabajo</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-edificio.png" target="_blank" rel="noopener">
-        <img src="131-edificio.png" alt="Edificio" loading="lazy" />
-      </a>
-      <figcaption>Edificio<span>131-edificio.png · ficha huerto</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-explorar.png" target="_blank" rel="noopener">
-        <img src="131-explorar.png" alt="Explorar" loading="lazy" />
-      </a>
-      <figcaption>Explorar<span>131-explorar.png · ficha de zona</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-d15.png" target="_blank" rel="noopener">
-        <img src="131-d15.png" alt="Día 15" loading="lazy" />
-      </a>
-      <figcaption>Día 15<span>131-d15.png · asentamiento</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-d30.png" target="_blank" rel="noopener">
-        <img src="131-d30.png" alt="Día 30" loading="lazy" />
-      </a>
-      <figcaption>Día 30<span>131-d30.png · colonia consolidada</span></figcaption>
-    </figure>
-    <figure>
-      <a class="shot" href="131-desktop.png" target="_blank" rel="noopener">
-        <img src="131-desktop.png" alt="Escritorio" loading="lazy" />
-      </a>
-      <figcaption>Escritorio<span>131-desktop.png · mapa protagonista</span></figcaption>
-    </figure>
-  </main>
-</body>
-</html>
+<html lang="es"><head><meta charset="UTF-8"/><title>Review Bloque 1 · Zona Zero</title>
+<style>
+body{margin:0;background:#12100c;color:#e8e0d4;font-family:system-ui,sans-serif;padding:1.5rem}
+h1{font-size:1.4rem;margin:0 0 1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+figure{margin:0;background:#1a1612;border-radius:10px;overflow:hidden;border:1px solid #333}
+img{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
+figure.desk img{aspect-ratio:16/9}
+figcaption{padding:.55rem .7rem;font-size:.85rem}
+figcaption strong{display:block}
+figcaption span{color:#9a9080;font-size:.75rem}
+</style></head><body>
+<h1>Zona Zero · Bloque 1 (D1–D5)</h1>
+<div class="grid">
+<figure class=""><img src="b1-d1-inicial.png" alt="D1 inicial"/><figcaption><strong>D1 inicial</strong><span>colonia + guía welcome</span></figcaption></figure>
+<figure class=""><img src="b1-construir.png" alt="Construir"/><figcaption><strong>Construir</strong><span>sheet / modo construir</span></figcaption></figure>
+<figure class=""><img src="b1-asignar.png" alt="Asignar trabajador"/><figcaption><strong>Asignar trabajador</strong><span>ficha huerto</span></figcaption></figure>
+<figure class=""><img src="b1-brief-d2.png" alt="Brief D2"/><figcaption><strong>Brief D2</strong><span>comida / agua / hechos</span></figcaption></figure>
+<figure class=""><img src="b1-d3-antes.png" alt="D3 antes de explorar"/><figcaption><strong>D3 antes de explorar</strong><span>landmark revelado</span></figcaption></figure>
+<figure class=""><img src="b1-ficha-lugar.png" alt="Ficha de lugar"/><figcaption><strong>Ficha de lugar</strong><span>distancia / tiempo / riesgo / botín</span></figcaption></figure>
+<figure class=""><img src="b1-expedicion.png" alt="Expedición en curso"/><figcaption><strong>Expedición en curso</strong><span>ruta en mapa</span></figcaption></figure>
+<figure class=""><img src="b1-retorno.png" alt="Retorno"/><figcaption><strong>Retorno</strong><span>explorador de vuelta</span></figcaption></figure>
+<figure class=""><img src="b1-d5.png" alt="D5"/><figcaption><strong>D5</strong><span>colonia crecida</span></figcaption></figure>
+<figure class="desk"><img src="b1-desktop-d1.png" alt="Desktop D1"/><figcaption><strong>Desktop D1</strong><span>1920×1080</span></figcaption></figure>
+<figure class="desk"><img src="b1-desktop-d5.png" alt="Desktop D5"/><figcaption><strong>Desktop D5</strong><span>panel lateral / ancho</span></figcaption></figure>
+</div>
+</body></html>

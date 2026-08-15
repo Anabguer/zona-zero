@@ -23,8 +23,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=18" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=18" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=19" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=19" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -35,6 +35,7 @@ $base = zz_public_base();
         <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
+          <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
           <button type="button" id="zz-zoom-in" title="Acercar">+</button>
         </div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Zona Zero"></svg>
@@ -44,25 +45,26 @@ $base = zz_public_base();
     <!-- HUD overlay superior -->
     <header class="zz-hud" id="zz-hud">
       <div class="zz-hud__row zz-hud__row--top">
-        <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Slots</a>
+        <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Partidas</a>
         <div class="zz-hud__title">
           <strong id="zz-colony">Zona Zero</strong>
           <span id="zz-day-label">Día 1</span>
         </div>
         <div class="zz-hud__actions">
-          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound" aria-pressed="true" title="Audio">Au</button>
-          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">Gu</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-help" title="Ayuda">?</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound" aria-pressed="true" title="Sonido">♪</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">💾</button>
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
-        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población (avanzado)">
+        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población">
           <img src="<?= htmlspecialchars($base) ?>assets/art/ui/pop.webp" alt="" width="18" height="18" />
           <strong id="zz-pop">0/0</strong>
         </button>
         <ul class="zz-hud__res" id="zz-resources" aria-label="Recursos"></ul>
-        <div class="zz-hud__threat" title="Amenaza / Defensa">
-          <span class="zz-hud__pill zz-hud__pill--threat"><i></i><strong id="zz-threat">0</strong></span>
-          <span class="zz-hud__pill zz-hud__pill--def"><i></i><strong id="zz-defense">0</strong></span>
+        <div class="zz-hud__threat" title="Amenaza y defensa" hidden>
+          <span class="zz-hud__pill zz-hud__pill--threat" title="Amenaza"><strong id="zz-threat">0</strong></span>
+          <span class="zz-hud__pill zz-hud__pill--def" title="Defensa"><strong id="zz-defense">0</strong></span>
         </div>
       </div>
       <button type="button" class="zz-mission" id="zz-mission" hidden>
@@ -75,7 +77,7 @@ $base = zz_public_base();
     <!-- Coach / onboarding -->
     <div id="zz-coach" class="zz-coach-card" hidden>
       <p id="zz-coach-text"></p>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Entendido</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Continuar</button>
     </div>
 
     <!-- Exploradores: rail compacto overlay -->
@@ -125,7 +127,7 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=18';
+    import { bootGame } from './js/main.js?v=19';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,

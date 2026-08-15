@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <title>Zona Zero · harness 1.3</title>
+  <title>Zona Zero · harness bloque 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=18" />
-  <link rel="stylesheet" href="../css/world.css?v=18" />
+  <link rel="stylesheet" href="../css/game.css?v=19" />
+  <link rel="stylesheet" href="../css/world.css?v=19" />
   <script type="importmap">
   {
     "imports": {
@@ -23,34 +23,36 @@
       <div class="zz-world-map-wrap" id="zz-map-wrap">
         <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
         <div class="zz-map-zoom" aria-label="Zoom">
-          <button type="button" id="zz-zoom-out">−</button>
-          <button type="button" id="zz-zoom-in">+</button>
+          <button type="button" id="zz-zoom-out" title="Alejar">−</button>
+          <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
+          <button type="button" id="zz-zoom-in" title="Acercar">+</button>
         </div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100"></svg>
       </div>
     </main>
     <header class="zz-hud" id="zz-hud">
       <div class="zz-hud__row zz-hud__row--top">
-        <a class="zz-back" href="#">Slots</a>
+        <a class="zz-back" href="#">Partidas</a>
         <div class="zz-hud__title">
-          <strong id="zz-colony">Harness</strong>
+          <strong id="zz-colony">Refugio Norte</strong>
           <span id="zz-day-label">Día 1</span>
         </div>
         <div class="zz-hud__actions">
-          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound">Au</button>
-          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save">Gu</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-help" title="Ayuda">?</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound" title="Sonido">♪</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">💾</button>
           <span id="zz-save-state" class="zz-save-state"></span>
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
-        <button type="button" class="zz-hud__pop" id="zz-open-pop">
+        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población">
           <img src="../assets/art/ui/pop.webp" alt="" width="18" height="18" />
           <strong id="zz-pop">0/0</strong>
         </button>
         <ul class="zz-hud__res" id="zz-resources"></ul>
-        <div class="zz-hud__threat">
-          <span class="zz-hud__pill zz-hud__pill--threat"><i></i><strong id="zz-threat">0</strong></span>
-          <span class="zz-hud__pill zz-hud__pill--def"><i></i><strong id="zz-defense">0</strong></span>
+        <div class="zz-hud__threat" title="Amenaza y defensa" hidden>
+          <span class="zz-hud__pill zz-hud__pill--threat" title="Amenaza"><strong id="zz-threat">0</strong></span>
+          <span class="zz-hud__pill zz-hud__pill--def" title="Defensa"><strong id="zz-defense">0</strong></span>
         </div>
       </div>
       <button type="button" class="zz-mission" id="zz-mission" hidden>
@@ -61,7 +63,7 @@
     </header>
     <div id="zz-coach" class="zz-coach-card" hidden>
       <p id="zz-coach-text"></p>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Entendido</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Continuar</button>
     </div>
     <div class="zz-explorer-rail" id="zz-explorer-rail"></div>
     <aside id="zz-sheet" class="zz-sheet" hidden>
@@ -97,8 +99,8 @@
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=18';
-    bootGame({ slot: 1, mode: 'new', name: 'Harness' }).then(() => {
+    import { bootGame } from '../js/main.js?v=19';
+    bootGame({ slot: 1, mode: 'new', name: 'Refugio Norte' }).then(() => {
       window.__zzOk = true;
     }).catch((e) => {
       window.__zzErr = String(e?.message || e);

@@ -912,74 +912,89 @@ export function advanceDay(state, content) {
 }
 
 function buildDayBrief(state, content, before, prod, ctx) {
-  const lines = [];
   const produced = prod?.produced || {};
-  const foodGain = produced.food || 0;
-  const waterGain = produced.water || 0;
-  if (foodGain) lines.push(`+${foodGain} comida`);
-  if (waterGain) lines.push(`+${waterGain} agua`);
-  if (produced.wood) lines.push(`+${produced.wood} madera`);
-  if (produced.metal) lines.push(`+${produced.metal} metal`);
-  if (produced.medicine) lines.push(`+${produced.medicine} medicinas`);
-  if (ctx.foodNeed) lines.push(`−${Math.round(ctx.foodNeed)} consumo comida`);
-  if (ctx.waterNeed) lines.push(`−${Math.round(ctx.waterNeed)} consumo agua`);
+  const foodGain = Math.round((produced.food || 0) * 10) / 10;
+  const waterGain = Math.round((produced.water || 0) * 10) / 10;
+  const foodNeed = Math.round((ctx.foodNeed || 0) * 10) / 10;
+  const waterNeed = Math.round((ctx.waterNeed || 0) * 10) / 10;
+  const foodBal = Math.round((foodGain - foodNeed) * 10) / 10;
+  const waterBal = Math.round((waterGain - waterNeed) * 10) / 10;
 
-  (prod?.byBuilding || []).forEach((b) => {
-    if (b.workers > 0 && Object.keys(b.out || {}).length) {
-      const bits = Object.entries(b.out)
-        .map(([k, v]) => `+${v} ${RES_LABEL[k] || k}`)
-        .join(', ');
-      // solo si aporta detalle distinto del total (evitar ruido)
-      if (Object.keys(prod.produced || {}).length > 2) lines.push(`${b.name}: ${bits}`);
-    }
-  });
+  const facts = [];
 
   const returning = (before.expeditions || []).filter((e) => e.returnDay === state.day);
   returning.forEach((e) => {
     const ex = (state.explorers || []).find((x) => x.id === e.explorerId);
-    if (ex) lines.push(`${ex.name} ha regresado.`);
+    if (!ex) return;
+    if (ex.status === 'wounded' || (ex.wounds || 0) > 0) {
+      facts.push({ kind: 'explore', text: `${ex.name} ha vuelto herido, pero con botín.` });
+    } else {
+      facts.push({ kind: 'explore', text: `${ex.name} ha regresado de la expedición.` });
+    }
   });
+  // Botín reciente en log
+  const lootLine = (state.log || [])
+    .slice()
+    .reverse()
+    .find((L) => L.day === state.day - 1 || L.day === state.day);
+  // Expediciones en curso
   (state.expeditions || []).forEach((e) => {
     const left = e.returnDay - state.day;
     const ex = (state.explorers || []).find((x) => x.id === e.explorerId);
-    if (ex && left === 1) lines.push(`${ex.name} llegará mañana.`);
-    else if (ex && left > 1) lines.push(`${ex.name} vuelve en ${left} días.`);
+    const zone = (state.zones || []).find((z) => z.id === e.zoneId);
+    if (ex && left >= 1) {
+      facts.push({
+        kind: 'explore',
+        text: left === 1 ? `${ex.name} vuelve mañana${zone ? ` de ${zone.name}` : ''}.` : `${ex.name} vuelve en ${left} días.`,
+      });
+    }
   });
 
   const dThreat = Math.round((state.director?.threat || 0) - (before.threat || 0));
-  if (dThreat) lines.push(`Amenaza ${dThreat > 0 ? '+' : ''}${dThreat}`);
+  if (dThreat) facts.push({ kind: 'threat', text: `Amenaza ${dThreat > 0 ? '+' : ''}${dThreat}.` });
 
   const dPop = (state.population?.total || 0) - (before.pop || 0);
-  if (dPop) lines.push(`Población ${dPop > 0 ? '+' : ''}${dPop}`);
+  if (dPop) facts.push({ kind: 'pop', text: `Población ${dPop > 0 ? '+' : ''}${dPop}.` });
 
   if (ctx.attack) {
-    lines.push(
-      ctx.attack.result === 'win'
-        ? 'Ataque repelido.'
-        : ctx.attack.result === 'messy'
-          ? 'Ataque contenido con pérdidas.'
-          : 'El perímetro ha cedido.'
-    );
-  } else if (ctx.dir?.quiet) {
-    // sin ruido
+    facts.push({
+      kind: 'attack',
+      text:
+        ctx.attack.result === 'win'
+          ? 'Ataque repelido.'
+          : ctx.attack.result === 'messy'
+            ? 'Ataque contenido con pérdidas.'
+            : 'El perímetro ha cedido.',
+    });
   } else if (ctx.dir?.event && !ctx.dir?.choice) {
-    lines.push(ctx.dir.event.name || 'Suceso en la zona');
+    facts.push({ kind: 'event', text: ctx.dir.event.name || 'Algo ha ocurrido en la colonia.' });
   }
 
+  // Construcciones del día anterior aproximadas por log
+  (state.log || [])
+    .filter((L) => L.day === state.day - 1 && /Construís|Mejoráis/.test(L.text || ''))
+    .slice(0, 2)
+    .forEach((L) => facts.push({ kind: 'build', text: L.text }));
+
   const important =
-    foodGain >= 1 ||
-    waterGain >= 1 ||
-    Math.abs(dPop) > 0 ||
-    Math.abs(dThreat) >= 2 ||
-    returning.length > 0 ||
-    (state.expeditions || []).some((e) => e.returnDay - state.day === 1) ||
-    !!ctx.attack ||
-    (!!ctx.dir?.event && !ctx.dir?.quiet && !ctx.dir?.choice);
+    Math.abs(foodBal) >= 0.1 ||
+    Math.abs(waterBal) >= 0.1 ||
+    facts.length > 0 ||
+    foodGain > 0 ||
+    waterGain > 0;
 
   return {
     day: state.day,
-    lines: lines.slice(0, 8),
-    important: !!important && lines.length > 0,
+    food: { produced: foodGain, consumed: foodNeed, balance: foodBal },
+    water: { produced: waterGain, consumed: waterNeed, balance: waterBal },
+    facts: facts.slice(0, 6),
+    // compat
+    lines: [
+      `Comida ${foodGain >= 0 ? '+' : ''}${foodGain} / −${foodNeed} → ${foodBal >= 0 ? '+' : ''}${foodBal}`,
+      `Agua ${waterGain >= 0 ? '+' : ''}${waterGain} / −${waterNeed} → ${waterBal >= 0 ? '+' : ''}${waterBal}`,
+      ...facts.map((f) => f.text),
+    ].slice(0, 8),
+    important: !!important,
   };
 }
 

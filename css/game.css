@@ -359,14 +359,15 @@ body.zz-body {
 .zz-base { width: 100%; height: auto; display: block; touch-action: manipulation; }
 
 /* Mapa ciudad — tejido urbano + vida en territorio recuperado */
-.zz-map-avenue { fill: #4a453c; opacity: 0.92; }
-.zz-map-street-fill { fill: #3a3630; opacity: 0.88; }
-.zz-map-street { fill: none; stroke: #5a5244; stroke-width: 0.25; opacity: 0.45; }
-.zz-map-block { fill: #24282a; stroke: #32383a; stroke-width: 0.12; opacity: 0.28; }
-.zz-map-bldg { fill: #2e3234; stroke: transparent; stroke-width: 0; opacity: 0.55; }
-.zz-map-bldg--tall { fill: #343a3e; opacity: 0.6; }
-.zz-map-bldg--mid { fill: #2c3034; opacity: 0.5; }
-.zz-map-bldg--low { fill: #282c2e; opacity: 0.45; }
+/* Ciudad de fondo: atmósfera, no grid GIS técnico */
+.zz-map-avenue { fill: #3a3630; opacity: 0.55; }
+.zz-map-street-fill { fill: #2e2c28; opacity: 0.5; }
+.zz-map-street { fill: none; stroke: #4a4438; stroke-width: 0.18; opacity: 0.22; }
+.zz-map-block { fill: #1e2224; stroke: transparent; stroke-width: 0; opacity: 0.18; }
+.zz-map-bldg { fill: #262a2c; stroke: transparent; stroke-width: 0; opacity: 0.28; }
+.zz-map-bldg--tall { fill: #2a3034; opacity: 0.32; }
+.zz-map-bldg--mid { fill: #262a2e; opacity: 0.26; }
+.zz-map-bldg--low { fill: #222628; opacity: 0.22; }
 .zz-map-park { fill: #2a3a28; stroke: #4a6a40; stroke-width: 0.2; opacity: 0.8; }
 .zz-map-tree { fill: #3a5a34; opacity: 0.65; }
 .zz-map-life-tree { fill: #5a9a48; opacity: 0.75; }
@@ -482,14 +483,28 @@ body.zz-body {
 }
 .zz-settle-ground {
   fill: #3a3428;
-  stroke: #4a4438;
-  stroke-width: 0.2;
+  stroke: none;
   opacity: 0.9;
 }
 .zz-settle-ground--t0 { fill: #2e2a22; }
 .zz-settle-ground--t1 { fill: #3a3428; }
 .zz-settle-ground--t2 { fill: #3e3a30; }
 .zz-settle-ground--t3 { fill: #424038; }
+.zz-settle-soil {
+  fill: #3a3428;
+  stroke: none;
+  opacity: 0.94;
+}
+.zz-settle-soil--t0 { fill: #322c24; }
+.zz-settle-soil--t1 { fill: #3a3428; }
+.zz-settle-soil--t2 { fill: #403a30; }
+.zz-settle-soil--t3 { fill: #464238; }
+.zz-settle-soil-patch {
+  fill: #241e18;
+  opacity: 0.32;
+  stroke: none;
+  pointer-events: none;
+}
 .zz-settle-dirt {
   fill: #2a2620;
   opacity: 0.55;
@@ -497,12 +512,21 @@ body.zz-body {
 }
 .zz-settle-path { fill: #5a5548; opacity: 0.85; }
 .zz-settle-path-line {
-  stroke: #5a5548;
+  stroke: #5a5040;
   stroke-width: 0.55;
   stroke-linecap: round;
-  opacity: 0.75;
+  opacity: 0.55;
   fill: none;
   pointer-events: none;
+}
+.zz-zone-hit {
+  fill: transparent !important;
+  stroke: none !important;
+  pointer-events: all;
+}
+.zz-zone.is-selected .zz-zone-hit {
+  fill: transparent !important;
+  stroke: none !important;
 }
 .zz-settle-fence {
   fill: none;
