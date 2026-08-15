@@ -1,19 +1,17 @@
 /**
- * Mapa mundo Zona Zero 1.2.1 — capas optimizadas, ciudad protagonista,
- * territorio vivo al controlar, núcleo con edificios reconocibles.
+ * Mapa mundo Zona Zero 1.3 — mundo-primero, assets raster + interacción directa.
  */
 import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
+import { artUrl, buildingArtUrl, zoneArtUrl, TERRAIN_ART } from './art.js';
 
 const VB_SQ = 100;
 
 function mapMetrics(svg) {
+  // Mundo lógico 100×100; el SVG llena el viewport (slice) — sin bandas negras.
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
-  if (wide) {
-    return { vbW: 160, vbH: 90, ox: 30, oy: -2, wide: true };
-  }
-  return { vbW: 100, vbH: 100, ox: 0, oy: 0, wide: false };
+  return { vbW: 100, vbH: 100, ox: 0, oy: 0, wide: !!wide };
 }
 const STATE_CLASS = {
   unknown: 'zz-zone--unknown',
@@ -321,6 +319,22 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   const groundRx = camp.r * (0.78 + life * 0.06);
   const groundRy = camp.r * (0.62 + life * 0.05);
   layer.appendChild(svgEl('ellipse', { cx: 0, cy: 0, rx: groundRx, ry: groundRy, class: 'zz-settle-ground' }));
+  // Día 1: campamento improvisado visible
+  if (tier <= 0 && buildings.length <= 4) {
+    const campArt = buildingArtUrl('camp_d1');
+    layer.appendChild(
+      svgEl('image', {
+        href: campArt,
+        x: -groundRx * 0.55,
+        y: -groundRy * 0.7,
+        width: groundRx * 1.1,
+        height: groundRy * 1.2,
+        preserveAspectRatio: 'xMidYMid meet',
+        opacity: '0.9',
+        style: 'pointer-events:none',
+      })
+    );
+  }
   if (life >= 1) {
     layer.appendChild(
       svgEl('ellipse', {
@@ -392,22 +406,37 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   buildings.forEach((b) => {
     const lx = (b.x - bw / 2 + 0.5) * scale;
     const ly = (b.y - bh / 2 + 0.5) * scale;
-    const cell = scale * 0.98;
+    const cell = scale * 1.05;
     const selected = state.selectedBuildingId === b.id;
     const wrap = svgEl('g', {
       class: `zz-settle-bldg${selected ? ' is-selected' : ''}`,
-      transform: `translate(${lx - cell / 2},${ly - cell / 2}) scale(${cell / 40})`,
+      transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
       'data-type': b.type,
       'data-id': b.id,
     });
-    wrap.appendChild(svgEl('ellipse', { cx: 20, cy: 36, rx: 14, ry: 4, fill: '#000', opacity: 0.28 }));
-    paintBuildingGlyph(wrap, b.type, resolveVisualLevel(b.type));
+    const href = buildingArtUrl(b.type);
+    // Sombra
+    wrap.appendChild(svgEl('ellipse', { cx: cell * 0.5, cy: cell * 0.92, rx: cell * 0.38, ry: cell * 0.12, fill: '#000', opacity: 0.35 }));
+    const img = svgEl('image', {
+      href,
+      x: 0,
+      y: 0,
+      width: cell,
+      height: cell,
+      preserveAspectRatio: 'xMidYMid meet',
+      class: 'zz-settle-bldg-img',
+    });
+    // fallback glyph underneath if image fails visually — keep glyph tiny behind
+    const glyph = svgEl('g', { transform: `scale(${cell / 40})`, opacity: '0' });
+    paintBuildingGlyph(glyph, b.type, resolveVisualLevel(b.type));
+    wrap.appendChild(glyph);
+    wrap.appendChild(img);
     const label = SHORT[b.type];
-    if (label && (tier >= 0 || buildings.length <= 8)) {
+    if (label) {
       wrap.appendChild(
         svgEl('text', {
-          x: 20,
-          y: 44,
+          x: cell / 2,
+          y: cell + 1.6,
           'text-anchor': 'middle',
           class: 'zz-settle-bldg-label',
         }, [label])
@@ -416,12 +445,26 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
     if ((b.workers || 0) > 0) {
       wrap.appendChild(
         svgEl('text', {
-          x: 33,
-          y: 9,
+          x: cell * 0.85,
+          y: cell * 0.22,
           class: 'zz-settle-workers',
           'text-anchor': 'middle',
         }, [String(b.workers)])
       );
+    } else {
+      // Señal contextual: sin personal
+      const def = null;
+      const needsStaff = ['farm', 'greenhouse', 'well', 'cistern', 'workshop', 'sawmill', 'kitchen', 'infirmary', 'clinic'].includes(b.type);
+      if (needsStaff) {
+        wrap.appendChild(
+          svgEl('text', {
+            x: cell / 2,
+            y: -0.8,
+            'text-anchor': 'middle',
+            class: 'zz-settle-warn',
+          }, ['⚠ SIN PERSONAL'])
+        );
+      }
     }
     wrap.style.cursor = 'pointer';
     wrap.addEventListener('click', (ev) => {
@@ -580,6 +623,41 @@ function drawZone(layer, z, state, tier, handlers) {
         );
       }
     });
+    // Landmark interactivo (supermercado, etc.)
+    const zArt = zoneArtUrl(z);
+    if (zArt && z.state !== 'controlled') {
+      const s = Math.min(7.5, z.r * 0.95);
+      g.appendChild(
+        svgEl('image', {
+          href: zArt,
+          x: z.x - s / 2,
+          y: z.y - s / 2 - 0.5,
+          width: s,
+          height: s,
+          preserveAspectRatio: 'xMidYMid meet',
+          class: 'zz-zone-landmark',
+          style: 'pointer-events:none',
+        })
+      );
+      g.appendChild(
+        svgEl('text', {
+          x: z.x,
+          y: z.y + s / 2 + 1.8,
+          'text-anchor': 'middle',
+          class: 'zz-zone-mark-label',
+        }, [z.name.split(' ')[0].toUpperCase()])
+      );
+      if (z.state === 'discovered' || z.state === 'hostile') {
+        g.appendChild(
+          svgEl('text', {
+            x: z.x + s * 0.35,
+            y: z.y - s * 0.35,
+            'text-anchor': 'middle',
+            class: 'zz-zone-q',
+          }, ['?'])
+        );
+      }
+    }
   }
 
   if (z.state === 'controlled') {
@@ -788,7 +866,7 @@ export function renderMap(svg, state, handlers = {}) {
   if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
   const vb = cameraViewBox(state, m);
   svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 
   const tier = colonyVisualTier(state);
   svg.dataset.tier = String(tier);
@@ -796,7 +874,6 @@ export function renderMap(svg, state, handlers = {}) {
   svg.dataset.mode = state.uiMode || '';
   addDefs(svg, tier);
 
-  // Fondo grande para poder hacer pan fuera del mundo
   const pad = 40;
   svg.appendChild(
     svgEl('rect', {
@@ -804,23 +881,36 @@ export function renderMap(svg, state, handlers = {}) {
       y: vb.y - pad,
       width: vb.w + pad * 2,
       height: vb.h + pad * 2,
-      fill: 'url(#zzMapSky)',
+      fill: tier <= 0 ? '#08090a' : '#0c0e10',
       class: 'zz-map-bg',
     })
   );
+  // Terreno ilustrado
+  const terrain = svgEl('image', {
+    href: artUrl(TERRAIN_ART),
+    x: -8,
+    y: -8,
+    width: 116,
+    height: 116,
+    preserveAspectRatio: 'xMidYMid slice',
+    class: 'zz-map-terrain',
+    opacity: tier <= 0 ? '0.72' : tier === 1 ? '0.82' : '0.9',
+    style: 'pointer-events:none',
+  });
+  svg.appendChild(terrain);
   svg.appendChild(
     svgEl('rect', {
-      x: -(m.ox || 0),
-      y: -(m.oy || 0),
-      width: m.vbW,
-      height: m.vbH,
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
       fill: 'url(#zzMapHaze)',
       class: 'zz-map-ground',
+      style: 'pointer-events:none',
     })
   );
 
   const worldAttrs = { class: 'zz-map-world' };
-  if (m.ox || m.oy) worldAttrs.transform = `translate(${m.ox},${m.oy})`;
   const world = svgEl('g', worldAttrs);
 
   const zones = state.zones || [];

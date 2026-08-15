@@ -1,5 +1,3 @@
-# Revisión visual — Zona Zero 1.2.5
+# Revisión 1.3 — mundo-primero
 
-Capturas UX + representación del mundo. Galería: [index.html](./index.html)
-
-Generadas con `node scripts/review-shots.mjs`.
+Galería: [index.html](./index.html)

@@ -1,7 +1,6 @@
 /**
- * Capturas revisión 1.2.5 — UX + representación del mundo.
- * Sustituye docs/review/. Uso: node scripts/review-shots.mjs
- * Requiere: npx serve -l 8765 .
+ * Capturas revisión 1.3 — UX mundo-primero.
+ * node scripts/review-shots.mjs  (serve -l 8765 .)
  */
 import { chromium, devices } from 'playwright';
 import { mkdirSync, rmSync, existsSync, writeFileSync, readdirSync, copyFileSync } from 'fs';
@@ -18,25 +17,39 @@ if (existsSync(out)) rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 mkdirSync(drive, { recursive: true });
 
+const gallery = [];
+function addShot(file, title, note) {
+  gallery.push({ file, title, note });
+}
+
 async function boot(page) {
   await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
   await page.waitForFunction(() => window.__zzOk === true || window.__zzErr, { timeout: 30000 });
   const err = await page.evaluate(() => window.__zzErr || null);
   if (err) throw new Error(err);
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(500);
+  // cerrar coach si tapa
+  await page.evaluate(() => {
+    const c = document.getElementById('zz-coach');
+    if (c) c.hidden = true;
+    const s = window.__zz?.getState?.();
+    if (s?.flags) {
+      s.flags.onboardingDone = true;
+      s.flags.onboardingActive = false;
+    }
+  });
 }
 
-function closeSheet(page) {
-  return page.evaluate(() => {
+async function closeSheet(page) {
+  await page.evaluate(() => {
     const s = document.getElementById('zz-sheet');
     if (s) s.hidden = true;
   });
 }
 
-/** Recursos ilimitados + colocación en celdas libres */
-async function enrichColony(page, { day, buildings, pop, controlled = 0, vehicles = false }) {
+async function enrich(page, { day, buildings, pop, controlled = 0, vehicles = false, zoom = 1.3 }) {
   await page.evaluate(
-    ({ day, buildings, pop, controlled, vehicles }) => {
+    ({ day, buildings, pop, controlled, vehicles, zoom }) => {
       const s = window.__zz.getState();
       s.day = day;
       s.era = Math.max(s.era || 0, day >= 25 ? 2 : day >= 8 ? 1 : 0);
@@ -48,17 +61,12 @@ async function enrichColony(page, { day, buildings, pop, controlled = 0, vehicle
       if (pop != null) {
         s.population.total = pop;
         s.population.labor = s.population.labor || {};
-        s.population.labor.build = Math.max(2, Math.floor(pop * 0.15));
+        s.population.labor.build = Math.max(2, Math.floor(pop * 0.12));
         s.population.labor.idle = Math.max(2, Math.floor(pop * 0.2));
         s.population.labor.food = Math.floor(pop * 0.2);
         s.population.labor.water = Math.floor(pop * 0.15);
         s.population.labor.produce = Math.floor(pop * 0.1);
         s.population.labor.defense = Math.floor(pop * 0.1);
-        s.population.labor.medicine = Math.max(0, Math.floor(pop * 0.05));
-      } else {
-        s.population.labor = s.population.labor || {};
-        s.population.labor.build = Math.max(2, s.population.labor.build || 0);
-        s.population.labor.idle = Math.max(1, s.population.labor.idle || 0);
       }
       const free = () => {
         for (let y = 0; y < s.base.h; y++) {
@@ -73,112 +81,126 @@ async function enrichColony(page, { day, buildings, pop, controlled = 0, vehicle
         if (!cell) break;
         window.__zz.place(type, cell[0], cell[1]);
         const b = s.base.buildings.find((x) => x.type === type && x.x === cell[0] && x.y === cell[1]);
-        if (b && ['farm', 'well', 'workshop', 'sawmill', 'greenhouse'].includes(type)) {
-          b.workers = Math.min(3, b.workers || 2);
+        if (b && ['farm', 'well', 'workshop', 'sawmill', 'greenhouse', 'cistern'].includes(type)) {
+          b.workers = Math.min(3, 2);
         }
       }
-      if (controlled > 0) {
-        let n = 0;
-        for (const z of s.zones) {
-          if (z.type === 'camp') continue;
-          if (n >= controlled) break;
-          z.state = 'controlled';
-          z.controlProgress = 1;
-          n++;
-        }
+      let n = 0;
+      for (const z of s.zones) {
+        if (z.type === 'camp') continue;
+        if (n >= controlled) break;
+        z.state = 'controlled';
+        z.controlProgress = 1;
+        n++;
       }
       if (vehicles) {
         s.vehiclesOwned = s.vehiclesOwned || [];
         if (!s.vehiclesOwned.includes('bike')) s.vehiclesOwned.push('bike');
       }
-      // Centrar cámara en campamento
       const camp = s.zones.find((z) => z.type === 'camp');
-      if (camp && s.mapCamera) {
+      s.mapCamera = s.mapCamera || {};
+      if (camp) {
         s.mapCamera.x = camp.x;
         s.mapCamera.y = camp.y;
-        s.mapCamera.zoom = day <= 2 ? 1.35 : day < 25 ? 1.2 : 1.05;
       }
+      s.mapCamera.zoom = zoom;
       window.__zz.paint();
     },
-    { day, buildings, pop, controlled, vehicles }
+    { day, buildings, pop, controlled, vehicles, zoom }
   );
-  await page.waitForTimeout(350);
-}
-
-const gallery = [];
-
-function addShot(file, title, note) {
-  gallery.push({ file, title, note });
+  await page.waitForTimeout(400);
 }
 
 const browser = await chromium.launch({ headless: true });
 
-// —— Móvil ——
 {
   const context = await browser.newContext({ ...devices['iPhone 12'], locale: 'es-ES' });
   const page = await context.newPage();
   await boot(page);
 
   await page.screenshot({ path: join(out, 'dia1.png') });
-  addShot('dia1.png', 'Día 1', 'colonia inicial');
+  addShot('dia1.png', 'Día 1', 'asentamiento inicial');
   await page.screenshot({ path: join(out, 'mobile.png') });
-  addShot('mobile.png', 'Móvil', 'HUD denso + mundo');
+  addShot('mobile.png', 'Móvil', 'mundo full-bleed');
 
   await page.click('#zz-open-pop', { force: true });
   await page.waitForTimeout(400);
   await page.screenshot({ path: join(out, 'poblacion.png') });
-  addShot('poblacion.png', 'Población', 'impacto esperado por asignación');
+  addShot('poblacion.png', 'Población', 'herramienta avanzada');
   await closeSheet(page);
 
   await page.click('#zz-open-build', { force: true });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(450);
   await page.screenshot({ path: join(out, 'construir.png') });
-  addShot('construir.png', 'Construcción', 'catálogo visual');
+  addShot('construir.png', 'Construir', 'catálogo compacto con arte');
   await closeSheet(page);
 
   await page.locator('.zz-ex-card').first().click({ force: true });
   await page.waitForTimeout(400);
   await page.screenshot({ path: join(out, 'explorador.png') });
-  addShot('explorador.png', 'Explorador', 'retrato · nivel · XP · skills');
-  await page.evaluate(() => {
-    const s = window.__zz.getState();
-    const ex = (s.explorers || []).find((e) => e.status === 'ready');
-    if (ex) {
-      s.selectedExplorerId = ex.id;
-      s.uiMode = 'explore';
-      const sheet = document.getElementById('zz-sheet');
-      if (sheet) sheet.hidden = true;
-      window.__zz.paint();
-    }
-  });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.waitForTimeout(350);
-  await page.screenshot({ path: join(out, 'mapa-explorando.png') });
-  addShot('mapa-explorando.png', 'Mapa explorando', 'destinos resaltados');
-  await page.evaluate(() => {
-    const s = window.__zz.getState();
-    s.uiMode = null;
-    window.__zz.paint();
-  });
+  addShot('explorador.png', 'Explorador', 'retrato real');
   await closeSheet(page);
 
-  // Colonia media (~día 18)
-  await enrichColony(page, {
-    day: 18,
+  // Edificio seleccionado
+  await enrich(page, { day: 2, pop: 4, buildings: ['farm', 'well'], zoom: 1.6 });
+  await page.evaluate(() => {
+    const s = window.__zz.getState();
+    const farm = s.base.buildings.find((b) => b.type === 'farm');
+    if (farm) {
+      farm.workers = 0;
+      window.__zz.paint();
+      // trigger sheet via click path
+      const ev = new Event('click');
+    }
+  });
+  await page.evaluate(() => {
+    const s = window.__zz.getState();
+    const farm = s.base.buildings.find((b) => b.type === 'farm');
+    if (!farm) return;
+    // open via paint handlers not exposed — use DOM from last paint
+    const g = document.querySelector(`[data-id="${farm.id}"]`);
+    if (g) g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: join(out, 'edificio-seleccionado.png') });
+  addShot('edificio-seleccionado.png', 'Edificio seleccionado', 'ficha huerto + trabajadores');
+  await closeSheet(page);
+
+  // Exploración zona
+  await page.evaluate(() => {
+    const s = window.__zz.getState();
+    const z = s.zones.find((x) => x.type === 'supermarket' || (x.name || '').toLowerCase().includes('super'));
+    const target = z || s.zones.find((x) => x.state === 'discovered' && x.type !== 'camp');
+    if (target) {
+      s.selectedZoneId = target.id;
+      s.mapCamera.x = target.x;
+      s.mapCamera.y = target.y;
+      s.mapCamera.zoom = 1.35;
+      window.__zz.paint();
+      const g = document.querySelector(`.zz-zone[data-id="${target.id}"]`);
+      if (g) g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }
+  });
+  await page.waitForTimeout(450);
+  await page.screenshot({ path: join(out, 'exploracion-zona.png') });
+  addShot('exploracion-zona.png', 'Exploración zona', 'ficha contextual Explorar');
+  await closeSheet(page);
+
+  await enrich(page, {
+    day: 15,
     pop: 14,
     controlled: 2,
     buildings: ['farm', 'well', 'house', 'workshop', 'barricade', 'storage', 'medkit'],
+    zoom: 1.25,
   });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.waitForTimeout(200);
-  await page.screenshot({ path: join(out, 'colonia-media.png') });
-  addShot('colonia-media.png', 'Colonia media', 'día ~18 · más edificios/luces');
+  await page.screenshot({ path: join(out, 'dia15.png') });
+  addShot('dia15.png', 'Día 15', 'colonia media');
+  await page.screenshot({ path: join(out, 'gameplay.png') });
+  addShot('gameplay.png', 'Gameplay', 'colonia en juego');
 
-  // Colonia avanzada (~día 40)
-  await enrichColony(page, {
-    day: 40,
-    pop: 28,
+  await enrich(page, {
+    day: 30,
+    pop: 26,
     controlled: 5,
     vehicles: true,
     buildings: [
@@ -196,18 +218,14 @@ const browser = await chromium.launch({ headless: true });
       'fence',
       'barricade',
     ],
+    zoom: 1.1,
   });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.waitForTimeout(200);
-  await page.screenshot({ path: join(out, 'colonia-avanzada.png') });
-  addShot('colonia-avanzada.png', 'Colonia avanzada', 'día ~40 · densamente ocupada');
-  await page.screenshot({ path: join(out, 'gameplay.png') });
-  addShot('gameplay.png', 'Gameplay', 'colonia avanzada en móvil');
+  await page.screenshot({ path: join(out, 'dia30.png') });
+  addShot('dia30.png', 'Día 30', 'colonia avanzada');
 
   await context.close();
 }
 
-// —— Escritorio panorámico ——
 {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
@@ -216,38 +234,20 @@ const browser = await chromium.launch({ headless: true });
   });
   const page = await context.newPage();
   await boot(page);
-  await enrichColony(page, {
-    day: 40,
-    pop: 28,
+  await enrich(page, {
+    day: 30,
+    pop: 26,
     controlled: 5,
     vehicles: true,
-    buildings: [
-      'farm',
-      'greenhouse',
-      'well',
-      'house',
-      'workshop',
-      'storage',
-      'medkit',
-      'infirmary',
-      'watchtower',
-      'fence',
-      'sawmill',
-    ],
+    buildings: ['farm', 'greenhouse', 'well', 'house', 'workshop', 'storage', 'medkit', 'infirmary', 'watchtower', 'fence'],
+    zoom: 1.05,
   });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.click('#zz-zoom-out', { force: true });
-  await page.waitForTimeout(300);
-  await page.screenshot({ path: join(out, 'desktop-panoramico.png') });
-  addShot('desktop-panoramico.png', 'Desktop panorámico', 'ciudad amplia 1440×900');
   await page.screenshot({ path: join(out, 'desktop.png') });
-  addShot('desktop.png', 'Escritorio', 'mismo estado');
-
+  addShot('desktop.png', 'Escritorio', 'viewport lleno');
   await page.click('#zz-open-pop', { force: true });
   await page.waitForTimeout(400);
   await page.screenshot({ path: join(out, 'desktop-poblacion.png') });
-  addShot('desktop-poblacion.png', 'Escritorio · Población', 'panel flotante');
-
+  addShot('desktop-poblacion.png', 'Escritorio · Población', 'panel lateral');
   await context.close();
 }
 
@@ -271,27 +271,26 @@ writeFileSync(
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Revisión visual · Zona Zero 1.2.5</title>
+  <title>Revisión visual · Zona Zero 1.3</title>
   <style>
     :root { color-scheme: dark; --bg:#12100e; --card:#1a1612; --line:#3a342c; --text:#e8e0d4; --muted:#9a9080; }
     * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.4; padding:1.25rem 1rem 2.5rem; }
+    body { margin:0; font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--text); padding:1.25rem 1rem 2.5rem; }
     header { max-width:1100px; margin:0 auto 1.5rem; }
-    h1 { font-size:1.35rem; font-weight:650; margin:0 0 0.35rem; }
+    h1 { font-size:1.35rem; margin:0 0 0.35rem; }
     header p { margin:0; color:var(--muted); font-size:0.92rem; }
     .gallery { max-width:1100px; margin:0 auto; display:grid; gap:1.25rem; grid-template-columns:1fr; }
     @media (min-width:720px) { .gallery { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     figure { margin:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-    a.shot { display:block; color:inherit; text-decoration:none; }
     img { display:block; width:100%; height:auto; background:#0a0908; }
-    figcaption { padding:0.65rem 0.85rem 0.8rem; font-size:0.95rem; font-weight:600; border-top:1px solid var(--line); }
+    figcaption { padding:0.65rem 0.85rem 0.8rem; font-weight:600; border-top:1px solid var(--line); }
     figcaption span { display:block; margin-top:0.15rem; font-size:0.78rem; font-weight:400; color:var(--muted); }
   </style>
 </head>
 <body>
   <header>
-    <h1>Revisión visual · Zona Zero 1.2.5</h1>
-    <p>Capturas de la revisión actual (UX + representación del mundo). Se sustituyen en cada entrega.</p>
+    <h1>Revisión visual · Zona Zero 1.3</h1>
+    <p>UX mundo-primero. Se sustituyen en cada entrega.</p>
   </header>
   <main class="gallery">
 ${figures}
@@ -302,18 +301,8 @@ ${figures}
   'utf8'
 );
 
-writeFileSync(
-  join(out, 'README.md'),
-  `# Revisión visual — Zona Zero 1.2.5
+writeFileSync(join(out, 'README.md'), `# Revisión 1.3 — mundo-primero\n\nGalería: [index.html](./index.html)\n`, 'utf8');
 
-Capturas UX + representación del mundo. Galería: [index.html](./index.html)
-
-Generadas con \`node scripts/review-shots.mjs\`.
-`,
-  'utf8'
-);
-
-// Copiar a Drive (limpiar png/jpg antiguos de revisión)
 for (const f of readdirSync(drive)) {
   if (/\.(png|jpg|jpeg|webp)$/i.test(f)) {
     try {
@@ -327,16 +316,14 @@ for (const g of gallery) {
   copyFileSync(join(out, g.file), join(drive, g.file));
 }
 
-// Contact sheet vía Python/Pillow
 const shotsJson = JSON.stringify(gallery.map((g) => [g.file, g.title]));
 const py = `
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import json
-
 SRC = Path(r'''${out.replace(/\\/g, '\\\\')}''')
 DRIVE = Path(r'''${drive.replace(/\\/g, '\\\\')}''')
-SHOTS = json.loads(r'''${shotsJson.replace(/'/g, "\\'")}''')
+SHOTS = json.loads(r'''${shotsJson}''')
 cols = 3
 pad = 24
 label_h = 36
@@ -353,7 +340,7 @@ try:
 except Exception:
     font = ImageFont.load_default()
     title_font = font
-draw.text((pad, 12), 'Zona Zero 1.2.5 — revisión visual', fill=(232, 212, 180), font=title_font)
+draw.text((pad, 12), 'Zona Zero 1.3 — revisión visual', fill=(232, 212, 180), font=title_font)
 for i, (fname, title) in enumerate(SHOTS):
     r, c = divmod(i, cols)
     x = pad + c * (cell_w + pad)
@@ -371,19 +358,13 @@ for i, (fname, title) in enumerate(SHOTS):
 out_path = SRC / 'review-contact-sheet.jpg'
 canvas.save(out_path, 'JPEG', quality=88, optimize=True)
 canvas.save(DRIVE / 'review-contact-sheet.jpg', 'JPEG', quality=88, optimize=True)
-print('contact sheet', out_path)
+print('ok', out_path)
 `;
 writeFileSync(join(out, '_make_contact.py'), py, 'utf8');
 const r = spawnSync('python', [join(out, '_make_contact.py')], { encoding: 'utf8' });
 if (r.status !== 0) {
-  console.error('contact sheet failed', r.stderr || r.stdout);
+  console.error(r.stderr || r.stdout);
   process.exit(1);
 }
-try {
-  rmSync(join(out, '_make_contact.py'), { force: true });
-} catch {
-  /* ignore */
-}
-
+rmSync(join(out, '_make_contact.py'), { force: true });
 console.log('Review shots:', gallery.map((g) => g.file).join(', '));
-console.log('Copied to Drive + contact sheet OK');

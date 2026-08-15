@@ -1,5 +1,5 @@
 /**
- * Zona Zero 1.2 — UI mundo continuo (población colectiva + exploradores)
+ * Zona Zero 1.3 — UI mundo-primero (tocar el mundo)
  */
 import {
   loadContent,
@@ -42,6 +42,20 @@ import {
   buildingWorkerCap,
 } from './colony.js';
 import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon } from './icons.js';
+import {
+  artUrl,
+  buildingArtUrl,
+  zoneArtUrl,
+  portraitArtUrl,
+  RES_ART,
+} from './art.js';
+import {
+  onboardingStatus,
+  checkOnboardingProgress,
+  advanceOnboarding,
+  ensureOnboarding,
+  dismissOnboarding,
+} from './onboarding.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
 
@@ -408,36 +422,39 @@ function openBuildingSheet(id) {
   const key = laborKeyForBuilding(def);
   const cap = buildingWorkerCap(def);
   const workers = b.workers || 0;
-  const prev = productionPreview(def, workers)
-    .map((p) => `${p.amount} ${RES_LABEL_UI[p.key] || p.key}/día`)
-    .join(' · ');
-  const scaleHint = [0, 1, Math.min(2, cap), cap]
-    .filter((v, i, a) => a.indexOf(v) === i)
-    .map((n) => {
-      const bits = productionPreview(def, n)
-        .map((p) => `${p.amount} ${RES_LABEL_UI[p.key] || p.key}`)
-        .join(', ');
-      return `${n} → ${bits || '0'}`;
-    })
-    .join('<br/>');
+  const prev = productionPreview(def, workers);
+  const prodLine =
+    prev.map((p) => `+${p.amount} ${RES_LABEL_UI[p.key] || p.key}/día`).join(' · ') ||
+    (def.defense ? `+${def.defense} defensa` : def.housing ? `+${def.housing} capacidad` : '—');
+  const art = buildingArtUrl(b.type);
+  const unstaffed = key && workers < 1;
 
   openSheet(`
-    <div class="zz-build-card__art" data-thumb="${b.type}"></div>
-    <h2>${escapeHtml(def.name)}</h2>
-    <p>${escapeHtml(def.desc || '')}</p>
-    ${
-      key
-        ? `<p><strong>Trabajadores: ${workers} / ${cap}</strong></p>
-           <div class="zz-stepper zz-stepper--lg">
-             <button type="button" data-bworkers="${b.id}" data-delta="-1">−</button>
-             <span>TRABAJADORES</span>
-             <button type="button" data-bworkers="${b.id}" data-delta="1">+</button>
-           </div>
-           <p class="zz-muted" style="margin-top:0.5rem;font-size:0.82rem">Producción ahora: ${prev || 'ninguna'}</p>
-           <p class="zz-prod-scale">${scaleHint}</p>`
-        : '<p class="zz-muted">Sin puestos de trabajo (estructura pasiva).</p>'
-    }
+    <div class="zz-ctx">
+      <div class="zz-ctx__head">
+        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" />
+        <div>
+          <h2>${escapeHtml(def.name)}</h2>
+          <p>${escapeHtml((def.desc || '').slice(0, 90))}</p>
+        </div>
+      </div>
+      ${
+        key
+          ? `<div class="zz-ctx__stat">
+               <span>Trabajadores</span>
+               <div class="zz-stepper">
+                 <button type="button" data-bworkers="${b.id}" data-delta="-1" aria-label="Menos">−</button>
+                 <span>${workers} / ${cap}</span>
+                 <button type="button" data-bworkers="${b.id}" data-delta="1" aria-label="Más">+</button>
+               </div>
+             </div>
+             <p class="zz-ctx__prod">${escapeHtml(prodLine)}</p>
+             ${unstaffed ? '<p class="zz-ctx__warn">⚠ Sin personal — no produce</p>' : ''}`
+          : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>`
+      }
+    </div>
   `);
+  checkOnboardingProgress(state);
 }
 
 function openExplorerSheet(id) {
@@ -454,36 +471,30 @@ function openExplorerSheet(id) {
     e.status === 'ready' ? 'Disponible' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
   const xp = Math.min(100, Math.round((e.xp || 0) % 100));
   const level = e.level || 1;
+  const portrait = portraitArtUrl(e);
   openSheet(`
-    <div class="zz-explorer-hero">
-      <span data-portrait="${e.id}"></span>
-      <div>
-        <h2 style="margin:0">${escapeHtml(e.name)}</h2>
-        <p style="margin:0.15rem 0 0">Explorador · Nv.${level}</p>
-        <div class="zz-xp-bar" title="Progreso al siguiente nivel"><i style="width:${xp}%"></i></div>
+    <div class="zz-ctx">
+      <div class="zz-explorer-hero">
+        <img src="${portrait}" alt="" width="56" height="56" />
+        <div>
+          <h2 style="margin:0">${escapeHtml(e.name)}</h2>
+          <p style="margin:0.15rem 0 0">Explorador · Nv.${level}</p>
+          <div class="zz-xp-bar"><i style="width:${xp}%"></i></div>
+        </div>
       </div>
+      <div class="zz-skill-list">${skills}</div>
+      <p>Estado: <strong>${stLabel}</strong></p>
+      ${
+        e.status === 'ready'
+          ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="start-explore" data-id="${e.id}">Explorar el mapa</button>
+             <p class="zz-muted" style="font-size:0.78rem;margin-top:0.35rem">O tocá directamente una zona en el mapa.</p>`
+          : e.status === 'away'
+            ? '<p class="zz-muted">Está fuera. Veréis su ruta en el mapa.</p>'
+            : ''
+      }
+      <p><button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button></p>
     </div>
-    <div class="zz-skill-list">${skills}</div>
-    <p>Estado: <strong>${stLabel}</strong></p>
-    ${
-      e.status === 'ready'
-        ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="start-explore" data-id="${e.id}">Mandar a explorar</button>`
-        : e.status === 'away'
-          ? '<p class="zz-muted">Está fuera. Veréis su marcador en el mapa.</p>'
-          : ''
-    }
-    <p style="margin-top:0.5rem">
-      <button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button>
-    </p>
   `);
-  const host = $('zz-sheet-body')?.querySelector('[data-portrait]');
-  if (host) {
-    try {
-      host.appendChild(renderPortraitSvg({ id: e.id, name: e.name, portraitSeed: e.portraitSeed }, 56));
-    } catch {
-      /* ignore */
-    }
-  }
   paint();
 }
 
@@ -494,11 +505,17 @@ function openZoneSheet(zoneId) {
 
   if (z.type === 'camp' && state.uiMode !== 'explore') {
     openSheet(`
-      <h2>${escapeHtml(z.name)}</h2>
-      <p>Vuestro refugio. Tocad un edificio para asignar trabajadores, o Construir para ampliar.</p>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
+      <div class="zz-ctx">
+        <div class="zz-ctx__head">
+          <img class="zz-ctx__art" src="${buildingArtUrl('shelter')}" alt="" />
+          <div>
+            <h2>${escapeHtml(z.name)}</h2>
+            <p>Tocá un edificio para gestionarlo. Construí para ampliar.</p>
+          </div>
+        </div>
+        <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
+      </div>
     `);
-    // bind open-build via action
     paint();
     return;
   }
@@ -506,26 +523,56 @@ function openZoneSheet(zoneId) {
   const ex = state.explorers.find((e) => e.id === state.selectedExplorerId) || readyExplorers(state)[0];
   const preview = ex ? expeditionPreview(state, content, zoneId, ex.id) : null;
   const badge =
-    z.state === 'controlled' ? 'Control' : z.state === 'hostile' ? 'Hostil' : 'Conocido';
-  const ctrlPct = Math.round((z.controlProgress || 0) * 100);
-  const exploring = state.uiMode === 'explore';
+    z.state === 'controlled' ? 'Controlada' : z.state === 'hostile' ? 'Hostil' : 'Conocida';
+  const art = zoneArtUrl(z) || buildingArtUrl('storage');
+  const lootIcons = (preview?.lootHint || [])
+    .slice(0, 4)
+    .map((k) => {
+      const key = String(k).toLowerCase();
+      const res =
+        key.includes('comida') || key.includes('food')
+          ? 'food'
+          : key.includes('agua') || key.includes('water')
+            ? 'water'
+            : key.includes('medi')
+              ? 'medicine'
+              : key.includes('madera') || key.includes('wood')
+                ? 'wood'
+                : key.includes('metal')
+                  ? 'metal'
+                  : key.includes('comb') || key.includes('fuel')
+                    ? 'fuel'
+                    : key.includes('muni') || key.includes('ammo')
+                      ? 'ammo'
+                      : null;
+      return res ? `<img src="${artUrl(RES_ART[res])}" alt="${escapeHtml(k)}" title="${escapeHtml(k)}" />` : `<span>${escapeHtml(k)}</span>`;
+    })
+    .join('');
+
   openSheet(`
-    <h2>${escapeHtml(z.name)}</h2>
-    <p><span class="zz-zone-badge zz-zone-badge--${z.state}">${badge}</span>
-      Riesgo base ${(z.risk * 100).toFixed(0)}% · Infectados ~${z.infectedLeft || 0}
-      ${z.state !== 'controlled' ? ` · Control ${ctrlPct}%` : ''}</p>
-    ${
-      preview
-        ? `<p>Distancia <strong>${preview.distance}</strong> · Tiempo <strong>${preview.days} día(s)</strong></p>
-           <p>Riesgo <strong>${preview.category}</strong> (${Math.round(preview.risk * 100)}%)</p>
-           <p>Posible botín: ${(preview.lootHint || []).join(', ') || 'incierto'}</p>
-           <p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong></p>
-           <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
-            ex.status !== 'ready' ? 'disabled' : ''
-          }>Enviar a ${escapeHtml(ex.name)}</button>
-           ${exploring ? '<p style="margin-top:0.4rem"><button type="button" class="zz-btn" data-action="cancel-explore">Cancelar selección</button></p>' : ''}`
-        : '<p>No hay explorador disponible.</p>'
-    }
+    <div class="zz-ctx">
+      <div class="zz-ctx__head">
+        <img class="zz-ctx__art" src="${art}" alt="" />
+        <div>
+          <h2>${escapeHtml(z.name)}</h2>
+          <p>${badge} · Riesgo ${(z.risk * 100).toFixed(0)}%</p>
+        </div>
+      </div>
+      ${
+        preview
+          ? `<div class="zz-ctx__stat"><span>Distancia</span><strong>${preview.distance}</strong></div>
+             <div class="zz-ctx__stat"><span>Tiempo</span><strong>${preview.days} día(s)</strong></div>
+             <div class="zz-ctx__stat"><span>Riesgo</span><strong>${preview.category}</strong></div>
+             <div><span class="zz-muted" style="font-size:0.8rem">Posible</span>
+               <div class="zz-loot-row" style="margin-top:0.25rem">${lootIcons || '¿?'}</div>
+             </div>
+             <p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · Nv.${ex.level || 1}</p>
+             <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
+               ex.status !== 'ready' ? 'disabled' : ''
+             }>Explorar</button>`
+          : '<p>No hay explorador disponible.</p>'
+      }
+    </div>
   `);
   paint();
 }
@@ -572,21 +619,20 @@ function openBuildSheet() {
       return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''}" data-action="build-pick" data-build="${b.id}" ${
         locked ? 'disabled' : ''
       }>
-        <span class="zz-build-card__art" data-thumb="${b.id}"></span>
+        <img src="${buildingArtUrl(b.id)}" alt="" width="56" height="56" />
         <span class="zz-build-card__body">
           <strong>${escapeHtml(b.name)}</strong>
-          <em>${escapeHtml((b.desc || '').slice(0, 72))}</em>
-          <span class="zz-build-card__meta">${jobs}${benefit ? ` · ${escapeHtml(benefit)}` : ''}</span>
+          <em>${escapeHtml((b.desc || '').slice(0, 60))}</em>
+          <span class="zz-build-card__meta">${jobs}${benefit ? ` · ${escapeHtml(String(benefit).slice(0, 48))}` : ''}</span>
           <span class="zz-build-cost">${cost || 'Gratis'}</span>
-          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar en el mapa</span>'}
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar</span>'}
         </span>
       </button>`;
     })
     .join('');
   openSheet(`
     <h2>Construir</h2>
-    <p>Elegid y colocad en el refugio. La colonia crece a la vista.</p>
-    <p class="zz-muted" style="font-size:0.8rem">Construcción: ${state.population.labor?.build || 0} · libres ${state.population.labor?.idle || 0}</p>
+    <p class="zz-muted" style="font-size:0.82rem">Elegí un edificio → tocá dónde colocarlo en el refugio.</p>
     <div class="zz-build-grid">${list}</div>
   `);
 }
@@ -675,25 +721,28 @@ function paintHud() {
     const labels = { clear: 'Despejado', rain: 'Lluvia', storm: 'Tormenta', cold: 'Frío', fog: 'Niebla', heat: 'Calor' };
     w.textContent = labels[state.weather] || state.weather;
     w.dataset.weather = state.weather || 'clear';
-    w.hidden = false;
   }
   const res = $('zz-resources');
   if (res) {
     const order = content.balance.resourceOrder || Object.keys(RES_LABEL_UI);
+    const popN = Math.max(1, pop.total || 1);
     res.innerHTML = '';
     order.forEach((k) => {
       const li = document.createElement('li');
-      try {
-        li.appendChild(RES_ICONS[k]?.(18) || document.createTextNode(''));
-      } catch {
-        /* ignore */
-      }
-      const lab = document.createElement('span');
-      lab.textContent = RES_LABEL_UI[k] || k;
+      const val = state.resources[k] || 0;
+      const days = k === 'food' || k === 'water' ? val / popN : Infinity;
+      if (days < 2) li.classList.add('is-crit');
+      else if (days < 4) li.classList.add('is-low');
+      const img = document.createElement('img');
+      img.src = artUrl(RES_ART[k]) || '';
+      img.alt = RES_LABEL_UI[k] || k;
+      img.width = 16;
+      img.height = 16;
       const strong = document.createElement('strong');
-      strong.textContent = String(state.resources[k] || 0);
-      li.appendChild(lab);
+      strong.textContent = String(val);
+      li.appendChild(img);
       li.appendChild(strong);
+      li.title = RES_LABEL_UI[k] || k;
       res.appendChild(li);
     });
   }
@@ -711,12 +760,15 @@ function paintExplorers() {
       'zz-ex-card' +
       (state.selectedExplorerId === e.id ? ' is-selected' : '') +
       (e.status === 'away' ? ' is-away' : '') +
+      (e.status === 'ready' ? ' is-ready' : '') +
       (e.status === 'dead' ? ' is-dead' : '');
-    const portrait = renderPortraitSvg(
-      { id: e.id, name: e.name, portraitSeed: e.portraitSeed },
-      36
-    );
-    btn.appendChild(portrait);
+    const img = document.createElement('img');
+    img.className = 'zz-ex-portrait';
+    img.src = portraitArtUrl(e);
+    img.alt = '';
+    img.width = 40;
+    img.height = 40;
+    btn.appendChild(img);
     const meta = document.createElement('div');
     meta.innerHTML = `<div class="zz-ex-card__name">${escapeHtml(e.name)}</div>
       <div class="zz-ex-card__st">${e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : 'Herido'} · Nv.${e.level || 1}</div>`;
@@ -747,6 +799,7 @@ function paint() {
   paintHud();
   paintExplorers();
   paintObjective();
+  paintCoach();
   paintModeBanner();
   const banner = $('zz-recover-banner');
   if (banner) {
@@ -783,10 +836,11 @@ function paint() {
       toast(`${content.buildings[type]?.name || type} colocado`, 'good');
       state.buildMode = null;
       state.uiMode = null;
+      checkOnboardingProgress(state);
       scheduleSave();
       paint();
       const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
-      if (b && laborKeyForBuilding(content.buildings[b.type])) openBuildingSheet(b.id);
+      if (b) openBuildingSheet(b.id);
     },
   });
   renderChoiceModal();
@@ -800,20 +854,63 @@ function paint() {
 }
 
 function paintObjective() {
-  const el = $('zz-objective');
-  const fold = $('zz-objective-fold');
-  if (!el) return;
+  const btn = $('zz-mission');
+  const text = $('zz-mission-text');
   const obj = currentObjective(state, content);
+  if (!btn || !text) return;
   if (!obj || state.flags?.objectivesOff) {
-    el.hidden = true;
-    if (fold) fold.hidden = true;
+    btn.hidden = true;
     return;
   }
-  if (fold) fold.hidden = false;
+  btn.hidden = false;
+  text.textContent = obj.text;
+  btn.dataset.objId = obj.id || '';
+}
+
+function paintCoach() {
+  const card = $('zz-coach');
+  const text = $('zz-coach-text');
+  if (!card || !text) return;
+  ensureOnboarding(state);
+  checkOnboardingProgress(state);
+  const st = onboardingStatus(state, content);
+  if (!st || state.day > 8) {
+    if (state.day > 8) dismissOnboarding(state);
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
+  text.textContent = st.step.text;
+}
+
+function showDayBrief(brief) {
+  const el = $('zz-day-brief');
+  if (!el || !brief) return;
+  const lines = (brief.lines || brief.items || []).slice(0, 6);
+  if (!brief.important && lines.length === 0) {
+    el.hidden = true;
+    return;
+  }
+  const lis = lines
+    .map((L) => {
+      if (typeof L === 'string') return `<li>${escapeHtml(L)}</li>`;
+      const cls = L.kind || L.type || '';
+      return `<li class="${escapeHtml(cls)}">${escapeHtml(L.text || L.msg || '')}</li>`;
+    })
+    .join('');
+  el.innerHTML = `
+    <h3>DÍA ${state.day}</h3>
+    <ul>${lis || '<li>La colonia aguanta otro día.</li>'}</ul>
+    <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-brief-ok">Continuar</button>
+  `;
   el.hidden = false;
-  const sum = fold?.querySelector('summary');
-  if (sum) sum.textContent = obj.title || 'Misión';
-  el.innerHTML = `<span>${escapeHtml(obj.text)}</span>`;
+  $('zz-brief-ok')?.addEventListener('click', () => {
+    el.hidden = true;
+  });
+  clearTimeout(showDayBrief._t);
+  showDayBrief._t = setTimeout(() => {
+    el.hidden = true;
+  }, 7000);
 }
 
 function paintModeBanner() {
@@ -821,27 +918,13 @@ function paintModeBanner() {
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
-    el.textContent = `Colocad ${content.buildings[state.buildMode]?.name || 'edificio'} · arrastrad para mirar · tocad parcela`;
+    el.textContent = `Colocá ${content.buildings[state.buildMode]?.name || 'edificio'} · tocá una parcela libre`;
   } else if (state.uiMode === 'explore') {
     el.hidden = false;
-    el.textContent = 'Modo exploración · destinos resaltados · tocad uno';
+    el.textContent = 'Tocá una zona del mapa para explorar';
   } else {
     el.hidden = true;
   }
-}
-
-function showDayBrief(brief) {
-  const card = $('zz-day-brief');
-  if (!card || !brief?.important || !brief.lines?.length) {
-    if (card) card.hidden = true;
-    return;
-  }
-  card.innerHTML = `<strong>DÍA ${brief.day}</strong><ul>${brief.lines.map((l) => `<li>${escapeHtml(l)}</li>`).join('')}</ul>`;
-  card.hidden = false;
-  clearTimeout(showDayBrief._t);
-  showDayBrief._t = setTimeout(() => {
-    card.hidden = true;
-  }, 5200);
 }
 
 function showAttackCard(atk) {
@@ -1003,6 +1086,24 @@ function bindChrome() {
     openMoreSheet();
   });
   $('zz-sheet-close')?.addEventListener('click', closeSheet);
+  $('zz-mission')?.addEventListener('click', () => {
+    const obj = currentObjective(state, content);
+    if (!obj) return;
+    openSheet(`
+      <div class="zz-ctx">
+        <h2>${escapeHtml(obj.title || 'Misión')}</h2>
+        <p>${escapeHtml(obj.text)}</p>
+        ${obj.hint ? `<p class="zz-muted">${escapeHtml(obj.hint)}</p>` : ''}
+        <p class="zz-muted" style="font-size:0.8rem">Tocá el mundo: edificios, zonas y Construir.</p>
+      </div>
+    `);
+  });
+  $('zz-coach-next')?.addEventListener('click', () => {
+    advanceOnboarding(state);
+    const st = onboardingStatus(state, content);
+    if (!st) dismissOnboarding(state);
+    paint();
+  });
   $('zz-map')?.addEventListener('click', (ev) => {
     if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) {
       if (state.uiMode === 'build' || state.uiMode === 'explore') return;
@@ -1056,8 +1157,17 @@ export async function bootGame(opts) {
   }
 
   bindChrome();
+  ensureOnboarding(state);
   if (!state.selectedExplorerId) {
     state.selectedExplorerId = livingExplorers(state)[0]?.id || null;
+  }
+  // Cámara inicial: refugio a zoom cercano (móvil = colonia protagonista)
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  if (camp) {
+    state.mapCamera = state.mapCamera || {};
+    state.mapCamera.x = camp.x;
+    state.mapCamera.y = camp.y;
+    state.mapCamera.zoom = state.day <= 3 ? 1.55 : state.mapCamera.zoom || 1.25;
   }
   seedZone();
   paint();

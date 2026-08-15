@@ -362,7 +362,7 @@ body.zz-body {
 .zz-map-avenue { fill: #4a453c; opacity: 0.92; }
 .zz-map-street-fill { fill: #3a3630; opacity: 0.88; }
 .zz-map-street { fill: none; stroke: #5a5244; stroke-width: 0.25; opacity: 0.45; }
-.zz-map-block { fill: #24282a; stroke: #32383a; stroke-width: 0.2; opacity: 0.9; }
+.zz-map-block { fill: #24282a; stroke: #32383a; stroke-width: 0.2; opacity: 0.45; }
 .zz-map-bldg { fill: #2e3234; stroke: #42484a; stroke-width: 0.15; }
 .zz-map-bldg--tall { fill: #343a3e; }
 .zz-map-bldg--mid { fill: #2c3034; }
@@ -405,12 +405,32 @@ body.zz-body {
 }
 .zz-settle-bldg-label {
   fill: #f0e8d4;
-  font-size: 7px;
+  font-size: 1.35px;
   font-family: var(--zz-display);
   font-weight: 700;
   paint-order: stroke;
-  stroke: rgba(0,0,0,0.65);
-  stroke-width: 1.2px;
+  stroke: rgba(0,0,0,0.75);
+  stroke-width: 0.35px;
+  pointer-events: none;
+}
+.zz-settle-workers {
+  fill: #f0d080;
+  font-size: 1.5px;
+  font-family: var(--zz-display);
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.8);
+  stroke-width: 0.4px;
+  pointer-events: none;
+}
+.zz-settle-warn {
+  fill: #e09070;
+  font-size: 1.15px;
+  font-family: var(--zz-display);
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.8);
+  stroke-width: 0.35px;
   pointer-events: none;
 }
 

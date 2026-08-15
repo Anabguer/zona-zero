@@ -17,54 +17,21 @@ $base = zz_public_base();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#1a1612" />
+  <meta name="theme-color" content="#12100c" />
   <title>Jugar · Zona Zero</title>
   <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=16" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=16" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=17" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=17" />
 </head>
-<body class="zz-body zz-body--play zz-body--world">
+<body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
-  <div id="zz-app" class="zz-world" hidden>
-    <header class="zz-world-top">
-      <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Slots</a>
-      <div class="zz-world-top__mid">
-        <strong id="zz-colony">Zona Zero</strong>
-        <span id="zz-day-label">Día 1</span>
-      </div>
-      <div class="zz-world-top__actions">
-        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound" aria-pressed="true">Audio</button>
-        <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
-      </div>
-    </header>
-
-    <details class="zz-objective-fold" id="zz-objective-fold">
-      <summary>Misión</summary>
-      <p class="zz-objective" id="zz-objective" hidden></p>
-    </details>
-    <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
-
-    <!-- HUD compacto: una franja -->
-    <section class="zz-chip-hud zz-chip-hud--dense" aria-label="Estado">
-      <button type="button" class="zz-chip-hud__pop" id="zz-open-pop" title="Población">
-        <span class="zz-ico zz-ico--pop" aria-hidden="true"></span>
-        <strong id="zz-pop">0/0</strong>
-      </button>
-      <ul class="zz-chip-hud__res" id="zz-resources"></ul>
-      <div class="zz-chip-hud__meta">
-        <span id="zz-era" class="zz-chip-hud__era">—</span>
-        <span id="zz-weather" class="zz-weather" data-weather="clear" hidden>—</span>
-        <span class="zz-chip-hud__m" title="Estabilidad"><i></i><strong id="zz-stability">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><i></i><strong id="zz-threat">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><i></i><strong id="zz-defense">0</strong></span>
-      </div>
-    </section>
-
-    <main class="zz-world-stage">
-      <div class="zz-world-map-wrap">
+  <div id="zz-app" class="zz-world zz-world--overlay" hidden>
+    <!-- MUNDO: protagonista full-bleed -->
+    <main class="zz-world-stage" id="zz-stage">
+      <div class="zz-world-map-wrap" id="zz-map-wrap">
         <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
@@ -72,9 +39,49 @@ $base = zz_public_base();
         </div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Zona Zero"></svg>
       </div>
-      <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
     </main>
 
+    <!-- HUD overlay superior -->
+    <header class="zz-hud" id="zz-hud">
+      <div class="zz-hud__row zz-hud__row--top">
+        <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Slots</a>
+        <div class="zz-hud__title">
+          <strong id="zz-colony">Zona Zero</strong>
+          <span id="zz-day-label">Día 1</span>
+        </div>
+        <div class="zz-hud__actions">
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound" aria-pressed="true" title="Audio">Au</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">Gu</button>
+        </div>
+      </div>
+      <div class="zz-hud__row zz-hud__row--stats">
+        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población (avanzado)">
+          <img src="<?= htmlspecialchars($base) ?>assets/art/ui/pop.webp" alt="" width="18" height="18" />
+          <strong id="zz-pop">0/0</strong>
+        </button>
+        <ul class="zz-hud__res" id="zz-resources" aria-label="Recursos"></ul>
+        <div class="zz-hud__threat" title="Amenaza / Defensa">
+          <span class="zz-hud__pill zz-hud__pill--threat"><i></i><strong id="zz-threat">0</strong></span>
+          <span class="zz-hud__pill zz-hud__pill--def"><i></i><strong id="zz-defense">0</strong></span>
+        </div>
+      </div>
+      <button type="button" class="zz-mission" id="zz-mission" hidden>
+        <span class="zz-mission__ico" aria-hidden="true">◎</span>
+        <span id="zz-mission-text">—</span>
+      </button>
+      <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
+    </header>
+
+    <!-- Coach / onboarding -->
+    <div id="zz-coach" class="zz-coach-card" hidden>
+      <p id="zz-coach-text"></p>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Entendido</button>
+    </div>
+
+    <!-- Exploradores: rail compacto overlay -->
+    <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
+
+    <!-- Sheet contextual (edificio / zona / construir) -->
     <aside id="zz-sheet" class="zz-sheet" hidden>
       <div class="zz-sheet__handle" aria-hidden="true"></div>
       <button type="button" class="zz-sheet__close" id="zz-sheet-close" aria-label="Cerrar">×</button>
@@ -112,8 +119,13 @@ $base = zz_public_base();
     </div>
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
+  <!-- hidden compatibility targets -->
+  <span id="zz-era" hidden></span>
+  <span id="zz-weather" hidden></span>
+  <span id="zz-stability" hidden></span>
+  <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=16';
+    import { bootGame } from './js/main.js?v=17';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,
@@ -121,7 +133,7 @@ $base = zz_public_base();
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
     }).catch((e) => {
       const boot = document.getElementById('zz-boot');
-      if (boot) boot.textContent = 'Error: ' + (e && e.message ? e.message : e);
+      if (boot) boot.textContent = 'Error: ' + (e?.message || e);
       console.error(e);
     });
   </script>
