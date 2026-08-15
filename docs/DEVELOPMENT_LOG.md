@@ -33,12 +33,12 @@ APROBACIÓN FINAL CHATGPT: SÍ
 
 | ID | Nombre | HUMAN_GATE | ESTADO CURSOR | ESTADO REVISIÓN | APROBACIÓN FINAL |
 |----|--------|------------|---------------|-----------------|------------------|
-| ZZ-001 | Aprobar contrato GAME_MASTER 2.5 + este plan | YES | COMPLETADA (docs plan 2.5) | CAMBIOS SOLICITADOS | NO |
-| ZZ-002 | Auditoría motor vs GAME_MASTER 2.5 | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-003 | Schemas content 2.5 | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-004 | Una fuente de mapa (locations) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-005 | Balance skeleton 2.5 | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-001 | Aprobar contrato GAME_MASTER 2.5 + este plan | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-002 | Auditoría motor vs GAME_MASTER 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-003 | Schemas content 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-010 | Colonia física D1 sin GIS | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-011 | Cámara D1 protagonista | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -172,49 +172,50 @@ APROBACIÓN FINAL CHATGPT: SÍ
 Congelar biblia 2.5 + IMPLEMENTATION_PLAN 2.5 alineado (cobertura 100%).
 
 ## RESULTADO CURSOR
-Plan 2.1 reconstruido → plan **2.5** (128 fases). Matriz GM→PLAN. Sin erratas. Sistemas 2.5 con fases propias (brotes, cuarentena, daño/repair, vida visual, radio/centro, clima madera, research sin Energía).
+Contrato cerrado tras aprobación formal ChatGPT.
 
 ## ARCHIVOS MODIFICADOS
-- docs/IMPLEMENTATION_PLAN.md
+- GAME_MASTER.md / Drive ZONA_ZERO_GAME_MASTER.md
+- docs/IMPLEMENTATION_PLAN.md / Drive ZONA_ZERO_IMPLEMENTATION_PLAN.md
 - docs/DEVELOPMENT_LOG.md
-- Drive ZONA_ZERO_IMPLEMENTATION_PLAN.md / ZONA_ZERO_DEVELOPMENT_LOG.md
-- scripts/rebuild-plan-25.mjs
 
 ## PRUEBAS
-Revisión documental + anti-regresión (sin sistema eléctrico v1, sin ERRATA activa, calefacción=madera).
+Revisión humana ChatGPT (ZZ-001).
 
 ## CAPTURAS
 —
 
 ## PROBLEMAS / LIMITACIONES
-ZZ-001 aún no APROBADA; pendiente re-revisión ChatGPT del plan 2.5.
+—
 
 ## COMMIT
-(ver push de esta ronda)
+(cierre ZZ-001)
 
 ## ESTADO CURSOR
-COMPLETADA (documentación plan)
+COMPLETADA
 
 ## REVISIÓN CHATGPT — RONDA 1
-Revisión final GM 2.5: coherente; sin dudas de diseño Neni. ZZ-001 NO aprobada porque el PLAN seguía en 2.1 / erratas / huecos (energía, brotes, repair, vida visual, etc.).
+Plan desalineado; CAMBIOS SOLICITADOS.
 
 ## RESPUESTA CURSOR — RONDA 1
-Reconstrucción completa del IMPLEMENTATION_PLAN a versión 2.5 alineada a GAME_MASTER 2.5 + matriz de cobertura + este log actualizado.
+Plan 2.5 + matriz cobertura.
 
-## REVISIÓN CHATGPT — RONDA 2
-Pendiente (siguiente pasada sobre el plan 2.5).
+## REVISIÓN CHATGPT — RONDA 2 (final)
+Aprobación formal: GAME_MASTER 2.5 + IMPLEMENTATION_PLAN 2.5 (128 fases, 25 HUMAN_GATE, matriz, sistemas 2.5 autorizados en la orden).
 
 ## ESTADO REVISIÓN
-CAMBIOS SOLICITADOS
+APROBADA
 
 ## CORRECCIONES SOLICITADAS
-Alinear plan a GM 2.5; quitar Energía/~28 techs; fases brotes/cuarentena/daño/repair/vida visual/radio-centro/clima madera; matriz cobertura; sin erratas. (Aplicadas en RESPUESTA RONDA 1.)
+—
 
 ## RESPUESTA CURSOR A LA REVISIÓN
-Plan 2.5 entregado. Listo para nueva revisión ChatGPT.
+Cierre documental aplicado. Implementación ZZ-002+ autorizada.
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
+
+**Contrato autorizado:** GAME_MASTER 2.5 + IMPLEMENTATION_PLAN 2.5.
 
 ---
 
@@ -224,13 +225,13 @@ NO
 Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-002).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Matriz código↔GM 2.5 creada. P0: electricidad/needEnergy/fuel colonia/parts-tools. P1: wood heating, brotes, radio/centro, cisterna, repair.
 
 ## ARCHIVOS MODIFICADOS
-—
+docs/AUDIT_ENGINE.md
 
 ## PRUEBAS
-—
+Revisión documental de js/* + content/*
 
 ## CAPTURAS
 —
@@ -239,13 +240,13 @@ Pendiente de ejecución (fase no iniciada).
 —
 
 ## COMMIT
-—
+(foundation batch)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente (fase sin HUMAN_GATE; se puede revisar en bloque fundación).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -259,7 +260,6 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
 
 # FASE ZZ-003 — Schemas content 2.5
 
@@ -267,13 +267,13 @@ NO
 Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-003).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Schemas documentados: balance 2.5, buildings, research sin Energía, outbreaks, buildingHP, missions templates, ambientLife, save v5+.
 
 ## ARCHIVOS MODIFICADOS
-—
+docs/CONTENT_SCHEMA.md
 
 ## PRUEBAS
-—
+Schema cubre sistemas GM 2.5
 
 ## CAPTURAS
 —
@@ -282,13 +282,13 @@ Pendiente de ejecución (fase no iniciada).
 —
 
 ## COMMIT
-—
+(foundation batch)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente (fase sin HUMAN_GATE; se puede revisar en bloque fundación).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -302,7 +302,6 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
 
 # FASE ZZ-004 — Una fuente de mapa (locations)
 
@@ -310,13 +309,13 @@ NO
 Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-004).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Runtime ya usaba locations.json. Smoke alineado a locations. zones.json vaciado y marcado DEPRECATED.
 
 ## ARCHIVOS MODIFICADOS
-—
+scripts/smoke.mjs, content/zones.json (DEPRECATED), js/state.js (ya locations-first)
 
 ## PRUEBAS
-—
+node scripts/smoke.mjs OK; smoke-d1 OK
 
 ## CAPTURAS
 —
@@ -325,13 +324,13 @@ Pendiente de ejecución (fase no iniciada).
 —
 
 ## COMMIT
-—
+(foundation batch)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente (fase sin HUMAN_GATE; se puede revisar en bloque fundación).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -345,7 +344,6 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
 
 # FASE ZZ-005 — Balance skeleton 2.5
 
@@ -353,13 +351,13 @@ NO
 Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-005).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Skeleton: laborModel=per_building, woodHeating/outbreaks/buildingDamage/ambientLife enabled:false, deprecatedV1.electricity, victory.needEnergy=false. Sin cambiar D1 visual.
 
 ## ARCHIVOS MODIFICADOS
-—
+content/balance.json
 
 ## PRUEBAS
-—
+smoke + smoke-d1 OK; load balance
 
 ## CAPTURAS
 —
@@ -368,13 +366,13 @@ Pendiente de ejecución (fase no iniciada).
 —
 
 ## COMMIT
-—
+(foundation batch)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente (fase sin HUMAN_GATE; se puede revisar en bloque fundación).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -388,7 +386,6 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
 
 # FASE ZZ-006 — Sync Drive ↔ GitHub de los 3 maestros
 
@@ -396,13 +393,13 @@ NO
 Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-006).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Hashes idénticos GM/PLAN/LOG Drive↔repo verificados.
 
 ## ARCHIVOS MODIFICADOS
-—
+scripts/sync-masters.mjs, Drive GAME_MASTER/*
 
 ## PRUEBAS
-—
+SHA256 match ×3
 
 ## CAPTURAS
 —
@@ -411,13 +408,13 @@ Pendiente de ejecución (fase no iniciada).
 —
 
 ## COMMIT
-—
+(foundation batch)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente (fase sin HUMAN_GATE; se puede revisar en bloque fundación).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -431,7 +428,6 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
----
 
 # FASE ZZ-010 — Colonia física D1 sin GIS
 
