@@ -1,9 +1,12 @@
 # Zona Zero — DEVELOPMENT LOG (Cursor ↔ ChatGPT)
 
-**Versión protocolo:** 1.0 · **Fecha:** 2026-08-15  
+**Versión protocolo:** 1.1 · anclado a **GAME_MASTER §41–§42** (biblia 2.2)  
+**Fecha:** 2026-08-15  
 **Estado global:** Diseño/plan en revisión — **PROHIBIDO implementar código de juego** hasta ZZ-001 APROBADA.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
+
+> El protocolo completo (roles, aprobación literal, HUMAN_GATE, rondas, sync, capturas) está en la biblia: **§41** y **§42**. Este log es la bitácora; la biblia es la norma.
 
 ---
 
