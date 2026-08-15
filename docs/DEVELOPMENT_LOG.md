@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.5** + PLAN **2.5**  
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-001 en revisión — **PROHIBIDO implementar código** hasta APROBADA + SÍ.  
+**Estado global:** ZZ-001 **APROBADA** · Fundación ZZ-002…006 hecha · **Siguiente HUMAN_GATE: ZZ-010** (colonia D1). Implementación no-gate autorizada según PLAN 2.5.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
