@@ -165,10 +165,10 @@ GM §9.4 aclarado: viewport = ventana; mundo > 844×390 y 932×430; pan/pinch/re
 `docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos, sin acumular).
 
 ## COMMIT
-*(pendiente cierre — ver hash tras commit)*
+`54d7946` — feat(ZZ-018): sectores orgánicos + mundo > viewport (REVIEW_STOP)
 
 ## Sync Drive/GitHub
-Masters + Review a Drive. **ZZ-019 NO iniciada.**
+Masters + Review a Drive. **ZZ-019 NO iniciada. PARAR.**
 
 ---
 
