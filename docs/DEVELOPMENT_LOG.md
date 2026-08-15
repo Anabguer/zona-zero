@@ -329,10 +329,10 @@ Correcciones:
 `docs/review/` · Drive Review\ · `review-contact-sheet.jpg`
 
 ## COMMIT
-`36795fd` (entrega inicial) · ronda CAMBIOS: _(tras commit)_
+`36795fd` (entrega inicial) · ronda CAMBIOS: `d6568ca`
 
 ## Sync Drive/GitHub
-Pendiente push ronda.
+OK · Review/ · **PARADO REVIEW_STOP**. No ZZ-012.
 
 ---
 
