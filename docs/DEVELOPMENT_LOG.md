@@ -118,7 +118,10 @@ NO
 - Yard art todavía “claro circular”; ZZ-018 puede romper simetría con sectores irregulares.
 
 ## COMMIT
-(pendiente)
+`d35cea3` — feat(ZZ-017): mundo base limpio + colonia mayor que viewport
+
+## Sync Drive/GitHub
+OK · Review sustituida · ZZ-018 NO iniciada.
 
 ---
 
