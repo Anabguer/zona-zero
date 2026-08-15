@@ -1,13 +1,29 @@
 /**
  * Zona Zero — UI principal
  */
-import { loadContent, createNewState, livingSurvivors, housingCapacity, defenseValue, summarizeState, pushLog } from './state.js';
-import { advanceDay, startExpedition, placeBuilding } from './sim.js';
+import {
+  loadContent,
+  createNewState,
+  livingSurvivors,
+  housingCapacity,
+  defenseValue,
+  summarizeState,
+  migrateState,
+} from './state.js';
+import { advanceDay, startExpedition, placeBuilding, RES_LABEL } from './sim.js';
 import { renderMap } from './render-map.js';
 import { renderBase } from './render-base.js';
 import * as api from './api.js';
 
-const RES_LABEL = { food: 'Comida', scrap: 'Chatarra', meds: 'Medicina', ammo: 'Munición' };
+const RES_LABEL_UI = {
+  food: 'Comida',
+  water: 'Agua',
+  wood: 'Madera',
+  metal: 'Metal',
+  medicine: 'Medicinas',
+  fuel: 'Combustible',
+  ammo: 'Munición',
+};
 
 let content = null;
 let state = null;
@@ -60,9 +76,12 @@ function renderHud() {
   $('zz-defense').textContent = String(defenseValue(state, content.balance));
   const res = $('zz-resources');
   res.innerHTML = '';
-  Object.entries(state.resources).forEach(([k, v]) => {
+  const order = content.balance.resourceOrder || Object.keys(state.resources);
+  order.forEach((k) => {
+    if (state.resources[k] == null) return;
+    const v = state.resources[k];
     const li = document.createElement('li');
-    li.innerHTML = `<span class="zz-res-ico zz-res-ico--${k}" aria-hidden="true"></span><strong>${v}</strong><span>${RES_LABEL[k] || k}</span>`;
+    li.innerHTML = `<span class="zz-res-ico zz-res-ico--${k}" aria-hidden="true"></span><strong>${v}</strong><span>${RES_LABEL_UI[k] || RES_LABEL[k] || k}</span>`;
     res.appendChild(li);
   });
   $('zz-colony').textContent = state.colonyName;
@@ -114,7 +133,7 @@ function renderBuildBar() {
     btn.type = 'button';
     btn.className = 'zz-build-btn' + (state.buildMode === b.id ? ' is-selected' : '');
     const cost = Object.entries(b.cost || {})
-      .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
+      .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || RES_LABEL[k] || k}`)
       .join(' · ');
     btn.innerHTML = `<strong>${b.name}</strong><small>${cost}</small>`;
     btn.title = b.desc;
@@ -231,7 +250,7 @@ export async function bootGame(opts) {
   } else {
     const res = await api.loadSlot(slot);
     if (!res.ok) throw new Error(res.error || 'load');
-    state = res.state;
+    state = migrateState(res.state, content.balance);
   }
   bindChrome();
   setTab('map');

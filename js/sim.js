@@ -10,6 +10,16 @@ import {
 } from './state.js';
 import { runDirector } from './director.js';
 
+export const RES_LABEL = {
+  food: 'comida',
+  water: 'agua',
+  wood: 'madera',
+  metal: 'metal',
+  medicine: 'medicinas',
+  fuel: 'combustible',
+  ammo: 'munición',
+};
+
 export function canAfford(state, cost) {
   if (!cost) return true;
   return Object.entries(cost).every(([k, v]) => (state.resources[k] || 0) >= v);
@@ -39,7 +49,6 @@ export function placeBuilding(state, content, type, x, y) {
   payCost(state, def.cost);
   state.base.buildings.push({ id: uid('b'), type, x, y });
   state.stats.buildingsBuilt += 1;
-  // Bonus build skill
   const best = builders.sort((a, b) => b.skills.build - a.skills.build)[0];
   best.skills.build = clamp(best.skills.build + 0.15, 1, 10);
   pushLog(state, `Construís ${def.name} (${best.name}).`, 'good');
@@ -54,12 +63,19 @@ export function startExpedition(state, content, zoneId, survivorIds) {
   if (zone.state === 'unknown') return { ok: false, error: 'Zona aún no descubierta' };
   if (zone.id === 'camp') return { ok: false, error: 'El campamento ya es vuestro' };
 
+  const fuelCost = content.balance.expeditionFuelCost ?? 1;
+  if ((state.resources.fuel || 0) < fuelCost) {
+    return { ok: false, error: `Hace falta ${fuelCost} combustible para la expedición` };
+  }
+
   const max = content.balance.expeditionMaxSurvivors || 3;
   const ids = [...new Set(survivorIds)].slice(0, max);
   const team = livingSurvivors(state).filter(
     (s) => ids.includes(s.id) && s.busyUntilDay <= state.day && s.status !== 'dead'
   );
   if (team.length < 1) return { ok: false, error: 'Selecciona supervivientes libres' };
+
+  state.resources.fuel -= fuelCost;
 
   const scout = Math.max(...team.map((s) => s.skills.scout));
   const duration = Math.max(
@@ -79,7 +95,7 @@ export function startExpedition(state, content, zoneId, survivorIds) {
   state.stats.expeditions += 1;
   pushLog(
     state,
-    `Expedición a ${zone.name}: ${team.map((s) => s.name).join(', ')} (vuelven día ${returnDay}).`,
+    `Expedición a ${zone.name}: ${team.map((s) => s.name).join(', ')} (vuelven día ${returnDay}, −${fuelCost} combustible).`,
     'info'
   );
   return { ok: true };
@@ -102,7 +118,6 @@ function resolveExpedition(state, content) {
   const infected = rollRange(zone.infected || [0, 2]);
   const risk = clamp(zone.risk - scout * 0.03 - fight * 0.025 + infected * 0.04, 0.05, 0.85);
 
-  // Descubrir vecinos
   (zone.neighbors || []).forEach((nid) => {
     const n = state.zones.find((z) => z.id === nid);
     if (n && n.state === 'unknown') {
@@ -122,7 +137,6 @@ function resolveExpedition(state, content) {
     }
   });
 
-  // Combate / heridas
   let deaths = 0;
   team.forEach((s) => {
     if (chance(risk * (0.7 + infected * 0.08))) {
@@ -145,7 +159,7 @@ function resolveExpedition(state, content) {
   });
 
   const lootTxt = Object.entries(lootGain)
-    .map(([k, v]) => `${v} ${labelRes(k)}`)
+    .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
     .join(', ');
   if (deaths) {
     pushLog(
@@ -161,7 +175,6 @@ function resolveExpedition(state, content) {
     );
   }
 
-  // Controlar zona si equipo fuerte y riesgo contenido
   const canControl =
     zone.state !== 'controlled' &&
     deaths === 0 &&
@@ -179,10 +192,6 @@ function randDmg(a, b) {
   return a + Math.floor(Math.random() * (b - a + 1));
 }
 
-function labelRes(k) {
-  return { food: 'comida', scrap: 'chatarra', meds: 'meds', ammo: 'munición' }[k] || k;
-}
-
 function applyProduction(state, balance) {
   const counts = {};
   state.base.buildings.forEach((b) => {
@@ -190,8 +199,45 @@ function applyProduction(state, balance) {
   });
   const p = balance.production || {};
   if (counts.farm) state.resources.food += counts.farm * (p.farm_food || 3);
-  if (counts.workshop) state.resources.scrap += counts.workshop * (p.workshop_scrap || 2);
-  if (counts.clinic) state.resources.meds += counts.clinic * (p.clinic_meds || 1);
+  if (counts.well) state.resources.water += counts.well * (p.well_water || 3);
+  if (counts.workshop) state.resources.metal += counts.workshop * (p.workshop_metal || 2);
+  if (counts.sawmill) state.resources.wood += counts.sawmill * (p.sawmill_wood || 3);
+  if (counts.clinic) state.resources.medicine += counts.clinic * (p.clinic_medicine || 1);
+}
+
+function fuelNeed(state, balance) {
+  const alive = livingSurvivors(state).length;
+  const base = balance.fuelPerDayBase ?? 1;
+  const per = balance.fuelPerSurvivorPerDay ?? 0.15;
+  const gens = state.base.buildings.filter((b) => b.type === 'generator').length;
+  const saved = gens * (balance.production?.generator_fuel_saved || 1);
+  return Math.max(0, Math.ceil(base + alive * per - saved));
+}
+
+function consumeNeed(state, key, need, damageKey, label, balance) {
+  const alive = livingSurvivors(state);
+  if (need <= 0) return;
+  if ((state.resources[key] || 0) >= need) {
+    state.resources[key] -= need;
+    return;
+  }
+  const missing = need - (state.resources[key] || 0);
+  state.resources[key] = 0;
+  pushLog(state, `${label}: faltan ${missing}.`, 'bad');
+  const dmg = balance[damageKey] || 20;
+  alive.forEach((s) => {
+    if (s.status === 'dead') return;
+    s.hp -= dmg;
+    if (s.hp <= 0) {
+      s.hp = 0;
+      s.status = 'dead';
+      state.stats.deaths += 1;
+      state.director.recentLosses += 1;
+      pushLog(state, `${s.name} muere por falta de ${key === 'food' ? 'comida' : 'agua'}.`, 'bad');
+    } else {
+      s.status = 'wounded';
+    }
+  });
 }
 
 function healTick(state) {
@@ -199,8 +245,8 @@ function healTick(state) {
   livingSurvivors(state).forEach((s) => {
     if (s.status === 'wounded') {
       let heal = hasClinic ? 12 : 5;
-      if (state.resources.meds > 0 && s.hp < 70) {
-        state.resources.meds -= 1;
+      if (state.resources.medicine > 0 && s.hp < 70) {
+        state.resources.medicine -= 1;
         heal += 18;
       }
       s.hp = Math.min(s.maxHp, s.hp + heal);
@@ -220,8 +266,8 @@ function checkDefeat(state, balance) {
     return;
   }
   const cap = housingCapacity(state, null, balance);
-  if (alive.length > cap + 2) {
-    // hacinamiento: daño moral/físico ligero
+  const grace = balance.housingOverflowGrace ?? 2;
+  if (alive.length > cap + grace) {
     const s = pick(alive);
     s.hp -= 8;
     if (s.hp <= 0) {
@@ -240,27 +286,27 @@ export function advanceDay(state, content) {
 
   resolveExpedition(state, content);
 
-  // Consumo
   const alive = livingSurvivors(state);
-  const need = alive.length * (balance.foodPerSurvivorPerDay || 1);
-  if (state.resources.food >= need) {
-    state.resources.food -= need;
-  } else {
-    const missing = need - state.resources.food;
-    state.resources.food = 0;
-    pushLog(state, `Hambre: faltan ${missing} raciones.`, 'bad');
-    alive.forEach((s) => {
-      s.hp -= balance.starvationDamage || 25;
-      if (s.hp <= 0) {
-        s.hp = 0;
-        s.status = 'dead';
-        state.stats.deaths += 1;
-        state.director.recentLosses += 1;
-        pushLog(state, `${s.name} muere de hambre.`, 'bad');
-      } else {
-        s.status = 'wounded';
-      }
-    });
+  const foodNeed = alive.length * (balance.foodPerSurvivorPerDay || 1);
+  const waterNeed = alive.length * (balance.waterPerSurvivorPerDay || 1);
+  consumeNeed(state, 'food', foodNeed, 'starvationDamage', 'Hambre', balance);
+  consumeNeed(state, 'water', waterNeed, 'dehydrationDamage', 'Sed', balance);
+
+  const fNeed = fuelNeed(state, balance);
+  if (fNeed > 0) {
+    if ((state.resources.fuel || 0) >= fNeed) {
+      state.resources.fuel -= fNeed;
+    } else {
+      const missing = fNeed - (state.resources.fuel || 0);
+      state.resources.fuel = 0;
+      const extra = balance.noFuelExtraFoodLoss ?? 1;
+      state.resources.food = Math.max(0, state.resources.food - extra * Math.max(1, missing));
+      pushLog(
+        state,
+        `Sin combustible suficiente (−${missing}). Se pierde comida al improvisar (−${extra * Math.max(1, missing)}).`,
+        'warn'
+      );
+    }
   }
 
   applyProduction(state, balance);
@@ -272,7 +318,6 @@ export function advanceDay(state, content) {
   runDirector(state, content);
   checkDefeat(state, balance);
 
-  // Liberar busy
   livingSurvivors(state).forEach((s) => {
     if (s.busyUntilDay < state.day) s.busyUntilDay = 0;
   });

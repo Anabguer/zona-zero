@@ -143,6 +143,9 @@ body.zz-body {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.35rem;
 }
+@media (min-width: 700px) {
+  .zz-resources { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+}
 .zz-resources li {
   display: grid;
   justify-items: center;
@@ -156,8 +159,11 @@ body.zz-body {
   background: #345;
 }
 .zz-res-ico--food { background: linear-gradient(135deg, #6ee7a8, #2f9e55); }
-.zz-res-ico--scrap { background: linear-gradient(135deg, #9ca3af, #4b5563); }
-.zz-res-ico--meds { background: linear-gradient(135deg, #7dd3fc, #0284c7); }
+.zz-res-ico--water { background: linear-gradient(135deg, #7dd3fc, #0369a1); }
+.zz-res-ico--wood { background: linear-gradient(135deg, #c4a574, #7c5a2e); }
+.zz-res-ico--metal { background: linear-gradient(135deg, #9ca3af, #4b5563); }
+.zz-res-ico--medicine { background: linear-gradient(135deg, #f9a8d4, #be185d); }
+.zz-res-ico--fuel { background: linear-gradient(135deg, #fdba74, #c2410c); }
 .zz-res-ico--ammo { background: linear-gradient(135deg, #f0c674, #b45309); }
 
 .zz-tabs {
@@ -222,6 +228,9 @@ body.zz-body {
 .zz-b-shelter { fill: #2f5d3d; stroke: #8fefb0; }
 .zz-b-farm { fill: #4d7c3f; stroke: #b6ef8a; }
 .zz-b-workshop { fill: #4b5563; stroke: #d1d5db; }
+.zz-b-well { fill: #0e7490; stroke: #7dd3fc; }
+.zz-b-sawmill { fill: #78716c; stroke: #d6d3d1; }
+.zz-b-generator { fill: #9a3412; stroke: #fdba74; }
 .zz-b-clinic { fill: #1e3a5f; stroke: #7dd3fc; }
 .zz-b-cross { stroke: #7dd3fc; stroke-width: 2; fill: none; }
 .zz-b-tower { fill: #5b4b2e; stroke: #f0c674; }

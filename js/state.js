@@ -3,7 +3,17 @@
  */
 import { randInt, pick, uid, clamp } from './util.js';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
+
+const DEFAULT_RESOURCES = {
+  food: 0,
+  water: 0,
+  wood: 0,
+  metal: 0,
+  medicine: 0,
+  fuel: 0,
+  ammo: 0,
+};
 
 export async function loadContent() {
   const base = new URL('../content/', import.meta.url);
@@ -17,12 +27,39 @@ export async function loadContent() {
   return { balance, buildings, zonesDoc, eventsDoc, survivorsDoc };
 }
 
+/** Normaliza recursos legacy (scrap/meds) → set actual. */
+export function normalizeResources(raw = {}) {
+  const out = { ...DEFAULT_RESOURCES };
+  Object.keys(DEFAULT_RESOURCES).forEach((k) => {
+    if (raw[k] != null && Number.isFinite(Number(raw[k]))) {
+      out[k] = Math.max(0, Math.floor(Number(raw[k])));
+    }
+  });
+  if (raw.scrap != null) out.metal += Math.max(0, Math.floor(Number(raw.scrap)) || 0);
+  if (raw.meds != null) out.medicine += Math.max(0, Math.floor(Number(raw.meds)) || 0);
+  return out;
+}
+
+export function migrateState(state, balance) {
+  if (!state || typeof state !== 'object') return state;
+  const next = { ...state };
+  next.v = SAVE_VERSION;
+  next.resources = normalizeResources(next.resources || {});
+  if (!next.base || !next.base.w) {
+    next.base = {
+      w: balance?.baseGrid?.w || 10,
+      h: balance?.baseGrid?.h || 8,
+      buildings: next.base?.buildings || [],
+    };
+  }
+  return next;
+}
+
 function makeSurvivor(names, skillKeys, forcedName = null) {
   const skills = {};
   skillKeys.forEach((k) => {
     skills[k] = randInt(1, 4);
   });
-  // Un poco de especialización
   const focus = pick(skillKeys);
   skills[focus] = clamp(skills[focus] + randInt(1, 3), 1, 8);
   return {
@@ -31,7 +68,7 @@ function makeSurvivor(names, skillKeys, forcedName = null) {
     hp: 100,
     maxHp: 100,
     skills,
-    status: 'ok', // ok | wounded | dead
+    status: 'ok',
     busyUntilDay: 0,
   };
 }
@@ -70,7 +107,7 @@ export function createNewState(content, colonyName = 'Refugio 0') {
     v: SAVE_VERSION,
     colonyName: colonyName.slice(0, 40) || 'Refugio 0',
     day: 1,
-    resources: { ...balance.startingResources },
+    resources: normalizeResources(balance.startingResources),
     survivors,
     base: { w: gw, h: gh, buildings },
     zones,
@@ -109,6 +146,11 @@ export function livingSurvivors(state) {
   return state.survivors.filter((s) => s.status !== 'dead');
 }
 
+export function maxSurvivorsCap(balance) {
+  const n = Number(balance?.maxSurvivors);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 80;
+}
+
 export function housingCapacity(state, buildingsContent, balance) {
   const shelters = state.base.buildings.filter((b) => b.type === 'shelter').length;
   return shelters * (balance.housingPerShelter || 2);
@@ -117,16 +159,17 @@ export function housingCapacity(state, buildingsContent, balance) {
 export function defenseValue(state, balance) {
   const towers = state.base.buildings.filter((b) => b.type === 'watchtower').length;
   const armed = livingSurvivors(state).filter((s) => s.skills.fight >= 3).length;
+  const ammoFactor = balance.ammoDefenseFactor ?? 1.5;
   return (
     towers * (balance.defensePerWatchtower || 8) +
     armed * (balance.defensePerArmedSurvivor || 3) +
-    Math.floor((state.resources.ammo || 0) * 1.5)
+    Math.floor((state.resources.ammo || 0) * ammoFactor)
   );
 }
 
 export function pushLog(state, text, kind = 'info') {
   state.log.unshift({ day: state.day, text, kind });
-  if (state.log.length > 80) state.log.length = 80;
+  if (state.log.length > 100) state.log.length = 100;
 }
 
 export function summarizeState(state) {

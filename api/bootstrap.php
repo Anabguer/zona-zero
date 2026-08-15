@@ -8,7 +8,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 
-const ZZ_SAVE_VERSION = 1;
+const ZZ_SAVE_VERSION = 2;
 
 function zz_find_intocables_includes(): ?string
 {

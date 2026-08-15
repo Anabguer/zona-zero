@@ -29,6 +29,32 @@ const ICONS = {
     p.setAttribute('class', 'zz-b-shape zz-b-workshop');
     return p;
   },
+  well: (x, y, ns) => {
+    const g = document.createElementNS(ns, 'g');
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', x + 16);
+    c.setAttribute('cy', y + 17);
+    c.setAttribute('r', '9');
+    c.setAttribute('class', 'zz-b-shape zz-b-well');
+    g.appendChild(c);
+    return g;
+  },
+  sawmill: (x, y, ns) => {
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', `M${x + 6} ${y + 26} H${x + 26} L${x + 22} ${y + 10} H${x + 10} Z`);
+    p.setAttribute('class', 'zz-b-shape zz-b-sawmill');
+    return p;
+  },
+  generator: (x, y, ns) => {
+    const p = document.createElementNS(ns, 'rect');
+    p.setAttribute('x', x + 7);
+    p.setAttribute('y', y + 10);
+    p.setAttribute('width', '18');
+    p.setAttribute('height', '14');
+    p.setAttribute('rx', '2');
+    p.setAttribute('class', 'zz-b-shape zz-b-generator');
+    return p;
+  },
   clinic: (x, y, ns) => {
     const g = document.createElementNS(ns, 'g');
     const box = document.createElementNS(ns, 'rect');

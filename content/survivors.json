@@ -1,7 +1,12 @@
 {
   "names": [
     "Nora", "Leo", "Mara", "Iker", "Sofía", "Dani", "Vera", "Hugo",
-    "Iris", "Pol", "Nerea", "Álex", "Lia", "Teo", "Carla", "Bruno"
+    "Iris", "Pol", "Nerea", "Álex", "Lia", "Teo", "Carla", "Bruno",
+    "Emma", "Nil", "Aina", "Jan", "Lucía", "Marc", "Paula", "Oriol",
+    "Clara", "Eric", "Laia", "Arnau", "Julia", "Pau", "Elena", "Gerard",
+    "Marina", "Roger", "Berta", "Sergi", "Núria", "Joel", "Ainhoa", "Xavi",
+    "Helena", "Martí", "Ona", "Adrià", "Blanca", "Tomàs", "Júlia", "Enric",
+    "Cristina", "Ivan", "Marta", "Raúl", "Andrea", "Óscar", "Patricia", "Álvaro"
   ],
   "skillKeys": ["scout", "fight", "build", "gather"],
   "skillLabels": {

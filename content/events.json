@@ -1,16 +1,44 @@
 {
   "events": [
     {
+      "id": "uneventful",
+      "name": "Nada relevante",
+      "intensity": 0,
+      "cooldown": 0,
+      "weight": 14,
+      "minDay": 1,
+      "conditions": {},
+      "variants": [
+        { "text": "La noche pasa sin incidentes dignos de anotar.", "effects": {} },
+        { "text": "Solo viento y distancias. Nadie se mueve cerca.", "effects": {} },
+        { "text": "Turno de vigilancia rutinario. Sin novedades.", "effects": {} }
+      ]
+    },
+    {
       "id": "quiet_night",
       "name": "Noche en calma",
       "intensity": 0,
-      "cooldown": 2,
+      "cooldown": 1,
       "weight": 8,
       "minDay": 1,
-      "conditions": { "maxThreat": 99 },
+      "conditions": { "maxThreat": 45 },
       "variants": [
-        { "text": "Los infectados se oyen lejos. La noche pasa.", "effects": {} },
-        { "text": "Vigilancia tensa, pero sin incidentes.", "effects": { "moraleHint": 1 } }
+        { "text": "Los infectados se oyen lejos. La colonia respira.", "effects": {} },
+        { "text": "Fogatas bajas y turnos cortos. Descansáis mejor.", "effects": {} },
+        { "text": "Una noche fría pero estable.", "effects": {} }
+      ]
+    },
+    {
+      "id": "morale_story",
+      "name": "Historias al fuego",
+      "intensity": 0,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 2,
+      "conditions": { "minPop": 2, "maxThreat": 50 },
+      "variants": [
+        { "text": "Alguien cuenta una historia absurda y la tensión baja un poco.", "effects": {} },
+        { "text": "Repasáis nombres de los que ya no están. Silencio respetuoso.", "effects": {} }
       ]
     },
     {
@@ -20,16 +48,101 @@
       "cooldown": 4,
       "weight": 4,
       "minDay": 2,
-      "conditions": { "maxThreat": 40 },
+      "conditions": { "maxThreat": 55 },
       "variants": [
-        {
-          "text": "Alguien encuentra una mochila abandonada junto al perímetro.",
-          "effects": { "loot": { "food": [1, 3], "scrap": [0, 2] } }
-        },
-        {
-          "text": "Un vehículo destrozado aún guarda piezas útiles.",
-          "effects": { "loot": { "scrap": [2, 4], "ammo": [0, 1] } }
-        }
+        { "text": "Una mochila abandonada junto al perímetro.", "effects": { "loot": { "food": [1, 3], "water": [0, 2] } } },
+        { "text": "Un vehículo destrozado aún guarda piezas.", "effects": { "loot": { "metal": [2, 4], "fuel": [0, 2] } } },
+        { "text": "Leña seca apilada tras un muro.", "effects": { "loot": { "wood": [2, 5] } } }
+      ]
+    },
+    {
+      "id": "rain_cistern",
+      "name": "Lluvia útil",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 3,
+      "conditions": {},
+      "variants": [
+        { "text": "La lluvia llena bidones improvisados.", "effects": { "loot": { "water": [2, 5] } } },
+        { "text": "Recolectáis agua limpia de tejados controlados.", "effects": { "loot": { "water": [3, 6] } } }
+      ]
+    },
+    {
+      "id": "ammo_cache",
+      "name": "Caja militar",
+      "intensity": 1,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 5,
+      "conditions": { "minControlled": 2 },
+      "variants": [
+        { "text": "Munición olvidada en una zona controlada.", "effects": { "loot": { "ammo": [1, 3], "metal": [0, 2] } } },
+        { "text": "Un botiquín de campaña incompleto pero útil.", "effects": { "loot": { "medicine": [1, 3], "ammo": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "fuel_leak_find",
+      "name": "Bidón medio lleno",
+      "intensity": 1,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 3,
+      "conditions": { "maxFuel": 12 },
+      "variants": [
+        { "text": "Encontráis combustible en un sótano cercano.", "effects": { "loot": { "fuel": [2, 4] } } },
+        { "text": "Un depósito doméstico aún tiene gasolina.", "effects": { "loot": { "fuel": [1, 3], "metal": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "deserter_hope",
+      "name": "Señal de humo",
+      "intensity": 1,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 4,
+      "conditions": { "minControlled": 1 },
+      "variants": [
+        { "text": "Un superviviente agotado pide unirse.", "effects": { "recruit": true } },
+        { "text": "Dos personas piden agua; una se queda.", "effects": { "recruit": true, "lose": { "water": [1, 2] } } }
+      ]
+    },
+    {
+      "id": "trade_whisper",
+      "name": "Trueque furtivo",
+      "intensity": 1,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 6,
+      "conditions": { "minPop": 3, "minMetal": 2 },
+      "variants": [
+        { "text": "Un forastero cambia metal por comida.", "effects": { "lose": { "metal": [1, 2] }, "loot": { "food": [2, 4], "water": [1, 2] } } },
+        { "text": "Cambiáis munición sobrante por medicinas.", "effects": { "lose": { "ammo": [1, 1] }, "loot": { "medicine": [1, 3] } } }
+      ]
+    },
+    {
+      "id": "good_hunt",
+      "name": "Caza menor",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 2,
+      "conditions": { "minPop": 2, "maxThreat": 40 },
+      "variants": [
+        { "text": "Alguien vuelve con carne magra del perímetro.", "effects": { "loot": { "food": [2, 4] } } },
+        { "text": "Trampas improvisadas dan resultado.", "effects": { "loot": { "food": [1, 3], "wood": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "repair_windfall",
+      "name": "Piezas reutilizables",
+      "intensity": 1,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 3,
+      "conditions": { "minControlled": 2 },
+      "variants": [
+        { "text": "Desmontáis una valla inútil y ganáis metal.", "effects": { "loot": { "metal": [2, 4], "wood": [1, 2] } } }
       ]
     },
     {
@@ -41,10 +154,8 @@
       "minDay": 3,
       "conditions": { "minPop": 2 },
       "variants": [
-        {
-          "text": "Un superviviente enferma. Sin medicinas, empeora.",
-          "effects": { "woundOne": 20, "needMeds": 1 }
-        }
+        { "text": "Un superviviente enferma. Sin medicinas, empeora.", "effects": { "woundOne": 22, "needMeds": 1 } },
+        { "text": "Tos seca por el polvo. Alguien pierde fuerzas.", "effects": { "woundOne": 16, "needMeds": 1 } }
       ]
     },
     {
@@ -54,12 +165,101 @@
       "cooldown": 6,
       "weight": 3,
       "minDay": 4,
-      "conditions": { "minFood": 8 },
+      "conditions": { "minFood": 10 },
       "variants": [
-        {
-          "text": "Parte de las raciones se estropea.",
-          "effects": { "lose": { "food": [2, 5] } }
-        }
+        { "text": "Parte de las raciones se estropea.", "effects": { "lose": { "food": [2, 5] } } },
+        { "text": "Humedad en el almacén: perdéis comida.", "effects": { "lose": { "food": [1, 4], "water": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "water_spoil",
+      "name": "Agua contaminada",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 3,
+      "conditions": { "minWater": 6 },
+      "variants": [
+        { "text": "Un bidón estaba sucio. Tiréis agua dudosa.", "effects": { "lose": { "water": [2, 5] } } },
+        { "text": "Alguien bebe mal y enferma; gastáis agua limpia para lavar.", "effects": { "lose": { "water": [1, 3] }, "woundOne": 12 } }
+      ]
+    },
+    {
+      "id": "fuel_waste",
+      "name": "Fuga de combustible",
+      "intensity": 2,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 4,
+      "conditions": { "minFuel": 3 },
+      "variants": [
+        { "text": "Un bidón pierde por una grieta.", "effects": { "lose": { "fuel": [1, 3] } } },
+        { "text": "Alguien deja un grifo abierto en el generador.", "effects": { "lose": { "fuel": [2, 4] } } }
+      ]
+    },
+    {
+      "id": "tool_break",
+      "name": "Herramienta rota",
+      "intensity": 1,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 2,
+      "conditions": { "minWood": 2 },
+      "variants": [
+        { "text": "Se parte un mango. Gastáis madera en reparar.", "effects": { "lose": { "wood": [1, 3] } } },
+        { "text": "El taller pierde una pieza metálica.", "effects": { "lose": { "metal": [1, 2] } } }
+      ]
+    },
+    {
+      "id": "argument",
+      "name": "Discusión",
+      "intensity": 1,
+      "cooldown": 4,
+      "weight": 3,
+      "minDay": 3,
+      "conditions": { "minPop": 3 },
+      "variants": [
+        { "text": "Una pelea por turnos de vigilancia deja a alguien golpeado.", "effects": { "woundOne": 10 } },
+        { "text": "Tensión por las raciones. Nadie gana, todos pierden sueño.", "effects": {} }
+      ]
+    },
+    {
+      "id": "rats",
+      "name": "Ratas",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 2,
+      "conditions": { "minFood": 5 },
+      "variants": [
+        { "text": "Las ratas roban comida del almacén.", "effects": { "lose": { "food": [1, 3] } } },
+        { "text": "Roen cables y desperdician un poco de combustible.", "effects": { "lose": { "fuel": [0, 2], "food": [0, 2] } } }
+      ]
+    },
+    {
+      "id": "false_alarm",
+      "name": "Falsa alarma",
+      "intensity": 1,
+      "cooldown": 3,
+      "weight": 4,
+      "minDay": 2,
+      "conditions": {},
+      "variants": [
+        { "text": "Gritos en la distancia. Resulta ser viento y metal.", "effects": {} },
+        { "text": "La atalaya avisa… y no hay nada. Gastáis nervios.", "effects": {} }
+      ]
+    },
+    {
+      "id": "scout_tip",
+      "name": "Rumores del mapa",
+      "intensity": 1,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 4,
+      "conditions": { "minPop": 2 },
+      "variants": [
+        { "text": "Un explorador marca un edificio lejano como prometedor.", "effects": { "discoverNeighbor": true } },
+        { "text": "Oís de un depósito de combustible al sur.", "effects": { "discoverNeighbor": true } }
       ]
     },
     {
@@ -71,14 +271,22 @@
       "minDay": 5,
       "conditions": { "minThreat": 8, "minDay": 5 },
       "variants": [
-        {
-          "text": "Un grupo pequeño de infectados prueba las defensas.",
-          "effects": { "raid": { "power": 12, "damage": [10, 25] } }
-        },
-        {
-          "text": "Ruidos en la valla. Hay que aguantar.",
-          "effects": { "raid": { "power": 16, "damage": [12, 30] } }
-        }
+        { "text": "Un grupo pequeño prueba las defensas.", "effects": { "raid": { "power": 12, "damage": [10, 24] } } },
+        { "text": "Ruidos en la valla. Hay que aguantar.", "effects": { "raid": { "power": 16, "damage": [12, 28] } } },
+        { "text": "Infectados aislados empujan la puerta este.", "effects": { "raid": { "power": 14, "damage": [8, 22] } } }
+      ]
+    },
+    {
+      "id": "night_probe",
+      "name": "Sondeo nocturno",
+      "intensity": 3,
+      "cooldown": 5,
+      "weight": 4,
+      "minDay": 6,
+      "conditions": { "minThreat": 12 },
+      "variants": [
+        { "text": "Prueban el perímetro en silencio. Disparáis de más.", "effects": { "raid": { "power": 18, "damage": [10, 26] }, "lose": { "ammo": [0, 1] } } },
+        { "text": "Sombras en el almacén exterior.", "effects": { "raid": { "power": 15, "damage": [12, 30] } } }
       ]
     },
     {
@@ -90,40 +298,95 @@
       "minDay": 9,
       "conditions": { "minThreat": 20, "minPop": 2 },
       "variants": [
-        {
-          "text": "La noche se llena de aullidos. La oleada es seria.",
-          "effects": { "raid": { "power": 28, "damage": [20, 45] } }
-        }
+        { "text": "La noche se llena de aullidos. La oleada es seria.", "effects": { "raid": { "power": 28, "damage": [20, 45] } } },
+        { "text": "Rompen un tramo de valla antes de rechazarlos.", "effects": { "raid": { "power": 32, "damage": [18, 40] }, "lose": { "wood": [1, 3] } } }
       ]
     },
     {
-      "id": "deserter_hope",
-      "name": "Señal de humo",
-      "intensity": 1,
+      "id": "siege_pressure",
+      "name": "Presión sostenida",
+      "intensity": 4,
       "cooldown": 8,
       "weight": 2,
-      "minDay": 6,
-      "conditions": { "maxPop": 8, "minControlled": 2 },
+      "minDay": 11,
+      "conditions": { "minThreat": 28, "minControlled": 3 },
       "variants": [
-        {
-          "text": "Un superviviente agotado pide unirse al refugio.",
-          "effects": { "recruit": true }
-        }
+        { "text": "Durante horas empujan sin entrar del todo. Gastáis munición y nervios.", "effects": { "raid": { "power": 24, "damage": [14, 32] }, "lose": { "ammo": [1, 2], "fuel": [0, 2] } } }
       ]
     },
     {
-      "id": "ammo_cache",
-      "name": "Caja militar",
-      "intensity": 1,
-      "cooldown": 10,
+      "id": "fire_scare",
+      "name": "Principio de incendio",
+      "intensity": 3,
+      "cooldown": 9,
       "weight": 2,
       "minDay": 7,
+      "conditions": { "minFuel": 2, "minPop": 2 },
+      "variants": [
+        { "text": "Una chispa casi prende el almacén de combustible.", "effects": { "lose": { "fuel": [1, 3], "wood": [0, 2] }, "woundOne": 8 } },
+        { "text": "Apagáis un fuego pequeño a tiempo. Perdéis madera.", "effects": { "lose": { "wood": [2, 4] } } }
+      ]
+    },
+    {
+      "id": "theft_inside",
+      "name": "Hurtos internos",
+      "intensity": 2,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 8,
+      "conditions": { "minPop": 5, "minFood": 8 },
+      "variants": [
+        { "text": "Alguien esconde raciones. Recuperáis parte, no todo.", "effects": { "lose": { "food": [1, 3], "medicine": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "migration_wave",
+      "name": "Grupo en tránsito",
+      "intensity": 2,
+      "cooldown": 12,
+      "weight": 2,
+      "minDay": 10,
       "conditions": { "minControlled": 2 },
       "variants": [
-        {
-          "text": "En una zona controlada aparece munición olvidada.",
-          "effects": { "loot": { "ammo": [1, 3], "scrap": [1, 2] } }
-        }
+        { "text": "Un grupo pide quedarse una noche. Uno se une al amanecer.", "effects": { "recruit": true, "lose": { "food": [1, 2], "water": [1, 2] } } },
+        { "text": "Rechazáis a forasteros armados. La amenaza sube.", "effects": { "threatDelta": 3 } }
+      ]
+    },
+    {
+      "id": "contamination_zone",
+      "name": "Zona sucia",
+      "intensity": 3,
+      "cooldown": 9,
+      "weight": 2,
+      "minDay": 8,
+      "conditions": { "minThreat": 15 },
+      "variants": [
+        { "text": "El viento trae hedor. Alguien cae enfermo al limpiar.", "effects": { "woundOne": 18, "needMeds": 1 } }
+      ]
+    },
+    {
+      "id": "lucky_cache",
+      "name": "Escondite intacto",
+      "intensity": 1,
+      "cooldown": 11,
+      "weight": 2,
+      "minDay": 7,
+      "conditions": { "minControlled": 3 },
+      "variants": [
+        { "text": "Tras una pared falsa: agua, comida y un poco de todo.", "effects": { "loot": { "food": [2, 4], "water": [2, 4], "medicine": [0, 2], "ammo": [0, 1] } } }
+      ]
+    },
+    {
+      "id": "cold_snap",
+      "name": "Frío seco",
+      "intensity": 2,
+      "cooldown": 7,
+      "weight": 3,
+      "minDay": 5,
+      "conditions": {},
+      "variants": [
+        { "text": "El frío fuerza a quemar más combustible.", "effects": { "lose": { "fuel": [1, 3], "wood": [0, 2] } } },
+        { "text": "Sin calor suficiente, alguien se resfría.", "effects": { "lose": { "fuel": [0, 2] }, "woundOne": 10 } }
       ]
     }
   ]

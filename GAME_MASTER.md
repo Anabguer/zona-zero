@@ -1,71 +1,104 @@
 # ZONA ZERO — GAME_MASTER
 
-> **PENDIENTE DE SINCRONIZAR CON EL GAME_MASTER v0.1 DE CHATGPT**
->
-> Este archivo no sustituye el documento funcional aprobado por ChatGPT.
-> Las reglas de diseño definitivas llegarán al sincronizar `GAME_MASTER_DIA_0_v0.1.md`.
-> Lo que sigue describe **estado técnico** e implementación actual, no reglas funcionales nuevas “aprobadas”.
->
-> **Fuente compartida Cursor ↔ ChatGPT:** repositorio GitHub privado `Anabguer/zona-zero` (rama `main`).
+Documento maestro compartido (Cursor ↔ ChatGPT).  
+Repositorio: `Anabguer/zona-zero` · rama `main`.
 
-## Estado técnico
+---
+
+## 1. Diseño aprobado (reglas funcionales)
+
+Estas reglas guían el juego. No deben cambiarse unilateralmente en código sin actualizar este documento.
+
+### Fantasía y bucle
+- Supervivencia postapocalíptica en ciudad: gestionar un refugio, explorar, construir, expandir control territorial y sobrevivir a amenazas variables.
+- Bucle: abrir → gestionar → mandar expediciones → recibir botín/riesgo → construir → expandirse → sobrevivir → guardar → continuar.
+- Juego web (navegador), móvil + ordenador. Sin APK.
+
+### Población
+- Partida típica empieza con ~3 supervivientes.
+- La colonia **debe poder crecer a 50+**.
+- Si existe tope técnico, es configurable (`balance.maxSurvivors`), nunca un `12` hardcodeado en lógica.
+
+### Recursos principales (con utilidad real)
+- **comida**, **agua**, **madera**, **metal**, **medicinas**, **combustible**, **munición**.
+- Consumo diario relevante (comida/agua; combustible de base/expediciones).
+- Producción vía edificios; botín vía expediciones/eventos.
+
+### Mapa y territorio
+- Mapa de ciudad con zonas: desconocida / descubierta / controlada.
+- Expediciones con duración, riesgo, botín variable, heridas y muerte permanente.
+- Posibilidad de controlar nuevas zonas.
+
+### Base
+- Asentamiento con parcelas; edificios colocables y reorganizables en lo esencial.
+- Capacidad de vivienda ligada a refugios.
+
+### Director / aleatoriedad
+- **No** hay guion fijo tipo «día 5 = evento A».
+- Eventos con condiciones, pesos, intensidad, cooldown y variantes.
+- La dificultad puede matar, pero no debe mandar amenazas absurdas al inicio.
+- No todos los días deben traer un evento importante.
+
+### Persistencia
+- 3 slots de partida.
+- Guardado versionado.
+- Auth reutiliza Intocables Universe.
+
+### Presentación
+- Estilo minimalista postapocalíptico; SVG/CSS.
+- Sin emojis como gráficos principales del juego.
+
+---
+
+## 2. Implementación actual (técnica)
 
 | Campo | Valor |
 |-------|--------|
-| Nombre | Zona Zero |
-| Versión técnica | 0.1.0-mvp |
+| Versión técnica | **0.2.0** |
 | Ubicación local | `W:\juegos\zona-zero\` |
-| URL producción | https://intocables13.com/juegos/zona-zero/ |
-| Biblioteca juegos | https://intocables13.com/juegos/ |
-| Repositorio | `https://github.com/Anabguer/zona-zero` (privado) |
-| Rama | `main` |
-| Último commit | `e94c6e7` — docs: record GitHub repo and latest MVP commit in GAME_MASTER |
+| URL | https://intocables13.com/juegos/zona-zero/ |
+| Biblioteca | https://intocables13.com/juegos/ |
+| Repo | https://github.com/Anabguer/zona-zero (privado) |
 | Stack | HTML / CSS / JS / PHP / MySQL |
 | Prefijo SQL | `zona_zero_*` |
-| Auth | Sesión Intocables Universe |
-| Slots de partida | 3 |
+| `save_version` / `v` | **2** |
+| `maxSurvivors` (balance) | **80** (configurable) |
 
-## Funcionalidades implementadas (MVP)
+### Cubierto en el MVP actual
+- Hub 3 slots + nueva/continuar/borrar
+- Recursos: comida, agua, madera, metal, medicinas, combustible, munición
+- Consumo diario comida/agua/combustible; producción por edificios (huerto, pozo, taller, aserradero, clínica, generador…)
+- Expediciones gastan combustible; botín multi-recurso
+- Mapa SVG + base SVG; Director ampliado (~30 eventos con variantes)
+- Noches tranquilas posibles (`quietNightChance`)
+- Migración de partidas v1 (`scrap`→metal, `meds`→medicine)
+- Derrota por extinción / presión de supervivencia
 
-- Biblioteca `/juegos/` + card **Juegos** en portal Intocables
-- Nueva partida / 3 slots / guardar / cargar / borrar slot
-- ~3 supervivientes iniciales, población, recursos, consumo diario
-- Base con cuadrícula, construcción y capacidad de vivienda
-- Mapa SVG: zonas desconocidas / descubiertas / controladas
-- Expediciones con tiempo, riesgo, botín, heridas y muerte permanente
-- Infectados, producción, control territorial, eventos vía Director (pesos/condiciones/cooldowns; sin guion fijo por día)
-- Derrota posible; guardado versionado (`save_version` / `v` en JSON)
+### Arquitectura
+- Cliente: simulación + UI (`js/`)
+- Contenido: `content/*.json`
+- API PHP: `api/` + tabla `zona_zero_saves`
+- Auth: includes Intocables (local `/intocables/includes`, prod `/includes`)
 
-## Decisiones técnicas (aprobadas para implementación)
+---
 
-- Simulación en cliente; persistencia JSON en MySQL (`zona_zero_saves`)
-- Contenido/balance en `content/*.json` (separado de la lógica)
-- Mapa y base en SVG + CSS (sin emojis como gráficos principales)
-- Sin APK / sin Vite obligatorio
-- Proyecto fuera de `/anabel/`: vive en `/juegos/zona-zero/`
-- Auth reutiliza Intocables (no cuentas duplicadas del juego)
+## 3. Pendientes relevantes
 
-## Pendientes relevantes
+- Ampliar sistemas futuros del diseño largo (más zonas, enemigos detallados, mejoras profundas, etc.)
+- Balance fino tras partidas reales en producción
+- Arte/identidad visual más rica (sin romper SVG minimalista)
+- Verificar en Hostalia con sesión real los 3 slots tras v2
 
-- Sustituir/sincronizar este documento con el GAME_MASTER v0.1 completo de ChatGPT
-- Ampliar contenido, arte y sistemas futuros del diseño aprobado
-- Ajustes finos de balance tras más partidas reales en producción
-- Verificar guardado en Hostalia con sesión de usuario real (3 slots)
+---
 
-## Flujo de trabajo
+## 4. Changelog
 
-1. Cursor implementa
-2. Actualiza este `GAME_MASTER.md` (estado / changelog / pendientes)
-3. Prueba
-4. Commit + push a `Anabguer/zona-zero`
-
-ChatGPT revisa el mismo repositorio y este documento.
-
-## Changelog
+### 0.2.0
+- Eliminado tope hardcodeado de 12; `maxSurvivors` en `balance.json` (80)
+- Recursos ampliados al set aprobado; edificios/zonas/eventos/consumo alineados
+- Director: más eventos/variantes + noches sin evento importante
+- `GAME_MASTER.md` sincronizado (diseño / implementación / pendientes)
+- `save_version` 2 + migración legacy
 
 ### 0.1.0-mvp
-- Primera versión jugable del bucle abrir → gestionar → expedición → construir → sobrevivir → guardar
-- Desplegado en Hostalia: `/juegos/` y `/juegos/zona-zero/`
-- Card **Juegos** en portal Intocables + redirect login `/juegos` permitido
-- Auth Intocables resuelta (rutas local `intocables/includes` y prod `/includes`)
-- Repositorio GitHub privado `Anabguer/zona-zero` creado y vinculado como fuente compartida
+- Primera versión jugable desplegada + repo GitHub
