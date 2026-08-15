@@ -1,36 +1,39 @@
-# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.6)
+# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.7)
 
-> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=pending-sync · sha256_16=pending · source=repo
+> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-15 · source=repo
 
-**Versión plan:** 2.6  
-**Estado:** Contrato de ejecución alineado a GAME_MASTER **2.6** (enmienda arranque/save/tutorial).  
-**Biblia:** GAME_MASTER **2.6** (Drive + repo idénticos).  
+**Versión plan:** 2.7  
+**Estado:** Replanificación por **modelo espacial / landscape / sectores** (contrato GAME_MASTER **2.7**).  
+**Biblia:** GAME_MASTER **2.7**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
 
-> Este plan **sustituye** 2.5 para fases de arranque/persistencia; el resto del grafo 2.5 se mantiene y se amplía.  
+> Este plan **sustituye 2.6** en bloques A2/B afectados por espacial+landscape.  
 > **Fuera de alcance v1:** electricidad, generator, solar, power_grid/power_hub, needEnergy, calefacción con fuel.  
-> **Fuera de UX v1:** múltiples slots de partida manuales.
+> **Fuera de UX v1:** múltiples slots de partida manuales · GIS visible · construcción portrait dual.
 
 ---
 
 ## 0. Reglas de ejecución
 
-1. Leer GAME_MASTER **2.6** antes de cada fase.  
+1. Leer GAME_MASTER **2.7** antes de cada fase.  
 2. Tras cada fase: tests → capturas si aplica → commit → push → DEVELOPMENT_LOG → `PENDIENTE DE REVISIÓN`.  
 3. Si `HUMAN_GATE: YES`: no continuar dependientes sin `APROBADA` + `SÍ`.  
 4. Tests verdes / elogios / silencio ≠ aprobación.  
 5. Balance solo en content.  
 6. Deploy solo ZZ-183 bajo orden.  
-7. Sync Drive = GitHub en docs maestros.
+7. Sync Drive = GitHub en docs maestros.  
+8. **No implementar sistemas D1+ encima del patio fijo 10×8** tras 2.7: primero gate espacial ZZ-019.
 
-### HUMAN_GATE (canónica 2.6)
+### HUMAN_GATE (canónica 2.7)
 
 - ZZ-001
 - ZZ-007
 - ZZ-008
-- ZZ-010
-- ZZ-012
+- ZZ-010 *(histórica; retrofit espacial en B0)*
+- ZZ-016 · Landscape + rotate gate
+- ZZ-019 · **MODELO ESPACIAL + CONSTRUCCIÓN LANDSCAPE** *(gate temprano crítico)*
+- ZZ-012 *(replanificada; depende ZZ-019)*
 - ZZ-014
 - ZZ-015
 - ZZ-021
@@ -54,8 +57,25 @@
 - ZZ-178
 - ZZ-183
 
-**Total fases:** 131  
-**Con HUMAN_GATE:** 27
+**Total fases:** 135  
+**Con HUMAN_GATE:** 29
+
+---
+
+## 0.1 Enmienda 2.7 — qué cambia respecto a 2.6
+
+| Tema | Acción |
+|------|--------|
+| Landscape móvil | Nuevo ZZ-016 (GATE) |
+| Arte patio / cámara > viewport | Nuevo ZZ-017 |
+| Sectores + recuperar territorio | Nuevo ZZ-018 |
+| Construcción semilibre + snap + ✓ | Nuevo **ZZ-019 (GATE espacial temprano)** |
+| ZZ-010 | Completada históricamente; **no** es el modelo espacial final |
+| ZZ-011 | Absorbida/ampliada por ZZ-017 |
+| ZZ-012 | **Bloqueada** hasta ZZ-019 APROBADA; reescribir tips landscape/sectores |
+| ZZ-013+ | Dependen de B estable post-019/012 |
+| ZZ-024 | Alinear a §9.2–§9.6 (confirm ✓, semilibre) |
+| Save | Migración layout/sectores en ZZ-017/018 |
 
 ---
 
@@ -63,120 +83,32 @@
 
 | Bloque | Fases | Gates |
 |--------|-------|-------|
-| A · Fundación | ZZ-001, ZZ-002, ZZ-003, ZZ-004, ZZ-005, ZZ-006 (6) | ZZ-001 |
+| A · Fundación | ZZ-001…ZZ-006 (6) | ZZ-001 |
 | A2 · Arranque y persistencia | ZZ-009, ZZ-007, ZZ-008 (3) | ZZ-007, ZZ-008 |
-| B · Experiencia D1 | ZZ-010, ZZ-011, ZZ-012, ZZ-013, ZZ-014, ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
-| C · Loop D2–D5 | ZZ-020, ZZ-021, ZZ-022, ZZ-023, ZZ-024, ZZ-025, ZZ-026, ZZ-027 (8) | ZZ-021, ZZ-023 |
-| D · Vivienda y agua | ZZ-030, ZZ-031, ZZ-032, ZZ-033, ZZ-034, ZZ-035, ZZ-036 (7) | ZZ-032 |
-| E · Clima e invierno (madera) | ZZ-040, ZZ-041, ZZ-042, ZZ-043, ZZ-044, ZZ-045, ZZ-046, ZZ-047, ZZ-048 (9) | ZZ-048 |
-| F · Salud y brotes | ZZ-050, ZZ-051, ZZ-052, ZZ-053, ZZ-054, ZZ-055, ZZ-056, ZZ-057, ZZ-058, ZZ-059 (10) | ZZ-059 |
-| G · Defensa e infectados | ZZ-060, ZZ-061, ZZ-062, ZZ-063, ZZ-064, ZZ-065 (6) | ZZ-065 |
-| G2 · Daño y reparación | ZZ-066, ZZ-067, ZZ-068, ZZ-069 (4) | ZZ-069 |
-| H · Territorio | ZZ-070, ZZ-071, ZZ-072, ZZ-073 (4) | ZZ-073 |
-| I · Investigación | ZZ-080, ZZ-081, ZZ-082, ZZ-083, ZZ-084 (5) | ZZ-083 |
-| J · Vehículos | ZZ-090, ZZ-091, ZZ-092, ZZ-093 (4) | — |
-| J2 · Radio y Centro de expediciones | ZZ-094, ZZ-095, ZZ-096 (3) | — |
-| K · Misiones y expediciones | ZZ-100, ZZ-101, ZZ-102, ZZ-103, ZZ-104, ZZ-105, ZZ-106, ZZ-107, ZZ-108 (9) | ZZ-108 |
-| L · Logros | ZZ-110, ZZ-111, ZZ-112, ZZ-113 (4) | — |
-| M · Director y eventos | ZZ-120, ZZ-121, ZZ-122, ZZ-123, ZZ-124, ZZ-125, ZZ-126 (7) | ZZ-125 |
-| N · Otros humanos | ZZ-130, ZZ-131, ZZ-132, ZZ-133 (4) | ZZ-133 |
-| O · Eras y victoria | ZZ-140, ZZ-141, ZZ-142, ZZ-143, ZZ-144 (5) | ZZ-144 |
-| P · UX mundo | ZZ-150, ZZ-151, ZZ-152, ZZ-153, ZZ-154 (5) | ZZ-150, ZZ-154 |
-| Q · Arte y audio | ZZ-160, ZZ-161, ZZ-162, ZZ-163, ZZ-164, ZZ-165 (6) | ZZ-161, ZZ-165 |
-| Q2 · Vida visual y movimiento | ZZ-166, ZZ-167, ZZ-168, ZZ-169, ZZ-170, ZZ-171, ZZ-172 (7) | ZZ-172 |
-| R · Simulador y balance | ZZ-175, ZZ-176, ZZ-177, ZZ-178 (4) | ZZ-178 |
-| S · Release | ZZ-180, ZZ-181, ZZ-182, ZZ-183, ZZ-184 (5) | ZZ-183 |
+| **B0 · Modelo espacial landscape** | **ZZ-016, ZZ-017, ZZ-018, ZZ-019 (4)** | **ZZ-016, ZZ-019** |
+| B · Experiencia D1 | ZZ-010…ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
+| C · Loop D2–D5 | ZZ-020…ZZ-027 (8) | ZZ-021, ZZ-023 |
+| D · Vivienda y agua | ZZ-030…ZZ-036 (7) | ZZ-032 |
+| E · Clima e invierno | ZZ-040…ZZ-048 (9) | ZZ-048 |
+| F · Salud y brotes | ZZ-050…ZZ-059 (10) | ZZ-059 |
+| G · Defensa e infectados | ZZ-060…ZZ-065 (6) | ZZ-065 |
+| G2 · Daño y reparación | ZZ-066…ZZ-069 (4) | ZZ-069 |
+| H · Territorio | ZZ-070…ZZ-073 (4) | ZZ-073 |
+| I · Investigación | ZZ-080…ZZ-084 (5) | ZZ-083 |
+| J · Vehículos | ZZ-090…ZZ-093 (4) | — |
+| J2 · Radio y Centro | ZZ-094…ZZ-096 (3) | — |
+| K · Misiones | ZZ-100…ZZ-108 (9) | ZZ-108 |
+| L · Logros | ZZ-110…ZZ-113 (4) | — |
+| M · Director | ZZ-120…ZZ-126 (7) | ZZ-125 |
+| N · Otros humanos | ZZ-130…ZZ-133 (4) | ZZ-133 |
+| O · Eras y victoria | ZZ-140…ZZ-144 (5) | ZZ-144 |
+| P · UX mundo | ZZ-150…ZZ-154 (5) | ZZ-150, ZZ-154 |
+| Q · Arte y audio | ZZ-160…ZZ-165 (6) | ZZ-161, ZZ-165 |
+| Q2 · Vida visual | ZZ-166…ZZ-172 (7) | ZZ-172 |
+| R · Simulador y balance | ZZ-175…ZZ-178 (4) | ZZ-178 |
+| S · Persistencia/ops | ZZ-180…ZZ-183 (4) | ZZ-183 |
 
 ---
-
-## 2. Grafo de dependencias (resumen)
-
-```
-ZZ-001 (GATE biblia+plan)
- ├─ ZZ-002..006 fundación
- ├─ ZZ-009 save → ZZ-007 portada → ZZ-008 intro (GATEs portada+intro)
- └─ ZZ-010..015 D1 (GATEs) → ZZ-020..027
-      ├─ ZZ-030..036 vivienda/agua
-      ├─ ZZ-040..048 clima+madera (GATE invierno)
-      ├─ ZZ-050..059 salud/brotes/cuarentena (GATE crisis sanitaria)
-      ├─ ZZ-060..065 defensa (GATE)
-      ├─ ZZ-066..069 daño/repair (GATE)
-      ├─ ZZ-070..073 territorio (GATE)
-      ├─ ZZ-080..084 research utilitario (GATE UI)
-      ├─ ZZ-090..093 vehículos (fuel)
-      ├─ ZZ-094..096 radio ≠ centro
-      ├─ ZZ-100..108 misiones/expediciones (GATE)
-      ├─ ZZ-110..113 logros
-      ├─ ZZ-120..126 director (GATE)
-      ├─ ZZ-130..133 humanos (GATE go/no-go)
-      ├─ ZZ-140..144 victoria sin energía (GATE)
-      ├─ ZZ-150..154 UX (GATE; ayuda ZZ-152)
-      ├─ ZZ-160..165 arte (GATE)
-      ├─ ZZ-166..172 vida visual (GATE perf)
-      ├─ ZZ-175..178 sim (GATE)
-      └─ ZZ-180..184 release (GATE deploy; migraciones save ZZ-180)
-```
-
----
-
-## 3. Matriz de cobertura GAME_MASTER 2.6 → PLAN
-
-| Sistema GM | Implementa | Prueba | HUMAN_GATE |
-|------------|------------|--------|------------|
-| Filosofía / pilares | ZZ-001 | ZZ-001 | ZZ-001 |
-| Portada / Continuar / Nueva | ZZ-007 | ZZ-007,ZZ-015 | ZZ-007 |
-| Mini-intro nueva partida | ZZ-008 | ZZ-008 | ZZ-008 |
-| Save 1 partida + autosave + backup | ZZ-009,ZZ-180 | ZZ-009,ZZ-181 | — |
-| Tutorial contextual en mundo | ZZ-012 | ZZ-012,ZZ-015 | ZZ-012 |
-| Ayuda consultable (§21.3) | ZZ-152 | ZZ-154 | ZZ-154 |
-| Población colectiva | ZZ-021,ZZ-025 | ZZ-023 | — |
-| Exploradores | ZZ-027,ZZ-022 | ZZ-023,ZZ-027 | — |
-| Vivienda + protección | ZZ-030..032 | ZZ-032,ZZ-048 | ZZ-032 |
-| Calefacción madera | ZZ-043..045 | ZZ-048 | ZZ-048 |
-| Exposición frío | ZZ-044 | ZZ-048 | ZZ-048 |
-| Necesidades colonia | ZZ-020,ZZ-030..036 | ZZ-023 | — |
-| Recursos (sin energía) | ZZ-005,ZZ-013 | ZZ-015 | — |
-| Pozo ≠ cisterna | ZZ-034,ZZ-035 | ZZ-034 | — |
-| Catálogo edificios (sin gen/solar) | ZZ-002,ZZ-005 | ZZ-002 | — |
-| Radio | ZZ-094 | ZZ-096 | — |
-| Centro expediciones | ZZ-095 | ZZ-096 | — |
-| Taller / mejoras=research | ZZ-080..084 | ZZ-084 | ZZ-083 |
-| Construcción | ZZ-024 | ZZ-024 | — |
-| Staffing por edificio | ZZ-021 | ZZ-021 | ZZ-021 |
-| Clima estaciones | ZZ-040..048 | ZZ-048 | ZZ-048 |
-| Salud camas/cadena | ZZ-050..052 | ZZ-059 | ZZ-059 |
-| Brotes probabilísticos + fases | ZZ-053..056 | ZZ-059 | ZZ-059 |
-| Cuarentena pasiva | ZZ-057,ZZ-081 | ZZ-059,ZZ-084 | ZZ-059 |
-| Defensa / ataques | ZZ-060..065 | ZZ-065 | ZZ-065 |
-| Daño y reparación edificios | ZZ-066..069 | ZZ-069 | ZZ-069 |
-| Infectados tipados | ZZ-062 | ZZ-065 | — |
-| Exploración + plantillas | ZZ-022,ZZ-104..108 | ZZ-107,ZZ-108 | ZZ-108 |
-| Territorio / fog | ZZ-070..073 | ZZ-073 | ZZ-073 |
-| Vehículos + fuel | ZZ-090..093 | ZZ-093 | — |
-| Research workers + árbol utilitario | ZZ-080..084 | ZZ-084 | ZZ-083 |
-| Eventos / Director | ZZ-120..126 | ZZ-125,ZZ-126 | ZZ-125 |
-| Misiones variedad | ZZ-100..108 | ZZ-108 | ZZ-108 |
-| Alertas | ZZ-151 | ZZ-154 | ZZ-154 |
-| Logros | ZZ-110..113 | ZZ-113 | — |
-| Eras | ZZ-140 | ZZ-144 | — |
-| Victoria sin needEnergy | ZZ-141..144 | ZZ-144 | ZZ-144 |
-| Derrota | ZZ-144 | ZZ-144 | ZZ-144 |
-| UX mundo | ZZ-150..154 | ZZ-150,ZZ-154 | ZZ-150,ZZ-154 |
-| Feedback §32 | ZZ-026 | ZZ-026 | — |
-| Vida visual §32B | ZZ-166..172 | ZZ-172 | ZZ-172 |
-| Arte / sonido | ZZ-160..165 | ZZ-165 | ZZ-161,ZZ-165 |
-| Datos/balance | ZZ-005,ZZ-177 | ZZ-178 | ZZ-178 |
-| Simulador | ZZ-175..178 | ZZ-178 | ZZ-178 |
-| Gobernanza Cursor↔ChatGPT | ZZ-001,ZZ-006 | ZZ-001 | ZZ-001 |
-| Colonia D1 sin GIS | ZZ-010 | ZZ-010,ZZ-015 | ZZ-010 |
-| Electricidad v1 | N/A — FUERA DE ALCANCE | N/A | N/A |
-| Multi-slots manuales | N/A — FUERA DE UX v1 | N/A | N/A |
-
-**Cobertura objetivo: 100%** de sistemas activos v1. Electricidad y multi-slots = explícitamente fuera.
-
----
-
-## 4. Fases detalladas
 
 
 ## A · Fundación
@@ -380,9 +312,108 @@ ZZ-001 (GATE biblia+plan)
 - Gate humano
 
 
+
+## B0 · Modelo espacial y landscape (2.7)
+
+> **Crítico:** HUMAN_GATE ZZ-019 antes de dar por bueno el tutorial/HUD D1 definitivo.
+
+### ZZ-016 — Landscape móvil + rotate gate
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · Modelo espacial landscape |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Gameplay landscape-first; pantalla «Gira tu dispositivo» cuidada en portrait; portada/intro vertical OK. |
+| **Sistemas** | UX shell, orientación |
+| **Dependencias** | ZZ-008 |
+| **Archivos approx.** | play.php/css, rotate overlay |
+| **Datos** | — |
+| **Assets** | icono rotate |
+| **Pruebas auto** | smoke-orient |
+| **Pruebas funcionales** | Portrait→gate→landscape entra juego; hub vertical |
+| **Revisión visual** | Sí |
+
+**Tareas:** Detectar orientación; overlay ZZ; desktop sin gate; hub/intro vertical opcionales.
+
+**Aceptación:**
+- Gameplay no usable en portrait sin gate
+- Gate de marca (no alert nativo)
+- Gate humano
+
+### ZZ-017 — Arte base limpio + colonia > viewport
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · Modelo espacial landscape |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Purgar pozo/huerto falsos del terreno; cámara pan/zoom/recenter con espacio > pantalla; save schema posiciones/sectores stub. |
+| **Sistemas** | arte, cámara, save |
+| **Dependencias** | ZZ-016 |
+| **Archivos approx.** | colony-yard, render-map, state/save |
+| **Datos** | saveVersion bump |
+| **Assets** | patio solo escenografía |
+| **Pruebas auto** | smoke-d1, smoke-save |
+| **Pruebas funcionales** | Pan lejos del HQ; sin edificios falsos en arte |
+| **Revisión visual** | Sí |
+
+**Tareas:** Regenerar arte base; relajar clamp; documentar migración.
+
+**Aceptación:**
+- Escenografía ≠ jugable
+- Colonia claramente mayor que viewport en landscape
+
+### ZZ-018 — Sectores orgánicos + recuperar territorio
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · Modelo espacial landscape |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Sector Núcleo D1; sectores colindantes recuperables con costes de sistemas existentes; perímetro vulnerable al expandir. |
+| **Sistemas** | sectors, construcción, defensa |
+| **Dependencias** | ZZ-017 |
+| **Archivos approx.** | js/sectors, sim, UI recuperar |
+| **Datos** | sectors[] en state |
+| **Assets** | ruinas/escombros por sector |
+| **Pruebas auto** | smoke-sectors |
+| **Pruebas funcionales** | Recuperar 1 sector; no construir fuera; expandir aumenta exposición |
+| **Revisión visual** | Sí |
+
+**Tareas:** Modelo datos sectores; acción Recuperar; feedback «hemos recuperado…»; link §9.5/§9.8.
+
+**Aceptación:**
+- No casillas bloqueadas tipo GIS
+- Recuperar = gameplay, no level-up vacío
+
+### ZZ-019 — Construcción semilibre landscape (GATE ESPACIAL TEMPRANO)
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · Modelo espacial landscape |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Ghost + snap invisible + manchas válidas + ✓/✕; pan vs mover ghost (§9.6); 2º/3º huerto donde el jugador quiera; demo jugable landscape. |
+| **Sistemas** | construcción, touch, sectores |
+| **Dependencias** | ZZ-018, ZZ-016 |
+| **Archivos approx.** | main/build UX, render |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-build-place |
+| **Pruebas funcionales** | Colocar 3 huertos distintos; cancelar; pan en build; sin segundo-tap build |
+| **Revisión visual** | Sí |
+
+**Tareas:** Implementar §9.2–§9.6; navegación básica lista→centrar; contact sheet landscape D1 build.
+
+**Aceptación:**
+- Sensación «yo construyo esta colonia»
+- UX móvil landscape inequívoca
+- **Gate humano obligatorio antes de ZZ-012+**
+
+---
+
 ## B · Experiencia D1
 
 ### ZZ-010 — Colonia física D1 sin GIS
+
+> **2.7:** Aprobada históricamente como base visual; **no** es el modelo espacial final. Retrofit en B0 (ZZ-017…019).
 
 | Campo | Valor |
 |-------|-------|
@@ -406,6 +437,8 @@ ZZ-001 (GATE biblia+plan)
 
 ### ZZ-011 — Cámara D1 protagonista
 
+> **2.7:** Hecha; ampliación colonia > viewport y landscape en **ZZ-017**.
+
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
@@ -428,13 +461,15 @@ ZZ-001 (GATE biblia+plan)
 
 ### ZZ-012 — Tutorial D1 contextual en el mundo
 
+> **2.7:** Replanificada. **No aprobar** sobre patio fijo. Depende del gate espacial **ZZ-019**. Tips deben asumir landscape + sectores + ✓ construir.
+
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Coach en mundo: una pista contextual (ej. comida → destacar Construir/huerto); avance al completar acción; sin cascada Continuar. Ayuda §21.3 accesible. |
+| **Objetivo** | Coach en mundo landscape: una pista contextual; avance por acción; sin cascada Continuar; ayuda §21.3. |
 | **Sistemas** | UX D1, mapa, onboarding |
-| **Dependencias** | ZZ-011, ZZ-008 |
+| **Dependencias** | ZZ-019, ZZ-008 |
 | **Archivos approx.** | js/onboarding.js |
 | **Datos** | — |
 | **Assets** | — |
@@ -456,7 +491,7 @@ ZZ-001 (GATE biblia+plan)
 | **HUMAN_GATE** | NO |
 | **Objetivo** | Comida/agua/madera legibles; sin Au/Gu. |
 | **Sistemas** | UX D1, mapa, onboarding |
-| **Dependencias** | ZZ-012 |
+| **Dependencias** | ZZ-012, ZZ-019 |
 | **Archivos approx.** | — |
 | **Datos** | — |
 | **Assets** | — |

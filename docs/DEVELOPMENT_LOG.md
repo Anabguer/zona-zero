@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 / ZZ-007 / ZZ-008 APROBADAS**. · **ZZ-011 + ZZ-009 hechas**. · **PARADO en ZZ-012 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-013+ / no deploy.  
+**Estado global:** Contrato **GAME_MASTER 2.7 + PLAN 2.7** (modelo espacial / landscape). · ZZ-007/008/010 APROBADAS. · **ZZ-012 PENDIENTE** (bloqueada hasta ZZ-019). · **PARADO en reforma documental espacial** — sin implementar B0 aún. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -26,6 +26,27 @@
 ESTADO REVISIÓN: APROBADA
 APROBACIÓN FINAL CHATGPT: SÍ
 ```
+
+
+---
+
+# REFORMA DOCUMENTAL 2.7 — MODELO ESPACIAL / LANDSCAPE (2026-08-15)
+
+## DECISIÓN NENI + CHATGPT
+Aprobada dirección: sectores orgánicos + semilibre + snap invisible + colonia > viewport + móvil landscape.
+
+## RESULTADO CURSOR (solo docs)
+- GAME_MASTER **2.7**: §9 contrato definitivo; §16; §31.8; §13 expansión; §9.7 auditoría max; changelog.
+- IMPLEMENTATION_PLAN **2.7**: bloque **B0** ZZ-016…ZZ-019; gate temprano **ZZ-019**; ZZ-012 replanificada.
+- ZZ-012: permanece PENDIENTE DE REVISIÓN / APROBACIÓN NO — **no implementar** hasta ZZ-019.
+
+## ESTADO
+Documentación sincronizada. **NO código de juego.** Esperando aprobación de la reforma antes de implementar B0.
+
+## APROBACIÓN DE ESTA REFORMA
+PENDIENTE Neni/ChatGPT (leer Drive).
+
+---
 
 ---
 
@@ -881,7 +902,7 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-**PARADO en ZZ-012.** No ZZ-013+ sin APROBADA + SÍ. No deploy.
+**PARADO en ZZ-012** (revisión congelada). Reforma 2.7: ZZ-012 depende de **ZZ-019**. No implementar tutorial ni B0 hasta aprobar docs 2.7. No deploy.
 
 
 # FASE ZZ-013 — HUD recursos D1
