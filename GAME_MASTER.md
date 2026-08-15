@@ -1,18 +1,34 @@
 # ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
-**Versión de diseño:** 2.1 · **Contrato funcional / BIBLIA COMPLETA**  
-**Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana  
+**Versión de diseño:** 2.2 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar)  
+**Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana (ZZ-001)  
 **Fecha:** 2026-08-15  
-**Copia de trabajo Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md`  
-**Copia repo:** `GAME_MASTER.md` (idénticas)  
-**Plan técnico Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` · **Repo:** `docs/IMPLEMENTATION_PLAN.md`  
-**Development log Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md` · **Repo:** `docs/DEVELOPMENT_LOG.md`  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
 **URL objetivo:** `/juegos/zona-zero/`
 
-> Esta orden de diseño **tiene prioridad** sobre `GAME_MASTER` 1.x, decisiones de chat y código existente cuando haya contradicción.  
-> El código actual es **prototipo / motor parcial**; no define el juego definitivo.
+### Tres documentos maestros (siempre idénticos Drive ↔ GitHub)
+
+| Documento | Drive | GitHub |
+|-----------|-------|--------|
+| **Esta biblia** | `G:\Mi unidad\Juegos\Zona Zero\GAME_MASTER\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
+| **Plan de fases** | `...\GAME_MASTER\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
+| **Log de ejecución** | `...\GAME_MASTER\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
+
+> **Prioridad:** esta biblia 2.2 manda sobre diseños 1.x, chats sueltos y código existente cuando haya contradicción.  
+> El código actual es **prototipo / motor parcial**; no define el juego definitivo.  
+> **Cómo trabajamos** está documentado en el §41 (parte integral de esta biblia, no un anexo opcional).
+
+---
+
+## CÓMO USAR ESTA BIBLIA (lectura rápida)
+
+1. **ChatGPT** lee Drive (`ZONA_ZERO_GAME_MASTER.md`) para diseñar, revisar y aprobar.  
+2. **Cursor** lee el mismo contenido en repo (`GAME_MASTER.md`) para implementar.  
+3. **Nadie implementa** hasta que ZZ-001 diga literalmente `ESTADO REVISIÓN: APROBADA` + `APROBACIÓN FINAL CHATGPT: SÍ` en el DEVELOPMENT_LOG.  
+4. Cada cambio de diseño se escribe **aquí** (y se sincroniza a Drive + GitHub).  
+5. Cada fase de código se ejecuta según IMPLEMENTATION_PLAN y se registra en DEVELOPMENT_LOG.  
+6. Capturas de revisión visual: `docs/review/` + Drive `...\Zona Zero\Review\` (ver reglas del repo).
 
 ---
 
@@ -55,11 +71,13 @@
 34. Sonido  
 35. Datos y balance  
 36. Simulador  
-37. Plan de implementación (resumen) → detalle en `docs/IMPLEMENTATION_PLAN.md`  
-38. Changelog de diseño 2.0  
+37. Plan de implementación (resumen) → detalle en plan ZZ-XXX  
+38. Changelog de diseño  
 39. Auditoría del documento (pasadas 2 y 3)  
 40. Decisiones que cambian o eliminan el diseño anterior  
-41. Flujo Cursor ↔ ChatGPT (gobernanza)  
+41. **Flujo de trabajo Cursor ↔ ChatGPT (gobernanza — parte de la biblia)**  
+42. Mapa de documentos, carpetas Drive y sync  
+A–N. Apéndices (techs, logros, misiones, costes, save, gates, inventario motor, curva, fichas, director, misiones detalle, logros ids, sync, checklist 30h) 
 
 ---
 
@@ -983,16 +1001,28 @@ Usar para calibrar, no para “aprobar UX”.
 
 # 37. PLAN DE IMPLEMENTACIÓN
 
-Detalle exhaustivo de fases/subfases, dependencias, tests y criterios de aceptación:
+Detalle exhaustivo de fases/subfases (`ZZ-XXX`), dependencias, tests, HUMAN_GATE y criterios de aceptación:
 
-→ **`docs/IMPLEMENTATION_PLAN.md`**
+→ Drive: `ZONA_ZERO_IMPLEMENTATION_PLAN.md`  
+→ Repo: `docs/IMPLEMENTATION_PLAN.md`
 
-Resumen: construcción por **bloques de aprobación humana**; primero experiencia D1 visual; luego sistemas capa a capa; nunca “MVP rápido” que salte diseño.
+Ejecución y revisiones fase a fase:
+
+→ Drive: `ZONA_ZERO_DEVELOPMENT_LOG.md`  
+→ Repo: `docs/DEVELOPMENT_LOG.md`
+
+Resumen: construcción por **bloques con HUMAN_GATE**; primero experiencia D1 visual; luego sistemas capa a capa; **nunca “MVP rápido”** que salte esta biblia. Gobernanza completa en §41.
 
 ---
 
-# 38. CHANGELOG DE DISEÑO 2.0
+# 38. CHANGELOG DE DISEÑO
 
+## 2.2 (2026-08-15)
+- Esta biblia incorpora **el flujo de trabajo Cursor ↔ ChatGPT** (§41–§42) como contrato, no como nota aparte.
+- Tres maestros obligatorios: GAME_MASTER + IMPLEMENTATION_PLAN + DEVELOPMENT_LOG (Drive = GitHub).
+- Aprobación solo literal (`APROBADA` + `SÍ`); HUMAN_GATE documentado.
+
+## 2.0 / 2.1
 - Modelo labor: **solo por edificio** (elimina doble asignación por categorías como primario).  
 - Vivienda: protección climática + vivienda aislada.  
 - Estaciones formales + patrón aviso/preparación/consecuencia.  
@@ -1003,7 +1033,8 @@ Resumen: construcción por **bloques de aprobación humana**; primero experienci
 - Infectados tipados deben importar en combate.  
 - Victoria = culminación + crisis final variable.  
 - UI: mundo-primero confirmado; tutorial por acción.  
-- Prioridad: diseño antes que más capas de código.
+- Prioridad: diseño antes que más capas de código.  
+- Apéndices G–N: inventario motor, curva detallada, director operativo, sync.
 
 ---
 
@@ -1875,10 +1906,12 @@ Campos schema: id, pattern, title, desc, status, progress, expiresDay, rewards, 
 
 | Documento | Drive | Repo |
 |-----------|-------|------|
-| Biblia diseño | `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
-| Plan técnico | `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
+| Biblia (este archivo) | `G:\Mi unidad\Juegos\Zona Zero\GAME_MASTER\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
+| Plan técnico | `G:\Mi unidad\Juegos\Zona Zero\GAME_MASTER\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
+| Development log | `G:\Mi unidad\Juegos\Zona Zero\GAME_MASTER\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
+| Capturas review | `G:\Mi unidad\Juegos\Zona Zero\Review\` | `docs/review/` |
 
-**Regla:** toda modificación de diseño actualiza **ambos** con el mismo contenido (hash idéntico).
+**Regla:** toda modificación documental actualiza Drive **y** repo con el mismo contenido (hash idéntico). Ver §41.9 y §42.
 
 ---
 
@@ -1897,7 +1930,7 @@ Campos schema: id, pattern, title, desc, status, progress, expiresDay, rewards, 
 - [x] Modelo labor único
 - [x] Feedback por acción importante
 - [x] Plan técnico por fases con gates humanos
-
+- [x] Forma de trabajar Cursor↔ChatGPT documentada en la biblia (§41–§42)
 ---
 
 # APÉNDICE A — TECNOLOGÍAS (LISTA COMPLETA OBJETIVO)
@@ -2094,49 +2127,278 @@ Compat: migrar saves 1.3 → 2.x con defaults seguros.
 
 ---
 
-# APÉNDICE F — MATRIZ DE APROBACIÓN HUMANA
+# APÉNDICE F — MATRIZ DE APROBACIÓN HUMANA (HUMAN_GATE)
 
-| Hito | Requiere “sí, continuar” |
-|------|---------------------------|
-| GAME_MASTER 2.1 | Sí (este doc) |
-| D1 visual F10–F15 | Sí |
-| D1–D5 loop | Sí |
-| Estaciones+vivienda | Sí |
-| Misiones+logros | Recomendado |
-| Arte lote final | Sí |
-| Release | Sí |
+La aprobación formal vive en DEVELOPMENT_LOG. Equivalencia de hitos:
+
+| Hito | Fase(s) | Requiere APROBADA + SÍ |
+|------|---------|-------------------------|
+| Biblia + plan | ZZ-001 | Sí (bloquea todo) |
+| D1 visual / tutorial / desktop | ZZ-010, ZZ-012, ZZ-014, ZZ-015 | Sí |
+| Loop D1–D5 + labor | ZZ-021, ZZ-023 | Sí |
+| Vivienda aislada | ZZ-032 | Sí |
+| Invierno / clima QA | ZZ-045 | Sí |
+| Ataque + recuperación | ZZ-065 | Sí |
+| Mapa / fog polish | ZZ-073 | Sí |
+| UI research | ZZ-082 | Sí |
+| Misiones QA | ZZ-106 | Sí |
+| Director auditoría | ZZ-125 | Sí |
+| Facciones go/no-go | ZZ-133 | Sí |
+| Victoria/derrota pantallas | ZZ-144 | Sí |
+| UX mundo / a11y | ZZ-150, ZZ-154 | Sí |
+| Arte terreno / review eras | ZZ-161, ZZ-165 | Sí |
+| Informe balance | ZZ-173 | Sí |
+| Deploy | ZZ-183 | Sí + orden explícita |
 
 ---
 
-*Apéndices A–N incluidos en la biblia 2.1 — documento maestro completo.*
+*Apéndices A–N + §41–§42 incluidos en la biblia 2.2 — documento maestro completo (diseño + forma de trabajar).*
 
 
 ---
 
-# 41. FLUJO CURSOR ↔ CHATGPT (GOBERNANZA)
+# 41. FLUJO DE TRABAJO CURSOR ↔ CHATGPT (GOBERNANZA)
 
-## 41.1 Documentos maestros (Drive = GitHub)
+> Este capítulo **forma parte de la biblia**. No es un tip de proceso: es contrato operativo del proyecto Zona Zero.
 
-| Doc | Rol |
-|-----|-----|
-| GAME_MASTER | Biblia funcional |
-| IMPLEMENTATION_PLAN | Fases ZZ-XXX |
-| DEVELOPMENT_LOG | Ejecución + revisiones + aprobaciones |
+## 41.1 Roles
 
-## 41.2 Regla de oro
+| Quién | Rol |
+|-------|-----|
+| **Esta biblia (GAME_MASTER)** | Qué es el juego: sistemas, contenido, curvas, UX contrato, arte, balance. |
+| **IMPLEMENTATION_PLAN** | Cómo se construye: fases `ZZ-XXX` con dependencias, tests y gates. |
+| **DEVELOPMENT_LOG** | Qué pasó: resultado Cursor, revisiones ChatGPT, correcciones, aprobaciones. |
+| **Cursor** | Ejecuta fases, escribe código/docs, tests, capturas, commits, push, actualiza el log. |
+| **ChatGPT** | Revisa diseño y cada fase leyendo Drive; escribe revisiones; otorga o deniega aprobación literal. |
+| **Humano (autor)** | Dueño del producto; puede reforzar o anular, pero el canal formal es el log. |
 
-Una fase solo está cerrada si el log contiene literalmente:
+## 41.2 Los tres documentos (siempre vivos)
+
+### GAME_MASTER / `ZONA_ZERO_GAME_MASTER.md`
+- Biblia funcional **completa**.
+- Incluye diseño del juego **y** esta forma de trabajar (§41–§42).
+- Si cambia una decisión de diseño, se actualiza **aquí primero**, luego sync.
+
+### IMPLEMENTATION_PLAN / `ZONA_ZERO_IMPLEMENTATION_PLAN.md`
+- Catálogo exhaustivo de fases/subfases (`ZZ-001` …).
+- Cada fase: ID, nombre, objetivo, sistemas, dependencias, tareas, datos, assets, pruebas auto/funcionales, revisión visual, aceptación, **HUMAN_GATE**.
+- No es un MVP de 5 fases: es el plan completo.
+
+### DEVELOPMENT_LOG / `ZONA_ZERO_DEVELOPMENT_LOG.md`
+- Documento de **comunicación de ejecución** Cursor ↔ ChatGPT.
+- Una sección por fase, formato obligatorio (ver §41.5).
+- Fuente de verdad de: dónde estamos, qué está hecho, qué pidió ChatGPT, qué está aprobado/bloqueado.
+
+## 41.3 Orden global del proyecto
+
+```
+1) Terminar / mantener esta biblia (diseño)
+2) Mantener IMPLEMENTATION_PLAN alineado
+3) ChatGPT aprueba ZZ-001 (GAME_MASTER + PLAN)
+4) Cursor ejecuta fases en orden de dependencias
+5) Tras cada fase → log PENDIENTE DE REVISIÓN
+6) Si HUMAN_GATE → esperar APROBADA + SÍ antes de continuar dependientes
+7) Si CAMBIOS SOLICITADOS → corregir → nueva ronda → otra vez PENDIENTE
+8) Solo con APROBADA + SÍ la fase se considera cerrada
+```
+
+**Ahora mismo:** pasos 1–2 en curso de revisión; **prohibido implementar juego** hasta ZZ-001 aprobada.
+
+## 41.4 Regla de oro de aprobación
+
+Una fase **solo** está autorizada/cerrada cuando el DEVELOPMENT_LOG contiene **literalmente**:
+
+```
+ESTADO REVISIÓN: APROBADA
+APROBACIÓN FINAL CHATGPT: SÍ
+```
+
+**NO equivalen a aprobación:**
+- silencio de ChatGPT;
+- “se ve mejor”, “va bien”, comentarios positivos;
+- tests verdes / smoke OK;
+- commit/push hechos;
+- capturas generadas.
+
+## 41.5 Formato obligatorio por fase (DEVELOPMENT_LOG)
+
+```markdown
+# FASE ZZ-XXX — Nombre
+
+## PLAN
+Qué debía hacerse.
+
+## RESULTADO CURSOR
+Qué se ha hecho realmente.
+
+## ARCHIVOS MODIFICADOS
+Lista.
+
+## PRUEBAS
+Qué se ejecutó y resultado.
+
+## CAPTURAS
+Rutas cuando proceda.
+
+## PROBLEMAS / LIMITACIONES
+Pendiente o provisional.
+
+## COMMIT
+Hash.
+
+## ESTADO CURSOR
+COMPLETADA / BLOQUEADA / NO INICIADA
+
+## REVISIÓN CHATGPT
+(Pendiente inicialmente / texto de revisión)
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN | CAMBIOS SOLICITADOS | APROBADA
+
+## CORRECCIONES SOLICITADAS
+(Vacío o lista concreta)
+
+## RESPUESTA CURSOR A LA REVISIÓN
+(Vacío o qué se corrigió)
+
+## APROBACIÓN FINAL CHATGPT
+NO | SÍ
+```
+
+### Historial de rondas (nunca borrar)
+
+Si hay varias pasadas:
+
+```markdown
+## REVISIÓN CHATGPT — RONDA 1
+…
+
+## RESPUESTA CURSOR — RONDA 1
+…
+
+## REVISIÓN CHATGPT — RONDA 2
+…
+
+## RESPUESTA CURSOR — RONDA 2
+…
+```
+
+## 41.6 Qué hace Cursor después de CADA fase
+
+1. Ejecutar pruebas de la fase.  
+2. Generar capturas si el plan lo pide (`docs/review/` + copia Drive Review + contact sheet).  
+3. Commit.  
+4. Push.  
+5. Actualizar DEVELOPMENT_LOG (Drive + repo).  
+6. Poner `ESTADO REVISIÓN: PENDIENTE DE REVISIÓN`.  
+7. Mantener `APROBACIÓN FINAL CHATGPT: NO` hasta nueva aprobación.  
+8. Continuar a la siguiente fase **solo si** no hay HUMAN_GATE pendiente de aprobación en dependencias.
+
+## 41.7 HUMAN_GATE
+
+Algunas fases llevan `HUMAN_GATE: YES` (arquitectura visual, D1, UX principal, mapa, arte, grandes cambios de gameplay, hitos jugables, deploy).
+
+En esas fases Cursor **NO** avanza a fases dependientes hasta:
 
 - `ESTADO REVISIÓN: APROBADA`
 - `APROBACIÓN FINAL CHATGPT: SÍ`
 
-Silencio, elogios o tests verdes **no** autorizan.
+Lista canónica actual (plan 2.1/2.2):  
+`ZZ-001`, `ZZ-010`, `ZZ-012`, `ZZ-014`, `ZZ-015`, `ZZ-021`, `ZZ-023`, `ZZ-032`, `ZZ-045`, `ZZ-065`, `ZZ-073`, `ZZ-082`, `ZZ-106`, `ZZ-125`, `ZZ-133`, `ZZ-144`, `ZZ-150`, `ZZ-154`, `ZZ-161`, `ZZ-165`, `ZZ-173`, `ZZ-183`.
 
-## 41.3 HUMAN_GATE
+## 41.8 Cuando ChatGPT pide cambios
 
-Fases marcadas `HUMAN_GATE: YES` bloquean el avance a dependientes hasta aprobación.
+Si el log dice `ESTADO REVISIÓN: CAMBIOS SOLICITADOS`:
 
-## 41.4 Prohibición actual
+1. Leer revisión completa + correcciones.  
+2. Implementar.  
+3. Re-ejecutar pruebas.  
+4. Regenerar capturas si aplica.  
+5. Commit/push.  
+6. Rellenar `RESPUESTA CURSOR A LA REVISIÓN` (o RONDA N).  
+7. Volver a `ESTADO REVISIÓN: PENDIENTE DE REVISIÓN`.  
+8. Dejar `APROBACIÓN FINAL CHATGPT: NO` hasta nueva revisión.
 
-**No implementar código de juego** hasta ZZ-001 (aprobación GAME_MASTER + PLAN) esté APROBADA.
+## 41.9 Sincronización Drive ↔ GitHub
+
+Tras **cualquier** cambio documental:
+
+1. Escribir el mismo contenido en Drive y en repo.  
+2. Verificar igualdad (hash / diff).  
+3. Commit + push de documentación.  
+
+Scripts de apoyo:
+- `scripts/build-dev-protocol-docs.mjs` — regenera plan + log + sync.
+- `scripts/sync-game-master-drive.mjs` — sync biblia/plan (ampliar si hace falta).
+
+**Regla:** Drive y GitHub deben contener la **misma versión** de los tres maestros. ChatGPT trabaja sobre Drive; Cursor sobre repo; el contenido es uno.
+
+## 41.10 Capturas y revisión visual
+
+Cuando una fase pide revisión visual:
+
+- Generar capturas necesarias.  
+- Subir a `docs/review/` en el mismo commit (sustituir antiguas; no acumular).  
+- Regenerar `docs/review/index.html` (preferible `node scripts/review-shots.mjs`).  
+- Copiar (no mover) a `G:\Mi unidad\Juegos\Zona Zero\Review\`.  
+- Regenerar `review-contact-sheet.jpg` en repo y Drive Review.  
+- Indicar en el log: commit, rutas, contact sheet.
+
+## 41.11 Qué NO hacer
+
+- No implementar fases antes de ZZ-001 APROBADA.  
+- No “seguir un poco” tras un HUMAN_GATE pendiente.  
+- No borrar revisiones anteriores del log.  
+- No diverger Drive vs GitHub.  
+- No tratar el código existente como diseño definitivo.  
+- No deploy salvo orden explícita (ZZ-183 + gate).
+
+## 41.12 Estado actual del proyecto (actualizar cuando cambie)
+
+| Ítem | Estado |
+|------|--------|
+| Biblia GAME_MASTER 2.2 | Lista para revisión ChatGPT |
+| Plan ZZ-XXX (~100 fases) | Listo para revisión ChatGPT |
+| DEVELOPMENT_LOG (plantillas) | Creado; fases NO INICIADAS |
+| Implementación de juego | **PARADA** hasta ZZ-001 |
+| ZZ-001 | PENDIENTE DE REVISIÓN |
+
+---
+
+# 42. MAPA DE DOCUMENTOS, CARPETAS Y RESPONSABILIDADES
+
+## 42.1 Carpeta Drive del proyecto
+
+```
+G:\Mi unidad\Juegos\Zona Zero\
+  GAME_MASTER\
+    ZONA_ZERO_GAME_MASTER.md          ← biblia (este documento)
+    ZONA_ZERO_IMPLEMENTATION_PLAN.md  ← fases
+    ZONA_ZERO_DEVELOPMENT_LOG.md      ← ejecución/revisión
+  Review\
+    *.png / review-contact-sheet.jpg  ← solo capturas de revisión actual
+```
+
+## 42.2 Equivalentes en el repositorio
+
+```
+GAME_MASTER.md
+docs/IMPLEMENTATION_PLAN.md
+docs/DEVELOPMENT_LOG.md
+docs/review/                          ← galería + capturas versionadas
+docs/art-direction/                   ← dirección arte (si aplica)
+docs/TECH.md                          ← notas técnicas (subordinado a esta biblia)
+content/*.json                        ← datos de juego (implementación)
+```
+
+## 42.3 Prioridad de fuentes de verdad
+
+1. **GAME_MASTER** (diseño + gobernanza)  
+2. Decisiones explícitas APROBADAS en DEVELOPMENT_LOG  
+3. IMPLEMENTATION_PLAN (cómo construir lo ya aprobado)  
+4. Código / JSON (adaptar al diseño; no sacralizar)
+
+## 42.4 Si dentro de 6 meses alguien abre solo un archivo
+
+Debe poder entender **todo Zona Zero** leyendo `ZONA_ZERO_GAME_MASTER.md` / `GAME_MASTER.md`, y saber **cómo se trabaja** leyendo §41–§42; el detalle de fases y el historial de ejecución viven en los otros dos maestros sincronizados.
 
