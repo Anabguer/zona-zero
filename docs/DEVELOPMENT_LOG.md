@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **2.7 cerrado** (decisiones recuperación/sectores/max/REVIEW_STOP). · ZZ-012 PENDIENTE (bloqueada hasta ZZ-019). · **PARADO — sin implementar B0** hasta autorización. No deploy.
+**Estado global:** B0 autorizado · **ZZ-016 HUMAN_GATE PENDIENTE DE REVISIÓN**. · ZZ-012 sigue bloqueada hasta ZZ-019. · **ZZ-017 NO iniciada.** No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -48,10 +48,53 @@ Dirección general **APROBADA**. Cierre de decisiones definitivas antes de B0:
 - ZZ-012: sigue PENDIENTE / NO — bloqueada hasta ZZ-019.
 
 ## ESTADO
-Docs sincronizados. **NO código.** Esperando autorización explícita para empezar B0 (ZZ-016).
+Dirección 2.7 APROBADA. B0 autorizado. **ZZ-016 entregada · PENDIENTE DE REVISIÓN.** ZZ-017 no iniciada.
 
 ## APROBACIÓN DIRECCIÓN 2.7
-APROBADA (dirección). Cierre decisiones incorporado — pendiente autorización de **implementación B0**.
+APROBADA (dirección). Implementación B0 **autorizada** (solo ZZ-016 ejecutada).
+
+---
+
+# FASE ZZ-016 — Landscape móvil + rotate gate
+
+IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE YES · GAME_MASTER §9.1 / §31.8
+
+## ESTADO CURSOR
+COMPLETADA (código + evidencias). **PARADO** — no ZZ-017.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+## APROBACIÓN FINAL CHATGPT
+NO
+
+## ENTREGA
+- Landscape-first en gameplay móvil: HUD compacto, ficha lateral, dock pulgares, safe areas.
+- Rotate gate de marca en portrait gameplay; hub/intro sin gate.
+- Desktop panorámico sin gate.
+- Tests: `smoke-orient`, `smoke-d1`.
+- Review: `docs/review/` + Drive `Review\` + `review-contact-sheet.jpg`.
+
+## AUTOCRÍTICA CURSOR (obligatoria)
+
+1. **¿Diseñado para landscape o UI vertical rotada?** Parece landscape: chrome en bordes, ficha lateral (~1/3), mundo dominante. No es un portrait encogido.
+2. **¿Mundo visible con HUD normal?** ~75–85% del alto útil; HUD top fino + dock ~3rem. Prioridad mundo OK.
+3. **¿Mundo con HQ seleccionado?** Ficha lateral deja ~60–70% del ancho al mundo; explorer rail se oculta con sheet abierta.
+4. **¿Controles pulgares?** Dock abajo Construir / Avanzar / Más; zoom cerca del dock. OK landscape; en 740×360 el chrome aprieta pero sigue usable.
+5. **¿Rotate gate de juego?** Sí: fondo ZZ, icono animado, «Gira tu dispositivo» + subtítulo; no alert nativo.
+6. **¿UI heredada que estorba?** Coach tip puede competir con mundo (mitigado arriba-izquierda en landscape). Arte patio con huerto/pozo «falsos» sigue (purga = ZZ-017). Emoji 💾 sustituido por «G».
+7. **¿Riesgos ZZ-017/018?** Clamp cámara D1 aún «patio»; no hay sectores reales; arte base mentirá hasta ZZ-017. Landscape composition ya anticipa colonia ancha.
+
+## PROBLEMAS TODAVÍA VISIBLES (no bloquean gate, a vigilar)
+- Decoración jugable falsa en yard (ZZ-017).
+- Dock full-width sigue ocupando franja vertical notable en móviles bajos.
+- Resource chips sin nombres en landscape (solo iconos) — legible tras aprender, menos para primer minuto.
+
+## COMMIT
+(pendiente al cerrar esta entrada)
+
+## Sync Drive/GitHub
+Tras commit.
 
 ---
 

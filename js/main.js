@@ -35,6 +35,7 @@ import {
   explorerSlotsUnlocked,
 } from './explorers.js';
 import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
+import { initOrientationGate, refreshOrientationGate, isGameplayPortraitBlocked } from './orientation.js';
 import { workforce } from './population.js';
 import {
   currentObjective,
@@ -1413,6 +1414,7 @@ export async function bootGame(opts) {
 
   bindChrome();
   startAutosaveLoop();
+  initOrientationGate();
   ensureOnboarding(state);
   if (!state.selectedExplorerId) {
     state.selectedExplorerId = livingExplorers(state)[0]?.id || null;
@@ -1469,6 +1471,12 @@ export async function bootGame(opts) {
       recenterCamera(state);
       paint();
     },
+    selectBuilding: (id) => {
+      openBuildingSheet(id);
+      paint();
+    },
+    refreshOrientation: () => refreshOrientationGate(),
+    isPortraitBlocked: () => isGameplayPortraitBlocked(),
   };
 }
 

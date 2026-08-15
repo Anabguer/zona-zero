@@ -24,11 +24,20 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=24" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=24" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=25" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=25" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
+  <div id="zz-rotate-gate" class="zz-rotate-gate" hidden aria-hidden="true" role="dialog" aria-labelledby="zz-rotate-title" aria-describedby="zz-rotate-desc">
+    <div class="zz-rotate-gate__panel">
+      <div class="zz-rotate-gate__phone" aria-hidden="true">
+        <span class="zz-rotate-gate__device"></span>
+      </div>
+      <h1 id="zz-rotate-title" class="zz-rotate-gate__title">Gira tu dispositivo</h1>
+      <p id="zz-rotate-desc" class="zz-rotate-gate__desc">Zona Zero se juega en horizontal.</p>
+    </div>
+  </div>
   <div id="zz-app" class="zz-world zz-world--overlay" hidden>
     <!-- MUNDO: protagonista full-bleed -->
     <main class="zz-world-stage" id="zz-stage">
@@ -54,7 +63,7 @@ $base = zz_public_base();
         <div class="zz-hud__actions">
           <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-help" title="Ayuda">?</button>
           <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-sound" aria-pressed="true" title="Sonido">♪</button>
-          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">💾</button>
+          <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-save" title="Guardar">G</button>
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
@@ -131,7 +140,7 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=24';
+    import { bootGame } from './js/main.js?v=25';
     bootGame({
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,

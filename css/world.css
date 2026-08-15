@@ -876,3 +876,269 @@ body.zz-from-intro #zz-boot {
   border-color: #a88850;
 }
 .zz-muted { color: var(--zz-muted); }
+
+/* ——— ZZ-016 Landscape-first + rotate gate ——— */
+
+.zz-rotate-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: max(1.25rem, env(safe-area-inset-top, 0px)) max(1.25rem, env(safe-area-inset-right, 0px))
+    max(1.25rem, env(safe-area-inset-bottom, 0px)) max(1.25rem, env(safe-area-inset-left, 0px));
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 35%, rgba(90, 70, 40, 0.35), transparent 60%),
+    linear-gradient(165deg, #0c0a08 0%, #16120e 45%, #0a0908 100%);
+  color: var(--zz-text);
+  text-align: center;
+}
+.zz-rotate-gate[hidden] {
+  display: none !important;
+}
+.zz-rotate-gate__panel {
+  max-width: 20rem;
+}
+.zz-rotate-gate__phone {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.15rem;
+  display: grid;
+  place-items: center;
+}
+.zz-rotate-gate__device {
+  display: block;
+  width: 1.65rem;
+  height: 2.85rem;
+  border: 2.5px solid #d4b06a;
+  border-radius: 0.35rem;
+  box-shadow: inset 0 0 0 1px rgba(212, 176, 106, 0.25);
+  position: relative;
+  animation: zz-rotate-phone 1.8s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+.zz-rotate-gate__device::after {
+  content: '';
+  position: absolute;
+  top: 0.22rem;
+  left: 50%;
+  width: 0.55rem;
+  height: 0.12rem;
+  transform: translateX(-50%);
+  border-radius: 99px;
+  background: rgba(212, 176, 106, 0.55);
+}
+@keyframes zz-rotate-phone {
+  0%,
+  18% {
+    transform: rotate(0deg);
+  }
+  42%,
+  68% {
+    transform: rotate(90deg);
+  }
+  88%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.zz-rotate-gate__title {
+  margin: 0 0 0.45rem;
+  font-family: var(--zz-display);
+  font-size: clamp(1.45rem, 6.5vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f0e4cc;
+}
+.zz-rotate-gate__desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #b0a490;
+}
+
+/* While gate is up, freeze chrome interaction (state intact). */
+body.zz-need-landscape #zz-app {
+  pointer-events: none;
+  filter: brightness(0.35) saturate(0.7);
+}
+body.zz-need-landscape #zz-toast {
+  display: none !important;
+}
+
+/*
+ * Mobile / tablet LANDSCAPE gameplay — designed for horizontal, not portrait CSS rotated.
+ * Priority: world surface > HUD chrome.
+ */
+@media (orientation: landscape) and (max-width: 1099px) {
+  .zz-body--v13 {
+    --zz-dock-h: 3.1rem;
+  }
+
+  .zz-hud {
+    padding: calc(0.2rem + env(safe-area-inset-top, 0px))
+      max(0.4rem, env(safe-area-inset-right, 0px)) 0.25rem
+      max(0.4rem, env(safe-area-inset-left, 0px));
+    background: linear-gradient(180deg, rgba(10, 8, 6, 0.88) 0%, rgba(10, 8, 6, 0.4) 75%, transparent 100%);
+  }
+  .zz-hud__row--top {
+    margin-bottom: 0.12rem;
+  }
+  .zz-hud__title strong {
+    font-size: 0.82rem;
+  }
+  #zz-day-label {
+    font-size: 0.62rem;
+  }
+  .zz-btn--icon {
+    min-width: 34px;
+    min-height: 34px;
+  }
+  .zz-hud__row--stats {
+    gap: 0.25rem;
+  }
+  .zz-hud__pop {
+    padding: 0.14rem 0.35rem;
+  }
+  .zz-hud__pop strong {
+    font-size: 0.82rem;
+  }
+  .zz-hud__pop-label {
+    display: none;
+  }
+  .zz-hud__res li {
+    min-width: 1.85rem;
+    padding: 0.08rem 0.2rem;
+  }
+  .zz-hud__res li strong {
+    font-size: 0.72rem;
+  }
+  .zz-hud__res-name {
+    display: none;
+  }
+  .zz-hud__res li img {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Compact side card — keep world visible (not a tall bottom sheet). */
+  .zz-world--overlay .zz-sheet {
+    left: auto;
+    right: max(0.35rem, env(safe-area-inset-right, 0px));
+    top: calc(3.6rem + env(safe-area-inset-top, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
+    width: min(42vw, 280px);
+    max-height: none;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.55rem 0.65rem 0.7rem;
+    box-shadow: -10px 0 28px rgba(0, 0, 0, 0.4);
+  }
+  .zz-sheet__handle {
+    display: none;
+  }
+  .zz-ctx__head {
+    grid-template-columns: 48px 1fr;
+    gap: 0.45rem;
+  }
+  .zz-ctx__art {
+    width: 48px;
+    height: 48px;
+  }
+  .zz-ctx__head h2 {
+    font-size: 1rem;
+  }
+  .zz-ctx__head p {
+    font-size: 0.72rem;
+  }
+  .zz-stepper button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .zz-world--overlay .zz-world-dock {
+    padding: 0.28rem max(0.45rem, env(safe-area-inset-right, 0px))
+      calc(0.28rem + env(safe-area-inset-bottom, 0px)) max(0.45rem, env(safe-area-inset-left, 0px));
+    gap: 0.35rem;
+  }
+  .zz-btn--dock-sec {
+    min-width: 4.6rem;
+    min-height: 2.55rem;
+    font-size: 0.88rem;
+  }
+  .zz-world--overlay .zz-world-dock .zz-btn--wide {
+    min-height: 2.55rem;
+    font-size: 0.95rem;
+  }
+
+  .zz-world--overlay .zz-explorer-rail {
+    left: max(0.4rem, env(safe-area-inset-left, 0px));
+    right: auto;
+    bottom: calc(var(--zz-dock-h) + 0.4rem + env(safe-area-inset-bottom, 0px));
+    max-width: min(38vw, 200px);
+  }
+
+  .zz-coach-card {
+    left: max(0.5rem, env(safe-area-inset-left, 0px));
+    right: auto;
+    transform: none;
+    bottom: auto;
+    top: calc(3.35rem + env(safe-area-inset-top, 0px));
+    width: min(260px, 42vw);
+    padding: 0.45rem 0.6rem;
+    max-height: 28vh;
+    overflow: auto;
+  }
+  .zz-coach-card p {
+    font-size: 0.78rem;
+  }
+  .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-coach-card {
+    width: min(220px, 32vw);
+    top: calc(3.35rem + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+  .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-explorer-rail {
+    display: none;
+  }
+
+  .zz-map-zoom {
+    right: max(0.4rem, env(safe-area-inset-right, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.45rem + env(safe-area-inset-bottom, 0px));
+    flex-direction: row;
+  }
+  .zz-map-zoom button {
+    width: 40px;
+    height: 40px;
+  }
+  .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-map-zoom {
+    right: auto;
+    left: max(0.4rem, env(safe-area-inset-left, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.45rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .zz-day-brief {
+    top: 10%;
+    width: min(320px, 55vw);
+  }
+}
+
+/* Short landscape phones (e.g. 667×375, 740×360) — squeeze chrome harder */
+@media (orientation: landscape) and (max-width: 1099px) and (max-height: 400px) {
+  .zz-body--v13 {
+    --zz-dock-h: 2.85rem;
+  }
+  .zz-hud__row--top .zz-back {
+    font-size: 0.78rem;
+  }
+  .zz-world--overlay .zz-sheet {
+    top: calc(3.15rem + env(safe-area-inset-top, 0px));
+    width: min(38vw, 240px);
+  }
+  .zz-map-zoom button {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+}
