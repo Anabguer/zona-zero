@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revisión visual · Zona Zero</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #12100e;
+      --card: #1a1612;
+      --line: #3a342c;
+      --text: #e8e0d4;
+      --muted: #9a9080;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: 1.25rem 1rem 2.5rem;
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto 1.5rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin: 0 0 0.35rem;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .gallery {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) {
+      .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    figure {
+      margin: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    a.shot {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+    a.shot:focus-visible {
+      outline: 2px solid #c4a050;
+      outline-offset: 2px;
+    }
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #0a0908;
+      vertical-align: middle;
+    }
+    figcaption {
+      padding: 0.65rem 0.85rem 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-top: 1px solid var(--line);
+    }
+    figcaption span {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Revisión visual · Zona Zero</h1>
+    <p>Capturas de la revisión actual (1.2.4 · gestión activa). Se sustituyen en cada entrega.</p>
+  </header>
+  <main class="gallery">
+    <figure>
+      <a class="shot" href="mobile.png" target="_blank" rel="noopener">
+        <img src="mobile.png" alt="Pantalla principal móvil" loading="lazy" />
+      </a>
+      <figcaption>Móvil<span>mobile.png · pantalla principal</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="desktop.png" target="_blank" rel="noopener">
+        <img src="desktop.png" alt="Vista escritorio" loading="lazy" />
+      </a>
+      <figcaption>Escritorio<span>desktop.png · vista 16:9</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="gameplay.png" target="_blank" rel="noopener">
+        <img src="gameplay.png" alt="Gameplay móvil con colonia" loading="lazy" />
+      </a>
+      <figcaption>Gameplay<span>gameplay.png · huerto y pozo colocados</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="poblacion.png" target="_blank" rel="noopener">
+        <img src="poblacion.png" alt="Panel de población" loading="lazy" />
+      </a>
+      <figcaption>Población<span>poblacion.png · asignación numérica</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="construir.png" target="_blank" rel="noopener">
+        <img src="construir.png" alt="Sheet de construcción" loading="lazy" />
+      </a>
+      <figcaption>Construir<span>construir.png · cards visuales</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="explorador.png" target="_blank" rel="noopener">
+        <img src="explorador.png" alt="Ficha de explorador" loading="lazy" />
+      </a>
+      <figcaption>Explorador<span>explorador.png · mandar a explorar</span></figcaption>
+    </figure>
+    <figure>
+      <a class="shot" href="desktop-poblacion.png" target="_blank" rel="noopener">
+        <img src="desktop-poblacion.png" alt="Panel población en escritorio" loading="lazy" />
+      </a>
+      <figcaption>Escritorio · Población<span>desktop-poblacion.png</span></figcaption>
+    </figure>
+  </main>
+</body>
+</html>

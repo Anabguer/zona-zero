@@ -11,6 +11,7 @@ Cuando termines una versión o cambio que requiera revisión visual:
 2. Súbelas a `docs/review/` **en el mismo commit** que el cambio (o en el commit de cierre de la versión).
 3. Mantén **solo** las capturas de la revisión actual: sustituye/borra las anteriores en `docs/review/` para no acumular.
 4. No dejes las capturas únicamente en `scripts/screenshots-*` local; deben estar en el repo bajo `docs/review/`.
+5. **Actualiza siempre** `docs/review/index.html` para que la galería muestre exactamente las capturas actuales (título debajo de cada una). Preferible regenerarla con `node scripts/review-shots.mjs`.
 
 ## Mínimo cuando corresponda
 
@@ -18,7 +19,8 @@ Cuando termines una versión o cambio que requiera revisión visual:
 - `desktop.png`
 - `gameplay.png`
 - Más capturas específicas necesarias para entender el cambio (p. ej. `poblacion.png`, `construir.png`, `explorador.png`).
+- `index.html` (galería de la revisión actual)
 
 ## Entrega al usuario
 
-Indica el **commit** y **qué archivos** has dejado en `docs/review/`.
+Indica el **commit**, la galería (`docs/review/index.html`) y **qué archivos** has dejado en `docs/review/`.

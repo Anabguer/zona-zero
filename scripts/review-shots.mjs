@@ -121,6 +121,8 @@ writeFileSync(
 
 Capturas de la **revisión actual** (se sustituyen en cada entrega).
 
+Galería: [index.html](./index.html)
+
 | Archivo | Contenido |
 |---------|-----------|
 | \`mobile.png\` | Pantalla principal móvil |
@@ -132,6 +134,105 @@ Capturas de la **revisión actual** (se sustituyen en cada entrega).
 | \`desktop-poblacion.png\` | Panel población en escritorio |
 
 Generadas con \`node scripts/review-shots.mjs\` (servidor local \`serve -l 8765\`).
+`,
+  'utf8'
+);
+
+const gallery = [
+  { file: 'mobile.png', title: 'Móvil', note: 'pantalla principal' },
+  { file: 'desktop.png', title: 'Escritorio', note: 'vista 16:9' },
+  { file: 'gameplay.png', title: 'Gameplay', note: 'huerto y pozo colocados' },
+  { file: 'poblacion.png', title: 'Población', note: 'asignación numérica' },
+  { file: 'construir.png', title: 'Construir', note: 'cards visuales' },
+  { file: 'explorador.png', title: 'Explorador', note: 'mandar a explorar' },
+  { file: 'desktop-poblacion.png', title: 'Escritorio · Población', note: 'panel lateral' },
+];
+
+const figures = gallery
+  .map(
+    (g) => `    <figure>
+      <a class="shot" href="${g.file}" target="_blank" rel="noopener">
+        <img src="${g.file}" alt="${g.title}" loading="lazy" />
+      </a>
+      <figcaption>${g.title}<span>${g.file}${g.note ? ` · ${g.note}` : ''}</span></figcaption>
+    </figure>`
+  )
+  .join('\n');
+
+writeFileSync(
+  join(out, 'index.html'),
+  `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revisión visual · Zona Zero</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #12100e;
+      --card: #1a1612;
+      --line: #3a342c;
+      --text: #e8e0d4;
+      --muted: #9a9080;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: 1.25rem 1rem 2.5rem;
+    }
+    header { max-width: 1100px; margin: 0 auto 1.5rem; }
+    h1 { font-size: 1.35rem; font-weight: 650; margin: 0 0 0.35rem; }
+    header p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    .gallery {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) {
+      .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    figure {
+      margin: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    a.shot { display: block; color: inherit; text-decoration: none; }
+    a.shot:focus-visible { outline: 2px solid #c4a050; outline-offset: 2px; }
+    img { display: block; width: 100%; height: auto; background: #0a0908; }
+    figcaption {
+      padding: 0.65rem 0.85rem 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-top: 1px solid var(--line);
+    }
+    figcaption span {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Revisión visual · Zona Zero</h1>
+    <p>Capturas de la revisión actual. Se sustituyen en cada entrega.</p>
+  </header>
+  <main class="gallery">
+${figures}
+  </main>
+</body>
+</html>
 `,
   'utf8'
 );
