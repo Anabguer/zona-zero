@@ -75,6 +75,7 @@
 | Arte patio / cámara > viewport | Nuevo ZZ-017 |
 | Sectores + recuperar territorio | Nuevo ZZ-018 + **REVIEW_STOP** |
 | Plantillas recuperación / sin cupo sector / sin macrogrid | Contrato §9.4–§9.5 (cierre 2.7) |
+| Mundo > viewport (no caber colonia en pantalla) | §9.4 aclaración escala; evidencia pan/zoom ZZ-018 |
 | radio max=1 · clinic sin max arbitrario | §9.7 |
 | Recuperación sin RNG punitivo v1 | §9.5 |
 | Construcción semilibre + snap + ✓ | Nuevo **ZZ-019 (GATE espacial temprano)** |
@@ -398,6 +399,10 @@
 - ausencia de macrogrid visible/sugerida
 - composición móvil landscape + desktop
 - sensación de espacio / ciudad parcial
+- **mismo mundo** con cámara en varias posiciones (continúa fuera del viewport)
+- zoom cercano · zoom alejado · recenter a Núcleo/HQ
+- pan horizontal · pan vertical/diagonal si la geometría lo permite
+- 740×360 manejable **sin** empequeñecer artificialmente el mundo
 
 **Aceptación:**
 - No casillas bloqueadas tipo GIS ni hexes uniformes

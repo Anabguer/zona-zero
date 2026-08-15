@@ -34,6 +34,7 @@ import {
   syncLaborFromColony,
   laborKeyForBuilding,
 } from './colony.js';
+import { isCellBuildable, tickSectorRecovery, ensureSectors } from './sectors.js';
 
 export const RES_LABEL = {
   food: 'comida',
@@ -80,6 +81,10 @@ export function placeBuilding(state, content, type, x, y) {
   const count = state.base.buildings.filter((b) => b.type === type && b.hp > 0).length;
   if (def.max != null && count >= def.max) return { ok: false, error: 'Límite de este edificio' };
   if (x < 0 || y < 0 || x >= state.base.w || y >= state.base.h) return { ok: false, error: 'Fuera de la base' };
+  ensureSectors(state);
+  if (!isCellBuildable(state, x, y)) {
+    return { ok: false, error: 'Terreno no recuperado — recupera el sector primero' };
+  }
   if (state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) {
     return { ok: false, error: 'Celda ocupada' };
   }
@@ -888,6 +893,10 @@ export function advanceDay(state, content) {
   }
 
   state.day += 1;
+  const recoveredSectors = tickSectorRecovery(state);
+  recoveredSectors.forEach((s) => {
+    pushLog(state, `Hemos recuperado «${s.name}». La colonia crece — y el perímetro también.`, 'good');
+  });
   pushLog(state, `Amanece el día ${state.day}.`, 'story');
 
   updateStability(state, content);
@@ -904,11 +913,17 @@ export function advanceDay(state, content) {
   checkVictory(state, content);
   checkDefeat(state);
 
-  const brief = buildDayBrief(state, content, before, prod, { foodNeed, waterNeed, dir, attack });
+  const brief = buildDayBrief(state, content, before, prod, {
+    foodNeed,
+    waterNeed,
+    dir,
+    attack,
+    recoveredSectors,
+  });
   state.lastDayBrief = brief;
 
   state.rngState = (state.rngState || 1) + 17;
-  return { ok: true, director: dir, attack, brief };
+  return { ok: true, director: dir, attack, brief, recoveredSectors };
 }
 
 function buildDayBrief(state, content, before, prod, ctx) {
@@ -969,6 +984,10 @@ function buildDayBrief(state, content, before, prod, ctx) {
   } else if (ctx.dir?.event && !ctx.dir?.choice) {
     facts.push({ kind: 'event', text: ctx.dir.event.name || 'Algo ha ocurrido en la colonia.' });
   }
+
+  (ctx.recoveredSectors || []).forEach((s) => {
+    facts.push({ kind: 'build', text: `Territorio recuperado: ${s.name}.` });
+  });
 
   // Construcciones del día anterior aproximadas por log
   (state.log || [])

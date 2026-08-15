@@ -634,7 +634,29 @@ HQ (ya), shelter, farm, well, barricade (opcional), storage (si recursos).
 
 ### Colonia > viewport
 
-El viewport muestra **una parte**. Pan, zoom (pinch), Recentrar. La colonia puede superar claramente una pantalla.
+El viewport es una **ventana** sobre un mundo físico mayor — no un marco donde “debe caber la colonia”.
+
+**Contrato de escala (2.7 · aclaración ZZ-018):**
+
+- El mundo de la colonia es **físicamente mayor** que 844×390 y que 932×430.  
+- El jugador **recorre** con pan; **pinch** acerca/aleja; **Recentrar** vuelve a una referencia útil (Núcleo/HQ al inicio).  
+- **No** intentar mostrar todos los sectores a la vez.  
+- **No** reducir edificios para hacer caber artificialmente la colonia.  
+- Edificios con tamaño visual agradable y legible.  
+- Crecimiento D1→D100 = más territorio real utilizado; late game puede exigir desplazarse en varias direcciones.  
+- Zoom alejado = lectura más global, dentro de límites de legibilidad/performance.  
+- El límite del mundo **no** es el borde de la pantalla.
+
+| Fase | Sensación espacial |
+|------|-------------------|
+| D1 | Principalmente Núcleo + entorno cercano |
+| Media | Desplazamiento entre áreas funcionales |
+| Avanzada | Extensión varias veces el viewport |
+
+**Pregunta de diseño correcta:** ¿es cómodo recorrer, localizar y gestionar una colonia mayor que la pantalla desde móvil?  
+**Incorrecta:** ¿cabe la colonia en móvil?
+
+Referencia de sensación (no copia de sistemas): mundos/bases navegables tipo Day R — escala y perspectiva.
 
 ### Sectores orgánicos (geometría del mundo)
 
@@ -648,6 +670,8 @@ Cada sector tiene **tamaño, forma y orientación propios** derivados del entorn
 ejemplos: antiguo aparcamiento · parcela entre ruinas · patio industrial · manzana parcial · terreno tras carretera · zona verde abandonada · hueco entre estructuras.
 
 Al mirar la colonia debe percibirse **ciudad/entorno recuperado**, no Civilization con celdas escondidas.
+
+Los sectores **pueden continuar fuera del viewport**; no se diseñan como N piezas que deban caber todas en pantalla a la vez. El jugador las descubre/recorre espacialmente.
 
 ### Capacidad de un sector = física, no cupo
 
@@ -1813,6 +1837,7 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 - Auditoría `max` edificios (§9.7); huertos sin max temprano arbitrario.  
 - PLAN 2.7: HUMAN_GATE espacial temprano; ZZ-012 replanificada (pendiente).
 - **Cierre decisiones:** plantillas de recuperación (no receta universal); sin cupo artificial por sector; sectores sin macrogrid; radio max=1; clinic sin max arbitrario; recuperación v1 sin RNG punitivo; REVIEW_STOP tras ZZ-018; criterio fantasía B0.
+- **Aclaración escala:** viewport = ventana; mundo mayor que 844×390/932×430; pan/zoom/recenter; no caber toda la colonia en pantalla (§9.4).
 
 ## 2.6 (2026-08-15) — arranque, tutorial contextual, save v1 (Neni)
 - **Portada / inicio:** Continuar (principal si hay partida) · Nueva partida · sin slots (§31.5).  

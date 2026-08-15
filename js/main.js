@@ -36,6 +36,15 @@ import {
 } from './explorers.js';
 import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
 import { initOrientationGate, refreshOrientationGate, isGameplayPortraitBlocked } from './orientation.js';
+import {
+  ensureSectors,
+  getSector,
+  summarizeRecoveryCost,
+  canStartRecovery,
+  startSectorRecovery,
+  isAdjacentToRecovered,
+  COMPONENT_LABEL,
+} from './sectors.js';
 import { workforce } from './population.js';
 import {
   currentObjective,
@@ -237,15 +246,45 @@ function handleSheetAction(action, btn) {
     state.buildMode = type;
     state.uiMode = 'build';
     state.selectedBuildingId = null;
-    // Centrar cámara en el refugio
-    const camp = state.zones.find((z) => z.type === 'camp');
-    if (camp && state.mapCamera) {
-      state.mapCamera.x = camp.x;
-      state.mapCamera.y = camp.y;
-      state.mapCamera.zoom = Math.max(state.mapCamera.zoom || 1, 1.6);
+    state.selectedSectorId = null;
+    closeSheet();
+    paint();
+    toast(`Coloca ${def?.name || type} en terreno recuperado`, 'info');
+    return;
+  }
+  if (action === 'expand-mode') {
+    if (state.uiMode === 'expand') {
+      state.uiMode = null;
+      state.selectedSectorId = null;
+      toast('Modo recuperación cerrado', 'info');
+    } else {
+      state.uiMode = 'expand';
+      state.buildMode = null;
+      ensureSectors(state);
+      toast('Toca una zona colindante para ver cómo recuperarla', 'info');
     }
     closeSheet();
-    toast(`Colocad ${def?.name || type} en una parcela libre del refugio`, 'info');
+    paint();
+    return;
+  }
+  if (action === 'recover-sector') {
+    const id = btn.getAttribute('data-sector');
+    const r = startSectorRecovery(state, id);
+    if (!r.ok) {
+      toast(r.error || 'No se puede recuperar', 'warn');
+      return;
+    }
+    sfx.build?.();
+    toast(`Recuperando «${r.sector.name}» · ${r.cost.days} día(s)`, 'good');
+    scheduleSave();
+    openSectorSheet(id);
+    paint();
+    return;
+  }
+  if (action === 'focus-core') {
+    state.selectedSectorId = 'core';
+    state.uiMode = state.uiMode === 'expand' ? 'expand' : null;
+    openSectorSheet('core');
     paint();
     return;
   }
@@ -673,6 +712,70 @@ function openBuildSheet() {
   `);
 }
 
+function openSectorSheet(id) {
+  ensureSectors(state);
+  const sector = getSector(state, id);
+  if (!sector) return;
+  state.selectedSectorId = id;
+  const cost = summarizeRecoveryCost(sector);
+  const check = canStartRecovery(state, id);
+  const adj = isAdjacentToRecovered(state, sector);
+  const problems = (sector.components || [])
+    .map((c) => `<li><strong>${escapeHtml(COMPONENT_LABEL[c.type] || c.type)}</strong>${
+      c.days ? ` · ~${c.days}d` : ''
+    }${c.wood ? ` · madera ${c.wood}` : ''}${c.metal ? ` · metal ${c.metal}` : ''}${
+      c.labor ? ` · labor ${c.labor}` : ''
+    }</li>`)
+    .join('');
+
+  let statusLine = '';
+  if (sector.status === 'recovered') {
+    statusLine = '<p class="zz-ctx__prod">Territorio de la colonia — podéis construir aquí.</p>';
+  } else if (sector.status === 'recovering') {
+    const left = sector.recover?.daysLeft ?? '?';
+    statusLine = `<p class="zz-ctx__prod">Recuperación en curso · ${left} día(s) restante(s). Al terminar: éxito.</p>`;
+  } else if (!adj) {
+    statusLine = '<p class="zz-ctx__warn">Todavía no colinda con territorio recuperado.</p>';
+  }
+
+  const actionBtn =
+    sector.status === 'locked' && adj
+      ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="recover-sector" data-sector="${sector.id}" ${
+          check.ok ? '' : 'disabled'
+        }>Empezar recuperación${cost.days ? ` (~${cost.days}d)` : ''}</button>
+         ${check.ok ? '' : `<p class="zz-ctx__warn">${escapeHtml(check.error || '')}</p>`}`
+      : '';
+
+  openSheet(`
+    <div class="zz-ctx">
+      <div class="zz-ctx__head" style="grid-template-columns:1fr">
+        <div>
+          <h2>${escapeHtml(sector.name)}</h2>
+          <p>${escapeHtml(sector.identity || '')}</p>
+        </div>
+      </div>
+      ${statusLine}
+      ${
+        problems
+          ? `<p class="zz-muted" style="margin:0.35rem 0 0.15rem;font-size:0.78rem">Situación</p>
+             <ul class="zz-sector-problems">${problems}</ul>`
+          : '<p class="zz-muted">Núcleo ya asegurado.</p>'
+      }
+      ${
+        sector.status !== 'recovered'
+          ? `<p class="zz-ctx__prod" style="margin-top:0.5rem">Al recuperar: ${escapeHtml(sector.gain || 'Más suelo construible.')}</p>
+             <p class="zz-muted" style="font-size:0.78rem">Esfuerzo total: ~${cost.days} día(s)${
+                 cost.wood || cost.metal
+                   ? ` · madera ${cost.wood || 0} · metal ${cost.metal || 0}`
+                   : ''
+               } · labor ≥${cost.labor}</p>`
+          : ''
+      }
+      ${actionBtn}
+    </div>
+  `);
+}
+
 function openMoreSheet() {
   const slots = explorerSlotsUnlocked(state, content.balance);
   const living = livingExplorers(state).length;
@@ -703,6 +806,14 @@ function openMoreSheet() {
 
   openSheet(`
     <h2>Más</h2>
+    <p>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="expand-mode">
+        ${state.uiMode === 'expand' ? 'Salir de recuperación' : 'Recuperar territorio'}
+      </button>
+    </p>
+    <p class="zz-muted" style="font-size:0.8rem;margin-top:0.35rem">
+      Amplía la colonia sector a sector. Cada zona tiene su propia situación.
+    </p>
     <p>Exploradores ${living}/${slots}.
       <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
@@ -906,13 +1017,21 @@ function paint() {
   renderMap($('zz-map'), state, {
     onSelectZone: (id) => {
       if (wrap?.dataset.zzPanned) return;
+      if (state.uiMode === 'expand') return;
       sfx.click?.();
       openZoneSheet(id);
     },
     onSelectBuilding: (id) => {
       if (wrap?.dataset.zzPanned) return;
+      if (state.uiMode === 'expand') return;
       sfx.click?.();
       openBuildingSheet(id);
+    },
+    onSelectSector: (id) => {
+      if (wrap?.dataset.zzPanned) return;
+      sfx.click?.();
+      openSectorSheet(id);
+      paint();
     },
     onPlaceCell: (x, y) => {
       if (!state.buildMode) return;
@@ -1077,7 +1196,7 @@ function paintModeBanner() {
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
-    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> en el refugio · tocá una parcela · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
+    el.innerHTML = `Colocá <strong>${escapeHtml(content.buildings[state.buildMode]?.name || 'edificio')}</strong> en terreno recuperado · <button type="button" class="zz-linkish" data-cancel-build>Cancelar</button>`;
     el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
       state.buildMode = null;
       state.uiMode = null;
@@ -1086,6 +1205,15 @@ function paintModeBanner() {
   } else if (state.uiMode === 'explore') {
     el.hidden = false;
     el.textContent = 'Tocá una zona del mapa para explorar';
+  } else if (state.uiMode === 'expand') {
+    el.hidden = false;
+    el.innerHTML =
+      'Recuperar territorio · tocá una zona colindante · <button type="button" class="zz-linkish" data-cancel-expand>Listo</button>';
+    el.querySelector('[data-cancel-expand]')?.addEventListener('click', () => {
+      state.uiMode = null;
+      state.selectedSectorId = null;
+      paint();
+    });
   } else {
     el.hidden = true;
   }
@@ -1474,6 +1602,20 @@ export async function bootGame(opts) {
     selectBuilding: (id) => {
       openBuildingSheet(id);
       paint();
+    },
+    selectSector: (id) => {
+      openSectorSheet(id);
+      paint();
+    },
+    setExpandMode: (on) => {
+      state.uiMode = on ? 'expand' : null;
+      if (!on) state.selectedSectorId = null;
+      paint();
+    },
+    startRecovery: (id) => {
+      const r = startSectorRecovery(state, id);
+      if (r.ok) paint();
+      return r;
     },
     refreshOrientation: () => refreshOrientationGate(),
     isPortraitBlocked: () => isGameplayPortraitBlocked(),

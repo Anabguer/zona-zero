@@ -20,7 +20,7 @@
   "starvationLossPerDay": 0.55,
   "dehydrationLossPerDay": 0.55,
   "noFuelExtraFoodLoss": 1,
-  "baseGrid": { "w": 10, "h": 8 },
+  "baseGrid": { "w": 14, "h": 12 },
   "housingOverflowGrace": 2,
   "laborPriorities": ["defense", "food", "water", "medicine", "produce", "build", "idle"],
   "laborTargets": {

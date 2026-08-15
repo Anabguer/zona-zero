@@ -515,6 +515,78 @@ body.zz-body {
   stroke-width: 0.06;
   pointer-events: none;
 }
+
+/* ZZ-018 sectores orgánicos */
+.zz-sector-fill {
+  pointer-events: none;
+  stroke: none;
+}
+.zz-sector-fill--core {
+  fill: rgba(90, 72, 48, 0.42);
+}
+.zz-sector-fill--recovered {
+  fill: rgba(70, 78, 52, 0.28);
+}
+.zz-sector-fill--recovering {
+  fill: rgba(120, 95, 45, 0.35);
+}
+.zz-sector-hit {
+  pointer-events: all;
+}
+.zz-sector-outline {
+  fill: none;
+  stroke: rgba(200, 170, 100, 0.0);
+  stroke-width: 0.35;
+  pointer-events: none;
+}
+.zz-sector-outline--recovered.is-selected,
+.zz-sector-outline--recovered.is-expand {
+  fill: rgba(120, 150, 90, 0.12);
+  stroke: rgba(160, 190, 120, 0.55);
+  stroke-dasharray: 1.2 0.8;
+}
+.zz-sector-outline--locked.is-expand {
+  fill: rgba(40, 36, 30, 0.18);
+  stroke: rgba(200, 160, 90, 0.65);
+  stroke-dasharray: 1.4 1.1;
+}
+.zz-sector-outline--locked.is-selected {
+  fill: rgba(90, 70, 40, 0.28);
+  stroke: rgba(230, 190, 110, 0.9);
+  stroke-dasharray: none;
+  stroke-width: 0.45;
+}
+.zz-sector-outline--recovering {
+  fill: rgba(160, 120, 50, 0.22);
+  stroke: rgba(220, 170, 80, 0.85);
+  stroke-dasharray: 0.9 0.7;
+}
+.zz-sector-outline.is-selected {
+  stroke-width: 0.5;
+}
+.zz-sector-label {
+  fill: #e8dcc0;
+  font-size: 1.35px;
+  font-family: var(--zz-display);
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.75);
+  stroke-width: 0.35px;
+  pointer-events: none;
+}
+.zz-sector-problems {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  color: var(--zz-muted);
+}
+.zz-sector-problems li {
+  margin: 0.2rem 0;
+}
+.zz-ground-camp-halo {
+  fill: rgba(55, 48, 36, 0.35);
+  pointer-events: none;
+}
 .zz-settle-yard-patch {
   display: none !important;
 }

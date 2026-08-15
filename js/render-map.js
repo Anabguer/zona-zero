@@ -4,6 +4,12 @@
 import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
 import { artUrl, buildingArtUrl, zoneArtUrl, TERRAIN_ART, FOG_ART, COLONY_YARD_ART } from './art.js';
+import {
+  ensureSectors,
+  ptsStr as sectorPtsStr,
+  isCellBuildable,
+  getSector,
+} from './sectors.js';
 
 const VB_SQ = 100;
 
@@ -216,15 +222,10 @@ function drawPlayableTerrain(parent, camp, tier, day) {
   g.appendChild(svgEl('rect', { x: 0, y: 0, width: 100, height: 100, class: 'zz-ground-base', fill: 'url(#zzDirtPat)' }));
   g.appendChild(svgEl('rect', { x: 0, y: 0, width: 100, height: 100, class: 'zz-ground-grain', filter: 'url(#zzSoilGrain)' }));
   if (camp) {
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: camp.x,
-        cy: camp.y + 1.2,
-        rx: early ? 24 : 18,
-        ry: early ? 19 : 14,
-        class: 'zz-ground-camp-halo',
-      })
-    );
+    // Halo irregular (no óvalo perfecto) — reduce lectura “isla circular”
+    const rngH = createRng(hashSeed(`halo:${camp.id || 'c'}`));
+    const halo = irregularPatch(camp.x, camp.y + 1.0, early ? 20 : 15, early ? 15 : 11, rngH, 9);
+    g.appendChild(svgEl('polygon', { points: ptsStr(halo), class: 'zz-ground-camp-halo' }));
   }
   const farN = early ? 14 : 22;
   for (let i = 0; i < farN; i++) {
@@ -379,57 +380,99 @@ function irregularPatch(cx, cy, rx, ry, rng, n = 7) {
 }
 
 /**
- * Patio físico D1: placa de terreno mundo (ruinas/escombros) + scrub.
- * ZZ-017: sin huerto/pozo/almacén/barricada falsos ni props de edificios jugables.
+ * Terreno de colonia: rellenos orgánicos por sector (no placa circular única).
+ * ZZ-018: yard art solo como textura suave bajo el núcleo, clipada.
  */
-function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day) {
-  const early = day <= 2;
-  const yardW = early ? scale * 8.4 : scale * 6.2;
-  const yardH = yardW * 0.92;
-  layer.appendChild(
-    svgEl('image', {
-      href: artUrl(COLONY_YARD_ART),
-      x: ox - yardW / 2,
-      y: oy - yardH / 2 + scale * 0.28,
-      width: yardW,
-      height: yardH,
-      opacity: early ? '0.98' : '0.82',
-      preserveAspectRatio: 'xMidYMid meet',
-      class: 'zz-settle-yard-art',
-      style: 'pointer-events:none',
-    })
-  );
+function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day, state, camp) {
+  ensureSectors(state);
+  const sectors = state.sectors || [];
 
-  // Escombros / vegetación procedural (nunca assets de edificios construibles)
-  const debrisN = early ? 9 : 5;
-  for (let i = 0; i < debrisN; i++) {
-    const a = rng.float(0, Math.PI * 2);
-    const r = scale * rng.float(2.2, 3.8);
-    const cx = ox + Math.cos(a) * r;
-    const cy = oy + Math.sin(a) * r * 0.78;
-    if (rng.chance(0.55)) {
-      layer.appendChild(
-        svgEl('ellipse', {
-          cx,
-          cy,
-          rx: rng.float(0.28, 0.55),
-          ry: rng.float(0.18, 0.32),
-          class: 'zz-settle-scrub',
-        })
-      );
-    } else {
+  // Relleno de tierra por sector recuperado (formas distintas)
+  sectors.forEach((sec) => {
+    if (sec.status !== 'recovered' && sec.status !== 'recovering') return;
+    const local = (sec.polyOff || []).map(([dx, dy]) => [dx, dy]);
+    if (local.length < 3) return;
+    layer.appendChild(
+      svgEl('polygon', {
+        points: local.map(([x, y]) => `${x},${y}`).join(' '),
+        class:
+          sec.status === 'recovering'
+            ? 'zz-sector-fill zz-sector-fill--recovering'
+            : sec.id === 'core'
+              ? 'zz-sector-fill zz-sector-fill--core'
+              : 'zz-sector-fill zz-sector-fill--recovered',
+      })
+    );
+  });
+
+  // Textura suave solo en núcleo (clipada a su poly — rompe lectura circular)
+  const core = sectors.find((s) => s.id === 'core');
+  if (core?.polyOff?.length) {
+    const clipId = `zzYardClip-${(camp?.id || 'c').replace(/[^a-z0-9]/gi, '')}`;
+    const defs = svgEl('defs', {});
+    const clip = svgEl('clipPath', { id: clipId });
+    clip.appendChild(
+      svgEl('polygon', {
+        points: core.polyOff.map(([x, y]) => `${x},${y}`).join(' '),
+      })
+    );
+    defs.appendChild(clip);
+    layer.appendChild(defs);
+    const yardW = scale * 6.2;
+    const yardH = yardW * 0.95;
+    layer.appendChild(
+      svgEl('image', {
+        href: artUrl(COLONY_YARD_ART),
+        x: -yardW / 2,
+        y: -yardH / 2 + scale * 0.15,
+        width: yardW,
+        height: yardH,
+        opacity: '0.55',
+        preserveAspectRatio: 'xMidYMid slice',
+        class: 'zz-settle-yard-art',
+        style: 'pointer-events:none',
+        'clip-path': `url(#${clipId})`,
+      })
+    );
+  }
+
+  // Escombros ambientales en sectores NO recuperados (mundo visible)
+  sectors.forEach((sec) => {
+    if (sec.status === 'recovered') return;
+    const local = sec.polyOff || [];
+    if (local.length < 3) return;
+    const cx = local.reduce((s, p) => s + p[0], 0) / local.length;
+    const cy = local.reduce((s, p) => s + p[1], 0) / local.length;
+    const n = sec.id === 'lot_west' || sec.id === 'yard_north' ? 5 : 3;
+    for (let i = 0; i < n; i++) {
+      const a = rng.float(0, Math.PI * 2);
+      const r = rng.float(1.2, 3.5);
       layer.appendChild(
         svgEl('rect', {
-          x: cx - rng.float(0.2, 0.45),
-          y: cy - 0.12,
-          width: rng.float(0.4, 0.85),
-          height: rng.float(0.18, 0.32),
-          rx: 0.06,
-          class: 'zz-settle-debris',
-          transform: `rotate(${rng.float(-28, 28)} ${cx} ${cy})`,
+          x: cx + Math.cos(a) * r - 0.35,
+          y: cy + Math.sin(a) * r * 0.75 - 0.15,
+          width: rng.float(0.5, 1.1),
+          height: rng.float(0.25, 0.45),
+          rx: 0.08,
+          class: 'zz-settle-debris zz-sector-world-debris',
+          transform: `rotate(${rng.float(-30, 30)} ${cx} ${cy})`,
         })
       );
     }
+  });
+
+  for (let i = 0; i < 7; i++) {
+    const a = rng.float(0, Math.PI * 2);
+    const r = scale * rng.float(0.4, 0.9);
+    layer.appendChild(
+      svgEl('ellipse', {
+        cx: Math.cos(a) * r * 2.2,
+        cy: Math.sin(a) * r * 1.6,
+        rx: rng.float(0.25, 0.5),
+        ry: rng.float(0.15, 0.28),
+        class: 'zz-settle-scrub',
+      })
+    );
   }
 
   if (buildings.length >= 2) {
@@ -448,6 +491,70 @@ function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX,
       );
     }
   }
+}
+
+/** Overlays de expansión — solo en modo expand / selección */
+function drawSectorOverlays(g, state, camp, { onSelectSector } = {}) {
+  ensureSectors(state);
+  const expand = state.uiMode === 'expand';
+  const selected = state.selectedSectorId;
+  const layer = svgEl('g', { class: 'zz-map-sectors', transform: `translate(${camp.x},${camp.y})` });
+
+  state.sectors.forEach((sec) => {
+    const local = sec.polyOff || [];
+    if (local.length < 3) return;
+    const pts = local.map(([x, y]) => `${x},${y}`).join(' ');
+    const hit = svgEl('polygon', {
+      points: pts,
+      class: 'zz-sector-hit',
+      fill: 'transparent',
+      stroke: 'none',
+    });
+    hit.style.cursor = expand || selected ? 'pointer' : 'default';
+    hit.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      onSelectSector && onSelectSector(sec.id);
+    });
+    layer.appendChild(hit);
+
+    if (!expand && sec.id !== selected && sec.status !== 'recovering') return;
+
+    let cls = 'zz-sector-outline';
+    if (sec.status === 'recovered') cls += ' zz-sector-outline--recovered';
+    else if (sec.status === 'recovering') cls += ' zz-sector-outline--recovering';
+    else cls += ' zz-sector-outline--locked';
+    if (sec.id === selected) cls += ' is-selected';
+    if (expand && sec.status === 'locked') cls += ' is-expand';
+
+    layer.appendChild(
+      svgEl('polygon', {
+        points: pts,
+        class: cls,
+        fill: sec.id === selected || expand ? undefined : 'none',
+      })
+    );
+
+    if (expand || sec.id === selected || sec.status === 'recovering') {
+      const cx = local.reduce((s, p) => s + p[0], 0) / local.length;
+      const cy = local.reduce((s, p) => s + p[1], 0) / local.length;
+      const label = svgEl('text', {
+        x: cx,
+        y: cy,
+        class: 'zz-sector-label',
+        'text-anchor': 'middle',
+      });
+      label.textContent =
+        sec.status === 'recovering'
+          ? `${sec.name}…`
+          : sec.status === 'recovered'
+            ? sec.name
+            : sec.name;
+      layer.appendChild(label);
+    }
+  });
+
+  g.appendChild(layer);
 }
 
 function drawBuildingFoundation(wrap, cell, rng) {
@@ -497,7 +604,7 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   const spanX = Math.max(scale * 2.9, (maxX - minX) / 2 + scale * 1.55);
   const spanY = Math.max(scale * 2.45, (maxY - minY) / 2 + scale * 1.35);
 
-  drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day);
+  drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day, state, camp);
 
   const buildMode = state.uiMode === 'build' && state.buildMode;
   let ghost = null;
@@ -519,6 +626,7 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
     for (let y = 0; y < bh; y++) {
       for (let x = 0; x < bw; x++) {
         if (buildings.some((b) => b.x === x && b.y === y)) continue;
+        if (!isCellBuildable(state, x, y)) continue;
         const near = buildings.some((b) => Math.abs(b.x - x) + Math.abs(b.y - y) <= 2);
         if (!near && buildings.length) continue;
         const lx = (x - bw / 2 + 0.5) * scale;
@@ -675,7 +783,7 @@ function drawInfectedMarkers(g, z, rng) {
 }
 
 function drawZone(layer, z, state, tier, handlers) {
-  const { onSelectZone, onSelectBuilding, onPlaceCell } = handlers || {};
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector } = handlers || {};
   const selected = state.selectedZoneId === z.id;
   const attacked = state.flags?.lastAttackZoneId === z.id || z._attackFlash;
   const exploreMode = state.uiMode === 'explore';
@@ -731,6 +839,7 @@ function drawZone(layer, z, state, tier, handlers) {
 
   if (z.type === 'camp') {
     drawSettlementCore(g, state, z, tier, { onSelectBuilding, onPlaceCell });
+    drawSectorOverlays(g, state, z, { onSelectSector });
   } else if (z.state === 'unknown') {
     drawIrregularFog(g, z, rng, (state.day || 1) <= 2);
   } else {
@@ -901,12 +1010,12 @@ export function recenterCamera(state) {
 export function clampCamera(state) {
   if (!state?.mapCamera) return;
   const day = state.day || 1;
-  // ZZ-017: permitir alejarse/recorrer terreno alrededor del camp
+  // ZZ-017/018: permitir recorrer territorio alrededor del camp (mundo > viewport)
   const minZ = day <= 2 ? 1.75 : day <= 5 ? 1.55 : ZOOM_MIN;
   state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, minZ, ZOOM_MAX);
   const camp = state.zones?.find((z) => z.type === 'camp');
   if (camp) {
-    const maxDist = day <= 2 ? 26 : day <= 5 ? 32 : 40;
+    const maxDist = day <= 2 ? 42 : day <= 5 ? 48 : 55;
     const dx = (state.mapCamera.x || camp.x) - camp.x;
     const dy = (state.mapCamera.y || camp.y) - camp.y;
     const d = Math.hypot(dx, dy);
@@ -939,7 +1048,7 @@ export function cameraViewBox(state, m) {
   clampCamera(state);
   const cam = state.mapCamera || { x: 50, y: 48, zoom: 1.4 };
   const day = state.day || 1;
-  const minZ = day <= 2 ? 2.15 : day <= 5 ? 1.75 : ZOOM_MIN;
+  const minZ = day <= 2 ? 1.75 : day <= 5 ? 1.55 : ZOOM_MIN;
   const zoom = clamp(cam.zoom || 1.4, minZ, ZOOM_MAX);
   const vw = m.vbW / zoom;
   const vh = m.vbH / zoom;
@@ -1043,7 +1152,7 @@ export function bindMapCamera(wrap, getState, onChange) {
 
 export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
-  const { onSelectZone, onSelectBuilding, onPlaceCell } = handlers;
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   const m = mapMetrics(svg);
   if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
@@ -1084,7 +1193,9 @@ export function renderMap(svg, state, handlers = {}) {
     const rank = { unknown: 0, discovered: 1, hostile: 2, controlled: 3 };
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
-  ordered.forEach((z) => drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onPlaceCell }));
+  ordered.forEach((z) =>
+    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector })
+  );
   world.appendChild(layer);
 
   drawExpeditions(world, state);

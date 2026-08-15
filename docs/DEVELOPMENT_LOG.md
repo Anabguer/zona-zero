@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 entregada · **PARADO** (no ZZ-018). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
+**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **COMPLETADA · REVIEW_STOP · PARADO** (no ZZ-019). · ZZ-012 bloqueada hasta ZZ-019. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -93,18 +93,18 @@ OK (masters + Review/).
 IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE NO · deps ZZ-016 APROBADA
 
 ## ESTADO CURSOR
-COMPLETADA. **PARADO** — ZZ-018 NO iniciada.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ## CAMBIOS
 - Nuevo `colony-yard.webp` sin huerto/pozo/solares/placements.
 - Eliminados props SVG `farm`/`well`/`storage`/`barricade` del patio.
-- Cámara D1: pan ~26, zoom menos cerrado → mundo > viewport.
+- Cámara D1: pan ampliado, zoom menos cerrado → mundo > viewport.
 - Save v5: `layoutVersion` + `sectors` stub (`recovered: ['core']`).
 - Ruins/debris del mundo más cerca del camp (no jugables).
 
@@ -112,16 +112,63 @@ NO
 1. **¿Mundo vs construido?** Sí: solo el HQ brilla como colonia; el anillo es ruina/escombro/valla rota. Sin huerto ni pozo falsos.
 2. **¿Rico para sectores orgánicos después?** Sí a nivel sensación: hay perímetro de restos y terreno panneable alrededor; geometría de sectores queda para ZZ-018 (stub solo).
 
-## DEUDAS
-- Dock full-width / chips sin nombre (heredadas ZZ-016).
-- Stub sectores sin recuperación real (ZZ-018).
-- Yard art todavía “claro circular”; ZZ-018 puede romper simetría con sectores irregulares.
+## DEUDAS (heredadas / no bloquean)
+- Dock full-width / chips sin nombre (ZZ-016).
+- Yard “claro circular” mitigado en ZZ-018 con sectores orgánicos + clip núcleo.
 
 ## COMMIT
 `d35cea3` — feat(ZZ-017): mundo base limpio + colonia mayor que viewport
 
 ## Sync Drive/GitHub
-OK · Review sustituida · ZZ-018 NO iniciada.
+OK · Review sustituida.
+
+---
+
+# FASE ZZ-018 — Sectores orgánicos + recuperar territorio (REVIEW_STOP)
+
+IMPLEMENTATION_PLAN 2.7 · B0 · HUMAN_GATE NO · **REVIEW_STOP YES** · deps ZZ-017 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA. **PARADO** — ZZ-019 **NO iniciada**.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN (REVIEW_STOP)
+
+## APROBACIÓN FINAL CHATGPT
+NO
+
+## CONTRATO ESCALA (antes de evidencia)
+GM §9.4 aclarado: viewport = ventana; mundo > 844×390 y 932×430; pan/pinch/recenter; no caber toda la colonia; sectores pueden quedar fuera; pregunta correcta = comodidad de recorrer/gestionar.
+
+## CAMBIOS
+- `js/sectors.js`: 7 sectores orgánicos (formas/áreas distintas); componentes situacionales; recuperación sin RNG punitivo.
+- Geometría ampliada (offsets ~±20–30): no caben todos a la vez en móvil.
+- `baseGrid` 14×12; SAVE_VERSION 6; `placeBuilding` solo en recuperado; tick recovery + amenaza perímetro.
+- Render: fills por sector (sin macrogrid); overlays solo expand/selección; yard clipado al núcleo.
+- UI: Más → Recuperar territorio; ficha sector + requisitos; `__zz.selectSector` / `setExpandMode` / `startRecovery`.
+- Tests: `smoke-sectors` (+ span fuera de viewport D1).
+- Review: pan H/V-diagonal, zoom cerca/lejos, recenter, 844×390, 740×360, desktop.
+
+## AUTOCRÍTICA (10)
+1. **¿Macrogrid?** No: polígonos irregulares distintos; sin hexes uniformes.
+2. **¿Caben todos en pantalla?** No — evidencia pan este/oeste/sur lo demuestra.
+3. **¿Edificios empequeñecidos?** No: zoom D1 legible; 740×360 sin minificar mundo.
+4. **¿Cupo N por sector?** No implementado (prohibido).
+5. **¿RNG punitivo al recuperar?** No: avance por días de componentes → recovered.
+6. **¿Solo núcleo D1?** Sí.
+7. **¿Recuperación situacional?** Sí: componentes por sector (debris/wreck/acceso…).
+8. **¿Mundo continúa fuera?** Sí: capturas 05–07 / 13.
+9. **¿Recentrar útil?** Sí → Núcleo/HQ (10).
+10. **¿Deudas?** Dock full-width / chips HUD; blending yard aún mejorable; ZZ-019 no tocado.
+
+## EVIDENCIA
+`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg` (sustituidos, sin acumular).
+
+## COMMIT
+*(pendiente cierre — ver hash tras commit)*
+
+## Sync Drive/GitHub
+Masters + Review a Drive. **ZZ-019 NO iniciada.**
 
 ---
 
