@@ -1,27 +1,27 @@
-> **ERRATA 2.5:** Protocolo de cuarentena = tech pasiva permanente (no toggle, no −prod artificial). Pérdida de prod en brote = sick/aislados + reasignación real de workers. HQ sin fuel. Fases health/research deben reflejar esto.
+# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.5)
 
-> **ERRATA 2.4 (obligatoria):** Electricidad eliminada de v1. Fases/techs/edificios `generator`/`solar`/`power_*`/`needEnergy` quedan **INVALIDADAS o a reescribir** como reparación/clínica/HQ. Calefacción = madera. Research = workers en banco/lab. Brotes/daño/vida visual/misiones plantilla = nuevos requisitos de diseño antes de implementar.
+**Versión plan:** 2.5  
+**Estado:** Contrato de ejecución — **NO IMPLEMENTAR** hasta ZZ-001 APROBADA (`APROBADA` + `SÍ`).  
+**Biblia:** GAME_MASTER **2.5** (Drive + repo idénticos).  
+**Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
+**Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
 
-# Zona Zero — Plan de implementación técnico (Diseño 2.1)
-
-**Estado:** Contrato de ejecución — **NO IMPLEMENTAR** hasta que ChatGPT apruebe GAME_MASTER + este plan (fase ZZ-001).  
-**Protocolo:** `ZONA_ZERO_DEVELOPMENT_LOG.md` (Drive) / `docs/DEVELOPMENT_LOG.md` (repo).  
-**Stack:** HTML/CSS/JS + PHP + MySQL · contenido en `content/*.json`.  
-**IDs:** `ZZ-XXX` (orden numérico + dependencias).
+> Este plan **sustituye** cualquier versión 2.1 y cualquier ERRATA provisional.  
+> **Fuera de alcance v1:** electricidad, generator, solar, power_grid/power_hub, needEnergy, calefacción con fuel.
 
 ---
 
-## 0. Reglas de ejecución (Cursor ↔ ChatGPT)
+## 0. Reglas de ejecución
 
-1. Leer GAME_MASTER 2.1 antes de cada fase.  
-2. Tras cada fase: tests → capturas si aplica → commit → push → actualizar DEVELOPMENT_LOG → `ESTADO REVISIÓN: PENDIENTE DE REVISIÓN`.  
-3. Continuar a la siguiente **solo si** no hay `HUMAN_GATE: YES` pendiente de `APROBADA` + `APROBACIÓN FINAL CHATGPT: SÍ`.  
-4. Silencio / “se ve mejor” / tests verdes **NO** son aprobación.  
-5. No hardcodear balance en UI.  
-6. No deploy salvo orden explícita (ZZ-183).  
-7. Drive y GitHub siempre sincronizados en los 3 docs maestros.
+1. Leer GAME_MASTER **2.5** antes de cada fase.  
+2. Tras cada fase: tests → capturas si aplica → commit → push → DEVELOPMENT_LOG → `PENDIENTE DE REVISIÓN`.  
+3. Si `HUMAN_GATE: YES`: no continuar dependientes sin `APROBADA` + `SÍ`.  
+4. Tests verdes / elogios / silencio ≠ aprobación.  
+5. Balance solo en content.  
+6. Deploy solo ZZ-183 bajo orden.  
+7. Sync Drive = GitHub en docs maestros.
 
-### HUMAN_GATE (lista canónica)
+### HUMAN_GATE (canónica 2.5)
 
 - ZZ-001
 - ZZ-010
@@ -31,11 +31,13 @@
 - ZZ-021
 - ZZ-023
 - ZZ-032
-- ZZ-045
+- ZZ-048
+- ZZ-059
 - ZZ-065
+- ZZ-069
 - ZZ-073
-- ZZ-082
-- ZZ-106
+- ZZ-083
+- ZZ-108
 - ZZ-125
 - ZZ-133
 - ZZ-144
@@ -43,11 +45,12 @@
 - ZZ-154
 - ZZ-161
 - ZZ-165
-- ZZ-173
+- ZZ-172
+- ZZ-178
 - ZZ-183
 
-**Total fases:** 100  
-**Con HUMAN_GATE:** 22
+**Total fases:** 128  
+**Con HUMAN_GATE:** 25
 
 ---
 
@@ -58,202 +61,240 @@
 | A · Fundación | ZZ-001, ZZ-002, ZZ-003, ZZ-004, ZZ-005, ZZ-006 (6) | ZZ-001 |
 | B · Experiencia D1 | ZZ-010, ZZ-011, ZZ-012, ZZ-013, ZZ-014, ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
 | C · Loop D2–D5 | ZZ-020, ZZ-021, ZZ-022, ZZ-023, ZZ-024, ZZ-025, ZZ-026, ZZ-027 (8) | ZZ-021, ZZ-023 |
-| D · Necesidades y vivienda | ZZ-030, ZZ-031, ZZ-032, ZZ-033, ZZ-034, ZZ-035 (6) | ZZ-032 |
-| E · Estaciones y clima | ZZ-040, ZZ-041, ZZ-042, ZZ-043, ZZ-044, ZZ-045 (6) | ZZ-045 |
-| F · Salud | ZZ-050, ZZ-051, ZZ-052, ZZ-053 (4) | — |
+| D · Vivienda y agua | ZZ-030, ZZ-031, ZZ-032, ZZ-033, ZZ-034, ZZ-035, ZZ-036 (7) | ZZ-032 |
+| E · Clima e invierno (madera) | ZZ-040, ZZ-041, ZZ-042, ZZ-043, ZZ-044, ZZ-045, ZZ-046, ZZ-047, ZZ-048 (9) | ZZ-048 |
+| F · Salud y brotes | ZZ-050, ZZ-051, ZZ-052, ZZ-053, ZZ-054, ZZ-055, ZZ-056, ZZ-057, ZZ-058, ZZ-059 (10) | ZZ-059 |
 | G · Defensa e infectados | ZZ-060, ZZ-061, ZZ-062, ZZ-063, ZZ-064, ZZ-065 (6) | ZZ-065 |
+| G2 · Daño y reparación | ZZ-066, ZZ-067, ZZ-068, ZZ-069 (4) | ZZ-069 |
 | H · Territorio | ZZ-070, ZZ-071, ZZ-072, ZZ-073 (4) | ZZ-073 |
-| I · Investigación | ZZ-080, ZZ-081, ZZ-082, ZZ-083 (4) | ZZ-082 |
+| I · Investigación | ZZ-080, ZZ-081, ZZ-082, ZZ-083, ZZ-084 (5) | ZZ-083 |
 | J · Vehículos | ZZ-090, ZZ-091, ZZ-092, ZZ-093 (4) | — |
-| K · Misiones | ZZ-100, ZZ-101, ZZ-102, ZZ-103, ZZ-104, ZZ-105, ZZ-106 (7) | ZZ-106 |
+| J2 · Radio y Centro de expediciones | ZZ-094, ZZ-095, ZZ-096 (3) | — |
+| K · Misiones y expediciones | ZZ-100, ZZ-101, ZZ-102, ZZ-103, ZZ-104, ZZ-105, ZZ-106, ZZ-107, ZZ-108 (9) | ZZ-108 |
 | L · Logros | ZZ-110, ZZ-111, ZZ-112, ZZ-113 (4) | — |
-| M · Eventos / Director 2.1 | ZZ-120, ZZ-121, ZZ-122, ZZ-123, ZZ-124, ZZ-125 (6) | ZZ-125 |
+| M · Director y eventos | ZZ-120, ZZ-121, ZZ-122, ZZ-123, ZZ-124, ZZ-125, ZZ-126 (7) | ZZ-125 |
 | N · Otros humanos | ZZ-130, ZZ-131, ZZ-132, ZZ-133 (4) | ZZ-133 |
 | O · Eras y victoria | ZZ-140, ZZ-141, ZZ-142, ZZ-143, ZZ-144 (5) | ZZ-144 |
-| P · UX mundo completa | ZZ-150, ZZ-151, ZZ-152, ZZ-153, ZZ-154 (5) | ZZ-150, ZZ-154 |
+| P · UX mundo | ZZ-150, ZZ-151, ZZ-152, ZZ-153, ZZ-154 (5) | ZZ-150, ZZ-154 |
 | Q · Arte y audio | ZZ-160, ZZ-161, ZZ-162, ZZ-163, ZZ-164, ZZ-165 (6) | ZZ-161, ZZ-165 |
-| R · Simulador y balance | ZZ-170, ZZ-171, ZZ-172, ZZ-173 (4) | ZZ-173 |
-| S · Producción / release | ZZ-180, ZZ-181, ZZ-182, ZZ-183, ZZ-184 (5) | ZZ-183 |
+| Q2 · Vida visual y movimiento | ZZ-166, ZZ-167, ZZ-168, ZZ-169, ZZ-170, ZZ-171, ZZ-172 (7) | ZZ-172 |
+| R · Simulador y balance | ZZ-175, ZZ-176, ZZ-177, ZZ-178 (4) | ZZ-178 |
+| S · Release | ZZ-180, ZZ-181, ZZ-182, ZZ-183, ZZ-184 (5) | ZZ-183 |
 
 ---
 
 ## 2. Grafo de dependencias (resumen)
 
 ```
-ZZ-001 (GATE diseño)
-  ├─ ZZ-002 → ZZ-003 → ZZ-004/ZZ-005 → ZZ-006
-  └─ ZZ-010…ZZ-015 (GATE D1) → ZZ-020…ZZ-027
-        ├─ ZZ-030…ZZ-035 vivienda
-        ├─ ZZ-040…ZZ-045 clima (GATE invierno)
-        ├─ ZZ-050…ZZ-053 salud
-        ├─ ZZ-060…ZZ-065 defensa (GATE)
-        ├─ ZZ-070…ZZ-073 territorio (GATE mapa)
-        ├─ ZZ-080…ZZ-083 research
-        ├─ ZZ-090…ZZ-093 vehículos
-        ├─ ZZ-100…ZZ-106 misiones (GATE)
-        ├─ ZZ-110…ZZ-113 logros
-        ├─ ZZ-120…ZZ-125 director (GATE)
-        ├─ ZZ-130…ZZ-133 humanos (GATE go/no-go)
-        ├─ ZZ-140…ZZ-144 victoria (GATE)
-        ├─ ZZ-150…ZZ-154 UX (GATE)
-        ├─ ZZ-160…ZZ-165 arte (GATE)
-        ├─ ZZ-170…ZZ-173 sim (GATE)
-        └─ ZZ-180…ZZ-184 release (GATE deploy)
+ZZ-001 (GATE biblia+plan 2.5)
+ ├─ ZZ-002..006 fundación
+ └─ ZZ-010..015 D1 (GATEs) → ZZ-020..027
+      ├─ ZZ-030..036 vivienda/agua
+      ├─ ZZ-040..048 clima+madera (GATE invierno)
+      ├─ ZZ-050..059 salud/brotes/cuarentena (GATE crisis sanitaria)
+      ├─ ZZ-060..065 defensa (GATE)
+      ├─ ZZ-066..069 daño/repair (GATE)
+      ├─ ZZ-070..073 territorio (GATE)
+      ├─ ZZ-080..084 research utilitario (GATE UI)
+      ├─ ZZ-090..093 vehículos (fuel)
+      ├─ ZZ-094..096 radio ≠ centro
+      ├─ ZZ-100..108 misiones/expediciones (GATE)
+      ├─ ZZ-110..113 logros
+      ├─ ZZ-120..126 director (GATE)
+      ├─ ZZ-130..133 humanos (GATE go/no-go)
+      ├─ ZZ-140..144 victoria sin energía (GATE)
+      ├─ ZZ-150..154 UX (GATE)
+      ├─ ZZ-160..165 arte (GATE)
+      ├─ ZZ-166..172 vida visual (GATE perf)
+      ├─ ZZ-175..178 sim (GATE)
+      └─ ZZ-180..184 release (GATE deploy)
 ```
 
 ---
 
-## 3. Fases detalladas
+## 3. Matriz de cobertura GAME_MASTER 2.5 → PLAN
+
+| Sistema GM | Implementa | Prueba | HUMAN_GATE |
+|------------|------------|--------|------------|
+| Filosofía / pilares | ZZ-001 | ZZ-001 | ZZ-001 |
+| Población colectiva | ZZ-021,ZZ-025 | ZZ-023 | — |
+| Exploradores | ZZ-027,ZZ-022 | ZZ-023,ZZ-027 | — |
+| Vivienda + protección | ZZ-030..032 | ZZ-032,ZZ-048 | ZZ-032 |
+| Calefacción madera | ZZ-043..045 | ZZ-048 | ZZ-048 |
+| Exposición frío | ZZ-044 | ZZ-048 | ZZ-048 |
+| Necesidades colonia | ZZ-020,ZZ-030..036 | ZZ-023 | — |
+| Recursos (sin energía) | ZZ-005,ZZ-013 | ZZ-015 | — |
+| Pozo ≠ cisterna | ZZ-034,ZZ-035 | ZZ-034 | — |
+| Catálogo edificios (sin gen/solar) | ZZ-002,ZZ-005 | ZZ-002 | — |
+| Radio | ZZ-094 | ZZ-096 | — |
+| Centro expediciones | ZZ-095 | ZZ-096 | — |
+| Taller / mejoras=research | ZZ-080..084 | ZZ-084 | ZZ-083 |
+| Construcción | ZZ-024 | ZZ-024 | — |
+| Staffing por edificio | ZZ-021 | ZZ-021 | ZZ-021 |
+| Clima estaciones | ZZ-040..048 | ZZ-048 | ZZ-048 |
+| Salud camas/cadena | ZZ-050..052 | ZZ-059 | ZZ-059 |
+| Brotes probabilísticos + fases | ZZ-053..056 | ZZ-059 | ZZ-059 |
+| Cuarentena pasiva | ZZ-057,ZZ-081 | ZZ-059,ZZ-084 | ZZ-059 |
+| Defensa / ataques | ZZ-060..065 | ZZ-065 | ZZ-065 |
+| Daño y reparación edificios | ZZ-066..069 | ZZ-069 | ZZ-069 |
+| Infectados tipados | ZZ-062 | ZZ-065 | — |
+| Exploración + plantillas | ZZ-022,ZZ-104..108 | ZZ-107,ZZ-108 | ZZ-108 |
+| Territorio / fog | ZZ-070..073 | ZZ-073 | ZZ-073 |
+| Vehículos + fuel | ZZ-090..093 | ZZ-093 | — |
+| Research workers + árbol utilitario | ZZ-080..084 | ZZ-084 | ZZ-083 |
+| Eventos / Director | ZZ-120..126 | ZZ-125,ZZ-126 | ZZ-125 |
+| Misiones variedad | ZZ-100..108 | ZZ-108 | ZZ-108 |
+| Alertas / ayuda | ZZ-151,ZZ-152 | ZZ-154 | ZZ-154 |
+| Logros | ZZ-110..113 | ZZ-113 | — |
+| Eras | ZZ-140 | ZZ-144 | — |
+| Victoria sin needEnergy | ZZ-141..144 | ZZ-144 | ZZ-144 |
+| Derrota | ZZ-144 | ZZ-144 | ZZ-144 |
+| UX mundo | ZZ-150..154 | ZZ-150,ZZ-154 | ZZ-150,ZZ-154 |
+| Feedback §32 | ZZ-026 | ZZ-026 | — |
+| Vida visual §32B | ZZ-166..172 | ZZ-172 | ZZ-172 |
+| Arte / sonido | ZZ-160..165 | ZZ-165 | ZZ-161,ZZ-165 |
+| Datos/balance | ZZ-005,ZZ-177 | ZZ-178 | ZZ-178 |
+| Simulador | ZZ-175..178 | ZZ-178 | ZZ-178 |
+| Gobernanza Cursor↔ChatGPT | ZZ-001,ZZ-006 | ZZ-001 | ZZ-001 |
+| Electricidad v1 | N/A — FUERA DE ALCANCE | N/A | N/A |
+
+**Cobertura objetivo: 100%** de sistemas activos v1. Electricidad = explícitamente fuera.
+
+---
+
+## 4. Fases detalladas
 
 
 ## A · Fundación
 
-### ZZ-001 — Aprobar contrato de diseño 2.1
+### ZZ-001 — Aprobar contrato GAME_MASTER 2.5 + este plan
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Congelar GAME_MASTER + IMPLEMENTATION_PLAN + protocolo DEVELOPMENT_LOG como contrato antes de código. |
-| **Sistemas** | documentación, gobernanza |
-| **Dependencias** | ninguna |
-| **Archivos approx.** | GAME_MASTER.md, docs/IMPLEMENTATION_PLAN.md, docs/DEVELOPMENT_LOG.md |
-| **Datos/contenido** | GAME_MASTER.md, docs/IMPLEMENTATION_PLAN.md, docs/DEVELOPMENT_LOG.md |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | n/a |
-| **Pruebas funcionales** | Revisión humana exhaustiva de diseño |
+| **Objetivo** | Congelar biblia 2.5 + plan alineado; única puerta a implementación. |
+| **Sistemas** | gobernanza, docs |
+| **Dependencias** | — |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | n/a |
+| **Pruebas funcionales** | Revisión humana |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- ChatGPT revisa ZONA_ZERO_GAME_MASTER.md completo
-- ChatGPT revisa ZONA_ZERO_IMPLEMENTATION_PLAN.md completo
-- Marcar APROBADA en DEVELOPMENT_LOG solo tras revisión literal
+**Tareas:** Revisión ChatGPT de GM 2.5; Revisión de este plan + matriz cobertura; Marcar APROBADA solo literal
 
-**Criterio exacto de aceptación:**
-- ESTADO REVISIÓN: APROBADA en ZZ-001
-- APROBACIÓN FINAL CHATGPT: SÍ
-- Autorización explícita a implementar ZZ-002+
+**Aceptación:**
+- ESTADO REVISIÓN APROBADA + APROBACIÓN SÍ
+- Matriz cobertura 100%
 
-### ZZ-002 — Auditoría motor vs diseño 2.1
+### ZZ-002 — Auditoría motor vs GAME_MASTER 2.5
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Matriz código↔diseño: conservar / reescribir / deprecar / borrar. |
-| **Sistemas** | motor, deuda técnica |
+| **Objetivo** | Matriz código↔diseño 2.5 (conservar/reescribir/borrar). Incluir deudas: energía legado, calefacción fuel, techs stub. |
+| **Sistemas** | deuda técnica |
 | **Dependencias** | ZZ-001 |
 | **Archivos approx.** | docs/AUDIT_ENGINE.md |
-| **Datos/contenido** | content/*.json, balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | node scripts existentes de smoke no regresan |
-| **Pruebas funcionales** | Documento AUDIT_ENGINE completo y priorizado |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Inventariar js/*, content/*, css/*, assets
-- Marcar cada sistema: OK / PARCIAL / STUB / CONFLICTO
-- Escribir docs/AUDIT_ENGINE.md
+**Tareas:** docs/AUDIT_ENGINE.md; Listar generator/solar/needEnergy a eliminar del load path
 
-**Criterio exacto de aceptación:**
-- Lista priorizada sin cambios de gameplay aún
-- Conflictos explícitos (labor dual, wall/power_hub, etc.)
+**Aceptación:**
+- Sin cambios gameplay aún
+- Lista priorizada
 
-### ZZ-003 — Schemas de contenido unificados
+### ZZ-003 — Schemas content 2.5
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Documentar schemas JSON para buildings, research, seasons, missions, achievements, housingClimate. |
-| **Sistemas** | content, balance |
+| **Objetivo** | Schemas: buildings (sin energy), research (sin rama Energía), seasons, outbreaks, buildingHP, missions templates, achievements, ambientLife. |
+| **Sistemas** | content |
 | **Dependencias** | ZZ-002 |
 | **Archivos approx.** | docs/CONTENT_SCHEMA.md |
-| **Datos/contenido** | schemas documentados |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | n/a |
-| **Pruebas funcionales** | Schema cubre todos los sistemas 2.1 |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- docs/CONTENT_SCHEMA.md
-- Campos obligatorios + opcionales
-- Notas de migración save
+**Tareas:** docs/CONTENT_SCHEMA.md
 
-**Criterio exacto de aceptación:**
-- CONTENT_SCHEMA.md revisable por ChatGPT
+**Aceptación:**
+- Schemas cubren GM 2.5
 
-### ZZ-004 — Una sola fuente de mapa
+### ZZ-004 — Una fuente de mapa (locations)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Deprecar zones.json del load path; locations.json canónico. |
-| **Sistemas** | mapa, loadContent |
+| **Objetivo** | Deprecar zones.json del load path. |
+| **Sistemas** | mapa |
 | **Dependencias** | ZZ-003 |
-| **Archivos approx.** | js/content-loader.js, content/zones.json |
-| **Datos/contenido** | locations.json, zones.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | loadContent + partida nueva sin error |
-| **Pruebas funcionales** | Mapa usa solo locations |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Auditar referencias zones.json
-- Documentar migración
-- Quitar load path o stub seguro
+**Tareas:** Deprecar zones.json del load path.
 
-**Criterio exacto de aceptación:**
-- Una fuente de landmarks activa
+**Aceptación:**
+- Solo locations.json activo
 
-### ZZ-005 — Skeleton balance 2.1
+### ZZ-005 — Balance skeleton 2.5
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Añadir secciones seasons, housingClimate, missions, laborModel, achievements en balance sin cambiar UX visible. |
+| **Objetivo** | balance.json: labor per_building, woodHeating, outbreaks, buildingDamage, ambientLife, sin needEnergy/energyDemand. |
 | **Sistemas** | balance |
 | **Dependencias** | ZZ-003 |
-| **Archivos approx.** | content/balance.json |
-| **Datos/contenido** | balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | loadContent OK; smoke partida nueva |
-| **Pruebas funcionales** | Campos nuevos leídos o ignorados sin crash |
+| **Archivos approx.** | — |
+| **Datos** | balance.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Extender balance.json con defaults seguros
-- Defaults no alteran D1 visual
+**Tareas:** balance.json: labor per_building, woodHeating, outbreaks, buildingDamage, ambientLife, sin needEnergy/energyDemand.
 
-**Criterio exacto de aceptación:**
-- laborModel=per_building documentado
-- Sin regresión visual
+**Aceptación:**
+- Load OK
+- Sin regresión D1 visual
 
-### ZZ-006 — Protocolo sync Drive ↔ GitHub
+### ZZ-006 — Sync Drive ↔ GitHub de los 3 maestros
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | A · Fundación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Automatizar/copiar los 3 docs maestros a Drive y repo con hash idéntico. |
-| **Sistemas** | documentación |
+| **Objetivo** | Hash idéntico GM/PLAN/LOG. |
+| **Sistemas** | docs |
 | **Dependencias** | ZZ-001 |
-| **Archivos approx.** | scripts/sync-game-master-drive.mjs |
-| **Datos/contenido** | tres docs Drive |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | hash Drive === hash repo |
-| **Pruebas funcionales** | ChatGPT puede abrir los 3 en Drive |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Mantener scripts/sync-game-master-drive.mjs
-- Incluir DEVELOPMENT_LOG en sync
-- Verificar hashes
+**Tareas:** Hash idéntico GM/PLAN/LOG.
 
-**Criterio exacto de aceptación:**
-- Sync reproducible
+**Aceptación:**
+- Hashes iguales
 
 
 ## B · Experiencia D1
@@ -264,24 +305,21 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Colonia legible al entrar: sin círculo/polígono territorio; suelo orgánico bajo edificios. |
-| **Sistemas** | render-map, UX D1, arte terreno |
+| **Objetivo** | Colonia legible; sin círculo/GIS. |
+| **Sistemas** | UX D1, mapa, onboarding |
 | **Dependencias** | ZZ-001, ZZ-005 |
-| **Archivos approx.** | js/render-map.js, css/game.css, css/world.css |
-| **Datos/contenido** | — |
-| **Assets** | props colonia si faltan |
-| **Pruebas automáticas** | smoke-d1 |
-| **Pruebas funcionales** | Usuario reconoce colonia en ≤3 s |
-| **Revisión visual** | Sí — docs/review + Drive Review |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
+| **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Eliminar/ocultar look GIS en viewport inicial
-- Props/restos discretos
-- Edificios a escala protagonista
+**Tareas:** Colonia legible; sin círculo/GIS.
 
-**Criterio exacto de aceptación:**
-- Sin círculo marrón dominante
-- Sin rejilla GIS obvia en D1
+**Aceptación:**
+- Colonia legible; sin círculo/GIS.
+- Gate humano
 
 ### ZZ-011 — Cámara D1 protagonista
 
@@ -289,24 +327,21 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Zoom/pan/recenter que no pierdan la colonia. |
-| **Sistemas** | cámara, mapa |
+| **Objetivo** | Zoom/pan/recenter. |
+| **Sistemas** | UX D1, mapa, onboarding |
 | **Dependencias** | ZZ-010 |
-| **Archivos approx.** | js/render-map.js, js/main.js |
-| **Datos/contenido** | balance camera si aplica |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | smoke cámara |
-| **Pruebas funcionales** | Recentrar siempre útil en móvil y desktop |
-| **Revisión visual** | Sí — capturas móvil+desktop |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
+| **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Zoom inicial ~colonia
-- Recentrar fiable
-- Límites de pan
+**Tareas:** Zoom/pan/recenter.
 
-**Criterio exacto de aceptación:**
-- Colonia centrada al inicio
-- No vacío confuso en desktop
+**Aceptación:**
+- Zoom/pan/recenter.
+- OK móvil+desktop
 
 ### ZZ-012 — Tutorial D1 por acciones
 
@@ -314,101 +349,87 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Intro → huerto → colocar → staff → (pozo); una acción/explicación. |
-| **Sistemas** | onboarding, misiones guía |
-| **Dependencias** | ZZ-010 |
-| **Archivos approx.** | js/onboarding.js, js/main.js |
-| **Datos/contenido** | textos guía |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | smoke onboarding steps |
-| **Pruebas funcionales** | Jugador completa D1 sin modal spam |
+| **Objetivo** | Una acción/explicación; sin cascada Continuar. |
+| **Sistemas** | UX D1, mapa, onboarding |
+| **Dependencias** | ZZ-011 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Quitar cascada Continuar
-- Coach ligado a acciones
-- Cierre natural
+**Tareas:** Una acción/explicación; sin cascada Continuar.
 
-**Criterio exacto de aceptación:**
-- Sin cascada Continuar
-- Una explicación por acción
+**Aceptación:**
+- Una acción/explicación; sin cascada Continuar.
+- Gate humano
 
-### ZZ-013 — HUD recursos D1 comprensible
+### ZZ-013 — HUD recursos D1
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Nombres legibles comida/agua; sin Au/Gu/A/D crudos. |
-| **Sistemas** | HUD, recursos |
-| **Dependencias** | ZZ-010 |
-| **Archivos approx.** | js/main.js, css/game.css |
-| **Datos/contenido** | resourceOrder |
-| **Assets** | iconos recursos si faltan |
-| **Pruebas automáticas** | HUD labels presentes |
-| **Pruebas funcionales** | Jugador entiende stock en 5 s |
+| **Objetivo** | Comida/agua/madera legibles; sin Au/Gu. |
+| **Sistemas** | UX D1, mapa, onboarding |
+| **Dependencias** | ZZ-012 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Labels claros
-- Tooltips/tap toast
-- Prioridad comida/agua
+**Tareas:** Comida/agua/madera legibles; sin Au/Gu.
 
-**Criterio exacto de aceptación:**
-- Sin abreviaturas opacas en D1
+**Aceptación:**
+- Comida/agua/madera legibles; sin Au/Gu.
+- OK móvil+desktop
 
-### ZZ-014 — Layout desktop 1920 D1
+### ZZ-014 — Desktop 1920 D1
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Panel lateral + mundo legible; no escritorio vacío. |
-| **Sistemas** | UX desktop |
-| **Dependencias** | ZZ-011, ZZ-013 |
-| **Archivos approx.** | css/world.css, css/game.css |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | screenshot desktop |
-| **Pruebas funcionales** | Colonia + panel visibles |
-| **Revisión visual** | Sí — desktop obligatorio |
+| **Objetivo** | Panel+mundo; no vacío. |
+| **Sistemas** | UX D1, mapa, onboarding |
+| **Dependencias** | ZZ-013 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
+| **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Composición desktop
-- Dock/panel
-- QA 1920×1080
+**Tareas:** Panel+mundo; no vacío.
 
-**Criterio exacto de aceptación:**
-- Desktop no se siente vacío
-- Móvil intacto
+**Aceptación:**
+- Panel+mundo; no vacío.
+- Gate humano
 
-### ZZ-015 — QA D1 + contact sheet + gate
+### ZZ-015 — QA D1 + contact sheet
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Cerrar bloque D1 con tests, capturas, sync Review, parar hasta aprobación. |
-| **Sistemas** | QA, review |
-| **Dependencias** | ZZ-010, ZZ-011, ZZ-012, ZZ-013, ZZ-014 |
-| **Archivos approx.** | docs/review/, scripts/review-shots.mjs |
-| **Datos/contenido** | — |
-| **Assets** | docs/review/* |
-| **Pruebas automáticas** | smoke-d1; save/load |
-| **Pruebas funcionales** | Partida nueva real D1 |
-| **Revisión visual** | Sí — gate humano |
+| **Objetivo** | Smoke+capturas; PARAR hasta APROBADA. |
+| **Sistemas** | UX D1, mapa, onboarding |
+| **Dependencias** | ZZ-014 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | smoke-d1 |
+| **Pruebas funcionales** | Partida nueva D1 |
+| **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Smoke D1 save/load
-- Capturas móvil+desktop
-- review-contact-sheet
-- Actualizar DEVELOPMENT_LOG
-- PARAR hasta APROBADA
+**Tareas:** Smoke+capturas; PARAR hasta APROBADA.
 
-**Criterio exacto de aceptación:**
-- Contact sheet regenerado
-- ESTADO REVISIÓN pendiente hasta ChatGPT
-- No avanzar a ZZ-020 sin APROBADA
+**Aceptación:**
+- Smoke+capturas; PARAR hasta APROBADA.
+- Gate humano
 
 
 ## C · Loop D2–D5
@@ -419,24 +440,20 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Al avanzar día: comida/agua producida·consumida·balance + hechos. |
-| **Sistemas** | sim, UX brief |
+| **Objetivo** | Balance comida/agua (+ madera si frío). |
+| **Sistemas** | sim, colony, exploración |
 | **Dependencias** | ZZ-015 |
-| **Archivos approx.** | js/sim.js, js/main.js |
-| **Datos/contenido** | balance consumo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | brief tras nextDay |
-| **Pruebas funcionales** | Jugador entiende balance diario |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- Card/sheet brief
-- Datos reales de sim
-- No spam
+**Tareas:** Balance comida/agua (+ madera si frío).
 
-**Criterio exacto de aceptación:**
-- Brief siempre tras avanzar día
-- Números coherentes
+**Aceptación:**
+- Balance comida/agua (+ madera si frío).
 
 ### ZZ-021 — Staffing por edificio canónico
 
@@ -444,24 +461,20 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Modelo único labor: +/- en ficha edificio; resumen población solo lectura. |
-| **Sistemas** | colony, labor |
+| **Objetivo** | Único modelo +/-; resumen población SO. |
+| **Sistemas** | sim, colony, exploración |
 | **Dependencias** | ZZ-020 |
-| **Archivos approx.** | js/colony.js, js/main.js |
-| **Datos/contenido** | laborModel |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | staff cambia producción |
-| **Pruebas funcionales** | Con 12 pop: asignar farm/well/defensa intuitivo |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- UI ficha workers
-- Eliminar/ocultar asignación dual por categorías como primaria
-- Autoasignar opcional
+**Tareas:** Único modelo +/-; resumen población SO.
 
-**Criterio exacto de aceptación:**
-- Un solo modelo de asignación
-- Sin micromanejo doble
+**Aceptación:**
+- Único modelo +/-; resumen población SO.
 
 ### ZZ-022 — Exploración D3–D5 mínima
 
@@ -469,73 +482,62 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Reveal → ficha → enviar → ruta → retorno; sin research/vehículos en tutorial. |
-| **Sistemas** | exploración, mapa |
-| **Dependencias** | ZZ-020 |
-| **Archivos approx.** | js/explore.js, js/main.js |
-| **Datos/contenido** | locations.json |
-| **Assets** | landmarks si faltan |
-| **Pruebas automáticas** | expedition roundtrip |
-| **Pruebas funcionales** | Primera salida en D3–D5 jugable |
+| **Objetivo** | Reveal→enviar→ruta→retorno. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-021 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Flujo completo primer landmark
-- Informe retorno
-- Riesgo/botín legibles
+**Tareas:** Reveal→enviar→ruta→retorno.
 
-**Criterio exacto de aceptación:**
-- Sin forzar research
-- Feedback ida/vuelta
+**Aceptación:**
+- Reveal→enviar→ruta→retorno.
 
-### ZZ-023 — QA bloque D1→D5
+### ZZ-023 — QA D1→D5
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Validar loop core hasta D5; gate humano. |
-| **Sistemas** | QA |
-| **Dependencias** | ZZ-020, ZZ-021, ZZ-022 |
-| **Archivos approx.** | docs/review/ |
-| **Datos/contenido** | — |
-| **Assets** | docs/review |
-| **Pruebas automáticas** | smoke D5 |
-| **Pruebas funcionales** | Partida guiada D1–D5 |
-| **Revisión visual** | Sí — gate |
+| **Objetivo** | Loop estable; gate. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-022 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Capturas D2–D5
-- Smoke
-- PARAR si HUMAN_GATE
+**Tareas:** Loop estable; gate.
 
-**Criterio exacto de aceptación:**
-- Loop estable
-- APROBADA antes de sistemas mid
+**Aceptación:**
+- Loop estable; gate.
 
-### ZZ-024 — Construcción flujo selecciono→coloco→construyen
+### ZZ-024 — Construcción selecciono→coloco
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Lista filtrada, preview fantasma solo en modo build, pago recursos, aparece edificio. |
-| **Sistemas** | construcción |
-| **Dependencias** | ZZ-021 |
-| **Archivos approx.** | js/build.js |
-| **Datos/contenido** | buildings.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | place building |
-| **Pruebas funcionales** | D1 farm place |
-| **Revisión visual** | Sí |
+| **Objetivo** | Preview solo en build; sin Tetris. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-023 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §9
-- Sin Tetris
-- Radio colocación cluster
+**Tareas:** Preview solo en build; sin Tetris.
 
-**Criterio exacto de aceptación:**
-- Preview solo en build mode
+**Aceptación:**
+- Preview solo en build; sin Tetris.
 
 ### ZZ-025 — Crecimiento población abstracto
 
@@ -543,461 +545,672 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Inmigración/rescates/natalidad rara según §26; límites housing/food. |
-| **Sistemas** | población |
-| **Dependencias** | ZZ-030 |
-| **Archivos approx.** | js/sim.js |
-| **Datos/contenido** | balance immigration |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | immigration gates |
-| **Pruebas funcionales** | Sin housing no crece |
-| **Revisión visual** | No |
-
-**Tareas concretas:**
-- §26
-
-**Criterio exacto de aceptación:**
-- Sin parejas Sims
-
-### ZZ-026 — Feedback acciones importantes
-
-| Campo | Valor |
-|-------|-------|
-| **Bloque** | C · Loop D2–D5 |
-| **HUMAN_GATE** | NO |
-| **Objetivo** | Toast/log/card por construir, explorar, ataque, tech, era, logro. |
-| **Sistemas** | feedback, UX |
-| **Dependencias** | ZZ-020 |
-| **Archivos approx.** | js/ui-feedback.js |
-| **Datos/contenido** | — |
-| **Assets** | sfx opcionales |
-| **Pruebas automáticas** | events emit |
-| **Pruebas funcionales** | Cada acción clave tiene feedback |
+| **Objetivo** | Inmigración/rescates; límites housing. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-024 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §32 matriz
+**Tareas:** Inmigración/rescates; límites housing.
 
-**Criterio exacto de aceptación:**
-- Matriz §32 cubierta
+**Aceptación:**
+- Inmigración/rescates; límites housing.
 
-### ZZ-027 — Exploradores: recluta, muerte, dolor
+### ZZ-026 — Feedback acciones clave
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | C · Loop D2–D5 |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Máx 3; muerte permanente; recluta desde pop; nuevo verde. |
-| **Sistemas** | exploradores |
-| **Dependencias** | ZZ-022 |
-| **Archivos approx.** | js/explorers.js |
-| **Datos/contenido** | survivors names, balance explorers |
-| **Assets** | retratos |
-| **Pruebas automáticas** | death permanent; recruit cooldown |
-| **Pruebas funcionales** | Perder explorador duele |
-| **Revisión visual** | Sí |
+| **Objetivo** | Matriz §32. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-025 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §3
+**Tareas:** Matriz §32.
 
-**Criterio exacto de aceptación:**
-- No RPG partido
-- Nombre editable
+**Aceptación:**
+- Matriz §32.
+
+### ZZ-027 — Exploradores muerte/recluta
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | C · Loop D2–D5 |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Máx 3; dolor real; sin RPG 100. |
+| **Sistemas** | sim, colony, exploración |
+| **Dependencias** | ZZ-026 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Parcial |
+
+**Tareas:** Máx 3; dolor real; sin RPG 100.
+
+**Aceptación:**
+- Máx 3; dolor real; sin RPG 100.
 
 
-## D · Necesidades y vivienda
+## D · Vivienda y agua
 
 ### ZZ-030 — Capacidad vivienda + overflow
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Capacidad = Σ housing; overflow frena crecimiento y baja estabilidad. |
-| **Sistemas** | vivienda, población |
+| **Objetivo** | Capacidad vivienda + overflow según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Capacidad vivienda + overflow según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
 ### ZZ-031 — Protección climática por tipo
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Campo climateProtection 0–3 en viviendas; cobertura efectiva. |
-| **Sistemas** | vivienda, clima |
+| **Objetivo** | Protección climática por tipo según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-030 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Protección climática por tipo según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
-### ZZ-032 — Vivienda aislada + unlock
+### ZZ-032 — Vivienda aislada + tech insulation
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Añadir insulated_house + tech insulation. |
-| **Sistemas** | vivienda, research, content |
+| **Objetivo** | Vivienda aislada + tech insulation según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-031 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | asset insulated_house |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Vivienda aislada + tech insulation según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
-### ZZ-033 — Alertas cobertura térmica
+### ZZ-033 — Alertas cobertura / madera estimada
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Aviso: plazas protegidas vs pop antes de ola. |
-| **Sistemas** | alertas, vivienda |
+| **Objetivo** | Alertas cobertura / madera estimada según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-032 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Alertas cobertura / madera estimada según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
-### ZZ-034 — Soft-caps almacenamiento
+### ZZ-034 — Pozo fuente ≠ cisterna reserva
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Soft-cap visible; merma exceso; almacenes aumentan. |
-| **Sistemas** | recursos, storage |
+| **Objetivo** | Pozo fuente ≠ cisterna reserva según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-033 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Pozo fuente ≠ cisterna reserva según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
-### ZZ-035 — Estabilidad factores UI
+### ZZ-035 — Soft-caps storage + cisterna agua
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | D · Necesidades y vivienda |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Estabilidad secundaria legible sin barra spam. |
-| **Sistemas** | estabilidad, UX |
+| **Objetivo** | Soft-caps storage + cisterna agua según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
 | **Dependencias** | ZZ-034 |
-| **Archivos approx.** | content/buildings.json, js/sim.js, js/colony.js |
-| **Datos/contenido** | buildings.json, balance housingClimate |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | unit housing math |
-| **Pruebas funcionales** | Escenarios overflow / frío avisado |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar según GAME_MASTER §4–5
-- Tests numéricos
-- UI mínima
+**Tareas:** Soft-caps storage + cisterna agua según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Cumple §4–5
-- Sin micromanejo alquiler
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
 
-
-## E · Estaciones y clima
-
-### ZZ-040 — Ciclo estaciones state
+### ZZ-036 — Estabilidad factores UI secundaria
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
+| **Bloque** | D · Vivienda y agua |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Primavera/verano/otoño/invierno en state + balance. |
-| **Sistemas** | clima, director, sim |
-| **Dependencias** | ZZ-031, ZZ-023 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
+| **Objetivo** | Estabilidad factores UI secundaria según GM §4–7. |
+| **Sistemas** | vivienda, agua, recursos |
+| **Dependencias** | ZZ-035 |
+| **Archivos approx.** | — |
+| **Datos** | buildings.json |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** Estabilidad factores UI secundaria según GM §4–7.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Pozo produce; cisterna buffer/soft-cap/lluvia
+- Sin alquiler diario
+
+
+## E · Clima e invierno (madera)
+
+### ZZ-040 — Ciclo estaciones en state
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | E · Clima e invierno (madera) |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Primavera/verano/otoño/invierno. |
+| **Sistemas** | clima, madera, vivienda, salud |
+| **Dependencias** | ZZ-031, ZZ-023 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
+| **Revisión visual** | No |
+
+**Tareas:** Primavera/verano/otoño/invierno.
+
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
 ### ZZ-041 — Clima puntual + duración
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
+| **Bloque** | E · Clima e invierno (madera) |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | clear/rain/storm/cold/heat/fog + duración. |
-| **Sistemas** | clima, director, sim |
+| **Objetivo** | clear/rain/storm/cold/heat/fog + eventos. |
+| **Sistemas** | clima, madera, vivienda, salud |
 | **Dependencias** | ZZ-040 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** clear/rain/storm/cold/heat/fog + eventos.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
 ### ZZ-042 — Pipeline aviso→prep→consecuencia
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
+| **Bloque** | E · Clima e invierno (madera) |
 | **HUMAN_GATE** | NO |
 | **Objetivo** | Nunca castigo imposible de prever. |
-| **Sistemas** | clima, director, sim |
+| **Sistemas** | clima, madera, vivienda, salud |
 | **Dependencias** | ZZ-041 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** Nunca castigo imposible de prever.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
-### ZZ-043 — Feedback visual clima
+### ZZ-043 — Calefacción automática MADERA
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
+| **Bloque** | E · Clima e invierno (madera) |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Partículas/tono/velo según clima. |
-| **Sistemas** | clima, director, sim |
+| **Objetivo** | maderaNecesariaCalefacción(pop,prot,sev); auto; NO fuel. |
+| **Sistemas** | clima, madera, vivienda, salud |
 | **Dependencias** | ZZ-042 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | FX clima |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** maderaNecesariaCalefacción(pop,prot,sev); auto; NO fuel.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
-### ZZ-044 — Impacto prod/exploración/salud
+### ZZ-044 — Exposición acumulativa frío
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
+| **Bloque** | E · Clima e invierno (madera) |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Tablas §11 aplicadas en sim. |
-| **Sistemas** | clima, director, sim |
+| **Objetivo** | verde→ámbar→rojo; no enfermar 1 noche. |
+| **Sistemas** | clima, madera, vivienda, salud |
 | **Dependencias** | ZZ-043 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** verde→ámbar→rojo; no enfermar 1 noche.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
-### ZZ-045 — QA invierno simulado
+### ZZ-045 — Aviso previo + estimación reserva madera
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | E · Estaciones y clima |
-| **HUMAN_GATE** | **YES** |
-| **Objetivo** | Escenario forzado + capturas + gate. |
-| **Sistemas** | clima, director, sim |
+| **Bloque** | E · Clima e invierno (madera) |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | HUD/brief: madera/día y días reserva. |
+| **Sistemas** | clima, madera, vivienda, salud |
 | **Dependencias** | ZZ-044 |
-| **Archivos approx.** | js/sim.js, js/director.js, content/balance.json |
-| **Datos/contenido** | balance seasons, events clima |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | season tick; warn before blizzard |
-| **Pruebas funcionales** | Jugador recibe aviso ≥1 día antes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
+| **Revisión visual** | No |
+
+**Tareas:** HUD/brief: madera/día y días reserva.
+
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
+
+### ZZ-046 — Impacto clima en prod/exploración/salud
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | E · Clima e invierno (madera) |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Tablas §11. |
+| **Sistemas** | clima, madera, vivienda, salud |
+| **Dependencias** | ZZ-045 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
+| **Revisión visual** | No |
+
+**Tareas:** Tablas §11.
+
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
+
+### ZZ-047 — Feedback visual clima
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | E · Clima e invierno (madera) |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Partículas/tono; chimeneas si calefacción. |
+| **Sistemas** | clima, madera, vivienda, salud |
+| **Dependencias** | ZZ-046 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- Implementar §11
-- Integrar Director
+**Tareas:** Partículas/tono; chimeneas si calefacción.
 
-**Criterio exacto de aceptación:**
-- Patrón aviso→prep→consecuencia
-- No muerte sorpresa D1
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- OK
 
-
-## F · Salud
-
-### ZZ-050 — Camas médicas y curación agregada
+### ZZ-048 — QA invierno forzado + gate
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | F · Salud |
+| **Bloque** | E · Clima e invierno (madera) |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Escenario frío; wood heat; exposición; capturas. |
+| **Sistemas** | clima, madera, vivienda, salud |
+| **Dependencias** | ZZ-047 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | woodHeating math; exposure thresholds |
+| **Pruebas funcionales** | Aviso ≥1 día antes; Sin fuel en calefacción |
+| **Revisión visual** | Sí |
+
+**Tareas:** Escenario frío; wood heat; exposición; capturas.
+
+**Aceptación:**
+- Fuel no calienta
+- Exposición progresiva
+- HUMAN_GATE invierno
+
+
+## F · Salud y brotes
+
+### ZZ-050 — Camas médicas + curación agregada
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Σ camas health; curación/día limitada. |
-| **Sistemas** | salud, exploradores |
+| **Objetivo** | Camas médicas + curación agregada (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/sim.js, js/explorers.js |
-| **Datos/contenido** | buildings health, balance heal |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | heal tick |
-| **Pruebas funcionales** | Heridos bajan labor; camas aceleran |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §12
+**Tareas:** Camas médicas + curación agregada (GM §12).
 
-**Criterio exacto de aceptación:**
-- Sin RPG de 100 fichas
-- Explorador individual sí
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
 
 ### ZZ-051 — Cadena botiquín→enfermería→clínica
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | F · Salud |
+| **Bloque** | F · Salud y brotes |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Progresión edificios health. |
-| **Sistemas** | salud, exploradores |
+| **Objetivo** | Cadena botiquín→enfermería→clínica (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
 | **Dependencias** | ZZ-050 |
-| **Archivos approx.** | js/sim.js, js/explorers.js |
-| **Datos/contenido** | buildings health, balance heal |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | heal tick |
-| **Pruebas funcionales** | Heridos bajan labor; camas aceleran |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §12
+**Tareas:** Cadena botiquín→enfermería→clínica (GM §12).
 
-**Criterio exacto de aceptación:**
-- Sin RPG de 100 fichas
-- Explorador individual sí
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
 
 ### ZZ-052 — Explorador wounded/sick timings
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | F · Salud |
+| **Bloque** | F · Salud y brotes |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Días indisponible; medicinas acortan. |
-| **Sistemas** | salud, exploradores |
+| **Objetivo** | Explorador wounded/sick timings (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
 | **Dependencias** | ZZ-051 |
-| **Archivos approx.** | js/sim.js, js/explorers.js |
-| **Datos/contenido** | buildings health, balance heal |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | heal tick |
-| **Pruebas funcionales** | Heridos bajan labor; camas aceleran |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §12
+**Tareas:** Explorador wounded/sick timings (GM §12).
 
-**Criterio exacto de aceptación:**
-- Sin RPG de 100 fichas
-- Explorador individual sí
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
 
-### ZZ-053 — Alertas salud
+### ZZ-053 — Motor brotes probabilístico (sin calendario)
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | F · Salud |
+| **Bloque** | F · Salud y brotes |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Camas X/Y; riesgo muerte agregado. |
-| **Sistemas** | salud, exploradores |
+| **Objetivo** | Motor brotes probabilístico (sin calendario) (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
 | **Dependencias** | ZZ-052 |
-| **Archivos approx.** | js/sim.js, js/explorers.js |
-| **Datos/contenido** | buildings health, balance heal |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | heal tick |
-| **Pruebas funcionales** | Heridos bajan labor; camas aceleran |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §12
+**Tareas:** Motor brotes probabilístico (sin calendario) (GM §12).
 
-**Criterio exacto de aceptación:**
-- Sin RPG de 100 fichas
-- Explorador individual sí
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-054 — Fases brote germen→propagación→pico→contención/crisis→recuperación
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Fases brote germen→propagación→pico→contención/crisis→recuperación (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-053 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | No |
+
+**Tareas:** Fases brote germen→propagación→pico→contención/crisis→recuperación (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-055 — Arquetipos brote + factores riesgo/reducción
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Arquetipos brote + factores riesgo/reducción (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-054 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | No |
+
+**Tareas:** Arquetipos brote + factores riesgo/reducción (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-056 — Staffing sanitario + prod solo por sick/reasignación
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Staffing sanitario + prod solo por sick/reasignación (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-055 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | No |
+
+**Tareas:** Staffing sanitario + prod solo por sick/reasignación (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-057 — Protocolo cuarentena pasivo (tech)
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Protocolo cuarentena pasivo (tech) (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-056 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | No |
+
+**Tareas:** Protocolo cuarentena pasivo (tech) (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-058 — Feedback semáforo salud + alertas brote
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Feedback semáforo salud + alertas brote (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-057 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | Sí |
+
+**Tareas:** Feedback semáforo salud + alertas brote (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- OK
+
+### ZZ-059 — QA crisis sanitaria completa + gate
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | F · Salud y brotes |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | QA crisis sanitaria completa + gate (GM §12). |
+| **Sistemas** | salud, brotes, research, staffing |
+| **Dependencias** | ZZ-058 |
+| **Archivos approx.** | — |
+| **Datos** | outbreaks content, research quarantine_protocol |
+| **Assets** | — |
+| **Pruebas auto** | outbreak no fixed day; quarantine reduces spread/duration; no artificial prod penalty; contained vs escalate scenarios |
+| **Pruebas funcionales** | Reasignar a enfermería baja contagio esperado; Tech cuarentena pasiva |
+| **Revisión visual** | Sí |
+
+**Tareas:** QA crisis sanitaria completa + gate (GM §12).
+
+**Aceptación:**
+- Sin calendario fijo
+- Prod↓ solo sick+reasignación
+- Cuarentena no toggle
+- HUMAN_GATE crisis sanitaria jugable
 
 
 ## G · Defensa e infectados
@@ -1008,22 +1221,21 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Score defensa sin A/D crudos opacos. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | Defensa agregada legible |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** Defensa agregada legible
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
 
 ### ZZ-061 — Ataques prep→resolve→informe
 
@@ -1031,45 +1243,43 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Jugador prepara; juego resuelve. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | Ataques prep→resolve→informe |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-060 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** Ataques prep→resolve→informe
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
 
-### ZZ-062 — Infectados tipados en combate
+### ZZ-062 — Infectados tipados afectan combate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | common/fast/tank/horde/rare afectan. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | Infectados tipados afectan combate |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-061 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** Infectados tipados afectan combate
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
 
 ### ZZ-063 — Munición y armería
 
@@ -1077,45 +1287,43 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Consumo ammo; armería produce. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | Munición y armería |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-062 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** Munición y armería
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
 
-### ZZ-064 — Recuperación post-ataque
+### ZZ-064 — Recuperación post-ataque Director
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Protección post-desastre; objetivos recovery. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | Recuperación post-ataque Director |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-063 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Parcial |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** Recuperación post-ataque Director
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
 
 ### ZZ-065 — QA ataque + recuperación visual
 
@@ -1123,22 +1331,116 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | G · Defensa e infectados |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Capturas + gate gameplay. |
-| **Sistemas** | defensa, infectados, director |
+| **Objetivo** | QA ataque + recuperación visual |
+| **Sistemas** | defensa, infectados |
 | **Dependencias** | ZZ-064 |
-| **Archivos approx.** | js/combat.js, js/director.js, content/infected.json |
-| **Datos/contenido** | infected.json, balance defense |
-| **Assets** | FX ataque opcional |
-| **Pruebas automáticas** | resolveBaseAttack cases |
-| **Pruebas funcionales** | 50→pérdida→recuperación posible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §13–14
+**Tareas:** QA ataque + recuperación visual
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No combate manual
-- Informe claro de bajas/daños
+- Informe bajas/daños
+
+
+## G2 · Daño y reparación
+
+### ZZ-066 — HP/estados estructurales edificios
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | G2 · Daño y reparación |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | ok→damaged→critical→destroyed. |
+| **Sistemas** | edificios, defensa, recursos, staffing |
+| **Dependencias** | ZZ-061 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | estados daño visual |
+| **Pruebas auto** | damage reduces output; repair restores HP; cost wood/metal |
+| **Pruebas funcionales** | Tocar dañado→Reparar; Alerta localiza |
+| **Revisión visual** | Sí |
+
+**Tareas:** ok→damaged→critical→destroyed.
+
+**Aceptación:**
+- Sin craft piezas
+- Compite con expansión
+- OK
+
+### ZZ-067 — Daño por hordas/eventos/tormentas + perímetro
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | G2 · Daño y reparación |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Perímetro roto → interiores. |
+| **Sistemas** | edificios, defensa, recursos, staffing |
+| **Dependencias** | ZZ-066 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | estados daño visual |
+| **Pruebas auto** | damage reduces output; repair restores HP; cost wood/metal |
+| **Pruebas funcionales** | Tocar dañado→Reparar; Alerta localiza |
+| **Revisión visual** | Sí |
+
+**Tareas:** Perímetro roto → interiores.
+
+**Aceptación:**
+- Sin craft piezas
+- Compite con expansión
+- OK
+
+### ZZ-068 — Acción Reparar (coste/tiempo/workers) + alerta localizar
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | G2 · Daño y reparación |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Aviso N edificios; tap→resaltar. |
+| **Sistemas** | edificios, defensa, recursos, staffing |
+| **Dependencias** | ZZ-067 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | estados daño visual |
+| **Pruebas auto** | damage reduces output; repair restores HP; cost wood/metal |
+| **Pruebas funcionales** | Tocar dañado→Reparar; Alerta localiza |
+| **Revisión visual** | Sí |
+
+**Tareas:** Aviso N edificios; tap→resaltar.
+
+**Aceptación:**
+- Sin craft piezas
+- Compite con expansión
+- OK
+
+### ZZ-069 — QA visual daño→reparación→recuperación + gate
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | G2 · Daño y reparación |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Capturas estados + flujo repair. |
+| **Sistemas** | edificios, defensa, recursos, staffing |
+| **Dependencias** | ZZ-068 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | estados daño visual |
+| **Pruebas auto** | damage reduces output; repair restores HP; cost wood/metal |
+| **Pruebas funcionales** | Tocar dañado→Reparar; Alerta localiza |
+| **Revisión visual** | Sí |
+
+**Tareas:** Capturas estados + flujo repair.
+
+**Aceptación:**
+- Sin craft piezas
+- Compite con expansión
+- HUMAN_GATE repair visual
 
 
 ## H · Territorio
@@ -1149,437 +1451,567 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | H · Territorio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Seguridad, reveal, rutas, loot residual. |
+| **Objetivo** | Beneficios reales de control |
 | **Sistemas** | mapa, exploración |
 | **Dependencias** | ZZ-022 |
-| **Archivos approx.** | js/map.js, content/locations.json |
-| **Datos/contenido** | locations.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | control bonuses |
-| **Pruebas funcionales** | Controlar zona mejora seguridad medible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §15–16
+**Tareas:** Beneficios reales de control
 
-**Criterio exacto de aceptación:**
-- No pintar verde vacío
+**Aceptación:**
+- Control ≠ pintar verde vacío
 
-### ZZ-071 — Contested / pérdida fronteriza
+### ZZ-071 — Contested/pérdida fronteriza
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | H · Territorio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Opcional según diseño; si sí, reglas claras. |
+| **Objetivo** | Contested/pérdida fronteriza |
 | **Sistemas** | mapa, exploración |
 | **Dependencias** | ZZ-070 |
-| **Archivos approx.** | js/map.js, content/locations.json |
-| **Datos/contenido** | locations.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | control bonuses |
-| **Pruebas funcionales** | Controlar zona mejora seguridad medible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §15–16
+**Tareas:** Contested/pérdida fronteriza
 
-**Criterio exacto de aceptación:**
-- No pintar verde vacío
+**Aceptación:**
+- Control ≠ pintar verde vacío
 
-### ZZ-072 — Tablas loot por landmark
+### ZZ-072 — Loot tables por landmark type
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | H · Territorio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Supermercado≠farmacia≠comisaría. |
+| **Objetivo** | Loot tables por landmark type |
 | **Sistemas** | mapa, exploración |
 | **Dependencias** | ZZ-071 |
-| **Archivos approx.** | js/map.js, content/locations.json |
-| **Datos/contenido** | locations.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | control bonuses |
-| **Pruebas funcionales** | Controlar zona mejora seguridad medible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §15–16
+**Tareas:** Loot tables por landmark type
 
-**Criterio exacto de aceptación:**
-- No pintar verde vacío
+**Aceptación:**
+- Control ≠ pintar verde vacío
 
-### ZZ-073 — Fog/discovered polish visual
+### ZZ-073 — Fog/discovered polish (no GIS) + gate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | H · Territorio |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Sin GIS; landmarks art. |
+| **Objetivo** | Fog/discovered polish (no GIS) + gate |
 | **Sistemas** | mapa, exploración |
 | **Dependencias** | ZZ-072 |
-| **Archivos approx.** | js/map.js, content/locations.json |
-| **Datos/contenido** | locations.json |
-| **Assets** | landmarks set |
-| **Pruebas automáticas** | control bonuses |
-| **Pruebas funcionales** | Controlar zona mejora seguridad medible |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §15–16
+**Tareas:** Fog/discovered polish (no GIS) + gate
 
-**Criterio exacto de aceptación:**
-- No pintar verde vacío
+**Aceptación:**
+- Control ≠ pintar verde vacío
 
 
 ## I · Investigación
 
-### ZZ-080 — Cablear effects research existentes
+### ZZ-080 — Banco técnico + lab con workers +/-
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | I · Investigación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Cada effect JSON aplica en sim. |
+| **Objetivo** | Research no UI hasta banco; 1 tech activa; más workers→más progreso. |
 | **Sistemas** | research |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/research.js, content/research.json |
-| **Datos/contenido** | research.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | tech effect suite |
-| **Pruebas funcionales** | Investigar insulation unlock insulated_house |
+| **Archivos approx.** | — |
+| **Datos** | research.json |
+| **Assets** | — |
+| **Pruebas auto** | no energy branch; each tech effect; quarantine passive |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §18 + Apéndice A
+**Tareas:** Research no UI hasta banco; 1 tech activa; más workers→más progreso.
 
-**Criterio exacto de aceptación:**
-- Cero techs stub
-- Sin unlock wall/power_hub huérfanos
+**Aceptación:**
+- Sin rama Energía
+- Sin número prefijado
+- Huerto D1 sin tech
 
-### ZZ-081 — Árbol 2.1 ramas Medicina/Energía
+### ZZ-081 — Árbol utilitario sin Energía + quarantine_protocol
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | I · Investigación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Ampliar a ~28 techs diseño. |
+| **Objetivo** | Solo techs con test deseo; sin cuota 20/28; sin generator/solar/power_*. |
 | **Sistemas** | research |
 | **Dependencias** | ZZ-080 |
-| **Archivos approx.** | js/research.js, content/research.json |
-| **Datos/contenido** | research.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | tech effect suite |
-| **Pruebas funcionales** | Investigar insulation unlock insulated_house |
+| **Archivos approx.** | — |
+| **Datos** | research.json |
+| **Assets** | — |
+| **Pruebas auto** | no energy branch; each tech effect; quarantine passive |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §18 + Apéndice A
+**Tareas:** Solo techs con test deseo; sin cuota 20/28; sin generator/solar/power_*.
 
-**Criterio exacto de aceptación:**
-- Cero techs stub
-- Sin unlock wall/power_hub huérfanos
+**Aceptación:**
+- Sin rama Energía
+- Sin número prefijado
+- Huerto D1 sin tech
 
-### ZZ-082 — UI research legible
+### ZZ-082 — Cablear efectos reales de cada tech
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | I · Investigación |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | 1 assertion medible por tech. |
+| **Sistemas** | research |
+| **Dependencias** | ZZ-081 |
+| **Archivos approx.** | — |
+| **Datos** | research.json |
+| **Assets** | — |
+| **Pruebas auto** | no energy branch; each tech effect; quarantine passive |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** 1 assertion medible por tech.
+
+**Aceptación:**
+- Sin rama Energía
+- Sin número prefijado
+- Huerto D1 sin tech
+
+### ZZ-083 — UI research legible (deseo claro)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | I · Investigación |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | En Más / sheet; deseo de unlock. |
+| **Objetivo** | Beneficio en lenguaje humano. |
 | **Sistemas** | research |
-| **Dependencias** | ZZ-081 |
-| **Archivos approx.** | js/research.js, content/research.json |
-| **Datos/contenido** | research.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | tech effect suite |
-| **Pruebas funcionales** | Investigar insulation unlock insulated_house |
+| **Dependencias** | ZZ-082 |
+| **Archivos approx.** | — |
+| **Datos** | research.json |
+| **Assets** | — |
+| **Pruebas auto** | no energy branch; each tech effect; quarantine passive |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §18 + Apéndice A
+**Tareas:** Beneficio en lenguaje humano.
 
-**Criterio exacto de aceptación:**
-- Cero techs stub
-- Sin unlock wall/power_hub huérfanos
+**Aceptación:**
+- Sin rama Energía
+- Sin número prefijado
+- Huerto D1 sin tech
 
-### ZZ-083 — Tests por tech medible
+### ZZ-084 — Tests suite research + cuarentena pasiva
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | I · Investigación |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | 1 assertion por tech. |
+| **Objetivo** | Cuarentena no toggle/−prod. |
 | **Sistemas** | research |
-| **Dependencias** | ZZ-082 |
-| **Archivos approx.** | js/research.js, content/research.json |
-| **Datos/contenido** | research.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | tech effect suite |
-| **Pruebas funcionales** | Investigar insulation unlock insulated_house |
+| **Dependencias** | ZZ-083 |
+| **Archivos approx.** | — |
+| **Datos** | research.json |
+| **Assets** | — |
+| **Pruebas auto** | no energy branch; each tech effect; quarantine passive |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §18 + Apéndice A
+**Tareas:** Cuarentena no toggle/−prod.
 
-**Criterio exacto de aceptación:**
-- Cero techs stub
-- Sin unlock wall/power_hub huérfanos
+**Aceptación:**
+- Sin rama Energía
+- Sin número prefijado
+- Huerto D1 sin tech
 
 
 ## J · Vehículos
 
-### ZZ-090 — Garage y requisitos compra
+### ZZ-090 — Garage + compra vehículos
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | J · Vehículos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Sin vehículo pesado sin garage/tech. |
-| **Sistemas** | vehículos, exploración |
+| **Objetivo** | Garage + compra vehículos (fuel ≠ calor). |
+| **Sistemas** | vehículos, fuel |
 | **Dependencias** | ZZ-022, ZZ-080 |
-| **Archivos approx.** | js/vehicles.js, content/vehicles.json |
-| **Datos/contenido** | vehicles.json |
-| **Assets** | sprites vehículos si faltan |
-| **Pruebas automáticas** | fuel cost trip |
-| **Pruebas funcionales** | Bike early; car mid |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §17
+**Tareas:** Garage + compra vehículos (fuel ≠ calor).
 
-**Criterio exacto de aceptación:**
-- Sin inventario piezas
+**Aceptación:**
+- Fuel no calienta ni HQ
 
-### ZZ-091 — Efectos speed/cargo/fuel/prot
+### ZZ-091 — Fuel solo viajes/repair vehicular
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | J · Vehículos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Aplicados en expedición. |
-| **Sistemas** | vehículos, exploración |
+| **Objetivo** | Fuel solo viajes/repair vehicular (fuel ≠ calor). |
+| **Sistemas** | vehículos, fuel |
 | **Dependencias** | ZZ-090 |
-| **Archivos approx.** | js/vehicles.js, content/vehicles.json |
-| **Datos/contenido** | vehicles.json |
-| **Assets** | sprites vehículos si faltan |
-| **Pruebas automáticas** | fuel cost trip |
-| **Pruebas funcionales** | Bike early; car mid |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §17
+**Tareas:** Fuel solo viajes/repair vehicular (fuel ≠ calor).
 
-**Criterio exacto de aceptación:**
-- Sin inventario piezas
+**Aceptación:**
+- Fuel no calienta ni HQ
 
-### ZZ-092 — Reparación abstracta
+### ZZ-092 — Efectos speed/cargo/prot
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | J · Vehículos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Coste metal/fuel + mech_shop; sin piezas. |
-| **Sistemas** | vehículos, exploración |
+| **Objetivo** | Efectos speed/cargo/prot (fuel ≠ calor). |
+| **Sistemas** | vehículos, fuel |
 | **Dependencias** | ZZ-091 |
-| **Archivos approx.** | js/vehicles.js, content/vehicles.json |
-| **Datos/contenido** | vehicles.json |
-| **Assets** | sprites vehículos si faltan |
-| **Pruebas automáticas** | fuel cost trip |
-| **Pruebas funcionales** | Bike early; car mid |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §17
+**Tareas:** Efectos speed/cargo/prot (fuel ≠ calor).
 
-**Criterio exacto de aceptación:**
-- Sin inventario piezas
+**Aceptación:**
+- Fuel no calienta ni HQ
 
-### ZZ-093 — Integración expedición UI
+### ZZ-093 — UI elegir vehículo en expedición
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | J · Vehículos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Elegir vehículo al enviar. |
-| **Sistemas** | vehículos, exploración |
+| **Objetivo** | UI elegir vehículo en expedición (fuel ≠ calor). |
+| **Sistemas** | vehículos, fuel |
 | **Dependencias** | ZZ-092 |
-| **Archivos approx.** | js/vehicles.js, content/vehicles.json |
-| **Datos/contenido** | vehicles.json |
-| **Assets** | sprites vehículos si faltan |
-| **Pruebas automáticas** | fuel cost trip |
-| **Pruebas funcionales** | Bike early; car mid |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- §17
+**Tareas:** UI elegir vehículo en expedición (fuel ≠ calor).
 
-**Criterio exacto de aceptación:**
-- Sin inventario piezas
+**Aceptación:**
+- Fuel no calienta ni HQ
 
 
-## K · Misiones
+## J2 · Radio y Centro de expediciones
+
+### ZZ-094 — Radio: señales/misiones/contactos
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | J2 · Radio y Centro de expediciones |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Historias; no +% invisible. |
+| **Sistemas** | radio, exploración, misiones |
+| **Dependencias** | ZZ-022 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** Historias; no +% invisible.
+
+**Aceptación:**
+- Roles A GM 2.5
+- Ambos edificios
+
+### ZZ-095 — Centro expediciones: info riesgo/tiempo/slots
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | J2 · Radio y Centro de expediciones |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Logística; feedback en ficha salida. |
+| **Sistemas** | radio, exploración, misiones |
+| **Dependencias** | ZZ-094 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** Logística; feedback en ficha salida.
+
+**Aceptación:**
+- Roles A GM 2.5
+- Ambos edificios
+
+### ZZ-096 — QA roles distintos radio≠centro
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | J2 · Radio y Centro de expediciones |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Tests que no duplican función. |
+| **Sistemas** | radio, exploración, misiones |
+| **Dependencias** | ZZ-095 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** Tests que no duplican función.
+
+**Aceptación:**
+- Roles A GM 2.5
+- Ambos edificios
+
+
+## K · Misiones y expediciones
 
 ### ZZ-100 — Schema missions + state
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | missions[] en save. |
-| **Sistemas** | misiones, director |
-| **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Objetivo** | Schema missions + state |
+| **Sistemas** | misiones, exploración, director |
+| **Dependencias** | ZZ-094, ZZ-023 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Schema missions + state
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
-### ZZ-101 — Misiones guía
+### ZZ-101 — Misiones guía (pocas)
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Sustituyen coach sticky. |
-| **Sistemas** | misiones, director |
+| **Objetivo** | Misiones guía (pocas) |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-100 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Misiones guía (pocas)
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
 ### ZZ-102 — Misiones contextuales necesidad
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | food/water/beds/warmth. |
-| **Sistemas** | misiones, director |
+| **Objetivo** | Misiones contextuales necesidad |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-101 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Misiones contextuales necesidad
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
-### ZZ-103 — Misiones aleatorias
+### ZZ-103 — Misiones radio/historia/crisis/ambiguas
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | radio, rescate, supply, nest. |
-| **Sistemas** | misiones, director |
+| **Objetivo** | Misiones radio/historia/crisis/ambiguas |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-102 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Misiones radio/historia/crisis/ambiguas
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
-### ZZ-104 — Misiones de era / victoria path
+### ZZ-104 — Motor expedición combinatorio placeState×encounter×choice×outcome×aftermath
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Gates era + final_chain. |
-| **Sistemas** | misiones, director |
+| **Objetivo** | Motor expedición combinatorio placeState×encounter×choice×outcome×aftermath |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-103 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Motor expedición combinatorio placeState×encounter×choice×outcome×aftermath
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
-### ZZ-105 — UI objetivo único
+### ZZ-105 — Pesos/cooldown/memoria/antirrepetición/rareza
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
+| **Bloque** | K · Misiones y expediciones |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Un objetivo visible; recompensas. |
-| **Sistemas** | misiones, director |
+| **Objetivo** | Pesos/cooldown/memoria/antirrepetición/rareza |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-104 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** Pesos/cooldown/memoria/antirrepetición/rareza
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
 
-### ZZ-106 — QA misiones no spam
+### ZZ-106 — UI objetivo único + recompensas
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | K · Misiones |
-| **HUMAN_GATE** | **YES** |
-| **Objetivo** | Cooldowns; gate. |
-| **Sistemas** | misiones, director |
+| **Bloque** | K · Misiones y expediciones |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | UI objetivo único + recompensas |
+| **Sistemas** | misiones, exploración, director |
 | **Dependencias** | ZZ-105 |
-| **Archivos approx.** | js/missions.js, content/missions.json |
-| **Datos/contenido** | content/missions.json nuevo |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | mission spawn rules |
-| **Pruebas funcionales** | Máx 1–2 activas relevantes |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §20 + Apéndice K
+**Tareas:** UI objetivo único + recompensas
 
-**Criterio exacto de aceptación:**
-- No campaña lineal rígida
-- No spam
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
+
+### ZZ-107 — Tests batch muchas expediciones (detección repetición)
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | K · Misiones y expediciones |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Tests batch muchas expediciones (detección repetición) |
+| **Sistemas** | misiones, exploración, director |
+| **Dependencias** | ZZ-106 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** Tests batch muchas expediciones (detección repetición)
+
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- OK
+
+### ZZ-108 — QA misiones/expediciones variedad + gate
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | K · Misiones y expediciones |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | QA misiones/expediciones variedad + gate |
+| **Sistemas** | misiones, exploración, director |
+| **Dependencias** | ZZ-107 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | combinatorial coverage; anti-repeat metrics |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | Sí |
+
+**Tareas:** QA misiones/expediciones variedad + gate
+
+**Aceptación:**
+- No checklist build infinito
+- Supermercado≠farmacia
+- HUMAN_GATE
 
 
 ## L · Logros
@@ -1590,22 +2022,21 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | L · Logros |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | content/achievements.json |
+| **Objetivo** | Schema achievements |
 | **Sistemas** | logros |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/achievements.js |
-| **Datos/contenido** | achievements.json |
-| **Assets** | iconos logros opcionales |
-| **Pruebas automáticas** | unlock triggers |
-| **Pruebas funcionales** | Logro D7 / pop10 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §22
+**Tareas:** Schema achievements
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Sin pay-to-win
-- ≥60
+- Sin logros de electricidad
 
 ### ZZ-111 — Tracking + persistencia
 
@@ -1613,45 +2044,43 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | L · Logros |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Unlock + save |
+| **Objetivo** | Tracking + persistencia |
 | **Sistemas** | logros |
 | **Dependencias** | ZZ-110 |
-| **Archivos approx.** | js/achievements.js |
-| **Datos/contenido** | achievements.json |
-| **Assets** | iconos logros opcionales |
-| **Pruebas automáticas** | unlock triggers |
-| **Pruebas funcionales** | Logro D7 / pop10 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §22
+**Tareas:** Tracking + persistencia
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Sin pay-to-win
-- ≥60
+- Sin logros de electricidad
 
-### ZZ-112 — Cablear ≥60 logros
+### ZZ-112 — Cablear ≥60 logros (sin generator/solar)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | L · Logros |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Apéndice L ids |
+| **Objetivo** | Cablear ≥60 logros (sin generator/solar) |
 | **Sistemas** | logros |
 | **Dependencias** | ZZ-111 |
-| **Archivos approx.** | js/achievements.js |
-| **Datos/contenido** | achievements.json |
-| **Assets** | iconos logros opcionales |
-| **Pruebas automáticas** | unlock triggers |
-| **Pruebas funcionales** | Logro D7 / pop10 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §22
+**Tareas:** Cablear ≥60 logros (sin generator/solar)
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Sin pay-to-win
-- ≥60
+- Sin logros de electricidad
 
 ### ZZ-113 — Feedback badge no invasivo
 
@@ -1659,187 +2088,201 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | L · Logros |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Toast/badge sin modal spam |
+| **Objetivo** | Feedback badge no invasivo |
 | **Sistemas** | logros |
 | **Dependencias** | ZZ-112 |
-| **Archivos approx.** | js/achievements.js |
-| **Datos/contenido** | achievements.json |
-| **Assets** | iconos logros opcionales |
-| **Pruebas automáticas** | unlock triggers |
-| **Pruebas funcionales** | Logro D7 / pop10 |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- §22
+**Tareas:** Feedback badge no invasivo
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Sin pay-to-win
-- ≥60
+- Sin logros de electricidad
 
 
-## M · Eventos / Director 2.1
+## M · Director y eventos
 
-### ZZ-120 — Pesos Director vs era/estación
+### ZZ-120 — Pesos Director vs era/estación/estado
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Recalibrar families. |
+| **Objetivo** | Pesos Director vs era/estación/estado (sin cadencia fija). |
 | **Sistemas** | director, eventos |
-| **Dependencias** | ZZ-040, ZZ-023 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Dependencias** | ZZ-040, ZZ-053 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Pesos Director vs era/estación/estado (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
 ### ZZ-121 — Memoria flags secuelas
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | flags narrativas. |
+| **Objetivo** | Memoria flags secuelas (sin cadencia fija). |
 | **Sistemas** | director, eventos |
 | **Dependencias** | ZZ-120 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Memoria flags secuelas (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
 ### ZZ-122 — Antirrepetición reforzada
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | ventana M días. |
+| **Objetivo** | Antirrepetición reforzada (sin cadencia fija). |
 | **Sistemas** | director, eventos |
 | **Dependencias** | ZZ-121 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Antirrepetición reforzada (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
-### ZZ-123 — Quiet nights calibrados
+### ZZ-123 — Quiet nights + post-desastre
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | ~30%. |
+| **Objetivo** | Quiet nights + post-desastre (sin cadencia fija). |
 | **Sistemas** | director, eventos |
 | **Dependencias** | ZZ-122 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Quiet nights + post-desastre (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
 ### ZZ-124 — Catástrofes con aviso
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | aviso→prep→consecuencia. |
+| **Objetivo** | Catástrofes con aviso (sin cadencia fija). |
 | **Sistemas** | director, eventos |
 | **Dependencias** | ZZ-123 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Catástrofes con aviso (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
-### ZZ-125 — Auditoría 110 eventos
+### ZZ-125 — Auditoría eventos vs familias + gate
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | M · Eventos / Director 2.1 |
+| **Bloque** | M · Director y eventos |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | familia vs diseño; recortar inútiles. |
+| **Objetivo** | Auditoría eventos vs familias + gate (sin cadencia fija). |
 | **Sistemas** | director, eventos |
 | **Dependencias** | ZZ-124 |
-| **Archivos approx.** | js/director.js, content/events.json |
-| **Datos/contenido** | events.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | director budget; cooldown |
-| **Pruebas funcionales** | Ritmo tensión→crisis→recovery en sim |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §19 + §25 + Apéndice J
+**Tareas:** Auditoría eventos vs familias + gate (sin cadencia fija).
 
-**Criterio exacto de aceptación:**
-- No crisis infinita
-- No 100 días planos
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
+
+### ZZ-126 — Ritmo tensión→crisis→recovery tests
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | M · Director y eventos |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Ritmo tensión→crisis→recovery tests (sin cadencia fija). |
+| **Sistemas** | director, eventos |
+| **Dependencias** | ZZ-125 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
+
+**Tareas:** Ritmo tensión→crisis→recovery tests (sin cadencia fija).
+
+**Aceptación:**
+- Nunca cada X días fijo
+- Brotes vía pesos
 
 
 ## N · Otros humanos
 
-### ZZ-130 — Contactos por evento
+### ZZ-130 — Contactos por evento (sin 4X)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | N · Otros humanos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Sin diplomacia 4X. |
+| **Objetivo** | Contactos por evento (sin 4X) |
 | **Sistemas** | facciones ligeras |
 | **Dependencias** | ZZ-120 |
-| **Archivos approx.** | js/factions.js, content/factions.json |
-| **Datos/contenido** | factions.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | event trade |
-| **Pruebas funcionales** | Contacto no requiere panel 4X |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §27
+**Tareas:** Contactos por evento (sin 4X)
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Si no aporta → solo flags
 
 ### ZZ-131 — Comercio evento
@@ -1848,42 +2291,40 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | N · Otros humanos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Trueque simple. |
+| **Objetivo** | Comercio evento |
 | **Sistemas** | facciones ligeras |
 | **Dependencias** | ZZ-130 |
-| **Archivos approx.** | js/factions.js, content/factions.json |
-| **Datos/contenido** | factions.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | event trade |
-| **Pruebas funcionales** | Contacto no requiere panel 4X |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §27
+**Tareas:** Comercio evento
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Si no aporta → solo flags
 
-### ZZ-132 — UI mínima contactos
+### ZZ-132 — UI mínima o solo cards
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | N · Otros humanos |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Cards o solo eventos. |
+| **Objetivo** | UI mínima o solo cards |
 | **Sistemas** | facciones ligeras |
 | **Dependencias** | ZZ-131 |
-| **Archivos approx.** | js/factions.js, content/factions.json |
-| **Datos/contenido** | factions.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | event trade |
-| **Pruebas funcionales** | Contacto no requiere panel 4X |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- §27
+**Tareas:** UI mínima o solo cards
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Si no aporta → solo flags
 
 ### ZZ-133 — Go/no-go facciones tras playtest
@@ -1892,70 +2333,67 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | N · Otros humanos |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Decisión documentada. |
+| **Objetivo** | Go/no-go facciones tras playtest |
 | **Sistemas** | facciones ligeras |
 | **Dependencias** | ZZ-132 |
-| **Archivos approx.** | js/factions.js, content/factions.json |
-| **Datos/contenido** | factions.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | event trade |
-| **Pruebas funcionales** | Contacto no requiere panel 4X |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §27
+**Tareas:** Go/no-go facciones tras playtest
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - Si no aporta → solo flags
 
 
 ## O · Eras y victoria
 
-### ZZ-140 — Unlock eras por indicadores 2.1
+### ZZ-140 — Unlock eras por indicadores 2.5
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | O · Eras y victoria |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | pop/control/research/infra. |
-| **Sistemas** | eras, victoria, derrota |
+| **Objetivo** | Unlock eras por indicadores 2.5 |
+| **Sistemas** | eras, victoria |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | js/eras.js, js/victory.js |
-| **Datos/contenido** | eras.json, balance victory |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | victory checks |
-| **Pruebas funcionales** | Derrota explica por qué |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §23 §28 §29
+**Tareas:** Unlock eras por indicadores 2.5
 
-**Criterio exacto de aceptación:**
-- No checkbox pop solo
-- Endless disponible
+**Aceptación:**
+- Sin electricidad en victoria
+- Culminación no checkbox pop
 
-### ZZ-141 — Victoria multi-condición
+### ZZ-141 — Victoria multi-condición SIN needEnergy
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | O · Eras y victoria |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Checklist culminación §28. |
-| **Sistemas** | eras, victoria, derrota |
+| **Objetivo** | Victoria multi-condición SIN needEnergy |
+| **Sistemas** | eras, victoria |
 | **Dependencias** | ZZ-140 |
-| **Archivos approx.** | js/eras.js, js/victory.js |
-| **Datos/contenido** | eras.json, balance victory |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | victory checks |
-| **Pruebas funcionales** | Derrota explica por qué |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §23 §28 §29
+**Tareas:** Victoria multi-condición SIN needEnergy
 
-**Criterio exacto de aceptación:**
-- No checkbox pop solo
-- Endless disponible
+**Aceptación:**
+- Sin electricidad en victoria
+- Culminación no checkbox pop
 
 ### ZZ-142 — Crisis final variable
 
@@ -1963,22 +2401,21 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | O · Eras y victoria |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Variantes por semilla. |
-| **Sistemas** | eras, victoria, derrota |
+| **Objetivo** | Crisis final variable |
+| **Sistemas** | eras, victoria |
 | **Dependencias** | ZZ-141 |
-| **Archivos approx.** | js/eras.js, js/victory.js |
-| **Datos/contenido** | eras.json, balance victory |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | victory checks |
-| **Pruebas funcionales** | Derrota explica por qué |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §23 §28 §29
+**Tareas:** Crisis final variable
 
-**Criterio exacto de aceptación:**
-- No checkbox pop solo
-- Endless disponible
+**Aceptación:**
+- Sin electricidad en victoria
+- Culminación no checkbox pop
 
 ### ZZ-143 — Endless post-victoria
 
@@ -1986,227 +2423,217 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | O · Eras y victoria |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Continuar partida. |
-| **Sistemas** | eras, victoria, derrota |
+| **Objetivo** | Endless post-victoria |
+| **Sistemas** | eras, victoria |
 | **Dependencias** | ZZ-142 |
-| **Archivos approx.** | js/eras.js, js/victory.js |
-| **Datos/contenido** | eras.json, balance victory |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | victory checks |
-| **Pruebas funcionales** | Derrota explica por qué |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §23 §28 §29
+**Tareas:** Endless post-victoria
 
-**Criterio exacto de aceptación:**
-- No checkbox pop solo
-- Endless disponible
+**Aceptación:**
+- Sin electricidad en victoria
+- Culminación no checkbox pop
 
-### ZZ-144 — Pantallas victoria/derrota
+### ZZ-144 — Pantallas victoria/derrota + gate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | O · Eras y victoria |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Narrativa causa clara. |
-| **Sistemas** | eras, victoria, derrota |
+| **Objetivo** | Pantallas victoria/derrota + gate |
+| **Sistemas** | eras, victoria |
 | **Dependencias** | ZZ-143 |
-| **Archivos approx.** | js/eras.js, js/victory.js |
-| **Datos/contenido** | eras.json, balance victory |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | victory checks |
-| **Pruebas funcionales** | Derrota explica por qué |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- §23 §28 §29
+**Tareas:** Pantallas victoria/derrota + gate
 
-**Criterio exacto de aceptación:**
-- No checkbox pop solo
-- Endless disponible
+**Aceptación:**
+- Sin electricidad en victoria
+- Culminación no checkbox pop
 
 
-## P · UX mundo completa
+## P · UX mundo
 
 ### ZZ-150 — Sheets móvil/desktop consistentes
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | P · UX mundo completa |
+| **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Mundo primero; bottom sheets / panel. |
+| **Objetivo** | Sheets móvil/desktop consistentes |
 | **Sistemas** | UX |
 | **Dependencias** | ZZ-023 |
-| **Archivos approx.** | css/world.css, js/main.js |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | a11y smoke |
-| **Pruebas funcionales** | Sin pestañas Mapa|Base|Gente |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §21 §31
+**Tareas:** Sheets móvil/desktop consistentes
 
-**Criterio exacto de aceptación:**
-- Contrato UI §31
+**Aceptación:**
+- Mundo primero; sin pestañas app
 
 ### ZZ-151 — Alertas prioritizadas
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | P · UX mundo completa |
+| **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Crítico > objetivo > tip. |
+| **Objetivo** | Alertas prioritizadas |
 | **Sistemas** | UX |
 | **Dependencias** | ZZ-150 |
-| **Archivos approx.** | css/world.css, js/main.js |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | a11y smoke |
-| **Pruebas funcionales** | Sin pestañas Mapa|Base|Gente |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §21 §31
+**Tareas:** Alertas prioritizadas
 
-**Criterio exacto de aceptación:**
-- Contrato UI §31
+**Aceptación:**
+- Mundo primero; sin pestañas app
 
 ### ZZ-152 — Ayuda contextual
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | P · UX mundo completa |
+| **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | ? sin mandar al jugador. |
+| **Objetivo** | Ayuda contextual |
 | **Sistemas** | UX |
 | **Dependencias** | ZZ-151 |
-| **Archivos approx.** | css/world.css, js/main.js |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | a11y smoke |
-| **Pruebas funcionales** | Sin pestañas Mapa|Base|Gente |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §21 §31
+**Tareas:** Ayuda contextual
 
-**Criterio exacto de aceptación:**
-- Contrato UI §31
+**Aceptación:**
+- Mundo primero; sin pestañas app
 
 ### ZZ-153 — Diario no spam
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | P · UX mundo completa |
+| **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Log filtrable. |
+| **Objetivo** | Diario no spam |
 | **Sistemas** | UX |
 | **Dependencias** | ZZ-152 |
-| **Archivos approx.** | css/world.css, js/main.js |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | a11y smoke |
-| **Pruebas funcionales** | Sin pestañas Mapa|Base|Gente |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §21 §31
+**Tareas:** Diario no spam
 
-**Criterio exacto de aceptación:**
-- Contrato UI §31
+**Aceptación:**
+- Mundo primero; sin pestañas app
 
-### ZZ-154 — Accesibilidad básica
+### ZZ-154 — Accesibilidad básica + gate
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | P · UX mundo completa |
+| **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Tap targets, contraste. |
+| **Objetivo** | Accesibilidad básica + gate |
 | **Sistemas** | UX |
 | **Dependencias** | ZZ-153 |
-| **Archivos approx.** | css/world.css, js/main.js |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | a11y smoke |
-| **Pruebas funcionales** | Sin pestañas Mapa|Base|Gente |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §21 §31
+**Tareas:** Accesibilidad básica + gate
 
-**Criterio exacto de aceptación:**
-- Contrato UI §31
+**Aceptación:**
+- Mundo primero; sin pestañas app
 
 
 ## Q · Arte y audio
 
-### ZZ-160 — Assets edificios faltantes *(revisar: sin solar assets obligatorios)*
+### ZZ-160 — Assets edificios (insulated, estados daño)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | insulated_house etc. |
+| **Objetivo** | Assets edificios (insulated, estados daño) (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-015 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** Assets edificios (insulated, estados daño) (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
 
-### ZZ-161 — Terreno ciudad close-up
+### ZZ-161 — Terreno ciudad close-up + gate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | No blur GIS. |
+| **Objetivo** | Terreno ciudad close-up + gate (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-160 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** Terreno ciudad close-up + gate (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
 
-### ZZ-162 — Landmarks set completo
+### ZZ-162 — Landmarks set
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | 18 tipos reconocibles. |
+| **Objetivo** | Landmarks set (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-161 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** Landmarks set (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
 
 ### ZZ-163 — Props colonia
 
@@ -2214,21 +2641,20 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Restos, valla, detalles. |
+| **Objetivo** | Props colonia (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-162 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** Props colonia (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
 
 ### ZZ-164 — SFX mínimo + mute
 
@@ -2236,269 +2662,423 @@ ZZ-001 (GATE diseño)
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | §34. |
+| **Objetivo** | SFX mínimo + mute (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-163 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** SFX mínimo + mute (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
 
-### ZZ-165 — Review visual por era
+### ZZ-165 — Review visual por era + gate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | Q · Arte y audio |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Contact sheets era 0–3. |
+| **Objetivo** | Review visual por era + gate (sin assets solar/generator obligatorios). |
 | **Sistemas** | arte, audio |
 | **Dependencias** | ZZ-164 |
-| **Archivos approx.** | assets/, docs/art-direction/ |
-| **Datos/contenido** | — |
-| **Assets** | lote completo |
-| **Pruebas automáticas** | assets load |
-| **Pruebas funcionales** | Reconocibilidad |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | Sí |
 
-**Tareas concretas:**
-- §33 §34
+**Tareas:** Review visual por era + gate (sin assets solar/generator obligatorios).
 
-**Criterio exacto de aceptación:**
-- Dirección artística coherente
+**Aceptación:**
+- Sin dependencia eléctrica
+
+
+## Q2 · Vida visual y movimiento
+
+### ZZ-166 — Sistema habitantes ambientales (cap render)
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Muestra proporcional; sin fichas individuales. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-021, ZZ-015 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Muestra proporcional; sin fichas individuales.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-167 — Movimiento trabajo por edificio staffed
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Farm/well/taller/etc. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-166 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Farm/well/taller/etc.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-168 — Animaciones construcción + reparación
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Polvo/andamiaje. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-167 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Polvo/andamiaje.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-169 — Semáforo verde/ámbar/rojo + enfermos
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Estados agregados. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-168 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Estados agregados.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-170 — Clima visible + explorador ida/vuelta
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Ruta silueta. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-169 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Ruta silueta.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-171 — Actividad/alerta durante hordas
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Flash perímetro; refugio. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-170 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** Flash perímetro; refugio.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- OK
+
+### ZZ-172 — Perf móvil ambient life + gate
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | Q2 · Vida visual y movimiento |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | 3 y ~100 pop; FPS aceptable. |
+| **Sistemas** | arte, UX, perf |
+| **Dependencias** | ZZ-171 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | sprite cap; perf budget mobile |
+| **Pruebas funcionales** | Se ve viva sin 100 NPCs |
+| **Revisión visual** | Sí |
+
+**Tareas:** 3 y ~100 pop; FPS aceptable.
+
+**Aceptación:**
+- No Sims
+- Cap render
+- HUMAN_GATE perf+vida
 
 
 ## R · Simulador y balance
 
-### ZZ-170 — Harness perfiles IA-jugador
+### ZZ-175 — Harness perfiles IA-jugador
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | R · Simulador y balance |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | atento/expansivo/conservador/mala gestión/sin explorar/sobreexpansión. |
+| **Objetivo** | Harness perfiles IA-jugador |
 | **Sistemas** | simulador, balance |
-| **Dependencias** | ZZ-120, ZZ-140 |
-| **Archivos approx.** | scripts/sim-harness.mjs, docs/BALANCE_REPORT.md |
-| **Datos/contenido** | balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | sim batch |
-| **Pruebas funcionales** | Perfil mala gestión pierde más |
+| **Dependencias** | ZZ-120, ZZ-053, ZZ-043 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §36
+**Tareas:** Harness perfiles IA-jugador
 
-**Criterio exacto de aceptación:**
-- Informe accionable
+**Aceptación:**
+- Perfil mala gestión pierde más
 
-### ZZ-171 — Métricas batch D30/D100
+### ZZ-176 — Métricas batch D30/D100
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | R · Simulador y balance |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | supervivencia, pop, crisis, victoria. |
+| **Objetivo** | Métricas batch D30/D100 |
 | **Sistemas** | simulador, balance |
-| **Dependencias** | ZZ-170 |
-| **Archivos approx.** | scripts/sim-harness.mjs, docs/BALANCE_REPORT.md |
-| **Datos/contenido** | balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | sim batch |
-| **Pruebas funcionales** | Perfil mala gestión pierde más |
+| **Dependencias** | ZZ-175 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §36
+**Tareas:** Métricas batch D30/D100
 
-**Criterio exacto de aceptación:**
-- Informe accionable
+**Aceptación:**
+- Perfil mala gestión pierde más
 
-### ZZ-172 — Calibración dificultad normal
+### ZZ-177 — Calibración normal (madera/brotes/ataques)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | R · Simulador y balance |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Ajustar balance.json. |
+| **Objetivo** | Calibración normal (madera/brotes/ataques) |
 | **Sistemas** | simulador, balance |
-| **Dependencias** | ZZ-171 |
-| **Archivos approx.** | scripts/sim-harness.mjs, docs/BALANCE_REPORT.md |
-| **Datos/contenido** | balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | sim batch |
-| **Pruebas funcionales** | Perfil mala gestión pierde más |
+| **Dependencias** | ZZ-176 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §36
+**Tareas:** Calibración normal (madera/brotes/ataques)
 
-**Criterio exacto de aceptación:**
-- Informe accionable
+**Aceptación:**
+- Perfil mala gestión pierde más
 
-### ZZ-173 — Informe balance
+### ZZ-178 — Informe balance + gate
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | R · Simulador y balance |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | docs/BALANCE_REPORT.md + gate. |
+| **Objetivo** | Informe balance + gate |
 | **Sistemas** | simulador, balance |
-| **Dependencias** | ZZ-172 |
-| **Archivos approx.** | scripts/sim-harness.mjs, docs/BALANCE_REPORT.md |
-| **Datos/contenido** | balance.json |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | sim batch |
-| **Pruebas funcionales** | Perfil mala gestión pierde más |
+| **Dependencias** | ZZ-177 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- §36
+**Tareas:** Informe balance + gate
 
-**Criterio exacto de aceptación:**
-- Informe accionable
+**Aceptación:**
+- Perfil mala gestión pierde más
 
 
-## S · Producción / release
+## S · Release
 
-### ZZ-180 — Migraciones save v5+
+### ZZ-180 — Migraciones save (sin energy fields)
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | S · Producción / release |
+| **Bloque** | S · Release |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Compat saves antiguos. |
+| **Objetivo** | Migraciones save (sin energy fields) |
 | **Sistemas** | release |
-| **Dependencias** | ZZ-173, ZZ-165 |
-| **Archivos approx.** | js/save.js, scripts/ |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | e2e |
-| **Pruebas funcionales** | Checklist release |
+| **Dependencias** | ZZ-178, ZZ-172 |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- § release
+**Tareas:** Migraciones save (sin energy fields)
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No deploy sin orden
 
 ### ZZ-181 — Smoke E2E móvil+desktop
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | S · Producción / release |
+| **Bloque** | S · Release |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Suite completa. |
+| **Objetivo** | Smoke E2E móvil+desktop |
 | **Sistemas** | release |
 | **Dependencias** | ZZ-180 |
-| **Archivos approx.** | js/save.js, scripts/ |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | e2e |
-| **Pruebas funcionales** | Checklist release |
-| **Revisión visual** | Sí |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
+| **Revisión visual** | No |
 
-**Tareas concretas:**
-- § release
+**Tareas:** Smoke E2E móvil+desktop
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No deploy sin orden
 
-### ZZ-182 — Perf mapa
+### ZZ-182 — Perf mapa + ambient
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | S · Producción / release |
+| **Bloque** | S · Release |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | FPS/pan aceptable. |
+| **Objetivo** | Perf mapa + ambient |
 | **Sistemas** | release |
 | **Dependencias** | ZZ-181 |
-| **Archivos approx.** | js/save.js, scripts/ |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | e2e |
-| **Pruebas funcionales** | Checklist release |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- § release
+**Tareas:** Perf mapa + ambient
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No deploy sin orden
 
-### ZZ-183 — Deploy bajo orden explícita
+### ZZ-183 — Deploy solo bajo orden + gate
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | S · Producción / release |
+| **Bloque** | S · Release |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Solo si se pide. |
+| **Objetivo** | Deploy solo bajo orden + gate |
 | **Sistemas** | release |
 | **Dependencias** | ZZ-182 |
-| **Archivos approx.** | js/save.js, scripts/ |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | e2e |
-| **Pruebas funcionales** | Checklist release |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- § release
+**Tareas:** Deploy solo bajo orden + gate
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No deploy sin orden
 
 ### ZZ-184 — Hotfix post-lanzamiento
 
 | Campo | Valor |
 |-------|-------|
-| **Bloque** | S · Producción / release |
+| **Bloque** | S · Release |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Proceso. |
+| **Objetivo** | Hotfix post-lanzamiento |
 | **Sistemas** | release |
 | **Dependencias** | ZZ-183 |
-| **Archivos approx.** | js/save.js, scripts/ |
-| **Datos/contenido** | — |
-| **Assets** | ninguno |
-| **Pruebas automáticas** | e2e |
-| **Pruebas funcionales** | Checklist release |
+| **Archivos approx.** | — |
+| **Datos** | — |
+| **Assets** | — |
+| **Pruebas auto** | — |
+| **Pruebas funcionales** | — |
 | **Revisión visual** | No |
 
-**Tareas concretas:**
-- § release
+**Tareas:** Hotfix post-lanzamiento
 
-**Criterio exacto de aceptación:**
+**Aceptación:**
 - No deploy sin orden
 
 
 ---
 
-## 4. Conteos
+## 5. Conteos
 
 | Métrica | Valor |
 |---------|-------|
-| Total fases/subfases | **100** |
-| HUMAN_GATE YES | **22** |
-| HUMAN_GATE NO | 78 |
+| Total fases | **128** |
+| HUMAN_GATE | **25** |
+| Nuevos bloques vs plan 2.1 | G2 daño/repair, J2 radio/centro, Q2 vida visual; F y E ampliados |
+| Eliminado del alcance | Energía eléctrica / generator / solar / needEnergy / calefacción fuel |
 
 ---
 
-## 5. Sync Drive
+## 6. Sync Drive
 
 | Doc | Drive | Repo |
 |-----|-------|------|
-| Biblia | `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
-| Plan | `...\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
-| Log | `...\\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
+| Biblia | `...\GAME_MASTER\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
+| Plan | `...\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
+| Log | `...\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
 
 ---
 
-*Fin del plan técnico 2.1 — contrato de fases ZZ-XXX.*
+*Fin plan técnico 2.5 — alineado a GAME_MASTER 2.5.*
