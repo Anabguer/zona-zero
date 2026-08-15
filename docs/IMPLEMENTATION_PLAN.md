@@ -1,21 +1,22 @@
-# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.5)
+# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.6)
 
-> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-15 19:41:46 · sha256_16=BDBEEACC6D1B5B7E · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
+> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=pending-sync · sha256_16=pending · source=repo
 
-**Versión plan:** 2.5  
-**Estado:** Contrato de ejecución — **NO IMPLEMENTAR** hasta ZZ-001 APROBADA (`APROBADA` + `SÍ`).  
-**Biblia:** GAME_MASTER **2.5** (Drive + repo idénticos).  
+**Versión plan:** 2.6  
+**Estado:** Contrato de ejecución alineado a GAME_MASTER **2.6** (enmienda arranque/save/tutorial).  
+**Biblia:** GAME_MASTER **2.6** (Drive + repo idénticos).  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
 
-> Este plan **sustituye** cualquier versión 2.1 y cualquier ERRATA provisional.  
-> **Fuera de alcance v1:** electricidad, generator, solar, power_grid/power_hub, needEnergy, calefacción con fuel.
+> Este plan **sustituye** 2.5 para fases de arranque/persistencia; el resto del grafo 2.5 se mantiene y se amplía.  
+> **Fuera de alcance v1:** electricidad, generator, solar, power_grid/power_hub, needEnergy, calefacción con fuel.  
+> **Fuera de UX v1:** múltiples slots de partida manuales.
 
 ---
 
 ## 0. Reglas de ejecución
 
-1. Leer GAME_MASTER **2.5** antes de cada fase.  
+1. Leer GAME_MASTER **2.6** antes de cada fase.  
 2. Tras cada fase: tests → capturas si aplica → commit → push → DEVELOPMENT_LOG → `PENDIENTE DE REVISIÓN`.  
 3. Si `HUMAN_GATE: YES`: no continuar dependientes sin `APROBADA` + `SÍ`.  
 4. Tests verdes / elogios / silencio ≠ aprobación.  
@@ -23,9 +24,11 @@
 6. Deploy solo ZZ-183 bajo orden.  
 7. Sync Drive = GitHub en docs maestros.
 
-### HUMAN_GATE (canónica 2.5)
+### HUMAN_GATE (canónica 2.6)
 
 - ZZ-001
+- ZZ-007
+- ZZ-008
 - ZZ-010
 - ZZ-012
 - ZZ-014
@@ -51,8 +54,8 @@
 - ZZ-178
 - ZZ-183
 
-**Total fases:** 128  
-**Con HUMAN_GATE:** 25
+**Total fases:** 131  
+**Con HUMAN_GATE:** 27
 
 ---
 
@@ -61,6 +64,7 @@
 | Bloque | Fases | Gates |
 |--------|-------|-------|
 | A · Fundación | ZZ-001, ZZ-002, ZZ-003, ZZ-004, ZZ-005, ZZ-006 (6) | ZZ-001 |
+| A2 · Arranque y persistencia | ZZ-009, ZZ-007, ZZ-008 (3) | ZZ-007, ZZ-008 |
 | B · Experiencia D1 | ZZ-010, ZZ-011, ZZ-012, ZZ-013, ZZ-014, ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
 | C · Loop D2–D5 | ZZ-020, ZZ-021, ZZ-022, ZZ-023, ZZ-024, ZZ-025, ZZ-026, ZZ-027 (8) | ZZ-021, ZZ-023 |
 | D · Vivienda y agua | ZZ-030, ZZ-031, ZZ-032, ZZ-033, ZZ-034, ZZ-035, ZZ-036 (7) | ZZ-032 |
@@ -88,8 +92,9 @@
 ## 2. Grafo de dependencias (resumen)
 
 ```
-ZZ-001 (GATE biblia+plan 2.5)
+ZZ-001 (GATE biblia+plan)
  ├─ ZZ-002..006 fundación
+ ├─ ZZ-009 save → ZZ-007 portada → ZZ-008 intro (GATEs portada+intro)
  └─ ZZ-010..015 D1 (GATEs) → ZZ-020..027
       ├─ ZZ-030..036 vivienda/agua
       ├─ ZZ-040..048 clima+madera (GATE invierno)
@@ -105,20 +110,25 @@ ZZ-001 (GATE biblia+plan 2.5)
       ├─ ZZ-120..126 director (GATE)
       ├─ ZZ-130..133 humanos (GATE go/no-go)
       ├─ ZZ-140..144 victoria sin energía (GATE)
-      ├─ ZZ-150..154 UX (GATE)
+      ├─ ZZ-150..154 UX (GATE; ayuda ZZ-152)
       ├─ ZZ-160..165 arte (GATE)
       ├─ ZZ-166..172 vida visual (GATE perf)
       ├─ ZZ-175..178 sim (GATE)
-      └─ ZZ-180..184 release (GATE deploy)
+      └─ ZZ-180..184 release (GATE deploy; migraciones save ZZ-180)
 ```
 
 ---
 
-## 3. Matriz de cobertura GAME_MASTER 2.5 → PLAN
+## 3. Matriz de cobertura GAME_MASTER 2.6 → PLAN
 
 | Sistema GM | Implementa | Prueba | HUMAN_GATE |
 |------------|------------|--------|------------|
 | Filosofía / pilares | ZZ-001 | ZZ-001 | ZZ-001 |
+| Portada / Continuar / Nueva | ZZ-007 | ZZ-007,ZZ-015 | ZZ-007 |
+| Mini-intro nueva partida | ZZ-008 | ZZ-008 | ZZ-008 |
+| Save 1 partida + autosave + backup | ZZ-009,ZZ-180 | ZZ-009,ZZ-181 | — |
+| Tutorial contextual en mundo | ZZ-012 | ZZ-012,ZZ-015 | ZZ-012 |
+| Ayuda consultable (§21.3) | ZZ-152 | ZZ-154 | ZZ-154 |
 | Población colectiva | ZZ-021,ZZ-025 | ZZ-023 | — |
 | Exploradores | ZZ-027,ZZ-022 | ZZ-023,ZZ-027 | — |
 | Vivienda + protección | ZZ-030..032 | ZZ-032,ZZ-048 | ZZ-032 |
@@ -146,7 +156,7 @@ ZZ-001 (GATE biblia+plan 2.5)
 | Research workers + árbol utilitario | ZZ-080..084 | ZZ-084 | ZZ-083 |
 | Eventos / Director | ZZ-120..126 | ZZ-125,ZZ-126 | ZZ-125 |
 | Misiones variedad | ZZ-100..108 | ZZ-108 | ZZ-108 |
-| Alertas / ayuda | ZZ-151,ZZ-152 | ZZ-154 | ZZ-154 |
+| Alertas | ZZ-151 | ZZ-154 | ZZ-154 |
 | Logros | ZZ-110..113 | ZZ-113 | — |
 | Eras | ZZ-140 | ZZ-144 | — |
 | Victoria sin needEnergy | ZZ-141..144 | ZZ-144 | ZZ-144 |
@@ -158,9 +168,11 @@ ZZ-001 (GATE biblia+plan 2.5)
 | Datos/balance | ZZ-005,ZZ-177 | ZZ-178 | ZZ-178 |
 | Simulador | ZZ-175..178 | ZZ-178 | ZZ-178 |
 | Gobernanza Cursor↔ChatGPT | ZZ-001,ZZ-006 | ZZ-001 | ZZ-001 |
+| Colonia D1 sin GIS | ZZ-010 | ZZ-010,ZZ-015 | ZZ-010 |
 | Electricidad v1 | N/A — FUERA DE ALCANCE | N/A | N/A |
+| Multi-slots manuales | N/A — FUERA DE UX v1 | N/A | N/A |
 
-**Cobertura objetivo: 100%** de sistemas activos v1. Electricidad = explícitamente fuera.
+**Cobertura objetivo: 100%** de sistemas activos v1. Electricidad y multi-slots = explícitamente fuera.
 
 ---
 
@@ -299,6 +311,75 @@ ZZ-001 (GATE biblia+plan 2.5)
 - Hashes iguales
 
 
+## A2 · Arranque y persistencia
+
+### ZZ-009 — Save v1: 1 partida + autosave + Guardar ahora + backup
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | A2 · Arranque y persistencia |
+| **HUMAN_GATE** | NO |
+| **Objetivo** | Persistencia §31.7 / Ap. E: main+backup; rotación segura; autosave; Guardar ahora; CONTINUAR con fallback backup. |
+| **Sistemas** | save, api PHP/MySQL o storage |
+| **Dependencias** | ZZ-006 |
+| **Archivos approx.** | api/save, js/save |
+| **Datos** | saveVersion bump |
+| **Assets** | — |
+| **Pruebas auto** | smoke-save |
+| **Pruebas funcionales** | corrupt main → backup; no double-corrupt |
+| **Revisión visual** | No |
+
+**Tareas:** Eliminar UX multi-slot; main/backup; validación antes de rotar; autosave triggers; Guardar ahora.
+
+**Aceptación:**
+- Rotación segura documentada en código+tests
+- CONTINUAR sin selector
+
+### ZZ-007 — Portada / inicio (Continuar · Nueva partida)
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | A2 · Arranque y persistencia |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Portada de juego terminado: sin partida → Nueva; con partida → Continuar (principal) + Nueva; ajustes mínimos. Sin slots. |
+| **Sistemas** | UX arranque, hub |
+| **Dependencias** | ZZ-009 |
+| **Archivos approx.** | hub HTML/CSS/JS, api save |
+| **Datos** | — |
+| **Assets** | arte portada si aplica |
+| **Pruebas auto** | smoke-boot |
+| **Pruebas funcionales** | Sin/con partida; Continuar primario |
+| **Revisión visual** | Sí |
+
+**Tareas:** Portada §31.5; Continuar/Nueva; sin UI de slots; branding.
+
+**Aceptación:**
+- Flujo §31.5 cumplido
+- Gate humano
+
+### ZZ-008 — Nueva partida: confirmación + mini-intro → D1
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | A2 · Arranque y persistencia |
+| **HUMAN_GATE** | **YES** |
+| **Objetivo** | Aviso si hay colonia; intro ≤3 pasos saltables (contexto/colonia/objetivo); entrar a Día 1. |
+| **Sistemas** | onboarding intro |
+| **Dependencias** | ZZ-007 |
+| **Archivos approx.** | intro UI |
+| **Datos** | meta.introSeen |
+| **Assets** | — |
+| **Pruebas auto** | smoke-boot |
+| **Pruebas funcionales** | Skip intro; confirm overwrite |
+| **Revisión visual** | Sí |
+
+**Tareas:** Confirmación §31.6; mini-intro 2–3 pasos; Skip; landing D1.
+
+**Aceptación:**
+- Sin cascada manual
+- Gate humano
+
+
 ## B · Experiencia D1
 
 ### ZZ-010 — Colonia física D1 sin GIS
@@ -345,26 +426,26 @@ ZZ-001 (GATE biblia+plan 2.5)
 - Zoom/pan/recenter.
 - OK móvil+desktop
 
-### ZZ-012 — Tutorial D1 por acciones
+### ZZ-012 — Tutorial D1 contextual en el mundo
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Una acción/explicación; sin cascada Continuar. |
+| **Objetivo** | Coach en mundo: una pista contextual (ej. comida → destacar Construir/huerto); avance al completar acción; sin cascada Continuar. Ayuda §21.3 accesible. |
 | **Sistemas** | UX D1, mapa, onboarding |
-| **Dependencias** | ZZ-011 |
-| **Archivos approx.** | — |
+| **Dependencias** | ZZ-011, ZZ-008 |
+| **Archivos approx.** | js/onboarding.js |
 | **Datos** | — |
 | **Assets** | — |
 | **Pruebas auto** | smoke-d1 |
-| **Pruebas funcionales** | Partida nueva D1 |
+| **Pruebas funcionales** | Partida nueva D1; skip intro → coach mundo |
 | **Revisión visual** | Sí |
 
-**Tareas:** Una acción/explicación; sin cascada Continuar.
+**Tareas:** Implementar §31.4; retirar cascadas Continuar; destacar acción; coach se apaga al dominar; enlace a ayuda.
 
 **Aceptación:**
-- Una acción/explicación; sin cascada Continuar.
+- Una pista a la vez; avance natural
 - Gate humano
 
 ### ZZ-013 — HUD recursos D1
@@ -2508,26 +2589,27 @@ ZZ-001 (GATE biblia+plan 2.5)
 **Aceptación:**
 - Mundo primero; sin pestañas app
 
-### ZZ-152 — Ayuda contextual
+### ZZ-152 — Ayuda consultable (§21.3)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | P · UX mundo |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Ayuda contextual |
-| **Sistemas** | UX |
-| **Dependencias** | ZZ-151 |
-| **Archivos approx.** | — |
-| **Datos** | — |
+| **Objetivo** | Panel ayuda pequeña: controles, recursos, conceptos desbloqueados, consejos; sin spoilers de sistemas futuros. |
+| **Sistemas** | UX, ayuda |
+| **Dependencias** | ZZ-151, ZZ-012 |
+| **Archivos approx.** | help UI |
+| **Datos** | meta.helpSeenTopics |
 | **Assets** | — |
 | **Pruebas auto** | — |
-| **Pruebas funcionales** | — |
+| **Pruebas funcionales** | Abrir ayuda; no spoilers |
 | **Revisión visual** | Sí |
 
-**Tareas:** Ayuda contextual
+**Tareas:** §21.3; acceso ?/Más; contenido gated por progreso; no enciclopedia.
 
 **Aceptación:**
-- Mundo primero; sin pestañas app
+- Consulta voluntaria OK
+- Sin spoiler de sistemas no vistos
 
 ### ZZ-153 — Diario no spam
 
@@ -2954,25 +3036,26 @@ ZZ-001 (GATE biblia+plan 2.5)
 
 ## S · Release
 
-### ZZ-180 — Migraciones save (sin energy fields)
+### ZZ-180 — Migraciones save (main+backup, sin energy)
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | S · Release |
 | **HUMAN_GATE** | NO |
-| **Objetivo** | Migraciones save (sin energy fields) |
-| **Sistemas** | release |
-| **Dependencias** | ZZ-178, ZZ-172 |
-| **Archivos approx.** | — |
-| **Datos** | — |
+| **Objetivo** | Migrar saves multi-slot/legacy → main(+backup); quitar campos energy; alinear Ap. E / §31.7. |
+| **Sistemas** | release, save |
+| **Dependencias** | ZZ-178, ZZ-172, ZZ-009 |
+| **Archivos approx.** | migraciones |
+| **Datos** | saveVersion |
 | **Assets** | — |
-| **Pruebas auto** | — |
-| **Pruebas funcionales** | — |
+| **Pruebas auto** | smoke-save |
+| **Pruebas funcionales** | Save viejo carga |
 | **Revisión visual** | No |
 
-**Tareas:** Migraciones save (sin energy fields)
+**Tareas:** Migraciones; sin energy fields; multi-slot → main.
 
 **Aceptación:**
+- Carga legacy segura
 - No deploy sin orden
 
 ### ZZ-181 — Smoke E2E móvil+desktop
@@ -3066,10 +3149,11 @@ ZZ-001 (GATE biblia+plan 2.5)
 
 | Métrica | Valor |
 |---------|-------|
-| Total fases | **128** |
-| HUMAN_GATE | **25** |
-| Nuevos bloques vs plan 2.1 | G2 daño/repair, J2 radio/centro, Q2 vida visual; F y E ampliados |
-| Eliminado del alcance | Energía eléctrica / generator / solar / needEnergy / calefacción fuel |
+| Total fases | **131** |
+| HUMAN_GATE | **27** |
+| Nuevos bloques vs plan 2.5 | A2 arranque/persistencia (ZZ-007..009) |
+| Ampliadas | ZZ-012 tutorial contextual; ZZ-152 ayuda; ZZ-180 migraciones main+backup |
+| Eliminado del alcance | Energía eléctrica / generator / solar / needEnergy / calefacción fuel / multi-slots UX |
 
 ---
 
@@ -3083,4 +3167,4 @@ ZZ-001 (GATE biblia+plan 2.5)
 
 ---
 
-*Fin plan técnico 2.5 — alineado a GAME_MASTER 2.5.*
+*Fin plan técnico 2.6 — alineado a GAME_MASTER 2.6.*

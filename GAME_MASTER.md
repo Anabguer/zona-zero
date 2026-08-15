@@ -2,8 +2,8 @@
 
 > **SYNC VERIFY GAME_MASTER** · stamp=2026-08-15 19:41:46 · sha256_16=E699961EE3D959BF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
-**Versión de diseño:** 2.5 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
-**Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana (ZZ-001)  
+**Versión de diseño:** 2.6 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
+**Estado:** Contrato vigente post-ZZ-001 — enmienda **arranque / save / tutorial** (2026-08-15)  
 **Fecha:** 2026-08-15  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
@@ -17,7 +17,7 @@
 | **Plan de fases** | `...\GAME_MASTER\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
 | **Log de ejecución** | `...\GAME_MASTER\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
 
-> **Prioridad:** esta biblia 2.2 manda sobre diseños 1.x, chats sueltos y código existente cuando haya contradicción.  
+> **Prioridad:** esta biblia **2.6** manda sobre diseños 1.x–2.5 previos, chats sueltos y código existente cuando haya contradicción.  
 > El código actual es **prototipo / motor parcial**; no define el juego definitivo.  
 > **Cómo trabajamos** está documentado en el §41 (parte integral de esta biblia, no un anexo opcional).
 
@@ -67,7 +67,7 @@
 28. Victoria  
 29. Derrota  
 30. Dificultad  
-31. UI / UX (contrato de juego, no pantallas)  
+31. UI / UX (mundo, portada, intro, tutorial, save)  
 32. Feedback  
 33. Arte (inventario, no producción)  
 34. Sonido  
@@ -1189,7 +1189,7 @@ Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/r
 1. Modal decisión / brief diario  
 2. Alerta crítica (comida 0, ataque inminente)  
 3. Objetivo contextual (1)  
-4. Coach tutorial (solo mecánicas nuevas)  
+4. Coach tutorial **en el mundo** (solo mecánicas nuevas; una pista a la vez)  
 5. Tips discreto  
 
 ## 21.2 Ejemplos de alertas
@@ -1201,6 +1201,22 @@ Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/r
 - “Podrías construir enfermería”  
 
 No mandar: orientar.
+
+## 21.3 Ayuda consultable (v1)
+
+### CURSOR: CONSOLIDADO 2.6 — decisión Neni
+
+Acceso desde el juego (p. ej. `?` / Más → Ayuda). **No** es una enciclopedia enorme.
+
+**Contiene solo lo ya descubierto / desbloqueado:**
+- Controles (pan, zoom, recentrar, construir, avanzar día).  
+- Significado de recursos visibles en HUD.  
+- Conceptos que el jugador ya ha tocado (staffing, brief, exploración…).  
+- Consejos básicos del sistema actual.
+
+**Prohibido:** spoilear sistemas, eras, techs o amenazas que aún no hayan aparecido si eso rompe descubrimiento.
+
+**Relación con coach:** el coach empuja en contexto (§31.4); la ayuda es consulta voluntaria cuando “ya sé, pero olvidé”.
 
 ---
 
@@ -1374,9 +1390,106 @@ Cámara: centrada en colonia early; límites; Recentrar.
 
 Ritual: comida/agua producida·consumida·balance + hechos del día.
 
-## 31.4 Tutorial
+## 31.4 Tutorial contextual (aprender jugando)
 
-Una acción → una explicación. Sin cascadas de Continuar.
+### CURSOR: CONSOLIDADO 2.6 — decisión Neni
+
+El tutorial **principal ocurre dentro del mundo**, no en cascadas de modales Continuar.
+
+| Regla | Detalle |
+|-------|---------|
+| Una pista | Un objetivo/explicación a la vez |
+| Contextual | Surge cuando el estado lo pide (ej. D1: “Necesitamos una fuente estable de comida.”) |
+| Destacar acción | Resalta el control/edificio relevante (p. ej. Construir → huerto) |
+| Avance natural | Al completar la acción, la guía avanza o se retira |
+| Desaparición | Cuando el jugador ya usa el sistema, el coach de esa mecánica se apaga |
+| Reconsulta | Siempre disponible vía §21.3 Ayuda |
+
+**Prohibido:** modal → Continuar → modal → Continuar → modal → Continuar.
+
+La mini-intro de nueva partida (§31.6) **no** sustituye este tutorial: la intro da tono; el coach enseña mecánica en D1+.
+
+## 31.5 Portada / inicio (arranque del juego)
+
+### CURSOR: CONSOLIDADO 2.6 — decisión Neni
+
+Entrada propia de **juego terminado**, no pantalla técnica ni gestor de slots.
+
+| Estado | Acciones |
+|--------|----------|
+| **Sin partida** | **NUEVA PARTIDA** (principal) · ajustes/sonido secundarios mínimos |
+| **Con partida** | **CONTINUAR** (acción principal) · **NUEVA PARTIDA** · ajustes si procede |
+
+- **CONTINUAR** carga la partida principal válida (§31.7 Carga).  
+- **Prohibido:** UI de múltiples slots, selector de archivos, jerga técnica.  
+- Branding / atmósfera de Zona Zero en primer viewport (no dashboard vacío).
+
+## 31.6 Nueva partida — confirmación + mini-intro
+
+### Confirmación (si ya hay partida)
+
+Si existe partida y el jugador pulsa **NUEVA PARTIDA**:
+
+> “Ya tienes una colonia en curso. Empezar de nuevo sustituirá esta partida.”
+
+Confirmación explícita. **No** destruir partida por un toque accidental.
+
+### Mini-intro (2–3 pasos máx.)
+
+Bienvenida breve y atractiva. **No** manual. **No** cascada larga.
+
+Cubrir en ≤3 pantallas/pasos:
+1. Qué ha ocurrido / contexto mínimo.  
+2. Qué representa nuestra colonia.  
+3. Objetivo general: **sobrevivir, estabilizar, explorar y recuperar territorio.**
+
+| Regla | |
+|-------|--|
+| Saltarse | Obligatorio (Skip / Saltar intro) |
+| Tras intro | **Entrar directamente al Día 1** |
+| Tono | Emoción + claridad; cero muro de texto |
+
+## 31.7 Sistema de guardado v1
+
+### CURSOR: CONSOLIDADO 2.6 — decisión Neni
+
+Sustituye el modelo de **múltiples slots manuales**.
+
+#### Modelo
+
+| Pieza | Rol |
+|-------|-----|
+| **1 partida principal** | Única colonia en curso que ve el jugador |
+| **AUTOGUARDADO** | Automático |
+| **GUARDAR AHORA** | Acción manual sencilla (Más / menú) |
+| **1 backup automático** | Copia anterior segura — **no** es un “slot” de usuario |
+
+#### Autoguardado (cuándo)
+
+- Periódicamente (intervalo seguro, calibrable).  
+- Al **avanzar día**.  
+- Tras **hitos importantes** cuando sea seguro (p. ej. construir, retorno de expedición, fin de brief).  
+- Al salir / volver al hub / cerrar si técnicamente procede.
+
+#### Backup — rotación segura
+
+Objetivo: recuperar ante corrupción, error de guardado o fallo técnico grave.
+
+**Regla de rotación (contrato técnico):**
+1. Antes de sobrescribir la partida principal con un autoguardado nuevo, validar que el payload nuevo es íntegro (parse OK + `saveVersion` + campos mínimos).  
+2. Solo si la principal **actual** es válida **y** el nuevo guardado es válido → copiar principal → backup, luego escribir principal.  
+3. Si el nuevo guardado **falla** validación → **no** tocar principal ni backup; informar error suave.  
+4. Si la principal está corrupta al cargar → intentar **backup** (véase Carga abajo); **no** rotar backup sobre una principal ya mala.  
+5. Nunca presentar backup como segunda colonia jugable en portada.
+
+#### Carga (CONTINUAR)
+
+1. Cargar partida principal válida más reciente.  
+2. Si falla → intentar recuperación desde backup.  
+3. Informar al jugador en lenguaje humano (“Recuperamos tu colonia desde una copia de seguridad.”).  
+4. Sin selector de archivos ni slots.
+
+Detalle de campos: Apéndice E.
 
 ---
 
@@ -1483,6 +1596,10 @@ Usar para calibrar, no para “aprobar UX”.
 
 Detalle exhaustivo de fases/subfases (`ZZ-XXX`), dependencias, tests, HUMAN_GATE y criterios de aceptación:
 
+→ `docs/IMPLEMENTATION_PLAN.md` (**versión 2.6**) / Drive `ZONA_ZERO_IMPLEMENTATION_PLAN.md`
+
+Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) + experiencia D1 visual; luego sistemas capa a capa; **nunca “MVP rápido”** que salte esta biblia. Gobernanza completa en §41.
+
 → Drive: `ZONA_ZERO_IMPLEMENTATION_PLAN.md`  
 → Repo: `docs/IMPLEMENTATION_PLAN.md`
 
@@ -1496,6 +1613,17 @@ Resumen: construcción por **bloques con HUMAN_GATE**; primero experiencia D1 vi
 ---
 
 # 38. CHANGELOG DE DISEÑO
+
+## 2.6 (2026-08-15) — arranque, tutorial contextual, save v1 (Neni)
+- **Portada / inicio:** Continuar (principal si hay partida) · Nueva partida · sin slots (§31.5).  
+- **Nueva partida:** aviso si hay colonia; mini-intro ≤3 pasos saltables → Día 1 (§31.6).  
+- **Tutorial:** aprender en el mundo; una pista contextual; sin cascada Continuar (§31.4).  
+- **Ayuda consultable** pequeña, sin spoilers (§21.3).  
+- **Save v1:** 1 partida + autoguardado + Guardar ahora + 1 backup con rotación segura (§31.7, Ap. E).  
+- Plan: fases ZZ-007 / ZZ-008 / ZZ-009; ampliaciones ZZ-012, ZZ-152, ZZ-180.
+
+## 2.5 (2026-08-15) — contrato aprobado ZZ-001
+- Electricidad fuera de v1; calefacción madera; brotes; quarantine pasivo; radio≠centro; etc. (ver 2.3–2.4).
 
 ## 2.3 (2026-08-15) — ronda Neni + ChatGPT → consolidación pendiente Cursor
 - Calefacción de invierno: **madera automática**, no fuel ni toggle por casa; exposición al frío progresiva y enfermedad probabilística (§4/§11).
@@ -2622,6 +2750,18 @@ Producción base (a plena plantilla): farm food 5, well water 5, etc. (ajustar e
 
 # APÉNDICE E — ESTADOS DEL SAVE (CONTRATO)
 
+## E.1 Modelo de persistencia v1 (2.6)
+
+| Key lógica | Visible al jugador | Uso |
+|------------|-------------------|-----|
+| `main` | Partida (CONTINUAR) | Única colonia |
+| `backup` | No (interno) | Recuperación técnica |
+| *(slots 1..N)* | **Eliminado de UX** | Migrar legado → main + descartar extras con aviso una vez |
+
+Acciones UI: **Guardar ahora**, autoguardado (§31.7). Sin pantalla de slots.
+
+## E.2 Campos de estado de juego
+
 Campos nuevos previstos (migración v5+):
 - `season`, `seasonDay`, `weather`, `weatherUntil`  
 - `missions[]`, `missionCooldowns`  
@@ -2629,8 +2769,10 @@ Campos nuevos previstos (migración v5+):
 - `housingClimateCoverage` (cache)  
 - `flags` memoria narrativa  
 - `laborModel: "per_building"`  
+- `meta.introSeen` (bool) — mini-intro nueva partida  
+- `meta.helpSeenTopics[]` — ayuda desbloqueada  
 
-Compat: migrar saves 1.3 → 2.x con defaults seguros.
+Compat: migrar saves 1.3 / multi-slot → **main** (+ backup si había slot secundario válido); defaults seguros.
 
 ---
 
@@ -2641,6 +2783,8 @@ La aprobación formal vive en DEVELOPMENT_LOG. Equivalencia de hitos:
 | Hito | Fase(s) | Requiere APROBADA + SÍ |
 |------|---------|-------------------------|
 | Biblia + plan | ZZ-001 | Sí (bloquea todo) |
+| Portada / arranque | ZZ-007 | Sí |
+| Intro nueva partida | ZZ-008 | Sí |
 | D1 visual / tutorial / desktop | ZZ-010, ZZ-012, ZZ-014, ZZ-015 | Sí |
 | Loop D1–D5 + labor | ZZ-021, ZZ-023 | Sí |
 | Vivienda aislada | ZZ-032 | Sí |

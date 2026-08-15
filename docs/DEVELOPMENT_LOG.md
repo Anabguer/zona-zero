@@ -2,9 +2,9 @@
 
 > **SYNC VERIFY DEVELOPMENT_LOG** · stamp=2026-08-15 19:41:46 · sha256_16=B66C6C0B88D974CF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
-**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.5** + PLAN **2.5**  
+**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-001 **APROBADA** · Fundación ZZ-002…006 **aceptadas** · **ZZ-010 COMPLETADA → HUMAN_GATE pendiente de revisión ChatGPT**. No continuar dependientes.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6** (enmienda arranque/save/tutorial). · **ZZ-010 COMPLETADA → HUMAN_GATE aún PENDIENTE DE REVISIÓN** (sin cambios visuales en esta enmienda). No ZZ-011+.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -39,6 +39,9 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-009 | Save v1: 1 partida + autosave + backup | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-007 | Portada / Continuar · Nueva partida | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-008 | Nueva partida: confirmación + mini-intro | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-011 | Cámara D1 protagonista | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -504,10 +507,30 @@ NO
 
 ---
 
+# ENMIENDA CONTRATO 2.6 — Arranque / tutorial / save (2026-08-15)
+
+## DECISIÓN NENI (pre-revisión visual ZZ-010)
+Incorporada a GAME_MASTER **2.6** + IMPLEMENTATION_PLAN **2.6** sin tocar capturas/código de ZZ-010.
+
+| Tema | Dónde en GM | Fases PLAN |
+|------|-------------|------------|
+| Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) |
+| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) |
+| Tutorial contextual | §31.4 | ZZ-012 (ampliada) |
+| Ayuda consultable | §21.3 | ZZ-152 (ampliada) |
+| Save 1+autosave+backup | §31.7 + Ap. E | ZZ-009, ZZ-180 |
+
+**ZZ-010:** sigue `PENDIENTE DE REVISIÓN` / `APROBACIÓN FINAL CHATGPT: NO`. Review Drive verificado idéntico (hash contact sheet).
+
+## ESTADO CURSOR
+Documentación sincronizada. **PARADO** — sin ZZ-011 ni A2 hasta orden.
+
+---
+
 # FASE ZZ-011 — Cámara D1 protagonista
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-011).
+Ver IMPLEMENTATION_PLAN 2.6 (§ ZZ-011).
 
 ## RESULTADO CURSOR
 Pendiente de ejecución (fase no iniciada).
