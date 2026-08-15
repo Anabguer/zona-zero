@@ -5,6 +5,7 @@ import { createRng, hashSeed } from './rng.js';
 import { clamp, uid } from './util.js';
 import { emptyLabor, redistributeLabor, workforce } from './population.js';
 import { makeExplorer, livingExplorers } from './explorers.js';
+import { syncLaborFromColony } from './colony.js';
 
 export const SAVE_VERSION = 4;
 /** @deprecated legacy individual skills — solo migración */
@@ -143,10 +144,10 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
   const hq = buildings.hq_central_l1 || Object.values(buildings).find((b) => b.category === 'core');
   const shelterDef = buildings.shelter;
   const buildingsPlaced = [];
-  if (hq) buildingsPlaced.push({ id: uid('b'), type: hq.id, x: 4, y: 3, hp: 100 });
+  if (hq) buildingsPlaced.push({ id: uid('b'), type: hq.id, x: 4, y: 3, hp: 100, workers: 0 });
   if (shelterDef) {
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 3, y: 3, hp: 100 });
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 5, y: 3, hp: 100 });
+    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 3, y: 3, hp: 100, workers: 0 });
+    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 5, y: 3, hp: 100, workers: 0 });
   }
 
   const templates = factionsDoc.templates || factionsDoc.factions || [];
@@ -187,7 +188,10 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     selectedZoneId: null,
     selectedBuildingId: null,
     uiPanel: null,
+    uiMode: null, // 'build' | 'explore' | null
     buildMode: null,
+    mapCamera: { x: 50, y: 48, zoom: 1.15 },
+    lastDayBrief: null,
     equipment: { weapon: 'none', armor: 'none', vehicleId: null },
     vehiclesOwned: [],
     research: { unlocked: [], active: null, progress: 0 },
@@ -243,6 +247,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
   };
 
   redistributeLabor(state, balance);
+  syncLaborFromColony(state, content);
   return state;
 }
 
@@ -308,16 +313,21 @@ export function migrateState(state, content) {
       buildings: next.base?.buildings || [],
     };
   }
-  next.base.buildings = (next.base.buildings || []).map((b) => {
-    const { workers, ...rest } = b;
-    return { hp: 100, ...rest };
-  });
+  next.base.buildings = (next.base.buildings || []).map((b) => ({
+    ...b,
+    hp: b.hp != null ? b.hp : 100,
+    workers: b.workers != null ? Math.max(0, b.workers) : 0,
+  }));
+  if (!next.mapCamera) next.mapCamera = { x: 50, y: 48, zoom: 1.15 };
+  if (next.uiMode == null) next.uiMode = null;
+  if (!next.population.manual) next.population.manual = {};
   (next.zones || []).forEach((z) => {
     if (z.controlProgress == null) z.controlProgress = z.state === 'controlled' ? 1 : 0;
     if (z.infectedLeft == null) z.infectedLeft = 0;
   });
 
   redistributeLabor(next, balance);
+  syncLaborFromColony(next, content);
   return next;
 }
 
@@ -362,10 +372,26 @@ export function defenseValue(state, buildingsContent, balance) {
   state.base.buildings.forEach((b) => {
     if (b.hp <= 0) return;
     const d = buildingsContent[b.type];
-    if (d?.defense) def += d.defense;
+    if (!d?.defense) return;
+    const jobs = d.jobs || 0;
+    if (jobs <= 0) {
+      def += d.defense; // pasivo (barricadas, vallas)
+    } else {
+      const staff = Math.max(0, b.workers || 0);
+      def += d.defense * clamp(staff / jobs, 0, 1.15);
+    }
   });
   const assigned = state.population?.labor?.defense || 0;
-  def += assigned * (balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5);
+  // Solo el cupo "extra" de patrulla (no doble-contar edificios)
+  const bldDefWorkers = (state.base?.buildings || []).reduce((n, b) => {
+    const d = buildingsContent[b.type];
+    if (b.hp <= 0 || !d || !(d.jobs > 0) || !(d.defense > 0)) return n;
+    return n + (b.workers || 0);
+  }, 0);
+  const patrol = Math.max(0, assigned - bldDefWorkers);
+  def += patrol * (balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5);
+  // Torres/armory staffed ya aportan defense del edificio; bonus ligero por estar asignados
+  def += bldDefWorkers * ((balance.defensePerAssigned || 2.5) * 0.35);
   const ammoFactor = balance.ammoDefenseFactor ?? 1.2;
   const ammoCap = balance.ammoDefenseCap ?? 12;
   def += Math.min(ammoCap, Math.floor((state.resources.ammo || 0) * ammoFactor));

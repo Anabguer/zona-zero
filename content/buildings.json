@@ -127,7 +127,7 @@
     "w": 1,
     "h": 1,
     "max": 12,
-    "jobs": 2,
+    "jobs": 3,
     "produces": {
       "food": 5
     },
@@ -169,7 +169,7 @@
     "w": 1,
     "h": 1,
     "max": 8,
-    "jobs": 1,
+    "jobs": 2,
     "produces": {
       "water": 5
     },

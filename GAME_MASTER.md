@@ -1289,16 +1289,16 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.2.3 — recalibración de dificultad (sin death spiral)  
+**Versión técnica:** 1.2.4 — núcleo de gestión activa (colonia interactiva)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=14`
+**save_version / v:** **4** · cache assets `?v=15`
 
 ## Arquitectura real (1.2)
-- Cliente: `js/` state, sim, director, population, explorers, render-map, render-base, icons, sound, api, main, rng, util
+- Cliente: `js/` state, sim, director, population, **colony**, explorers, render-map, render-base, icons, sound, api, main, rng, util
 - UI: `play.php` mundo continuo + `css/world.css` (sin pestañas Gente)
 - Contenido: `content/*.json` — `balance.explorers` / laborTargets; buildings×32; locations×18; events×110; research; vehicles; infected; factions; eras
 - Muestra artística: `docs/art-direction/`
@@ -1306,18 +1306,30 @@ Y periódicamente el juego debe responder:
 - Tools: balance-sim, screenshots, manual-play, harness
 
 ## Decisiones 1.2 (sustituyen gente individual / patrullas)
-- Población = contador + pools de labor (+/−) + redistribución automática
+- Población = contador + asignación numérica (+/−) + trabajadores por edificio
+- Un edificio sin trabajadores **no produce**
 - Exploradores máx. 3; skills Explorar/Saquear/Combatir/Resistir; muerte permanente; reclutamiento desde población
-- Expediciones = 1 explorador por salida; varias en paralelo
-- UI sin tabs Mapa/Base/Gente; sheets contextuales
+- Expediciones = 1 explorador por salida; varias en paralelo; modo selección en mapa
+- UI sin tabs Mapa/Base/Gente; sheets contextuales + pan/zoom ciudad
 - Migración saves v3→v4 (supervivientes → population + 1 explorador)
 
-## Pendiente (tras “Sí, se ve así”)
-- ~~Lote artístico completo alineado a docs/art-direction~~ **HECHO en 1.2.1**
-- Recalibración periódica balance-sim
-- Pulido continuo de glifos por edificio según feedback
+## Pendiente
+- Recalibración de dificultad **después** de validar el loop de gestión con jugadoras
+- Pulido continuo de glifos / colocación en mapa
 
 ## Changelog técnico
+### 1.2.4 — Núcleo de gestión activa
+- Panel población: asignación numérica (comida/agua/construcción/producción/defensa/medicina)
+- Edificios con cupos `workers` (huerto 0–3, pozo, taller, etc.); producción 0 si 0 trabajadores
+- Construir: sheet visual con miniaturas + colocación en parcelas del refugio
+- Mapa: pan/zoom, ver ciudad, destinos resaltados en modo explorar
+- Explorador: ficha → Mandar a explorar → selección de destino en el mundo
+- Objetivos inmediatos discretos + resumen del día (si hay algo relevante)
+- Dock: Avanzar día sigue siendo global; construir/más secundarios; acciones en el mundo
+- Prueba D1–D10 con decisiones reales cada día (`scripts/manual-play-colony.mjs`, `MANUAL-D10.txt`)
+- Capturas móvil: `scripts/screenshots-prod/colony-*.png`
+- Cache `?v=15` · **sin deploy** (gestión primero; balance después)
+
 ### 1.2.3 — Recalibración dificultad
 - Protección post-crisis no inmuniza el ataque del mismo día (`wasProtected`)
 - Amenazas medias ↑; quiet nights ↓; defensa/munición con tope; merma de comida sin almacén

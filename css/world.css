@@ -184,7 +184,195 @@
   color: var(--zz-muted);
 }
 
-/* Bottom sheet */
+.zz-objective {
+  margin: 0.25rem 0.75rem 0;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(40, 52, 40, 0.72);
+  border: 1px solid rgba(120, 160, 100, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.86rem;
+}
+.zz-objective strong {
+  font-family: var(--zz-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b8d49a;
+}
+.zz-objective span { color: var(--zz-text); }
+
+.zz-mode-banner {
+  margin: 0.2rem 0.75rem 0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(70, 55, 30, 0.85);
+  border: 1px solid rgba(200, 160, 80, 0.4);
+  font-size: 0.8rem;
+  color: #f0d9a0;
+  text-align: center;
+}
+
+.zz-map-zoom {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.zz-map-zoom button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--zz-line);
+  background: rgba(18, 15, 12, 0.88);
+  color: var(--zz-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.zz-world-map-wrap { position: relative; touch-action: none; }
+
+.zz-day-brief {
+  position: fixed;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(320px, 88vw);
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(16, 14, 12, 0.94);
+  border: 1px solid var(--zz-line);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+}
+.zz-day-brief[hidden] { display: none !important; }
+.zz-day-brief strong {
+  font-family: var(--zz-display);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.zz-day-brief ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--zz-muted);
+  font-size: 0.88rem;
+}
+.zz-day-brief li { margin: 0.15rem 0; }
+
+.zz-build-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+.zz-build-card {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  text-align: left;
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid var(--zz-line);
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  cursor: pointer;
+}
+.zz-build-card.is-disabled { opacity: 0.55; cursor: not-allowed; }
+.zz-build-card__art {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+}
+.zz-build-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.zz-build-card__body strong {
+  font-family: var(--zz-display);
+  font-size: 1.05rem;
+}
+.zz-build-card__body em {
+  font-style: normal;
+  color: var(--zz-muted);
+  font-size: 0.78rem;
+}
+.zz-build-card__meta { font-size: 0.75rem; color: #a8c090; }
+.zz-build-go {
+  font-size: 0.78rem;
+  color: #d0b070;
+  font-family: var(--zz-display);
+}
+.zz-build-lock {
+  font-size: 0.75rem;
+  color: #c08070;
+}
+
+.zz-skill-list {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.4rem 0 0.7rem;
+}
+.zz-skill-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.9rem;
+}
+.zz-stepper--lg {
+  margin: 0.35rem 0;
+  gap: 0.45rem;
+}
+.zz-stepper--lg span {
+  min-width: 7rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.zz-prod-scale {
+  font-size: 0.78rem;
+  color: var(--zz-muted);
+  line-height: 1.45;
+}
+
+.zz-settle-slot {
+  fill: rgba(200, 170, 90, 0.22);
+  stroke: rgba(230, 200, 110, 0.7);
+  stroke-width: 0.25;
+  animation: zz-slot-pulse 1.4s ease-in-out infinite;
+}
+@keyframes zz-slot-pulse {
+  0%, 100% { fill-opacity: 0.35; }
+  50% { fill-opacity: 0.7; }
+}
+.zz-settle-bldg.is-selected {
+  filter: drop-shadow(0 0 0.4px #f0d080);
+}
+.zz-settle-workers {
+  font-size: 9px;
+  fill: #f2e2b0;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+}
+.zz-zone.is-explore-target .zz-zone-explore-ring {
+  stroke: #e0c060;
+  stroke-width: 0.55;
+  stroke-dasharray: 1.5 1;
+  animation: zz-explore-ring 1.2s linear infinite;
+}
+@keyframes zz-explore-ring {
+  to { stroke-dashoffset: -5; }
+}
+
+.zz-btn--dock-sec {
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
 .zz-sheet {
   position: fixed;
   left: 0; right: 0; bottom: 0;

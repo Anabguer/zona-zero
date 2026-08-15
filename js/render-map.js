@@ -312,9 +312,9 @@ function drawLifeInControlled(g, z, tier, rng) {
   }
 }
 
-function drawSettlementCore(g, state, camp, tier) {
+function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCell } = {}) {
   const buildings = (state.base?.buildings || []).filter((b) => b.hp > 0);
-  if (!buildings.length) return;
+  if (!buildings.length && state.uiMode !== 'build') return;
   const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
   // Plaza / terreno vivo
   layer.appendChild(svgEl('ellipse', { cx: 0, cy: 0, rx: camp.r * 0.85, ry: camp.r * 0.7, class: 'zz-settle-ground' }));
@@ -330,18 +330,64 @@ function drawSettlementCore(g, state, camp, tier) {
   // Escala generosa: edificios del núcleo deben leerse en el mundo
   const scale = (camp.r * 2.6) / Math.max(bw, bh);
 
+  // Celdas de colocación
+  if (state.uiMode === 'build' && state.buildMode) {
+    for (let y = 0; y < bh; y++) {
+      for (let x = 0; x < bw; x++) {
+        const occupied = buildings.some((b) => b.x === x && b.y === y);
+        if (occupied) continue;
+        const lx = (x - bw / 2 + 0.5) * scale;
+        const ly = (y - bh / 2 + 0.5) * scale;
+        const cell = scale * 0.88;
+        const slot = svgEl('rect', {
+          x: lx - cell / 2,
+          y: ly - cell / 2,
+          width: cell,
+          height: cell,
+          class: 'zz-settle-slot',
+          rx: 0.2,
+        });
+        slot.style.cursor = 'pointer';
+        slot.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          onPlaceCell && onPlaceCell(x, y);
+        });
+        layer.appendChild(slot);
+      }
+    }
+  }
+
   buildings.forEach((b) => {
     const lx = (b.x - bw / 2 + 0.5) * scale;
     const ly = (b.y - bh / 2 + 0.5) * scale;
     const cell = scale * 0.92;
+    const selected = state.selectedBuildingId === b.id;
     const wrap = svgEl('g', {
-      class: 'zz-settle-bldg',
+      class: `zz-settle-bldg${selected ? ' is-selected' : ''}`,
       transform: `translate(${lx - cell / 2},${ly - cell / 2}) scale(${cell / 40})`,
       'data-type': b.type,
+      'data-id': b.id,
     });
     // Sombra
     wrap.appendChild(svgEl('ellipse', { cx: 20, cy: 36, rx: 14, ry: 4, fill: '#000', opacity: 0.25 }));
     paintBuildingGlyph(wrap, b.type, resolveVisualLevel(b.type));
+    if ((b.workers || 0) > 0) {
+      wrap.appendChild(
+        svgEl('text', {
+          x: 32,
+          y: 10,
+          class: 'zz-settle-workers',
+          'text-anchor': 'middle',
+        }, [String(b.workers)])
+      );
+    }
+    wrap.style.cursor = 'pointer';
+    wrap.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      onSelectBuilding && onSelectBuilding(b.id);
+    });
     layer.appendChild(wrap);
   });
 
@@ -401,9 +447,12 @@ function drawInfectedMarkers(g, z, rng) {
   }
 }
 
-function drawZone(layer, z, state, tier, onSelectZone) {
+function drawZone(layer, z, state, tier, handlers) {
+  const { onSelectZone, onSelectBuilding, onPlaceCell } = handlers || {};
   const selected = state.selectedZoneId === z.id;
   const attacked = state.flags?.lastAttackZoneId === z.id || z._attackFlash;
+  const exploreMode = state.uiMode === 'explore';
+  const exploreTarget = exploreMode && z.state !== 'unknown' && z.type !== 'camp';
   const g = svgEl('g', {
     class: [
       'zz-zone',
@@ -412,6 +461,7 @@ function drawZone(layer, z, state, tier, onSelectZone) {
       z.risk >= 0.45 && z.state !== 'controlled' ? 'is-risky' : '',
       attacked ? 'is-attacked' : '',
       z.state === 'controlled' && tier >= 2 ? 'is-recovered' : '',
+      exploreTarget ? 'is-explore-target' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -430,11 +480,14 @@ function drawZone(layer, z, state, tier, onSelectZone) {
   if (z.state === 'hostile' || attacked) {
     g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: z.r * 0.95, ry: z.r * 0.85, fill: attacked ? 'url(#zzAttackGlow)' : 'url(#zzHostTint)', class: 'zz-zone-tint' }));
   }
+  if (exploreTarget) {
+    g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: z.r * 1.08, ry: z.r * 0.95, class: 'zz-zone-explore-ring', fill: 'none' }));
+  }
 
   g.appendChild(svgEl('polygon', { points: polyPts, class: 'zz-zone-plot zz-zone-poly' }));
 
   if (z.type === 'camp') {
-    drawSettlementCore(g, state, z, tier);
+    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onPlaceCell });
   } else if (z.state !== 'unknown') {
     const fps = footprintsForType(z.type, z, rng);
     if (z.type === 'park') {
@@ -471,7 +524,7 @@ function drawZone(layer, z, state, tier, onSelectZone) {
       g.appendChild(svgEl('circle', { cx: z.x, cy: z.y - z.r * 0.78, r: 1.6, class: 'zz-zone-beacon' }));
     }
     // Etiqueta solo si seleccionado o controlado/descubierto — edificios del núcleo se reconocen solos
-    if (z.type !== 'camp' || selected) {
+    if (z.type !== 'camp' || selected || state.uiMode === 'build') {
       g.appendChild(
         svgEl('text', { x: z.x, y: z.y + z.r * 0.92 + 2.8, 'text-anchor': 'middle', class: 'zz-zone-label' }, [z.name])
       );
@@ -480,6 +533,8 @@ function drawZone(layer, z, state, tier, onSelectZone) {
 
   if (z.state !== 'unknown') {
     g.addEventListener('click', (ev) => {
+      // no abrir zona si el click vino de un edificio/celda
+      if (ev.target?.closest?.('.zz-settle-bldg, .zz-settle-slot')) return;
       ev.preventDefault();
       onSelectZone && onSelectZone(z.id);
     });
@@ -558,25 +613,151 @@ function drawLegend(parent, m) {
   parent.appendChild(legend);
 }
 
-export function renderMap(svg, state, { onSelectZone } = {}) {
+export function cameraViewBox(state, m) {
+  const cam = state.mapCamera || { x: 50, y: 48, zoom: 1 };
+  const zoom = clamp(cam.zoom || 1, 0.55, 2.4);
+  const vw = m.vbW / zoom;
+  const vh = m.vbH / zoom;
+  // Mundo lógico ~0–100 (+ offset desktop en el group)
+  const worldW = 100;
+  const worldH = 100;
+  let cx = cam.x ?? 50;
+  let cy = cam.y ?? 48;
+  cx = clamp(cx, vw / 2 - (m.ox || 0), worldW - vw / 2 + (m.ox || 0) + 20);
+  cy = clamp(cy, vh / 2 - (m.oy || 0), worldH - vh / 2 + 20);
+  return {
+    x: cx - vw / 2 - (m.ox || 0),
+    y: cy - vh / 2 - (m.oy || 0),
+    w: vw,
+    h: vh,
+    zoom,
+    cx,
+    cy,
+  };
+}
+
+export function applyMapCamera(svg, state) {
+  if (!svg || !state) return;
+  const m = mapMetrics(svg);
+  const vb = cameraViewBox(state, m);
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+}
+
+/** Bind pan/zoom una sola vez al contenedor del mapa. */
+export function bindMapCamera(wrap, getState, onChange) {
+  if (!wrap || wrap._zzCamBound) return;
+  wrap._zzCamBound = true;
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  let moved = false;
+
+  const svg = () => wrap.querySelector('svg.zz-map') || wrap.querySelector('svg');
+
+  wrap.addEventListener(
+    'wheel',
+    (ev) => {
+      const state = getState();
+      if (!state?.mapCamera) return;
+      ev.preventDefault();
+      const factor = ev.deltaY > 0 ? 0.9 : 1.1;
+      state.mapCamera.zoom = clamp((state.mapCamera.zoom || 1) * factor, 0.55, 2.4);
+      applyMapCamera(svg(), state);
+      onChange && onChange();
+    },
+    { passive: false }
+  );
+
+  wrap.addEventListener('pointerdown', (ev) => {
+    if (ev.button != null && ev.button !== 0) return;
+    // no pan si tocamos edificio/zona interactiva (salvo fondo)
+    const t = ev.target;
+    if (t?.closest?.('.zz-settle-bldg, .zz-settle-slot, .zz-zone-poly, .zz-ex-card')) {
+      // zonas sí permiten pan con drag: marcamos y vemos si hay movimiento
+    }
+    dragging = true;
+    moved = false;
+    lastX = ev.clientX;
+    lastY = ev.clientY;
+    wrap.setPointerCapture?.(ev.pointerId);
+  });
+  wrap.addEventListener('pointermove', (ev) => {
+    if (!dragging) return;
+    const state = getState();
+    const el = svg();
+    if (!state?.mapCamera || !el) return;
+    const dx = ev.clientX - lastX;
+    const dy = ev.clientY - lastY;
+    if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+    lastX = ev.clientX;
+    lastY = ev.clientY;
+    const m = mapMetrics(el);
+    const vb = cameraViewBox(state, m);
+    const rect = el.getBoundingClientRect();
+    const scaleX = vb.w / Math.max(1, rect.width);
+    const scaleY = vb.h / Math.max(1, rect.height);
+    state.mapCamera.x = (state.mapCamera.x || 50) - dx * scaleX;
+    state.mapCamera.y = (state.mapCamera.y || 48) - dy * scaleY;
+    applyMapCamera(el, state);
+  });
+  const endDrag = (ev) => {
+    if (!dragging) return;
+    dragging = false;
+    wrap.releasePointerCapture?.(ev.pointerId);
+    if (moved) {
+      wrap.dataset.zzPanned = '1';
+      onChange && onChange();
+      setTimeout(() => {
+        delete wrap.dataset.zzPanned;
+      }, 0);
+    }
+  };
+  wrap.addEventListener('pointerup', endDrag);
+  wrap.addEventListener('pointercancel', endDrag);
+}
+
+export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
+  const { onSelectZone, onSelectBuilding, onPlaceCell } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   const m = mapMetrics(svg);
-  svg.setAttribute('viewBox', `0 0 ${m.vbW} ${m.vbH}`);
+  if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
+  const vb = cameraViewBox(state, m);
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   const tier = colonyVisualTier(state);
   svg.dataset.tier = String(tier);
   svg.dataset.wide = m.wide ? '1' : '0';
+  svg.dataset.mode = state.uiMode || '';
   addDefs(svg, tier);
 
-  svg.appendChild(svgEl('rect', { width: m.vbW, height: m.vbH, fill: 'url(#zzMapSky)', class: 'zz-map-bg' }));
-  svg.appendChild(svgEl('rect', { width: m.vbW, height: m.vbH, fill: 'url(#zzMapHaze)', class: 'zz-map-ground' }));
+  // Fondo grande para poder hacer pan fuera del mundo
+  const pad = 40;
+  svg.appendChild(
+    svgEl('rect', {
+      x: vb.x - pad,
+      y: vb.y - pad,
+      width: vb.w + pad * 2,
+      height: vb.h + pad * 2,
+      fill: 'url(#zzMapSky)',
+      class: 'zz-map-bg',
+    })
+  );
+  svg.appendChild(
+    svgEl('rect', {
+      x: -(m.ox || 0),
+      y: -(m.oy || 0),
+      width: m.vbW,
+      height: m.vbH,
+      fill: 'url(#zzMapHaze)',
+      class: 'zz-map-ground',
+    })
+  );
 
-  const world = svgEl('g', {
-    class: 'zz-map-world',
-    transform: m.ox || m.oy ? `translate(${m.ox},${m.oy})` : undefined,
-  });
+  const worldAttrs = { class: 'zz-map-world' };
+  if (m.ox || m.oy) worldAttrs.transform = `translate(${m.ox},${m.oy})`;
+  const world = svgEl('g', worldAttrs);
 
   const zones = state.zones || [];
   const grid = drawRoads(world, zones, tier);
@@ -588,7 +769,7 @@ export function renderMap(svg, state, { onSelectZone } = {}) {
     const rank = { unknown: 0, discovered: 1, hostile: 2, controlled: 3 };
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
-  ordered.forEach((z) => drawZone(layer, z, state, tier, onSelectZone));
+  ordered.forEach((z) => drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onPlaceCell }));
   world.appendChild(layer);
 
   drawExpeditions(world, state);

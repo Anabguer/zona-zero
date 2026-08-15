@@ -27,6 +27,13 @@ import {
   explorerSlotsUnlocked,
 } from './explorers.js';
 import { runDirector, applyEventEffects } from './director.js';
+import {
+  adjustBuildingWorkers,
+  adjustCategoryLabor,
+  autoStaffColony,
+  syncLaborFromColony,
+  laborKeyForBuilding,
+} from './colony.js';
 
 export const RES_LABEL = {
   food: 'comida',
@@ -90,32 +97,23 @@ export function placeBuilding(state, content, type, x, y) {
       return { ok: true, upgraded: true };
     }
   }
-  state.base.buildings.push({ id: uid('b'), type, x, y, hp: 100 });
+  state.base.buildings.push({ id: uid('b'), type, x, y, hp: 100, workers: 0 });
   state.stats.buildingsBuilt += 1;
+  syncLaborFromColony(state, content);
   pushLog(state, `Construís ${def.name}.`, 'good');
   return { ok: true };
 }
 
-/** Compat stubs — la asignación es colectiva */
-export function assignWorker() {
-  return { ok: false, error: 'Asignación colectiva: usad el panel de población' };
+export function assignWorker(state, content, buildingId) {
+  return adjustBuildingWorkers(state, content, buildingId, 1);
 }
-export function unassignWorker() {}
+export function unassignWorker(state, content, buildingId) {
+  return adjustBuildingWorkers(state, content, buildingId, -1);
+}
 export function autoAssignWorkers(state, content) {
-  if (!state.population) return { ok: false, error: 'Sin población' };
-  const wf = Math.max(
-    0,
-    (state.population.total || 0) - (state.population.sick || 0) - (state.population.injured || 0) - (state.population.dependents || 0)
-  );
-  state.population.manual = {
-    food: Math.max(1, Math.floor(wf * 0.35)),
-    water: Math.max(wf >= 2 ? 1 : 0, Math.floor(wf * 0.2)),
-    defense: Math.floor(wf * 0.12),
-  };
-  redistributeLabor(state, content.balance, { preserveManual: true });
-  return { ok: true, assigned: workforce(state.population) };
+  return autoStaffColony(state, content);
 }
-export { adjustLabor };
+export { adjustLabor, adjustCategoryLabor, adjustBuildingWorkers, syncLaborFromColony };
 
 function riskCategory(score) {
   if (score < 0.25) return 'Bajo';
@@ -430,17 +428,15 @@ export function resolveExpedition(state, content) {
 }
 
 function applyProduction(state, content) {
+  syncLaborFromColony(state, content);
   const stabMod = clamp(0.6 + state.stability / 200, 0.6, 1.15);
   const weatherMod =
     state.weather === 'heat' || state.weather === 'cold' ? 0.85 : state.weather === 'storm' ? 0.75 : 1;
-  const labor = state.population?.labor || {};
-  const per = content.balance.productionPerWorker || {};
 
   let energyProd = 0;
   let energyDemand = 1;
-  let buildingFood = 0;
-  let buildingWater = 0;
-  let buildingOther = {};
+  const produced = {};
+  const byBuilding = [];
 
   state.base.buildings.forEach((b) => {
     if (b.hp <= 0) return;
@@ -449,43 +445,36 @@ function applyProduction(state, content) {
     if (def.energy > 0) energyProd += def.energy;
     if (def.energy < 0) energyDemand += Math.abs(def.energy);
     if (!def.produces) return;
-    const jobs = def.jobs || 1;
+    const jobs = Math.max(1, def.jobs || 1);
+    const staff = Math.max(0, b.workers || 0);
+    // Sin trabajadores → 0 producción (el edificio solo no alimenta)
+    if (staff <= 0) {
+      byBuilding.push({ id: b.id, type: b.type, name: def.name, workers: 0, out: {} });
+      return;
+    }
+    const ratio = clamp(staff / jobs, 0.15, 1.15);
+    const out = {};
     Object.entries(def.produces).forEach(([k, v]) => {
-      // Capacidad del edificio × cobertura laboral
-      let staff = labor.produce || 0;
-      if (k === 'food') staff = labor.food || 0;
-      if (k === 'water') staff = labor.water || 0;
-      const ratio = clamp(staff / Math.max(1, jobs * 1.5), 0.35, 1.1);
-      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * 0.95));
-      if (k === 'food') buildingFood += amt;
-      else if (k === 'water') buildingWater += amt;
-      else buildingOther[k] = (buildingOther[k] || 0) + amt;
+      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod));
+      if (amt <= 0) return;
+      out[k] = amt;
+      produced[k] = (produced[k] || 0) + amt;
+      state.resources[k] = (state.resources[k] || 0) + amt;
     });
+    byBuilding.push({ id: b.id, type: b.type, name: def.name, workers: staff, out });
   });
 
-  // Producción por trabajadores: sin huerto/pozo es supervivencia precaria
   const hasFarm = state.base.buildings.some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
   const hasWell = state.base.buildings.some((b) => ['well', 'cistern', 'pump'].includes(b.type) && b.hp > 0);
-  const foodExtra = Math.round(
-    (labor.food || 0) * (per.food || 2.1) * (hasFarm ? 0.3 : 0.22) * stabMod
-  );
-  const waterExtra = Math.round(
-    (labor.water || 0) * (per.water || 2.0) * (hasWell ? 0.3 : 0.22) * stabMod
-  );
-  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.2) * 0.3 * stabMod);
 
-  state.resources.food = (state.resources.food || 0) + buildingFood + foodExtra;
-  state.resources.water = (state.resources.water || 0) + buildingWater + waterExtra;
-  if (produceExtra > 0) {
-    state.resources.wood = (state.resources.wood || 0) + Math.ceil(produceExtra / 2);
-    state.resources.metal = (state.resources.metal || 0) + Math.floor(produceExtra / 2);
+  if ((state.research.unlocked || []).includes('surv_crops') && hasFarm) {
+    state.resources.food += 1;
+    produced.food = (produced.food || 0) + 1;
   }
-  Object.entries(buildingOther).forEach(([k, v]) => {
-    state.resources[k] = (state.resources[k] || 0) + v;
-  });
-
-  if ((state.research.unlocked || []).includes('surv_crops') && hasFarm) state.resources.food += 1;
-  if ((state.research.unlocked || []).includes('surv_filters') && hasWell) state.resources.water += 1;
+  if ((state.research.unlocked || []).includes('surv_filters') && hasWell) {
+    state.resources.water += 1;
+    produced.water = (produced.water || 0) + 1;
+  }
 
   // Merma por exceso sin almacén (evita stock infinito)
   const pop = Math.max(1, state.population?.total || 1);
@@ -505,6 +494,7 @@ function applyProduction(state, content) {
 
   state.energy.produced = energyProd;
   state.energy.demand = energyDemand;
+  return { produced, byBuilding };
 }
 
 function fuelNeed(state, content) {
@@ -616,6 +606,7 @@ function populationTick(state, content) {
   }
 
   redistributeLabor(state, bal);
+  syncLaborFromColony(state, content);
 }
 
 export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
@@ -849,6 +840,17 @@ export function advanceDay(state, content) {
     return { ok: false, error: 'Victoria alcanzada. Continuad en modo endless o nueva partida.' };
   }
 
+  const before = {
+    food: state.resources.food || 0,
+    water: state.resources.water || 0,
+    wood: state.resources.wood || 0,
+    metal: state.resources.metal || 0,
+    pop: state.population?.total || 0,
+    threat: state.director?.threat || 0,
+    expeditions: (state.expeditions || []).map((e) => ({ ...e })),
+  };
+
+  syncLaborFromColony(state, content);
   resolveExpedition(state, content);
   // Limpiar flash de ataque del día anterior
   (state.zones || []).forEach((z) => {
@@ -876,7 +878,7 @@ export function advanceDay(state, content) {
     }
   }
 
-  applyProduction(state, content);
+  const prod = applyProduction(state, content) || { produced: {}, byBuilding: [] };
   healPopulationTick(state, content.balance);
   tickResearch(state, content);
 
@@ -902,8 +904,83 @@ export function advanceDay(state, content) {
   checkVictory(state, content);
   checkDefeat(state);
 
+  const brief = buildDayBrief(state, content, before, prod, { foodNeed, waterNeed, dir, attack });
+  state.lastDayBrief = brief;
+
   state.rngState = (state.rngState || 1) + 17;
-  return { ok: true, director: dir, attack };
+  return { ok: true, director: dir, attack, brief };
+}
+
+function buildDayBrief(state, content, before, prod, ctx) {
+  const lines = [];
+  const produced = prod?.produced || {};
+  const foodGain = produced.food || 0;
+  const waterGain = produced.water || 0;
+  if (foodGain) lines.push(`+${foodGain} comida`);
+  if (waterGain) lines.push(`+${waterGain} agua`);
+  if (produced.wood) lines.push(`+${produced.wood} madera`);
+  if (produced.metal) lines.push(`+${produced.metal} metal`);
+  if (produced.medicine) lines.push(`+${produced.medicine} medicinas`);
+  if (ctx.foodNeed) lines.push(`−${Math.round(ctx.foodNeed)} consumo comida`);
+  if (ctx.waterNeed) lines.push(`−${Math.round(ctx.waterNeed)} consumo agua`);
+
+  (prod?.byBuilding || []).forEach((b) => {
+    if (b.workers > 0 && Object.keys(b.out || {}).length) {
+      const bits = Object.entries(b.out)
+        .map(([k, v]) => `+${v} ${RES_LABEL[k] || k}`)
+        .join(', ');
+      // solo si aporta detalle distinto del total (evitar ruido)
+      if (Object.keys(prod.produced || {}).length > 2) lines.push(`${b.name}: ${bits}`);
+    }
+  });
+
+  const returning = (before.expeditions || []).filter((e) => e.returnDay === state.day);
+  returning.forEach((e) => {
+    const ex = (state.explorers || []).find((x) => x.id === e.explorerId);
+    if (ex) lines.push(`${ex.name} ha regresado.`);
+  });
+  (state.expeditions || []).forEach((e) => {
+    const left = e.returnDay - state.day;
+    const ex = (state.explorers || []).find((x) => x.id === e.explorerId);
+    if (ex && left === 1) lines.push(`${ex.name} llegará mañana.`);
+    else if (ex && left > 1) lines.push(`${ex.name} vuelve en ${left} días.`);
+  });
+
+  const dThreat = Math.round((state.director?.threat || 0) - (before.threat || 0));
+  if (dThreat) lines.push(`Amenaza ${dThreat > 0 ? '+' : ''}${dThreat}`);
+
+  const dPop = (state.population?.total || 0) - (before.pop || 0);
+  if (dPop) lines.push(`Población ${dPop > 0 ? '+' : ''}${dPop}`);
+
+  if (ctx.attack) {
+    lines.push(
+      ctx.attack.result === 'win'
+        ? 'Ataque repelido.'
+        : ctx.attack.result === 'messy'
+          ? 'Ataque contenido con pérdidas.'
+          : 'El perímetro ha cedido.'
+    );
+  } else if (ctx.dir?.quiet) {
+    // sin ruido
+  } else if (ctx.dir?.event && !ctx.dir?.choice) {
+    lines.push(ctx.dir.event.name || 'Suceso en la zona');
+  }
+
+  const important =
+    foodGain >= 1 ||
+    waterGain >= 1 ||
+    Math.abs(dPop) > 0 ||
+    Math.abs(dThreat) >= 2 ||
+    returning.length > 0 ||
+    (state.expeditions || []).some((e) => e.returnDay - state.day === 1) ||
+    !!ctx.attack ||
+    (!!ctx.dir?.event && !ctx.dir?.quiet && !ctx.dir?.choice);
+
+  return {
+    day: state.day,
+    lines: lines.slice(0, 8),
+    important: !!important && lines.length > 0,
+  };
 }
 
 export function continueEndless(state) {

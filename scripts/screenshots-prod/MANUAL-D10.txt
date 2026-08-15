@@ -1,0 +1,94 @@
+Prueba D1–D10 — núcleo de gestión (sin mirar código durante decisiones)
+
+--- Día 1 (antes de Avanzar) ---
+Población 3 · comida 36 · agua 30
+Labor idle=1 food=1 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:1, well:1
+  · Objetivo: asegurar comida y agua
+  · Población: 1 a construcción
+  · Construir HUERTO (colocación en refugio)
+  · Construir POZO
+  · Edificios: 1 en huerto, 1 en pozo (1 disponible)
+  → Tras avanzar: Día 2
+  Resumen: +1 comida · +2 agua · −3 consumo comida · −3 consumo agua · Amenaza +5
+
+--- Día 2 (antes de Avanzar) ---
+Población 3 · comida 33 · agua 29
+Labor idle=1 food=1 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:1, well:1
+  · Explorador: Mandar a explorar → Supermercado Norte
+  · Enviar Tomàs a Supermercado Norte
+  → Tras avanzar: Día 3
+  Resumen: +1 comida · +2 agua · −3 consumo comida · −3 consumo agua · Tomàs ha regresado. · Amenaza -1 · Lluvia útil
+
+--- Día 3 (antes de Avanzar) ---
+Población 3 · comida 31 · agua 33
+Labor idle=0 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1
+  · Esperar retorno explorador; mantener producción
+  · Subir huerto a 2 trabajadores (más comida)
+  → Tras avanzar: Día 4
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Amenaza +1 · Población +1 · Turno rutinario
+
+--- Día 4 (antes de Avanzar) ---
+Población 4 · comida 32 · agua 32
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Capacidad: liberar 1 del huerto → construcción → refugio
+  · Colocar refugio extra
+  · Devolver trabajador al huerto
+  → Tras avanzar: Día 5
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua
+
+--- Día 5 (antes de Avanzar) ---
+Población 4 · comida 31 · agua 31
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Revisar agua: asegurar 1 en pozo; explorar si hay idle explorador
+  → Tras avanzar: Día 6
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Amenaza -1
+
+--- Día 6 (antes de Avanzar) ---
+Población 4 · comida 31 · agua 29
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Trade-off: quitar 1 de comida → segundo en pozo si agua baja
+  · Agua OK; mantener asignación
+  → Tras avanzar: Día 7
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Amenaza -1
+
+--- Día 7 (antes de Avanzar) ---
+Población 4 · comida 30 · agua 28
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Defensa ligera: 1 disponible a construcción → barricada
+  · Recursos insuficientes
+  → Tras avanzar: Día 8
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Amenaza -1 · Leña apilada
+
+--- Día 8 (antes de Avanzar) ---
+Población 4 · comida 30 · agua 26
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Reequilibrar producción comida/agua tras obras
+  · Labor: comida 2 agua 1 idle 1
+  → Tras avanzar: Día 9
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Fuga de combustible
+
+--- Día 9 (antes de Avanzar) ---
+Población 4 · comida 28 · agua 25
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Segunda salida: Tomàs → Supermercado Norte
+  → Tras avanzar: Día 10
+  Resumen: +3 comida · +2 agua · −4 consumo comida · −4 consumo agua · Tomàs ha regresado. · Amenaza +1 · Niebla densa
+
+--- Día 10 (antes de Avanzar) ---
+Población 4 · comida 26 · agua 23
+Labor idle=1 food=2 water=1 build=0
+Edificios: hq_central_l1:0, shelter:0, shelter:0, farm:2, well:1, shelter:0
+  · Cierre: comprobar objetivo y stock antes de avanzar
+  → Tras avanzar: Día 11
+  Resumen: +3 comida · +3 agua · −4 consumo comida · −4 consumo agua · Amenaza +1
+
+FIN: D11 pop=4 defeated=false

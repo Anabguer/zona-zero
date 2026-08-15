@@ -23,8 +23,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=14" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=14" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=15" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=15" />
 </head>
 <body class="zz-body zz-body--play zz-body--world">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -46,6 +46,9 @@ $base = zz_public_base();
       <button type="button" id="zz-coach-dismiss" aria-label="Cerrar">×</button>
     </p>
 
+    <p class="zz-objective" id="zz-objective" hidden></p>
+    <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
+
     <!-- HUD compacto iconográfico -->
     <section class="zz-chip-hud" aria-label="Estado">
       <button type="button" class="zz-chip-hud__pop" id="zz-open-pop" title="Población">
@@ -66,6 +69,10 @@ $base = zz_public_base();
     <main class="zz-world-stage">
       <div class="zz-world-map-wrap">
         <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
+        <div class="zz-map-zoom" aria-label="Zoom">
+          <button type="button" id="zz-zoom-out" title="Alejar">−</button>
+          <button type="button" id="zz-zoom-in" title="Acercar">+</button>
+        </div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Zona Zero"></svg>
       </div>
       <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
@@ -81,11 +88,12 @@ $base = zz_public_base();
     <div id="zz-pulse-layer" class="zz-pulse-layer" aria-hidden="true"></div>
     <div id="zz-event-card" class="zz-event-card" hidden></div>
     <div id="zz-attack-card" class="zz-attack-card" hidden></div>
+    <div id="zz-day-brief" class="zz-day-brief" hidden></div>
 
     <footer class="zz-world-dock">
-      <button type="button" class="zz-btn zz-btn--ghost" id="zz-open-build">Construir</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build">Construir</button>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
-      <button type="button" class="zz-btn zz-btn--ghost" id="zz-open-more">Más</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more">Más</button>
     </footer>
 
     <div id="zz-defeat" class="zz-defeat" hidden>
@@ -109,7 +117,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=14';
+    import { bootGame } from './js/main.js?v=15';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,

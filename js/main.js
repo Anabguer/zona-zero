@@ -19,12 +19,14 @@ import {
   startResearch,
   buyVehicle,
   continueEndless,
-  adjustLabor,
+  adjustCategoryLabor,
+  adjustBuildingWorkers,
   autoAssignWorkers,
   resolveBaseAttack,
+  syncLaborFromColony,
 } from './sim.js';
 import { resolvePendingChoice } from './director.js';
-import { renderMap } from './render-map.js';
+import { renderMap, bindMapCamera } from './render-map.js';
 import {
   readyExplorers,
   livingExplorers,
@@ -32,8 +34,14 @@ import {
   recruitExplorer,
   explorerSlotsUnlocked,
 } from './explorers.js';
-import { clearLaborManual, workforce } from './population.js';
-import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon, FAMILY_ICONS } from './icons.js';
+import { workforce } from './population.js';
+import {
+  currentObjective,
+  laborKeyForBuilding,
+  productionPreview,
+  buildingWorkerCap,
+} from './colony.js';
+import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon } from './icons.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
 
@@ -120,18 +128,39 @@ function openSheet(html) {
   if (!sheet || !body) return;
   body.innerHTML = html;
   sheet.hidden = false;
-  // Rebind interactive bits
+  body.querySelectorAll('[data-thumb]').forEach((el) => {
+    const type = el.getAttribute('data-thumb');
+    try {
+      el.appendChild(buildingThumb(type, 44));
+    } catch {
+      /* ignore */
+    }
+  });
   body.querySelectorAll('[data-labor]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-labor');
       const delta = Number(btn.getAttribute('data-delta') || 0);
-      const r = adjustLabor(state, key, delta, content.balance);
+      const r = adjustCategoryLabor(state, content, key, delta);
       if (!r.ok) toast(r.error || 'No', 'warn');
       else {
         sfx.click?.();
         scheduleSave();
         paint();
         openPopulationSheet();
+      }
+    });
+  });
+  body.querySelectorAll('[data-bworkers]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-bworkers');
+      const delta = Number(btn.getAttribute('data-delta') || 0);
+      const r = adjustBuildingWorkers(state, content, id, delta);
+      if (!r.ok) toast(r.error || 'No', 'warn');
+      else {
+        sfx.click?.();
+        scheduleSave();
+        paint();
+        openBuildingSheet(id);
       }
     });
   });
@@ -154,34 +183,59 @@ function handleSheetAction(action, btn) {
     else {
       sfx.expedition?.();
       toast(`${r.preview.explorerName} en ruta`, 'good');
+      state.uiMode = null;
       scheduleSave();
       closeSheet();
     }
     paint();
     return;
   }
-  if (action === 'build') {
-    state.buildMode = btn.getAttribute('data-build');
-    toast('Tocad una parcela libre en el núcleo (próximo zoom). Usad colocación rápida.', 'info');
-    // Colocación rápida en primera celda libre
-    const type = state.buildMode;
-    outer: for (let y = 0; y < state.base.h; y++) {
-      for (let x = 0; x < state.base.w; x++) {
-        if (!state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) {
-          const r = placeBuilding(state, content, type, x, y);
-          if (r.ok) {
-            sfx.build?.();
-            toast('Construido', 'good');
-            state.buildMode = null;
-            scheduleSave();
-            paint();
-            openBuildSheet();
-            return;
-          }
-        }
-      }
+  if (action === 'build-pick') {
+    const type = btn.getAttribute('data-build');
+    const def = content.buildings[type];
+    if (!canAfford(state, def?.cost)) {
+      toast('Faltan recursos', 'warn');
+      return;
     }
-    toast('No hay parcela o faltan recursos/mano de obra', 'warn');
+    state.buildMode = type;
+    state.uiMode = 'build';
+    state.selectedBuildingId = null;
+    // Centrar cámara en el refugio
+    const camp = state.zones.find((z) => z.type === 'camp');
+    if (camp && state.mapCamera) {
+      state.mapCamera.x = camp.x;
+      state.mapCamera.y = camp.y;
+      state.mapCamera.zoom = Math.max(state.mapCamera.zoom || 1, 1.6);
+    }
+    closeSheet();
+    toast(`Colocad ${def?.name || type} en una parcela libre del refugio`, 'info');
+    paint();
+    return;
+  }
+  if (action === 'cancel-build') {
+    state.buildMode = null;
+    state.uiMode = null;
+    toast('Construcción cancelada', 'info');
+    paint();
+    return;
+  }
+  if (action === 'start-explore') {
+    const id = btn.getAttribute('data-id');
+    state.selectedExplorerId = id;
+    state.uiMode = 'explore';
+    state.buildMode = null;
+    closeSheet();
+    toast('Elegid un destino resaltado en el mapa', 'info');
+    paint();
+    return;
+  }
+  if (action === 'cancel-explore') {
+    state.uiMode = null;
+    paint();
+    return;
+  }
+  if (action === 'open-build-from-camp') {
+    openBuildSheet();
     return;
   }
   if (action === 'auto-labor') {
@@ -259,6 +313,7 @@ function handleSheetAction(action, btn) {
 }
 
 function openPopulationSheet() {
+  syncLaborFromColony(state, content);
   const pop = state.population;
   const cap = housingCapacity(state, content.buildings);
   const labor = pop.labor || {};
@@ -266,20 +321,62 @@ function openPopulationSheet() {
     .map((k) => {
       const steppers =
         k === 'idle'
-          ? `<span>${labor[k] || 0}</span>`
+          ? `<span class="zz-labor-val">${labor[k] || 0}</span>`
           : `<div class="zz-stepper">
-              <button type="button" data-labor="${k}" data-delta="-1">−</button>
+              <button type="button" data-labor="${k}" data-delta="-1" aria-label="Menos">−</button>
               <span>${labor[k] || 0}</span>
-              <button type="button" data-labor="${k}" data-delta="1">+</button>
+              <button type="button" data-labor="${k}" data-delta="1" aria-label="Más">+</button>
             </div>`;
       return `<div class="zz-labor-row"><div><strong>${LABOR_LABEL[k]}</strong></div>${steppers}</div>`;
     })
     .join('');
   openSheet(`
     <h2>Población ${pop.total} / ${cap}</h2>
-    <p>Fuerza laboral: ${workforce(pop)} · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}</p>
+    <p>Disponibles: <strong>${labor.idle || 0}</strong> · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}</p>
+    <p class="zz-muted" style="font-size:0.8rem">Asignación numérica. Comida/agua/producción van a edificios con puestos.</p>
     ${rows}
     <p style="margin-top:0.75rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>
+  `);
+}
+
+function openBuildingSheet(id) {
+  const b = state.base.buildings.find((x) => x.id === id && x.hp > 0);
+  if (!b) return;
+  state.selectedBuildingId = id;
+  const def = content.buildings[b.type];
+  if (!def) return;
+  const key = laborKeyForBuilding(def);
+  const cap = buildingWorkerCap(def);
+  const workers = b.workers || 0;
+  const prev = productionPreview(def, workers)
+    .map((p) => `${p.amount} ${RES_LABEL_UI[p.key] || p.key}/día`)
+    .join(' · ');
+  const scaleHint = [0, 1, Math.min(2, cap), cap]
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .map((n) => {
+      const bits = productionPreview(def, n)
+        .map((p) => `${p.amount} ${RES_LABEL_UI[p.key] || p.key}`)
+        .join(', ');
+      return `${n} → ${bits || '0'}`;
+    })
+    .join('<br/>');
+
+  openSheet(`
+    <div class="zz-build-card__art" data-thumb="${b.type}"></div>
+    <h2>${escapeHtml(def.name)}</h2>
+    <p>${escapeHtml(def.desc || '')}</p>
+    ${
+      key
+        ? `<p><strong>Trabajadores: ${workers} / ${cap}</strong></p>
+           <div class="zz-stepper zz-stepper--lg">
+             <button type="button" data-bworkers="${b.id}" data-delta="-1">−</button>
+             <span>TRABAJADORES</span>
+             <button type="button" data-bworkers="${b.id}" data-delta="1">+</button>
+           </div>
+           <p class="zz-muted" style="margin-top:0.5rem;font-size:0.82rem">Producción ahora: ${prev || 'ninguna'}</p>
+           <p class="zz-prod-scale">${scaleHint}</p>`
+        : '<p class="zz-muted">Sin puestos de trabajo (estructura pasiva).</p>'
+    }
   `);
 }
 
@@ -287,21 +384,29 @@ function openExplorerSheet(id) {
   const e = state.explorers.find((x) => x.id === id);
   if (!e) return;
   state.selectedExplorerId = id;
-  const skills = Object.entries(e.skills || {})
-    .map(([k, v]) => `<span>${SKILL_LABEL[k] || k} ${'●'.repeat(v)}${'○'.repeat(5 - v)}</span>`)
+  const skills = ['explore', 'loot', 'fight', 'resist']
+    .map((k) => {
+      const v = e.skills?.[k] || 1;
+      return `<div class="zz-skill-row"><span>${SKILL_LABEL[k]}</span><strong>${v}</strong></div>`;
+    })
     .join('');
   const stLabel =
-    e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
+    e.status === 'ready' ? 'Disponible' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
   openSheet(`
     <h2>${escapeHtml(e.name)}</h2>
-    <p>Explorador · Nv.${e.level || 1} · ${stLabel}</p>
-    <div class="zz-skill-mini">${skills}</div>
-    <p>
+    <p>Explorador · Nv.${e.level || 1}</p>
+    <div class="zz-skill-list">${skills}</div>
+    <p>Estado: <strong>${stLabel}</strong></p>
+    ${
+      e.status === 'ready'
+        ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="start-explore" data-id="${e.id}">Mandar a explorar</button>`
+        : e.status === 'away'
+          ? '<p class="zz-muted">Está fuera. Veréis su marcador en el mapa.</p>'
+          : ''
+    }
+    <p style="margin-top:0.5rem">
       <button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button>
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="basic">Arma básica</button>
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="improved">Arma mejorada</button>
     </p>
-    <p class="zz-muted">Tocad un lugar del mapa para enviarlo. Cerrad este panel cuando no lo necesitéis.</p>
   `);
   paint();
 }
@@ -310,31 +415,40 @@ function openZoneSheet(zoneId) {
   const z = state.zones.find((x) => x.id === zoneId);
   if (!z || z.state === 'unknown') return;
   state.selectedZoneId = zoneId;
+
+  if (z.type === 'camp' && state.uiMode !== 'explore') {
+    openSheet(`
+      <h2>${escapeHtml(z.name)}</h2>
+      <p>Vuestro refugio. Tocad un edificio para asignar trabajadores, o Construir para ampliar.</p>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
+    `);
+    // bind open-build via action
+    paint();
+    return;
+  }
+
   const ex = state.explorers.find((e) => e.id === state.selectedExplorerId) || readyExplorers(state)[0];
   const preview = ex ? expeditionPreview(state, content, zoneId, ex.id) : null;
   const badge =
     z.state === 'controlled' ? 'Control' : z.state === 'hostile' ? 'Hostil' : 'Conocido';
   const ctrlPct = Math.round((z.controlProgress || 0) * 100);
+  const exploring = state.uiMode === 'explore';
   openSheet(`
     <h2>${escapeHtml(z.name)}</h2>
     <p><span class="zz-zone-badge zz-zone-badge--${z.state}">${badge}</span>
       Riesgo base ${(z.risk * 100).toFixed(0)}% · Infectados ~${z.infectedLeft || 0}
       ${z.state !== 'controlled' ? ` · Control ${ctrlPct}%` : ''}</p>
     ${
-      z.state === 'controlled'
-        ? '<p>Territorio vuestro. Podéis avanzar desde aquí o enviar patrulla ligera.</p>'
-        : preview
-          ? `<p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> (${preview.explorerStatus})</p>
-             <p>Distancia ${preview.distance} · ${preview.days} día(s) · Riesgo <strong>${preview.category}</strong> (${Math.round(
-              preview.risk * 100
-            )}%)</p>
-             <p>Enfoque: ${escapeHtml(preview.note || preview.focus || '')}</p>
-             <p>Botín probable: ${(preview.lootHint || []).join(', ') || 'incierto'} · Combustible ${preview.fuel}</p>
-             <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
-              ex.status !== 'ready' ? 'disabled' : ''
-            }>Enviar a ${escapeHtml(ex.name)}</button>
-             <p class="zz-muted" style="margin-top:0.5rem;font-size:0.8rem">Otro explorador cambia el riesgo y el botín. Zonas hostiles tardan más.</p>`
-          : '<p>No hay explorador disponible. Curad heridas o esperad el retorno.</p>'
+      preview
+        ? `<p>Distancia <strong>${preview.distance}</strong> · Tiempo <strong>${preview.days} día(s)</strong></p>
+           <p>Riesgo <strong>${preview.category}</strong> (${Math.round(preview.risk * 100)}%)</p>
+           <p>Posible botín: ${(preview.lootHint || []).join(', ') || 'incierto'}</p>
+           <p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong></p>
+           <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
+            ex.status !== 'ready' ? 'disabled' : ''
+          }>Enviar a ${escapeHtml(ex.name)}</button>
+           ${exploring ? '<p style="margin-top:0.4rem"><button type="button" class="zz-btn" data-action="cancel-explore">Cancelar selección</button></p>' : ''}`
+        : '<p>No hay explorador disponible.</p>'
     }
   `);
   paint();
@@ -350,20 +464,46 @@ function openBuildSheet() {
       const count = state.base.buildings.filter((x) => x.type === b.id && x.hp > 0).length;
       return b.max == null || count < b.max;
     })
-    .slice(0, 16)
+    .slice(0, 18)
     .map((b) => {
       const afford = canAfford(state, b.cost);
+      const missing = Object.entries(b.cost || {})
+        .filter(([k, v]) => (state.resources[k] || 0) < v)
+        .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
+        .join(', ');
+      const reqTech = (b.requires || []).filter((t) => !(state.research.unlocked || []).includes(t));
+      const reqBld = b.requiresBuilding && !state.base.buildings.some((x) => x.type === b.requiresBuilding && x.hp > 0);
+      const locked = !afford || reqTech.length || reqBld || (state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1;
       const cost = Object.entries(b.cost || {})
         .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
         .join(' · ');
-      return `<button type="button" class="zz-build-btn ${afford ? '' : 'is-disabled'}" data-action="build" data-build="${b.id}">
-        <strong>${escapeHtml(b.name)}</strong>
-        <span class="zz-build-desc">${escapeHtml(b.desc || '')}</span>
-        <span class="zz-build-cost">${cost || 'Gratis'}</span>
+      const jobs = b.jobs > 0 ? `Trabajadores 0–${b.jobs}` : 'Sin puestos';
+      let lockReason = '';
+      if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
+      else if (reqTech.length) lockReason = 'Falta investigación';
+      else if (!afford) lockReason = `Falta: ${missing}`;
+      else if ((state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1)
+        lockReason = 'Asignad gente a construcción';
+      return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''}" data-action="build-pick" data-build="${b.id}" ${
+        locked ? 'disabled' : ''
+      }>
+        <span class="zz-build-card__art" data-thumb="${b.id}"></span>
+        <span class="zz-build-card__body">
+          <strong>${escapeHtml(b.name)}</strong>
+          <em>${escapeHtml(b.desc || '')}</em>
+          <span class="zz-build-card__meta">${jobs}</span>
+          <span class="zz-build-cost">${cost || 'Gratis'}</span>
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Construir</span>'}
+        </span>
       </button>`;
     })
     .join('');
-  openSheet(`<h2>Construir</h2><p>Mano de obra construcción: ${state.population.labor?.build || 0} (+ idle ${state.population.labor?.idle || 0})</p><div class="zz-build-bar" style="display:grid;gap:0.4rem">${list}</div>`);
+  openSheet(`
+    <h2>Construir</h2>
+    <p>Elegid un edificio y colocadlo en el refugio.</p>
+    <p class="zz-muted" style="font-size:0.8rem">Mano de obra construcción: ${state.population.labor?.build || 0} (+ disponibles ${state.population.labor?.idle || 0})</p>
+    <div class="zz-build-grid">${list}</div>
+  `);
 }
 
 function openMoreSheet() {
@@ -518,8 +658,11 @@ function paintExplorers() {
 
 function paint() {
   if (!state || !content) return;
+  syncLaborFromColony(state, content);
   paintHud();
   paintExplorers();
+  paintObjective();
+  paintModeBanner();
   const banner = $('zz-recover-banner');
   if (banner) {
     const recovering = state.day < (state.director?.protectionUntil || 0);
@@ -528,10 +671,37 @@ function paint() {
       banner.textContent = `Recuperación · hasta día ${state.director.protectionUntil}`;
     }
   }
+  const wrap = document.querySelector('.zz-world-map-wrap');
+  if (wrap) {
+    bindMapCamera(wrap, () => state, () => scheduleSave());
+  }
   renderMap($('zz-map'), state, {
     onSelectZone: (id) => {
+      if (wrap?.dataset.zzPanned) return;
       sfx.click?.();
       openZoneSheet(id);
+    },
+    onSelectBuilding: (id) => {
+      if (wrap?.dataset.zzPanned) return;
+      sfx.click?.();
+      openBuildingSheet(id);
+    },
+    onPlaceCell: (x, y) => {
+      if (!state.buildMode) return;
+      const type = state.buildMode;
+      const r = placeBuilding(state, content, type, x, y);
+      if (!r.ok) {
+        toast(r.error || 'No se pudo construir', 'warn');
+        return;
+      }
+      sfx.build?.();
+      toast(`${content.buildings[type]?.name || type} colocado`, 'good');
+      state.buildMode = null;
+      state.uiMode = null;
+      scheduleSave();
+      paint();
+      const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
+      if (b && laborKeyForBuilding(content.buildings[b.type])) openBuildingSheet(b.id);
     },
   });
   renderChoiceModal();
@@ -542,33 +712,46 @@ function paint() {
   }
   const victory = $('zz-victory');
   if (victory) victory.hidden = !(state.flags.victory && !state.flags.endless);
-  updateCoach();
 }
 
-function updateCoach() {
-  const coach = $('zz-coach');
-  const text = $('zz-coach-text');
-  if (!coach || !text || state.flags.coach?.dismissed) {
-    if (coach) coach.hidden = true;
+function paintObjective() {
+  const el = $('zz-objective');
+  if (!el) return;
+  const obj = currentObjective(state, content);
+  if (!obj || state.flags?.objectivesOff) {
+    el.hidden = true;
     return;
   }
-  const c = state.flags.coach || {};
-  if (!c.explore && readyExplorers(state).length) {
-    text.textContent = 'Tocad una zona conocida y enviad a vuestro explorador.';
-    coach.hidden = false;
+  el.hidden = false;
+  el.innerHTML = `<strong>${escapeHtml(obj.title)}</strong><span>${escapeHtml(obj.text)}</span>`;
+}
+
+function paintModeBanner() {
+  const el = $('zz-mode-banner');
+  if (!el) return;
+  if (state.uiMode === 'build' && state.buildMode) {
+    el.hidden = false;
+    el.textContent = `Colocad ${content.buildings[state.buildMode]?.name || 'edificio'} · arrastrad para mirar · tocad parcela`;
+  } else if (state.uiMode === 'explore') {
+    el.hidden = false;
+    el.textContent = 'Modo exploración · destinos resaltados · tocad uno';
+  } else {
+    el.hidden = true;
+  }
+}
+
+function showDayBrief(brief) {
+  const card = $('zz-day-brief');
+  if (!card || !brief?.important || !brief.lines?.length) {
+    if (card) card.hidden = true;
     return;
   }
-  if (!c.labor) {
-    text.textContent = 'Tocad la población del HUD para asignar trabajo con + / −.';
-    coach.hidden = false;
-    return;
-  }
-  if (!c.build) {
-    text.textContent = 'Con madera y metal, usad Construir abajo.';
-    coach.hidden = false;
-    return;
-  }
-  coach.hidden = true;
+  card.innerHTML = `<strong>DÍA ${brief.day}</strong><ul>${brief.lines.map((l) => `<li>${escapeHtml(l)}</li>`).join('')}</ul>`;
+  card.hidden = false;
+  clearTimeout(showDayBrief._t);
+  showDayBrief._t = setTimeout(() => {
+    card.hidden = true;
+  }, 5200);
 }
 
 function showAttackCard(atk) {
@@ -675,21 +858,14 @@ function handleAdvanceDay() {
     toast('Resolved la decisión pendiente', 'warn');
     return;
   }
-  const before = {
-    food: state.resources.food,
-    water: state.resources.water,
-    pop: state.population.total,
-    day: state.day,
-  };
+  if (state.uiMode === 'build' || state.uiMode === 'explore') {
+    state.uiMode = null;
+    state.buildMode = null;
+  }
   const r = advanceDay(state, content);
   if (!r.ok) {
     toast(r.error || 'No', 'warn');
     return;
-  }
-  if (state.flags.coach) {
-    if (state.expeditionsDone || state.stats.expeditions) state.flags.coach.explore = true;
-    state.flags.coach.labor = true;
-    if (state.stats.buildingsBuilt > 3) state.flags.coach.build = true;
   }
   if (r.director?.quiet) {
     /* silencio intencional */
@@ -706,18 +882,8 @@ function handleAdvanceDay() {
   if (r.attack) {
     showAttackCard(r.attack);
     sfx.attack?.();
-  } else {
-    const dFood = Math.round((state.resources.food || 0) - (before.food || 0));
-    const dWater = Math.round((state.resources.water || 0) - (before.water || 0));
-    const dPop = (state.population.total || 0) - (before.pop || 0);
-    if (Math.abs(dFood) >= 2 || Math.abs(dWater) >= 2 || dPop) {
-      const bits = [];
-      if (dFood) bits.push(`comida ${dFood > 0 ? '+' : ''}${dFood}`);
-      if (dWater) bits.push(`agua ${dWater > 0 ? '+' : ''}${dWater}`);
-      if (dPop) bits.push(`población ${dPop > 0 ? '+' : ''}${dPop}`);
-      toast(`Día ${state.day}: ${bits.join(' · ')}`, dPop < 0 || dFood < -3 ? 'warn' : 'info');
-    }
   }
+  if (r.brief) showDayBrief(r.brief);
   sfx.click?.();
   scheduleSave();
   paint();
@@ -747,12 +913,25 @@ function bindChrome() {
     openMoreSheet();
   });
   $('zz-sheet-close')?.addEventListener('click', closeSheet);
-  // Cerrar panel al tocar el mapa (fondo), no las zonas
   $('zz-map')?.addEventListener('click', (ev) => {
-    if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) closeSheet();
+    if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) {
+      if (state.uiMode === 'build' || state.uiMode === 'explore') return;
+      closeSheet();
+    }
   });
-  $('zz-coach-dismiss')?.addEventListener('click', () => {
-    state.flags.coach.dismissed = true;
+  $('zz-objective-dismiss')?.addEventListener('click', () => {
+    state.flags.objectivesOff = true;
+    paint();
+  });
+  // zoom buttons
+  $('zz-zoom-in')?.addEventListener('click', () => {
+    if (!state.mapCamera) return;
+    state.mapCamera.zoom = Math.min(2.4, (state.mapCamera.zoom || 1) * 1.15);
+    paint();
+  });
+  $('zz-zoom-out')?.addEventListener('click', () => {
+    if (!state.mapCamera) return;
+    state.mapCamera.zoom = Math.max(0.55, (state.mapCamera.zoom || 1) / 1.15);
     paint();
   });
   $('zz-endless')?.addEventListener('click', () => {
@@ -874,9 +1053,3 @@ export async function bootHub() {
     throw e;
   }
 }
-
-// silence unused
-void FAMILY_ICONS;
-void buildingThumb;
-void resolveBaseAttack;
-void clearLaborManual;
