@@ -1289,13 +1289,13 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.2.1 — producción visual (dirección art-direction aprobada)  
+**Versión técnica:** 1.2.2 — pulido jugable (balance, escritorio 16:9, feedback, expediciones)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=12`
+**save_version / v:** **4** · cache assets `?v=13`
 
 ## Arquitectura real (1.2)
 - Cliente: `js/` state, sim, director, population, explorers, render-map, render-base, icons, sound, api, main, rng, util
@@ -1318,6 +1318,16 @@ Y periódicamente el juego debe responder:
 - Pulido continuo de glifos por edificio según feedback
 
 ## Changelog técnico
+### 1.2.2 — Pulido jugable
+- Director: calma real, `crisisCooldownDays` cableado, protección post-catástrofe, menos espirales
+- Ataques suaves con techo de bajas + recuperación forzosa tras lose; hambre sin edificios duele
+- Escritorio: mapa panorámico 16:9; paneles flotantes estrechos
+- Crecimiento visual: caminos recuperados, luces/cultivos/actividad/defensas por tier
+- Expediciones: distancia/días, enfoque saqueo vs control, outcome pírrico, sorpresas
+- UX: Est/Amz/Def visibles, banner recuperación, cards ataque, plaza reclutar, preview expedición
+- Balance-sim: balanced@60 ≈97% · mismanaged@60 ≈75% (pop viva ~1.4) · balanced@120 ≈95%
+- Partida manual razonada ≥D55 superviviente; capturas en `scripts/screenshots-prod/`
+
 ### 1.2.1 — Producción visual
 - Arte/mapa por capas: ciudad, niebla, control vivo (vegetación/cultivos/luces), hostil, ataque
 - Núcleo con edificios reconocibles en el mapa; tiers visuales Día1 / media / avanzada

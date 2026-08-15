@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness 1.2</title>
-  <link rel="stylesheet" href="../css/game.css?v=12" />
-  <link rel="stylesheet" href="../css/world.css?v=12" />
+  <link rel="stylesheet" href="../css/game.css?v=13" />
+  <link rel="stylesheet" href="../css/world.css?v=13" />
   <script type="importmap">
   {
     "imports": {
@@ -43,13 +43,14 @@
       <div class="zz-chip-hud__meta">
         <span id="zz-era" class="zz-chip-hud__era">—</span>
         <span id="zz-weather" class="zz-weather" data-weather="clear">—</span>
-        <span class="zz-chip-hud__m"><i></i><strong id="zz-stability">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--threat"><i></i><strong id="zz-threat">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--def"><i></i><strong id="zz-defense">0</strong></span>
+        <span class="zz-chip-hud__m"><em>Est.</em><i></i><strong id="zz-stability">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--threat"><em>Amz.</em><i></i><strong id="zz-threat">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--def"><em>Def.</em><i></i><strong id="zz-defense">0</strong></span>
       </div>
     </section>
     <main class="zz-world-stage">
       <div class="zz-world-map-wrap">
+        <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100"></svg>
       </div>
       <div class="zz-explorer-rail" id="zz-explorer-rail"></div>
@@ -84,7 +85,7 @@
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=12';
+    import { bootGame } from '../js/main.js?v=13';
     window.__zzReady = bootGame({ slot: 1, mode: 'new', name: 'Harness' })
       .then(() => { window.__zzOk = true; })
       .catch((e) => { window.__zzOk = false; window.__zzErr = String(e && e.message ? e.message : e); throw e; });

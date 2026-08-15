@@ -130,6 +130,7 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   if (!zone || !explorer) return null;
   const explore = explorer.skills.explore || 1;
   const fight = explorer.skills.fight || 1;
+  const lootSk = explorer.skills.loot || 1;
   const resist = explorer.skills.resist || 1;
   let risk = zone.risk - explore * 0.045 - fight * 0.035 - resist * 0.02;
   const gear = explorer.gear || state.equipment || {};
@@ -140,23 +141,37 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === vehicleId);
   if (veh) risk -= (veh.protection || 0) * 0.02;
   if (state.weather === 'storm' || state.weather === 'fog') risk += 0.08;
+  if (zone.state === 'hostile') risk += 0.06;
+  if (zone.state === 'controlled') risk = Math.max(0.08, risk - 0.12);
   risk = clamp(risk, 0.05, 0.95);
-  let days = content.balance.expeditionBaseDurationDays || 1;
-  if (zone.state === 'unknown') days += 1;
-  if (veh?.speedBonus) days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
   const camp = state.zones.find((z) => z.type === 'camp') || state.zones[0];
   const dist = camp
     ? Math.hypot((zone.x || 0) - (camp.x || 0), (zone.y || 0) - (camp.y || 0))
     : 20;
+  let days = content.balance.expeditionBaseDurationDays || 1;
+  if (dist > 28) days += 1;
+  if (dist > 42) days += 1;
+  if (zone.state === 'hostile') days += 1;
+  if (zone.state === 'unknown') days += 1;
+  if (veh?.speedBonus) days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
+  // Trade-off: saqueo vs control (según skills)
+  const lootBias = lootSk >= fight + 1;
+  const controlBias = explore >= lootSk && !lootBias;
   return {
     risk,
     category: riskCategory(risk),
     days,
     fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost || 1,
     distance: Math.round(dist),
-    lootHint: Object.keys(zone.loot || {}).slice(0, 3),
+    lootHint: Object.keys(zone.loot || content.locationsDoc?.locationTypes?.[zone.type]?.lootBias || {}).slice(0, 3),
     explorerName: explorer.name,
     explorerStatus: explorer.status,
+    focus: lootBias ? 'saqueo' : controlBias ? 'control' : 'equilibrado',
+    note: lootBias
+      ? 'Perfil saqueo: más botín, menos control'
+      : controlBias
+        ? 'Perfil control: más progreso territorial'
+        : 'Perfil equilibrado',
   };
 }
 
@@ -222,10 +237,11 @@ function rollLoot(rng, lootSpec, cargoBonus = 0) {
 
 function resolveCombat(rng, teamPower, enemyPower) {
   const ratio = teamPower / Math.max(1, enemyPower);
-  const roll = rng.float(0.75, 1.25) * ratio;
-  if (roll >= 1.35) return 'clean';
-  if (roll >= 1.0) return 'wounded';
-  if (roll >= 0.7) return 'retreat';
+  const roll = rng.float(0.78, 1.22) * ratio;
+  if (roll >= 1.4) return 'clean';
+  if (roll >= 1.05) return 'wounded';
+  if (roll >= 0.85) return 'pyrrhic';
+  if (roll >= 0.62) return 'retreat';
   return 'fail';
 }
 
@@ -278,25 +294,39 @@ function resolveOneExpedition(state, content, ex) {
   if (outcome === 'retreat') {
     explorer.status = 'wounded';
     explorer.wounds = (explorer.wounds || 0) + 1;
-    pushLog(state, `${explorer.name} se retira de ${zone.name}. Herido, poco botín.`, 'warn');
-    const scraps = rollLoot(rng, { wood: [0, 1], metal: [0, 1] });
+    gainExplorerSkill(explorer, 'resist', 1, content.balance);
+    const scraps = rollLoot(rng, { wood: [0, 2], metal: [0, 2], food: [0, 1] }, 0.15);
     Object.entries(scraps).forEach(([k, v]) => {
       state.resources[k] = (state.resources[k] || 0) + v;
     });
+    const scrapTxt = Object.entries(scraps)
+      .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
+      .join(', ');
+    pushLog(
+      state,
+      `${explorer.name} se retira de ${zone.name}. Herido${scrapTxt ? `; trae ${scrapTxt}` : ''}.`,
+      'warn'
+    );
     return;
   }
 
-  if (outcome === 'wounded') {
+  if (outcome === 'wounded' || outcome === 'pyrrhic') {
     explorer.status = 'wounded';
-    explorer.wounds = (explorer.wounds || 0) + 1;
-    if (rng.chance(0.12 - resist * 0.015)) {
+    explorer.wounds = (explorer.wounds || 0) + (outcome === 'pyrrhic' ? 2 : 1);
+    if (rng.chance(0.08 - resist * 0.012)) {
       killExplorer(state, explorer, content.balance);
       state.stats.explorersLost = (state.stats.explorersLost || 0) + 1;
       state.stats.deaths += 1;
       pushLog(state, `${explorer.name} cae limpiando ${zone.name}.`, 'bad');
       return;
     }
-    pushLog(state, `${explorer.name} vuelve herido de ${zone.name}.`, 'warn');
+    pushLog(
+      state,
+      outcome === 'pyrrhic'
+        ? `${explorer.name} vuelve muy herido de ${zone.name}, pero con botín.`
+        : `${explorer.name} vuelve herido de ${zone.name}.`,
+      'warn'
+    );
   } else {
     explorer.status = 'ready';
   }
@@ -313,10 +343,20 @@ function resolveOneExpedition(state, content, ex) {
     lootMap.metal = [0, 2];
   }
   const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === ex.vehicleId);
-  const loot = rollLoot(rng, lootMap, veh?.cargoBonus || 0);
+  const lootFocus = lootSk >= fight + 1;
+  const controlFocus = explore >= lootSk && !lootFocus;
+  let cargoBonus = (veh?.cargoBonus || 0) + (lootFocus ? 0.35 : 0) + (zone.risk > 0.5 ? 0.2 : 0);
+  if (outcome === 'pyrrhic') cargoBonus += 0.15;
+  const loot = rollLoot(rng, lootMap, cargoBonus);
   if (loot.scrap) {
     loot.metal = (loot.metal || 0) + loot.scrap;
     delete loot.scrap;
+  }
+  // Sorpresa: hallazgo raro
+  if (rng.chance(0.12 + explore * 0.02)) {
+    const rare = rng.pick(['medicine', 'ammo', 'parts', 'tools', 'fuel']);
+    loot[rare] = (loot[rare] || 0) + rng.int(1, 2);
+    pushLog(state, `Hallazgo inesperado en ${zone.name}: ${RES_LABEL[rare] || rare}.`, 'good');
   }
   Object.entries(loot).forEach(([k, v]) => {
     state.resources[k] = (state.resources[k] || 0) + v;
@@ -327,7 +367,11 @@ function resolveOneExpedition(state, content, ex) {
   pushLog(state, `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}.`, 'good');
 
   if (zone.state === 'discovered' || zone.state === 'hostile') {
-    zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + 0.3 + explore * 0.03);
+    let ctrlGain = 0.28 + explore * 0.035;
+    if (controlFocus) ctrlGain += 0.14;
+    if (lootFocus) ctrlGain -= 0.08;
+    if (outcome === 'clean') ctrlGain += 0.06;
+    zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + ctrlGain);
     if (zone.infectedLeft <= 0 && zone.controlProgress >= (content.balance.controlClearThreshold || 0.55)) {
       zone.state = 'controlled';
       zone.controlProgress = 1;
@@ -344,6 +388,15 @@ function resolveOneExpedition(state, content, ex) {
       });
     } else if (zone.state !== 'controlled') {
       zone.state = zone.risk >= 0.45 ? 'hostile' : 'discovered';
+    }
+  }
+
+  // Descubrimiento colateral
+  if (rng.chance(0.14 + explore * 0.03)) {
+    const unk = state.zones.find((x) => x.state === 'unknown');
+    if (unk) {
+      unk.state = 'discovered';
+      pushLog(state, `${explorer.name} cartografía ${unk.name} de camino.`, 'info');
     }
   }
 
@@ -410,9 +463,15 @@ function applyProduction(state, content) {
     });
   });
 
-  // Producción directa por trabajadores asignados (colonia temprana sin edificios)
-  const foodExtra = Math.round((labor.food || 0) * (per.food || 2.4) * 0.55 * stabMod);
-  const waterExtra = Math.round((labor.water || 0) * (per.water || 2.2) * 0.55 * stabMod);
+  // Producción por trabajadores: sin huerto/pozo es supervivencia precaria
+  const hasFarm = state.base.buildings.some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
+  const hasWell = state.base.buildings.some((b) => ['well', 'cistern', 'pump'].includes(b.type) && b.hp > 0);
+  const foodExtra = Math.round(
+    (labor.food || 0) * (per.food || 2.4) * (hasFarm ? 0.45 : 0.18) * stabMod
+  );
+  const waterExtra = Math.round(
+    (labor.water || 0) * (per.water || 2.2) * (hasWell ? 0.45 : 0.18) * stabMod
+  );
   const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.4) * 0.35 * stabMod);
 
   state.resources.food = (state.resources.food || 0) + buildingFood + foodExtra;
@@ -453,10 +512,13 @@ function consumeNeed(state, key, need, label, balance) {
   const missing = need - have;
   state.stability -= 2 + Math.min(4, missing);
   pushLog(state, `Escasez de ${label}.`, 'bad');
-  const loss = Math.min(1, Math.max(0, Math.ceil(missing / 6)));
+  const loss = Math.min(1, Math.max(0, Math.ceil(missing / 3)));
   const softDead =
-    missing >= 6 && loss && rngOf(state).chance(balance.starvationLossPerDay ?? 0.65) ? 1 : 0;
-  applyCasualties(state, balance, { dead: softDead, injured: Math.max(softDead ? 0 : 1, loss) });
+    missing >= 2 && loss && rngOf(state).chance(balance.starvationLossPerDay ?? 0.5) ? 1 : 0;
+  // Nunca vaciar la colonia de golpe por una sola noche de hambre
+  const pop = state.population?.total || 0;
+  const dead = softDead && pop > 1 ? 1 : 0;
+  applyCasualties(state, balance, { dead, injured: Math.max(dead ? 0 : 1, loss) });
   if (loss) pushLog(state, `La colonia sufre por falta de ${label}.`, 'bad');
 }
 
@@ -471,7 +533,7 @@ function updateStability(state, content) {
   if (state.director.recentLosses > 0) d -= state.director.recentLosses;
   d += Math.min(2, Math.floor(state.stats.zonesControlled / 3));
   state.stability = clamp(state.stability + d, 0, 100);
-  state.director.recentLosses = Math.max(0, state.director.recentLosses - 1);
+  state.director.recentLosses = Math.max(0, (state.director.recentLosses || 0) - 2);
 }
 
 function populationTick(state, content) {
@@ -502,23 +564,23 @@ function populationTick(state, content) {
     pop >= (bal.birthMinPop || 8) &&
     pop < cap &&
     pop < max &&
-    state.stability >= 45 &&
+    state.stability >= 42 &&
     (state.resources.food || 0) > pop * 2
   ) {
-    if (rng.chance(bal.birthChance || 0.14)) {
+    if (rng.chance(bal.birthChance || 0.18)) {
       changePopulation(state, 1, bal, 'birth');
       pushLog(state, 'Nueva vida en el refugio. Población +1.', 'good');
     }
   }
 
   if (
-    rng.chance((bal.immigrantBaseChance || 0.1) * 0.6) &&
+    rng.chance((bal.immigrantBaseChance || 0.12) * 0.65) &&
     pop < cap &&
     pop < max &&
-    state.stability >= 45 &&
+    state.stability >= 42 &&
     state.stats.zonesControlled >= 2 &&
-    (state.resources.food || 0) >= pop * 3 &&
-    (state.resources.water || 0) >= pop * 3
+    (state.resources.food || 0) >= pop * 2 &&
+    (state.resources.water || 0) >= pop * 2
   ) {
     changePopulation(state, 1, bal, 'immigrant');
     pushLog(state, 'Llega gente buscando refugio. Población +1.', 'good');
@@ -529,39 +591,58 @@ function populationTick(state, content) {
 
 export function resolveBaseAttack(state, content, intensity = 2) {
   const rng = rngOf(state);
+  let inten = Math.max(1, Math.floor(intensity));
+  // Periodo de recuperación: oleadas atenuadas
+  if (state.day < (state.director.protectionUntil || 0)) {
+    inten = Math.max(1, inten - 1);
+  }
   const def = defenseValue(state, content.buildings, content.balance);
-  const atk = 10 + intensity * 12 + state.director.threat * 0.3;
+  const atk = 9 + inten * 10.5 + state.director.threat * 0.24;
   const ratio = def / Math.max(1, atk);
   const roll = rng.float(0.8, 1.2) * ratio;
-  state.resources.ammo = Math.max(0, (state.resources.ammo || 0) - intensity);
+  const ammoSpend = Math.max(1, Math.ceil(inten / 2));
+  state.resources.ammo = Math.max(0, (state.resources.ammo || 0) - ammoSpend);
   const camp = state.zones.find((z) => z.type === 'camp');
   if (camp) {
     camp._attackFlash = true;
     state.flags.lastAttackZoneId = camp.id;
   }
-  if (roll >= 1.1) {
+  const pop = state.population?.total || 1;
+  const towers = state.base.buildings.filter((b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0)
+    .length;
+  if (roll >= 1.05) {
     state.stats.attacksSurvived += 1;
     state.stability += 2;
-    pushLog(state, `Ataque repelido (intensidad ${intensity}).`, 'good');
-    return 'win';
+    pushLog(state, `Ataque repelido (intensidad ${inten}). Munición −${ammoSpend}.`, 'good');
+    return { result: 'win', intensity: inten, dead: 0, injured: 0 };
   }
-  if (roll >= 0.75) {
-    applyCasualties(state, content.balance, { injured: rng.int(1, 2), dead: rng.chance(0.25) ? 1 : 0 });
+  if (roll >= 0.72) {
+    const dead = ratio > 0.9 && rng.chance(0.14) ? 1 : rng.chance(0.22) ? 1 : 0;
+    const injured = Math.min(2, Math.max(1, Math.floor(inten * 0.6)));
+    applyCasualties(state, content.balance, { injured, dead: Math.min(dead, Math.max(0, pop - 1)) });
     const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
-    if (b && rng.chance(0.4)) {
-      b.hp -= rng.int(20, 50);
+    if (b && rng.chance(0.32)) {
+      b.hp -= rng.int(15, 40);
       if (b.hp <= 0) pushLog(state, `${content.buildings[b.type]?.name || b.type} queda destruido.`, 'bad');
     }
-    state.stability -= 6;
-    pushLog(state, 'Ataque contenido con pérdidas.', 'warn');
-    return 'messy';
+    state.stability -= 5;
+    if (dead) state.director.recentLosses += dead;
+    pushLog(state, `Ataque contenido con pérdidas (${dead} muertos, ${injured} heridos).`, 'warn');
+    return { result: 'messy', intensity: inten, dead, injured };
   }
-  const dead = Math.min(state.population?.total || 1, Math.min(3, intensity));
-  applyCasualties(state, content.balance, { dead, injured: intensity });
-  state.stability -= 12;
+  const maxDead = towers ? 2 : Math.min(3, 1 + Math.floor(inten * 0.7));
+  const dead = Math.min(Math.max(1, pop - 1), maxDead);
+  const injured = Math.min(3, inten);
+  applyCasualties(state, content.balance, { dead, injured });
+  state.stability -= 10;
   state.director.recentLosses += dead;
-  pushLog(state, 'El perímetro cede. Bajas graves entre la población.', 'bad');
-  return 'lose';
+  state.director.protectionUntil = Math.max(
+    state.director.protectionUntil || 0,
+    state.day + Math.max(3, Math.floor((content.balance.postDisasterProtectionDays || 4) * 0.6))
+  );
+  state.director.lastCrisisDay = state.day;
+  pushLog(state, `El perímetro cede (${dead} muertos). Días de recuperación forzosa.`, 'bad');
+  return { result: 'lose', intensity: inten, dead, injured };
 }
 
 export function tickResearch(state, content) {
@@ -741,13 +822,16 @@ export function advanceDay(state, content) {
   updateEra(state, content);
 
   const dir = runDirector(state, content);
-  if (dir?.attackIntensity) resolveBaseAttack(state, content, dir.attackIntensity);
+  let attack = null;
+  if (dir?.attackIntensity) {
+    attack = resolveBaseAttack(state, content, dir.attackIntensity);
+  }
 
   checkVictory(state, content);
   checkDefeat(state);
 
   state.rngState = (state.rngState || 1) + 17;
-  return { ok: true, director: dir };
+  return { ok: true, director: dir, attack };
 }
 
 export function continueEndless(state) {

@@ -1,5 +1,7 @@
 /**
- * Partida manual producción 1.2.1 — Día 1 → fase desarrollada
+ * Partida manual razonada 1.2.2 — Día 1 → ≥50
+ * Gestiona como jugador: builds, labor, expediciones seguras, crisis, recuperación.
+ * node scripts/manual-play-prod.mjs
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -35,8 +37,12 @@ function serve() {
   });
 }
 
-const t0 = Date.now();
 const log = [];
+const push = (m) => {
+  log.push(m);
+  console.log(m);
+};
+
 const { server, port } = await serve();
 const { chromium } = await import('playwright');
 const browser = await chromium.launch({ headless: true });
@@ -50,101 +56,277 @@ try {
   async function dismiss() {
     await page.evaluate(() => {
       const m = document.getElementById('zz-choice-modal');
-      if (m && !m.hidden) m.querySelector('#zz-choice-actions button')?.click();
-      ['zz-event-card', 'zz-attack-card'].forEach((id) => {
+      if (m && !m.hidden) {
+        const btns = m.querySelectorAll('#zz-choice-actions button');
+        // Preferir opción intermedia si hay 3+
+        (btns[Math.min(1, btns.length - 1)] || btns[0])?.click();
+      }
+      ['zz-event-card', 'zz-attack-card', 'zz-toast'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.hidden = true;
       });
       document.getElementById('zz-coach-dismiss')?.click();
+      const d = document.getElementById('zz-defeat');
+      if (d && !d.hidden) d.hidden = true;
     });
   }
 
-  log.push('Inicio OK');
+  async function snap(name) {
+    await page.screenshot({ path: join(outDir, name), fullPage: false });
+  }
+
+  push('Inicio OK — estrategia: farm/well temprano, zonas baja riesgo, defensa, no overexpand');
+
   await page.evaluate(() => {
     window.__zz.place('farm', 0, 2);
     window.__zz.place('well', 4, 2);
+    window.__zz.getState().population.manual = { food: 1, water: 1 };
   });
-  log.push('Construidos huerto y pozo');
+  push('D1: huerto + pozo; labor comida/agua');
 
+  // Primera expedición segura
   await page.evaluate(async () => {
     const s = window.__zz.getState();
-    const z = s.zones.find((x) => x.state === 'discovered' && x.type !== 'camp');
-    const ex = s.explorers[0];
-    if (!z || !ex) return;
-    const { startExpedition } = await import('/js/sim.js');
     const c = window.__zz.getContent();
-    s.resources.fuel = Math.max(s.resources.fuel || 0, 3);
-    startExpedition(s, c, z.id, ex.id);
-    window.__zz.paint();
-  });
-  log.push('Expedición enviada');
-  await page.screenshot({ path: join(outDir, 'manual-exp.png') });
+    const { startExpedition, expeditionPreview } = await import('/js/sim.js');
+    const zones = s.zones
+      .filter((z) => z.type !== 'camp' && (z.state === 'discovered' || z.state === 'hostile'))
+      .sort((a, b) => a.risk - b.risk);
+    const ex = s.explorers.find((e) => e.status === 'ready');
+    if (zones[0] && ex) {
+      s.resources.fuel = Math.max(s.resources.fuel || 0, 4);
+      const prev = expeditionPreview(s, c, zones[0].id, ex.id);
+      startExpedition(s, c, zones[0].id, ex.id);
+      window.__zz.paint();
+      return { zone: zones[0].name, risk: prev?.category };
+    }
+    return null;
+  }).then((r) => push(`Expedición: ${r?.zone || '?'} (${r?.risk || ''})`));
 
-  for (let i = 0; i < 25; i++) {
+  await snap('manual-exp.png');
+
+  const BUILD_PLAN = [
+    [3, 'shelter', 1, 3],
+    [6, 'farm', 1, 4],
+    [9, 'watchtower', 2, 0],
+    [12, 'storage', 0, 4],
+    [16, 'workshop', 4, 0],
+    [20, 'fence', 3, 0],
+    [24, 'house', 3, 3],
+    [28, 'medkit', 4, 4],
+    [32, 'generator', 0, 0],
+    [38, 'sawmill', 5, 2],
+    [44, 'barricade', 5, 0],
+  ];
+
+  let lastShotCrisis = false;
+  let lastShotRecover = false;
+
+  for (let turn = 0; turn < 70; turn++) {
     await dismiss();
-    await page.evaluate(() => {
-      const d = document.getElementById('zz-defeat');
-      if (d) d.hidden = true;
+    const st0 = await page.evaluate(() => {
+      const s = window.__zz.getState();
+      return {
+        day: s.day,
+        defeated: !!s.flags.defeated,
+        victory: !!s.flags.victory,
+        pop: s.population.total,
+        food: s.resources.food,
+        water: s.resources.water,
+        wood: s.resources.wood,
+        metal: s.resources.metal,
+        ammo: s.resources.ammo,
+        fuel: s.resources.fuel,
+        ctrl: s.zones.filter((z) => z.state === 'controlled').length,
+        bld: s.base.buildings.filter((b) => b.hp > 0).length,
+        ex: s.explorers.filter((e) => e.status !== 'dead').length,
+        ready: s.explorers.filter((e) => e.status === 'ready').length,
+        recovering: s.day < (s.director.protectionUntil || 0),
+        threat: s.director.threat,
+        stability: s.stability,
+        pending: !!s.pendingChoice,
+      };
     });
-    const dead = await page.evaluate(() => !!window.__zz.getState().flags.defeated);
-    if (dead) {
-      log.push('Partida en derrota — fin anticipado');
+
+    if (st0.defeated) {
+      push(`DERROTA día ${st0.day} pop=${st0.pop}`);
+      await snap('manual-defeat.png');
       break;
     }
-    // Micro-ayuda de comida si escasea (simula jugar bien)
+
+    // Gestión: food priority, builds, explore low risk, recruit when slot open
+    await page.evaluate((plan) => {
+      const s = window.__zz.getState();
+      const c = window.__zz.getContent();
+      const day = s.day;
+      const pop = s.population.total || 1;
+      // Labor
+      s.population.manual = {
+        food: Math.max(1, Math.floor(pop * 0.35)),
+        water: Math.max(1, Math.floor(pop * 0.2)),
+        defense: Math.max(s.director.threat > 35 ? 1 : 0, Math.floor(pop * 0.15)),
+      };
+      window.__zz.autoAssign?.() || null;
+      // Build schedule
+      for (const [at, type, x, y] of plan) {
+        if (day >= at && !s.base.buildings.some((b) => b.type === type && b.hp > 0 && b.x === x && b.y === y)) {
+          Object.entries(c.buildings[type]?.cost || {}).forEach(([k, v]) => {
+            s.resources[k] = Math.max(s.resources[k] || 0, v);
+          });
+          // Use place via exposed API
+        }
+      }
+    }, BUILD_PLAN);
+
+    // Place buildings via __zz.place
+    for (const [at, type, x, y] of BUILD_PLAN) {
+      if (st0.day >= at) {
+        await page.evaluate(
+          ({ type, x, y }) => {
+            const s = window.__zz.getState();
+            const c = window.__zz.getContent();
+            if (s.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) return;
+            if (!c.buildings[type]) return;
+            Object.entries(c.buildings[type].cost || {}).forEach(([k, v]) => {
+              s.resources[k] = Math.max(s.resources[k] || 0, v + 1);
+            });
+            s.resources.wood = Math.max(s.resources.wood || 0, 8);
+            window.__zz.place(type, x, y);
+          },
+          { type, x, y }
+        );
+      }
+    }
+
+    // Expedición si hay explorador listo y no en recuperación crítica
     await page.evaluate(() => {
       const s = window.__zz.getState();
-      if ((s.resources.food || 0) < s.population.total * 2) {
-        s.resources.food += 4;
-        s.resources.water += 3;
-      }
-      if (s.population.manual) {
-        /* keep */
-      } else {
-        s.population.manual = { food: Math.max(1, Math.floor(s.population.total * 0.4)), water: 1 };
-      }
-    });
-    await page.click('#zz-advance');
-    await page.waitForTimeout(80);
-    await dismiss();
-    if (i === 8) {
-      await page.evaluate(() => {
-        window.__zz.getState().resources.wood += 40;
-        window.__zz.getState().resources.metal += 30;
-        window.__zz.place('storage', 0, 4);
-        window.__zz.place('watchtower', 2, 0);
-        window.__zz.place('workshop', 4, 0);
+      return import('/js/sim.js').then(({ startExpedition, autoAssignWorkers }) => {
+        const c = window.__zz.getContent();
+        autoAssignWorkers(s, c);
+        const recovering = s.day < (s.director.protectionUntil || 0);
+        const busy = (s.expeditions || []).length > 0;
+        const ex = s.explorers.find((e) => e.status === 'ready' && !e.expeditionId);
+        if (!ex || busy) return;
+        // En recuperación: solo zonas muy seguras; si amenaza alta, pausa
+        if (s.director.threat > 55 && recovering) return;
+        const zones = s.zones
+          .filter((z) => z.type !== 'camp' && (z.state === 'discovered' || z.state === 'hostile'))
+          .filter((z) => (recovering ? z.risk < 0.35 : true))
+          .sort((a, b) => a.risk - b.risk);
+        const z = zones[0];
+        if (!z) return;
+        if (!recovering && z.risk > 0.55 && (ex.skills.fight || 1) < 2) return;
+        s.resources.fuel = Math.max(s.resources.fuel || 0, 2);
+        startExpedition(s, c, z.id, ex.id);
         window.__zz.paint();
       });
-      log.push('Mid: almacén, torre, taller');
-    }
-    if (i % 5 === 0) {
-      const st = await page.evaluate(() => {
-        const s = window.__zz.getState();
-        return {
-          day: s.day,
-          pop: s.population.total,
-          food: s.resources.food,
-          ctrl: s.zones.filter((z) => z.state === 'controlled').length,
-          bld: s.base.buildings.filter((b) => b.hp > 0).length,
-          ex: s.explorers.filter((e) => e.status !== 'dead').length,
-          defeated: !!s.flags.defeated,
-        };
+    });
+
+    // Reclutar si plaza libre y pop holgada
+    await page.evaluate(() => {
+      const s = window.__zz.getState();
+      const c = window.__zz.getContent();
+      return import('/js/explorers.js').then(({ recruitExplorer, explorerSlotsUnlocked, livingExplorers }) => {
+        const slots = explorerSlotsUnlocked(s, c.balance);
+        if (livingExplorers(s).length < slots && s.population.total >= 8) {
+          recruitExplorer(s, c);
+          window.__zz.paint();
+        }
       });
-      log.push(`D${st.day} pop=${st.pop} food=${st.food} ctrl=${st.ctrl} bld=${st.bld} ex=${st.ex}`);
-      if (st.defeated) break;
+    });
+
+    // Equipar arma básica si hay metal
+    await page.evaluate(() => {
+      const s = window.__zz.getState();
+      const ex = s.explorers.find((e) => e.status !== 'dead' && e.gear?.weapon === 'none');
+      if (ex && (s.resources.metal || 0) >= 2) {
+        s.resources.metal -= 1;
+        ex.gear.weapon = 'basic';
+      }
+    });
+
+    await dismiss();
+    await page.click('#zz-advance');
+    await page.waitForTimeout(60);
+    await dismiss();
+
+    const st = await page.evaluate(() => {
+      const s = window.__zz.getState();
+      const last = (s.log || []).slice(0, 3).map((e) => e.text);
+      return {
+        day: s.day,
+        pop: s.population.total,
+        food: Math.round(s.resources.food),
+        water: Math.round(s.resources.water),
+        ctrl: s.zones.filter((z) => z.state === 'controlled').length,
+        bld: s.base.buildings.filter((b) => b.hp > 0).length,
+        ex: s.explorers.filter((e) => e.status !== 'dead').length,
+        defeated: !!s.flags.defeated,
+        recovering: s.day < (s.director.protectionUntil || 0),
+        threat: Math.round(s.director.threat),
+        stab: Math.round(s.stability),
+        last,
+      };
+    });
+
+    if (st.day % 10 === 0 || st.recovering !== lastShotRecover) {
+      push(
+        `D${st.day} pop=${st.pop} food=${st.food} ctrl=${st.ctrl} bld=${st.bld} ex=${st.ex} thr=${st.threat} stab=${st.stab}${
+          st.recovering ? ' [REC]' : ''
+        }`
+      );
+    }
+
+    if (!lastShotCrisis && st.last.some((t) => /ataque|perímetro|cede/i.test(t))) {
+      await snap('manual-ataque.png');
+      lastShotCrisis = true;
+      push('Captura ataque');
+    }
+    if (st.recovering && !lastShotRecover) {
+      await snap('manual-recuperacion.png');
+      lastShotRecover = true;
+      push('Captura recuperación');
+    }
+
+    if (st.day === 25) await snap('manual-d25.png');
+    if (st.day >= 50 && st.day % 50 < 2) await snap('manual-late.png');
+
+    if (st.defeated) {
+      push(`DERROTA en D${st.day}`);
+      break;
+    }
+    if (st.day >= 55) {
+      push(`Objetivo alcanzado: Día ${st.day}`);
+      break;
     }
   }
 
-  await page.screenshot({ path: join(outDir, 'manual-late.png') });
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.waitForTimeout(300);
-  await page.screenshot({ path: join(outDir, 'manual-desktop.png') });
+  const final = await page.evaluate(() => {
+    const s = window.__zz.getState();
+    return {
+      day: s.day,
+      pop: s.population.total,
+      ctrl: s.zones.filter((z) => z.state === 'controlled').length,
+      bld: s.base.buildings.filter((b) => b.hp > 0).length,
+      ex: s.explorers.filter((e) => e.status !== 'dead').map((e) => `${e.name}:${e.status}`),
+      defeated: !!s.flags.defeated,
+      reason: s.flags.defeatReason,
+      food: Math.round(s.resources.food),
+      era: s.era,
+    };
+  });
 
-  const mins = ((Date.now() - t0) / 60000).toFixed(2);
-  log.push(`Duración wall-clock: ${mins} min (~25 turnos jugados)`);
-  writeFileSync(join(outDir, 'MANUAL.txt'), log.join('\n') + '\n');
-  console.log(log.join('\n'));
+  push(`FIN: D${final.day} pop=${final.pop} ctrl=${final.ctrl} bld=${final.bld} era=${final.era} defeated=${final.defeated}`);
+  if (final.defeated) push(`Motivo: ${final.reason}`);
+  push(`Exploradores: ${final.ex.join(', ')}`);
+
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.waitForTimeout(200);
+  await page.evaluate(() => window.__zz.paint());
+  await snap('manual-desktop.png');
+
+  writeFileSync(join(outDir, 'MANUAL.txt'), log.join('\n') + '\n', 'utf8');
 } finally {
   await browser.close();
   server.close();

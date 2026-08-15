@@ -142,7 +142,7 @@
 .zz-world-map-wrap .zz-map {
   width: 100%;
   height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 4;
   display: block;
 }
 
@@ -289,20 +289,29 @@
   .zz-world-top { grid-column: 1; }
   .zz-coach { grid-column: 1; }
   .zz-chip-hud { grid-column: 1; }
-  .zz-world-stage { grid-column: 1; min-height: 62vh; }
-  .zz-world-map-wrap {
-    max-width: min(92vh, 900px);
-    margin: 0.5rem auto;
+  .zz-world-stage {
+    grid-column: 1;
+    min-height: 0;
   }
-  /* Panel contextual: oculto hasta abrir; flotante, no come el mundo */
+  .zz-world-map-wrap {
+    max-width: min(96vw, 1400px);
+    width: 100%;
+    margin: 0.45rem auto;
+  }
+  .zz-world-map-wrap .zz-map {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+  /* Panel contextual: flotante estrecho, no come el mundo */
   .zz-sheet {
     position: fixed;
     top: 5.5rem;
     right: 1rem;
     bottom: auto;
     left: auto;
-    width: min(360px, 34vw);
-    max-height: min(70vh, 640px);
+    width: min(340px, 28vw);
+    max-height: min(68vh, 620px);
     border-radius: 14px;
     padding: 0.85rem 0.85rem 1rem;
     margin: 0;
@@ -314,10 +323,15 @@
   .zz-sheet__close { display: block; }
   .zz-world-dock {
     position: static;
-    max-width: min(92vh, 900px);
+    max-width: min(96vw, 1400px);
+    width: 100%;
     margin: 0 auto;
     border: 0;
     background: transparent;
     padding: 0.35rem 0.55rem;
+  }
+  .zz-explorer-rail {
+    max-width: min(96vw, 1400px);
+    margin: 0 auto;
   }
 }

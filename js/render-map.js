@@ -5,7 +5,16 @@
 import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
 
-const VB = 100;
+const VB_SQ = 100;
+
+function mapMetrics(svg) {
+  const wide =
+    typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
+  if (wide) {
+    return { vbW: 160, vbH: 90, ox: 30, oy: -2, wide: true };
+  }
+  return { vbW: 100, vbH: 100, ox: 0, oy: 0, wide: false };
+}
 const STATE_CLASS = {
   unknown: 'zz-zone--unknown',
   discovered: 'zz-zone--discovered',
@@ -103,6 +112,35 @@ function streetCorridors(zones) {
     xs: [...xs].sort((a, b) => a - b).filter((v) => v > 4 && v < 96),
     ys: [...ys].sort((a, b) => a - b).filter((v) => v > 4 && v < 96),
   };
+}
+
+function drawRecoveredPaths(parent, zones, tier) {
+  if (tier < 1) return;
+  const controlled = zones.filter((z) => z.state === 'controlled');
+  if (controlled.length < 2) return;
+  const g = svgEl('g', { class: 'zz-map-layer zz-map-life-paths', 'aria-hidden': 'true' });
+  for (let i = 0; i < controlled.length; i++) {
+    for (let j = i + 1; j < controlled.length; j++) {
+      const a = controlled[i];
+      const b = controlled[j];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (dist > 38) continue;
+      const linked =
+        (a.neighbors || []).includes(b.id) || (b.neighbors || []).includes(a.id) || dist < 26;
+      if (!linked) continue;
+      g.appendChild(
+        svgEl('line', {
+          x1: a.x,
+          y1: a.y,
+          x2: b.x,
+          y2: b.y,
+          class: 'zz-map-life-path',
+          opacity: tier >= 2 ? 0.7 : 0.45,
+        })
+      );
+    }
+  }
+  parent.appendChild(g);
 }
 
 function drawRoads(parent, zones, tier) {
@@ -248,19 +286,29 @@ function drawLifeInControlled(g, z, tier, rng) {
   }
   if (tier >= 1) {
     // Luces cálidas
-    for (let i = 0; i < 2 + tier; i++) {
+    for (let i = 0; i < 2 + tier * 2 + (tier >= 3 ? 3 : 0); i++) {
       g.appendChild(
         svgEl('circle', {
           cx: z.x + rng.float(-z.r * 0.6, z.r * 0.6),
           cy: z.y + rng.float(-z.r * 0.5, z.r * 0.5),
-          r: 0.55 + tier * 0.15,
+          r: 0.55 + tier * 0.18,
           class: 'zz-map-life-light',
         })
       );
     }
   }
   if (tier >= 2) {
-    g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: z.r * 0.85, ry: z.r * 0.7, fill: 'url(#zzLifeGlow)', class: 'zz-zone-life-halo', opacity: 0.55 }));
+    g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: z.r * 0.85, ry: z.r * 0.7, fill: 'url(#zzLifeGlow)', class: 'zz-zone-life-halo', opacity: tier >= 3 ? 0.75 : 0.55 }));
+    for (let i = 0; i < 1 + tier; i++) {
+      g.appendChild(
+        svgEl('circle', {
+          cx: z.x + rng.float(-z.r * 0.4, z.r * 0.4),
+          cy: z.y + rng.float(-z.r * 0.35, z.r * 0.35),
+          r: 0.4,
+          class: 'zz-settle-person',
+        })
+      );
+    }
   }
 }
 
@@ -297,25 +345,45 @@ function drawSettlementCore(g, state, camp, tier) {
     layer.appendChild(wrap);
   });
 
-  // Densidad poblacional: tiendas / figuras abstractas
+  // Densidad poblacional: figuras + humo de talleres
   const pop = state.population?.total || 0;
-  if (pop >= 8) {
-    for (let i = 0; i < Math.min(6, Math.floor(pop / 5)); i++) {
-      const a = (i / 6) * Math.PI * 2;
-      const rr = camp.r * 0.45;
-      layer.appendChild(
-        svgEl('circle', {
-          cx: Math.cos(a) * rr,
-          cy: Math.sin(a) * rr * 0.7,
-          r: 0.45,
-          class: 'zz-settle-person',
-        })
-      );
-    }
+  const personN = Math.min(12, Math.max(0, Math.floor(pop / 4) + (tier >= 2 ? 2 : 0)));
+  for (let i = 0; i < personN; i++) {
+    const a = (i / Math.max(1, personN)) * Math.PI * 2;
+    const rr = camp.r * (0.35 + (i % 3) * 0.08);
+    layer.appendChild(
+      svgEl('circle', {
+        cx: Math.cos(a) * rr,
+        cy: Math.sin(a) * rr * 0.7,
+        r: 0.45,
+        class: 'zz-settle-person',
+      })
+    );
+  }
+  const hasWorkshop = buildings.some((b) => ['workshop', 'garage', 'lab'].includes(b.type));
+  if (hasWorkshop && tier >= 1) {
+    layer.appendChild(svgEl('circle', { cx: camp.r * 0.2, cy: -camp.r * 0.55, r: 1.1, class: 'zz-map-smoke' }));
+    layer.appendChild(svgEl('circle', { cx: camp.r * 0.28, cy: -camp.r * 0.7, r: 0.7, class: 'zz-map-smoke' }));
+  }
+  const defenses = buildings.filter((b) => ['barricade', 'fence', 'watchtower', 'wall'].includes(b.type)).length;
+  if (defenses > 0 || tier >= 1) {
+    layer.appendChild(
+      svgEl('ellipse', {
+        cx: 0,
+        cy: 0,
+        rx: camp.r * (0.95 + Math.min(0.2, defenses * 0.04)),
+        ry: camp.r * (0.78 + Math.min(0.15, defenses * 0.03)),
+        class: 'zz-settle-fence',
+      })
+    );
   }
   if (tier >= 2) {
-    layer.appendChild(svgEl('circle', { cx: camp.r * 0.35, cy: -camp.r * 0.4, r: 0.7, class: 'zz-map-life-light' }));
-    layer.appendChild(svgEl('circle', { cx: -camp.r * 0.4, cy: camp.r * 0.25, r: 0.7, class: 'zz-map-life-light' }));
+    layer.appendChild(svgEl('circle', { cx: camp.r * 0.35, cy: -camp.r * 0.4, r: 0.85, class: 'zz-map-life-light' }));
+    layer.appendChild(svgEl('circle', { cx: -camp.r * 0.4, cy: camp.r * 0.25, r: 0.85, class: 'zz-map-life-light' }));
+  }
+  if (tier >= 3) {
+    layer.appendChild(svgEl('circle', { cx: 0, cy: -camp.r * 0.15, r: 1.1, class: 'zz-map-life-light' }));
+    layer.appendChild(svgEl('circle', { cx: camp.r * 0.5, cy: camp.r * 0.1, r: 0.7, class: 'zz-map-life-light' }));
   }
 
   g.appendChild(layer);
@@ -449,70 +517,82 @@ function drawExpeditions(svg, state) {
   });
 }
 
-function drawWeather(svg, weather) {
+function drawWeather(parent, weather, m) {
   const w = weather || 'clear';
   const g = svgEl('g', { class: `zz-map-weather zz-map-weather--${w}`, 'aria-hidden': 'true' });
   const rng = createRng(hashSeed(`wx:${w}`));
+  const W = m.vbW;
+  const H = m.vbH;
   if (w === 'rain' || w === 'storm') {
-    const n = w === 'storm' ? 28 : 18;
+    const n = w === 'storm' ? 36 : 22;
     for (let i = 0; i < n; i++) {
-      const x = rng.float(4, 96);
-      const y = rng.float(4, 92);
+      const x = rng.float(2, W - 2);
+      const y = rng.float(2, H - 2);
       const len = w === 'storm' ? rng.float(2.5, 4.5) : rng.float(1.8, 3.2);
       g.appendChild(svgEl('line', { x1: x, y1: y, x2: x - len * 0.25, y2: y + len, class: 'zz-map-wx-particle' }));
     }
   } else if (w === 'cold') {
-    for (let i = 0; i < 16; i++) {
-      g.appendChild(svgEl('circle', { cx: rng.float(5, 95), cy: rng.float(5, 95), r: rng.float(0.2, 0.45), class: 'zz-map-wx-particle' }));
+    for (let i = 0; i < 20; i++) {
+      g.appendChild(svgEl('circle', { cx: rng.float(3, W - 3), cy: rng.float(3, H - 3), r: rng.float(0.2, 0.45), class: 'zz-map-wx-particle' }));
     }
   } else if (w === 'fog') {
-    g.appendChild(svgEl('rect', { x: 0, y: 0, width: VB, height: VB, class: 'zz-map-wx-particle', opacity: '0.22', fill: '#8a8478' }));
+    g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.22', fill: '#8a8478' }));
   } else if (w === 'heat') {
-    g.appendChild(svgEl('rect', { x: 0, y: 0, width: VB, height: VB, class: 'zz-map-wx-particle', opacity: '0.12', fill: '#c08040' }));
+    g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.12', fill: '#c08040' }));
   }
-  svg.appendChild(g);
+  parent.appendChild(g);
 }
 
-function drawLegend(svg) {
-  const legend = svgEl('g', { class: 'zz-map-legend', transform: 'translate(3,91)' });
+function drawLegend(parent, m) {
+  const y = m.vbH - 8;
+  const legend = svgEl('g', { class: 'zz-map-legend', transform: `translate(4,${y})` });
   [
     ['#3d8a52', 'Control'],
     ['#c4a050', 'Conocido'],
     ['#c05030', 'Hostil'],
     ['#1a1c20', 'Niebla'],
   ].forEach(([c, t], i) => {
-    legend.appendChild(svgEl('rect', { x: i * 24, y: 0, width: 3.5, height: 3.5, rx: 0.5, fill: c }));
-    legend.appendChild(svgEl('text', { x: i * 24 + 5, y: 3.1, class: 'zz-map-legend-t' }, [t]));
+    legend.appendChild(svgEl('rect', { x: i * 26, y: 0, width: 3.5, height: 3.5, rx: 0.5, fill: c }));
+    legend.appendChild(svgEl('text', { x: i * 26 + 5, y: 3.1, class: 'zz-map-legend-t' }, [t]));
   });
-  svg.appendChild(legend);
+  parent.appendChild(legend);
 }
 
 export function renderMap(svg, state, { onSelectZone } = {}) {
   if (!svg) return;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
-  if (!svg.getAttribute('viewBox')) svg.setAttribute('viewBox', '0 0 100 100');
+  const m = mapMetrics(svg);
+  svg.setAttribute('viewBox', `0 0 ${m.vbW} ${m.vbH}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   const tier = colonyVisualTier(state);
   svg.dataset.tier = String(tier);
+  svg.dataset.wide = m.wide ? '1' : '0';
   addDefs(svg, tier);
 
-  svg.appendChild(svgEl('rect', { width: VB, height: VB, fill: 'url(#zzMapSky)', class: 'zz-map-bg' }));
-  svg.appendChild(svgEl('rect', { width: VB, height: VB, fill: 'url(#zzMapHaze)', class: 'zz-map-ground' }));
+  svg.appendChild(svgEl('rect', { width: m.vbW, height: m.vbH, fill: 'url(#zzMapSky)', class: 'zz-map-bg' }));
+  svg.appendChild(svgEl('rect', { width: m.vbW, height: m.vbH, fill: 'url(#zzMapHaze)', class: 'zz-map-ground' }));
+
+  const world = svgEl('g', {
+    class: 'zz-map-world',
+    transform: m.ox || m.oy ? `translate(${m.ox},${m.oy})` : undefined,
+  });
 
   const zones = state.zones || [];
-  const grid = drawRoads(svg, zones, tier);
-  drawUrbanBlocks(svg, zones, grid, tier);
+  const grid = drawRoads(world, zones, tier);
+  drawUrbanBlocks(world, zones, grid, tier);
+  drawRecoveredPaths(world, zones, tier);
 
   const layer = svgEl('g', { class: 'zz-map-layer zz-map-zones' });
-  // Pintar desconocidas primero, controladas encima
   const ordered = [...zones].sort((a, b) => {
     const rank = { unknown: 0, discovered: 1, hostile: 2, controlled: 3 };
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
   ordered.forEach((z) => drawZone(layer, z, state, tier, onSelectZone));
-  svg.appendChild(layer);
+  world.appendChild(layer);
 
-  drawExpeditions(svg, state);
-  drawWeather(svg, state.weather);
-  drawLegend(svg);
+  drawExpeditions(world, state);
+  svg.appendChild(world);
+  drawWeather(svg, state.weather, m);
+  drawLegend(svg, m);
 }

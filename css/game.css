@@ -352,7 +352,10 @@ body.zz-body {
   overflow: hidden;
   box-shadow: 0 8px 28px rgba(0,0,0,0.35);
 }
-.zz-map { width: 100%; height: auto; aspect-ratio: 1 / 1; display: block; touch-action: manipulation; }
+.zz-map { width: 100%; height: auto; aspect-ratio: 3 / 4; display: block; touch-action: manipulation; }
+@media (min-width: 900px) {
+  .zz-map { aspect-ratio: 16 / 9; }
+}
 .zz-base { width: 100%; height: auto; display: block; touch-action: manipulation; }
 
 /* Mapa ciudad — tejido urbano + vida en territorio recuperado */
@@ -370,6 +373,25 @@ body.zz-body {
 .zz-map-crop { fill: #3a5028; stroke: #6a8a40; stroke-width: 0.15; opacity: 0.85; }
 .zz-map-crop-row { stroke: #8aba50; stroke-width: 0.2; opacity: 0.7; }
 .zz-map-life-light { fill: #f0c070; opacity: 0.85; filter: drop-shadow(0 0 1.2px #f0c070); }
+.zz-map-life-path { fill: none; stroke: #6a8a58; stroke-width: 0.55; opacity: 0.55; stroke-dasharray: 1.2 0.8; }
+.zz-map-defense-ring { fill: none; stroke: #8a7060; stroke-width: 0.7; opacity: 0.65; }
+.zz-map-smoke { fill: #9a9a98; opacity: 0.35; }
+.zz-settle-fence { fill: none; stroke: #a09070; stroke-width: 0.55; opacity: 0.7; }
+.zz-chip-hud__m em { font-style: normal; color: var(--zz-muted); font-size: 0.62rem; margin-right: 0.15rem; }
+.zz-recover-banner {
+  position: absolute;
+  left: 50%;
+  top: 0.45rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(60,100,70,0.88);
+  color: #d8f0d8;
+  font: 600 0.72rem var(--zz-display);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
 .zz-map-car { fill: #4a4038; opacity: 0.8; }
 .zz-map-debris { fill: #353840; opacity: 0.55; }
 .zz-map-legend-t { fill: #8a9a88; font-size: 2.8px; font-family: var(--zz-font); }

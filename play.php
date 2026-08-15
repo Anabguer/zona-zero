@@ -23,8 +23,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=12" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=12" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=13" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=13" />
 </head>
 <body class="zz-body zz-body--play zz-body--world">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -56,15 +56,16 @@ $base = zz_public_base();
       <div class="zz-chip-hud__meta">
         <span id="zz-era" class="zz-chip-hud__era">—</span>
         <span id="zz-weather" class="zz-weather" data-weather="clear">—</span>
-        <span class="zz-chip-hud__m" title="Estabilidad"><i></i><strong id="zz-stability">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><i></i><strong id="zz-threat">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><i></i><strong id="zz-defense">0</strong></span>
+        <span class="zz-chip-hud__m" title="Estabilidad"><em>Est.</em><i></i><strong id="zz-stability">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><em>Amz.</em><i></i><strong id="zz-threat">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><em>Def.</em><i></i><strong id="zz-defense">0</strong></span>
       </div>
     </section>
 
     <!-- Mundo continuo -->
     <main class="zz-world-stage">
       <div class="zz-world-map-wrap">
+        <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Zona Zero"></svg>
       </div>
       <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
@@ -108,7 +109,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=12';
+    import { bootGame } from './js/main.js?v=13';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,

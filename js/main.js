@@ -314,23 +314,27 @@ function openZoneSheet(zoneId) {
   const preview = ex ? expeditionPreview(state, content, zoneId, ex.id) : null;
   const badge =
     z.state === 'controlled' ? 'Control' : z.state === 'hostile' ? 'Hostil' : 'Conocido';
+  const ctrlPct = Math.round((z.controlProgress || 0) * 100);
   openSheet(`
     <h2>${escapeHtml(z.name)}</h2>
     <p><span class="zz-zone-badge zz-zone-badge--${z.state}">${badge}</span>
-      Riesgo base ${(z.risk * 100).toFixed(0)}% · Infectados ~${z.infectedLeft || 0}</p>
+      Riesgo base ${(z.risk * 100).toFixed(0)}% · Infectados ~${z.infectedLeft || 0}
+      ${z.state !== 'controlled' ? ` · Control ${ctrlPct}%` : ''}</p>
     ${
       z.state === 'controlled'
-        ? '<p>Territorio vuestro. Podéis avanzar desde aquí.</p>'
+        ? '<p>Territorio vuestro. Podéis avanzar desde aquí o enviar patrulla ligera.</p>'
         : preview
           ? `<p>Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> (${preview.explorerStatus})</p>
-             <p>Distancia ${preview.distance} · ${preview.days} día(s) · Riesgo ${preview.category} (${Math.round(
+             <p>Distancia ${preview.distance} · ${preview.days} día(s) · Riesgo <strong>${preview.category}</strong> (${Math.round(
               preview.risk * 100
             )}%)</p>
-             <p>Botín probable: ${(preview.lootHint || []).join(', ') || 'incierto'}</p>
+             <p>Enfoque: ${escapeHtml(preview.note || preview.focus || '')}</p>
+             <p>Botín probable: ${(preview.lootHint || []).join(', ') || 'incierto'} · Combustible ${preview.fuel}</p>
              <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
               ex.status !== 'ready' ? 'disabled' : ''
-            }>Enviar a ${escapeHtml(ex.name)}</button>`
-          : '<p>No hay explorador disponible.</p>'
+            }>Enviar a ${escapeHtml(ex.name)}</button>
+             <p class="zz-muted" style="margin-top:0.5rem;font-size:0.8rem">Otro explorador cambia el riesgo y el botín. Zonas hostiles tardan más.</p>`
+          : '<p>No hay explorador disponible. Curad heridas o esperad el retorno.</p>'
     }
   `);
   paint();
@@ -392,9 +396,10 @@ function openMoreSheet() {
 
   openSheet(`
     <h2>Más</h2>
-    <p>Exploradores ${living}/${slots}. 
-      <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar</button>
+    <p>Exploradores ${living}/${slots}.
+      <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
+    <p class="zz-muted" style="font-size:0.8rem">${slotHint(slots, living)}</p>
     <h3 style="font-family:var(--zz-display)">Investigación</h3>
     <div class="zz-tech-list">${techHtml}</div>
     <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
@@ -413,6 +418,17 @@ function openMoreSheet() {
       .map((e) => `D${e.day} ${escapeHtml(e.text)}`)
       .join(' · ')}</p>
   `);
+}
+
+function slotHint(slots, living) {
+  const cfg = content.balance.explorers || {};
+  if (living >= 3 || slots >= 3) return 'Máximo 3 exploradores. Son los únicos individuos.';
+  if (slots < 2) {
+    const s2 = cfg.slot2 || {};
+    return `2ª plaza: población ≥${s2.minPop || 10}, zonas controladas ≥${s2.minControlled || 3}, era ≥${s2.minEra || 1}.`;
+  }
+  const s3 = cfg.slot3 || {};
+  return `3ª plaza: población ≥${s3.minPop || 24}, zonas ≥${s3.minControlled || 5}, era ≥${s3.minEra || 2}.`;
 }
 
 function paintHud() {
@@ -487,10 +503,15 @@ function paintExplorers() {
     rail.appendChild(btn);
   });
   if (livingExplorers(state).length < slots) {
-    const tip = document.createElement('div');
+    const tip = document.createElement('button');
+    tip.type = 'button';
     tip.className = 'zz-ex-card';
-    tip.style.opacity = '0.5';
-    tip.innerHTML = `<div></div><div><div class="zz-ex-card__name">Plaza libre</div><div class="zz-ex-card__st">${livingExplorers(state).length}/${slots}</div></div>`;
+    tip.style.opacity = '0.7';
+    tip.innerHTML = `<div></div><div><div class="zz-ex-card__name">Plaza libre</div><div class="zz-ex-card__st">Reclutar · ${livingExplorers(state).length}/${slots}</div></div>`;
+    tip.addEventListener('click', () => {
+      sfx.click?.();
+      openMoreSheet();
+    });
     rail.appendChild(tip);
   }
 }
@@ -499,6 +520,14 @@ function paint() {
   if (!state || !content) return;
   paintHud();
   paintExplorers();
+  const banner = $('zz-recover-banner');
+  if (banner) {
+    const recovering = state.day < (state.director?.protectionUntil || 0);
+    banner.hidden = !recovering;
+    if (recovering) {
+      banner.textContent = `Recuperación · hasta día ${state.director.protectionUntil}`;
+    }
+  }
   renderMap($('zz-map'), state, {
     onSelectZone: (id) => {
       sfx.click?.();
@@ -540,6 +569,32 @@ function updateCoach() {
     return;
   }
   coach.hidden = true;
+}
+
+function showAttackCard(atk) {
+  const card = $('zz-attack-card');
+  if (!card || !atk) return;
+  const result = atk.result || atk;
+  const labels = {
+    win: 'Ataque repelido',
+    messy: 'Ataque contenido',
+    lose: 'El perímetro cede',
+  };
+  card.className = `zz-attack-card zz-attack-card--${result}`;
+  card.innerHTML = `<strong>${labels[result] || 'Ataque'}</strong>
+    <p>Intensidad ${atk.intensity ?? '—'} · Muertos ${atk.dead ?? 0} · Heridos ${atk.injured ?? 0}</p>
+    <p class="zz-event-fx">${
+      result === 'lose'
+        ? 'Periodo de recuperación activo. Priorizad comida y defensa.'
+        : result === 'messy'
+          ? 'Habéis aguantado. Revisad heridos y munición.'
+          : 'La defensa ha funcionado.'
+    }</p>`;
+  card.hidden = false;
+  clearTimeout(showAttackCard._t);
+  showAttackCard._t = setTimeout(() => {
+    card.hidden = true;
+  }, 4800);
 }
 
 function showEventCard(ev) {
@@ -594,7 +649,20 @@ function renderChoiceModal() {
     btn.className = 'zz-btn zz-btn--primary';
     btn.textContent = opt.label || opt.text || `Opción ${i + 1}`;
     btn.addEventListener('click', () => {
-      resolvePendingChoice(state, content, i);
+      const r = resolvePendingChoice(state, content, i);
+      if (r.ok && r.attackIntensity) {
+        const atk = resolveBaseAttack(state, content, r.attackIntensity);
+        showAttackCard(atk);
+        sfx.attack?.();
+      }
+      if (r.ok && r.event) {
+        showEventCard({
+          name: r.event.name,
+          family: r.event.family,
+          intensity: r.event.intensity,
+          brief: pending.text,
+        });
+      }
       scheduleSave();
       paint();
     });
@@ -607,6 +675,12 @@ function handleAdvanceDay() {
     toast('Resolved la decisión pendiente', 'warn');
     return;
   }
+  const before = {
+    food: state.resources.food,
+    water: state.resources.water,
+    pop: state.population.total,
+    day: state.day,
+  };
   const r = advanceDay(state, content);
   if (!r.ok) {
     toast(r.error || 'No', 'warn');
@@ -617,14 +691,32 @@ function handleAdvanceDay() {
     state.flags.coach.labor = true;
     if (state.stats.buildingsBuilt > 3) state.flags.coach.build = true;
   }
-  if (r.director?.event && !r.director.choice && !state.pendingChoice) {
+  if (r.director?.quiet) {
+    /* silencio intencional */
+  } else if (r.director?.event && !r.director.choice && !state.pendingChoice) {
     const ev = r.director.event;
+    const brief = r.director.variant?.text || (ev.variants && ev.variants[0]?.text) || ev.name;
     showEventCard({
       name: ev.name,
       family: ev.family,
       intensity: ev.intensity,
-      brief: (ev.variants && ev.variants[0]?.text) || ev.name,
+      brief,
     });
+  }
+  if (r.attack) {
+    showAttackCard(r.attack);
+    sfx.attack?.();
+  } else {
+    const dFood = Math.round((state.resources.food || 0) - (before.food || 0));
+    const dWater = Math.round((state.resources.water || 0) - (before.water || 0));
+    const dPop = (state.population.total || 0) - (before.pop || 0);
+    if (Math.abs(dFood) >= 2 || Math.abs(dWater) >= 2 || dPop) {
+      const bits = [];
+      if (dFood) bits.push(`comida ${dFood > 0 ? '+' : ''}${dFood}`);
+      if (dWater) bits.push(`agua ${dWater > 0 ? '+' : ''}${dWater}`);
+      if (dPop) bits.push(`población ${dPop > 0 ? '+' : ''}${dPop}`);
+      toast(`Día ${state.day}: ${bits.join(' · ')}`, dPop < 0 || dFood < -3 ? 'warn' : 'info');
+    }
   }
   sfx.click?.();
   scheduleSave();

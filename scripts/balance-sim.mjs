@@ -36,8 +36,8 @@ const {
 } = await import(pathToFileURL(join(root, 'js', 'sim.js')).href);
 
 const PROFILES = {
-  conservative: { exploreEvery: 5, buildEvery: 5, risk: false },
-  balanced: { exploreEvery: 3, buildEvery: 4, risk: false },
+  conservative: { exploreEvery: 5, buildEvery: 4, risk: false },
+  balanced: { exploreEvery: 3, buildEvery: 3, risk: false },
   expansive: { exploreEvery: 2, buildEvery: 3, risk: true },
   mismanaged: { exploreEvery: 1, buildEvery: 12, risk: true, noBuild: true },
 };
@@ -57,7 +57,20 @@ function runGame(seed, days, profileName, opts = {}) {
   state._autoResolveChoices = true;
   autoAssignWorkers(state, content);
   let built = 0;
-  const buildOrder = ['farm', 'well', 'farm', 'sawmill', 'workshop', 'watchtower', 'medkit', 'storage', 'generator'];
+  const buildOrder = [
+    'farm',
+    'well',
+    'shelter',
+    'farm',
+    'watchtower',
+    'storage',
+    'workshop',
+    'sawmill',
+    'medkit',
+    'generator',
+    'fence',
+    'house',
+  ];
 
   for (let i = 0; i < days; i++) {
     if (state.flags.defeated) break;
@@ -70,19 +83,27 @@ function runGame(seed, days, profileName, opts = {}) {
     if (!profile.noBuild && built < buildOrder.length && i % profile.buildEvery === 0) {
       const cell = freeCell(state);
       if (cell) {
-        state.resources.wood += 12;
-        state.resources.metal += 8;
-        state.resources.water += 4;
-        const r = placeBuilding(state, content, buildOrder[built], cell[0], cell[1]);
+        let r = placeBuilding(state, content, buildOrder[built], cell[0], cell[1]);
+        if (!r.ok) {
+          // Ayuda mínima (no dump de recursos)
+          state.resources.wood = (state.resources.wood || 0) + 5;
+          state.resources.metal = (state.resources.metal || 0) + 3;
+          r = placeBuilding(state, content, buildOrder[built], cell[0], cell[1]);
+        }
         if (r.ok) built++;
       }
     }
 
-    if ((!state.expeditions || !state.expeditions.length) && !state.expedition && i % profile.exploreEvery === 0) {
-      const z = state.zones.find((x) => x.state === 'discovered' || x.state === 'hostile');
+    const busy = (state.expeditions || []).length > 0 || !!state.expedition;
+    if (!busy && i % profile.exploreEvery === 0) {
+      const candidates = state.zones.filter(
+        (x) => x.type !== 'camp' && (x.state === 'discovered' || x.state === 'hostile')
+      );
+      candidates.sort((a, b) => (profile.risk ? b.risk - a.risk : a.risk - b.risk));
+      const z = candidates[0];
       const ex = (state.explorers || []).find((e) => e.status === 'ready' && !e.expeditionId);
       if (z && ex) {
-        state.resources.fuel += 2;
+        state.resources.fuel += 1;
         startExpedition(state, content, z.id, ex.id);
       }
     }
