@@ -1,0 +1,30 @@
+{
+  "saveVersion": 1,
+  "startingSurvivors": 3,
+  "startingResources": {
+    "food": 18,
+    "scrap": 10,
+    "meds": 4,
+    "ammo": 2
+  },
+  "foodPerSurvivorPerDay": 1,
+  "starvationDamage": 25,
+  "baseGrid": { "w": 6, "h": 5 },
+  "housingPerShelter": 2,
+  "expeditionBaseDurationDays": 1,
+  "expeditionMaxSurvivors": 3,
+  "controlZoneRequiresClear": true,
+  "production": {
+    "workshop_scrap": 2,
+    "farm_food": 3,
+    "clinic_meds": 1,
+    "watchtower_defense": 1
+  },
+  "defensePerWatchtower": 8,
+  "defensePerArmedSurvivor": 3,
+  "woundThreshold": 1,
+  "deathHp": 0,
+  "raidBaseWeight": 1,
+  "directorMinDay": 2,
+  "softCapThreatEarlyDays": 4
+}

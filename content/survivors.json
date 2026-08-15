@@ -1,0 +1,13 @@
+{
+  "names": [
+    "Nora", "Leo", "Mara", "Iker", "Sofía", "Dani", "Vera", "Hugo",
+    "Iris", "Pol", "Nerea", "Álex", "Lia", "Teo", "Carla", "Bruno"
+  ],
+  "skillKeys": ["scout", "fight", "build", "gather"],
+  "skillLabels": {
+    "scout": "Explorar",
+    "fight": "Combatir",
+    "build": "Construir",
+    "gather": "Recolectar"
+  }
+}

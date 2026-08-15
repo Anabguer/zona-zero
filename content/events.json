@@ -1,0 +1,130 @@
+{
+  "events": [
+    {
+      "id": "quiet_night",
+      "name": "Noche en calma",
+      "intensity": 0,
+      "cooldown": 2,
+      "weight": 8,
+      "minDay": 1,
+      "conditions": { "maxThreat": 99 },
+      "variants": [
+        { "text": "Los infectados se oyen lejos. La noche pasa.", "effects": {} },
+        { "text": "Vigilancia tensa, pero sin incidentes.", "effects": { "moraleHint": 1 } }
+      ]
+    },
+    {
+      "id": "scavenge_bonus",
+      "name": "Hallazgo cercano",
+      "intensity": 1,
+      "cooldown": 4,
+      "weight": 4,
+      "minDay": 2,
+      "conditions": { "maxThreat": 40 },
+      "variants": [
+        {
+          "text": "Alguien encuentra una mochila abandonada junto al perímetro.",
+          "effects": { "loot": { "food": [1, 3], "scrap": [0, 2] } }
+        },
+        {
+          "text": "Un vehículo destrozado aún guarda piezas útiles.",
+          "effects": { "loot": { "scrap": [2, 4], "ammo": [0, 1] } }
+        }
+      ]
+    },
+    {
+      "id": "illness",
+      "name": "Fiebre",
+      "intensity": 2,
+      "cooldown": 5,
+      "weight": 3,
+      "minDay": 3,
+      "conditions": { "minPop": 2 },
+      "variants": [
+        {
+          "text": "Un superviviente enferma. Sin medicinas, empeora.",
+          "effects": { "woundOne": 20, "needMeds": 1 }
+        }
+      ]
+    },
+    {
+      "id": "supply_rot",
+      "name": "Comida en mal estado",
+      "intensity": 1,
+      "cooldown": 6,
+      "weight": 3,
+      "minDay": 4,
+      "conditions": { "minFood": 8 },
+      "variants": [
+        {
+          "text": "Parte de las raciones se estropea.",
+          "effects": { "lose": { "food": [2, 5] } }
+        }
+      ]
+    },
+    {
+      "id": "small_raid",
+      "name": "Oleada menor",
+      "intensity": 3,
+      "cooldown": 4,
+      "weight": 5,
+      "minDay": 5,
+      "conditions": { "minThreat": 8, "minDay": 5 },
+      "variants": [
+        {
+          "text": "Un grupo pequeño de infectados prueba las defensas.",
+          "effects": { "raid": { "power": 12, "damage": [10, 25] } }
+        },
+        {
+          "text": "Ruidos en la valla. Hay que aguantar.",
+          "effects": { "raid": { "power": 16, "damage": [12, 30] } }
+        }
+      ]
+    },
+    {
+      "id": "hard_raid",
+      "name": "Oleada fuerte",
+      "intensity": 5,
+      "cooldown": 7,
+      "weight": 2,
+      "minDay": 9,
+      "conditions": { "minThreat": 20, "minPop": 2 },
+      "variants": [
+        {
+          "text": "La noche se llena de aullidos. La oleada es seria.",
+          "effects": { "raid": { "power": 28, "damage": [20, 45] } }
+        }
+      ]
+    },
+    {
+      "id": "deserter_hope",
+      "name": "Señal de humo",
+      "intensity": 1,
+      "cooldown": 8,
+      "weight": 2,
+      "minDay": 6,
+      "conditions": { "maxPop": 8, "minControlled": 2 },
+      "variants": [
+        {
+          "text": "Un superviviente agotado pide unirse al refugio.",
+          "effects": { "recruit": true }
+        }
+      ]
+    },
+    {
+      "id": "ammo_cache",
+      "name": "Caja militar",
+      "intensity": 1,
+      "cooldown": 10,
+      "weight": 2,
+      "minDay": 7,
+      "conditions": { "minControlled": 2 },
+      "variants": [
+        {
+          "text": "En una zona controlada aparece munición olvidada.",
+          "effects": { "loot": { "ammo": [1, 3], "scrap": [1, 2] } }
+        }
+      ]
+    }
+  ]
+}

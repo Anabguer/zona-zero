@@ -1,0 +1,68 @@
+{
+  "shelter": {
+    "id": "shelter",
+    "name": "Refugio",
+    "desc": "Camas y techo. +2 capacidad.",
+    "cost": { "scrap": 6, "food": 0 },
+    "w": 1,
+    "h": 1,
+    "max": 6,
+    "category": "housing",
+    "icon": "shelter"
+  },
+  "farm": {
+    "id": "farm",
+    "name": "Huerto",
+    "desc": "Produce comida cada día.",
+    "cost": { "scrap": 5, "food": 2 },
+    "w": 1,
+    "h": 1,
+    "max": 4,
+    "category": "production",
+    "icon": "farm"
+  },
+  "workshop": {
+    "id": "workshop",
+    "name": "Taller",
+    "desc": "Recupera chatarra útil.",
+    "cost": { "scrap": 8 },
+    "w": 1,
+    "h": 1,
+    "max": 3,
+    "category": "production",
+    "icon": "workshop"
+  },
+  "clinic": {
+    "id": "clinic",
+    "name": "Botiquín",
+    "desc": "Genera medicinas y ayuda a curar.",
+    "cost": { "scrap": 7, "meds": 1 },
+    "w": 1,
+    "h": 1,
+    "max": 2,
+    "category": "support",
+    "icon": "clinic"
+  },
+  "watchtower": {
+    "id": "watchtower",
+    "name": "Atalaya",
+    "desc": "Mejora la defensa del asentamiento.",
+    "cost": { "scrap": 10, "ammo": 1 },
+    "w": 1,
+    "h": 1,
+    "max": 3,
+    "category": "defense",
+    "icon": "watchtower"
+  },
+  "storage": {
+    "id": "storage",
+    "name": "Almacén",
+    "desc": "Reduce pérdidas por eventos de saqueo.",
+    "cost": { "scrap": 6 },
+    "w": 1,
+    "h": 1,
+    "max": 2,
+    "category": "support",
+    "icon": "storage"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "zones": [
+    {
+      "id": "camp",
+      "name": "Campamento",
+      "x": 48,
+      "y": 62,
+      "r": 18,
+      "startState": "controlled",
+      "risk": 0.05,
+      "loot": { "food": [0, 1], "scrap": [0, 1] },
+      "controlBonus": {},
+      "neighbors": ["market", "apartments"]
+    },
+    {
+      "id": "market",
+      "name": "Mercado",
+      "x": 28,
+      "y": 48,
+      "r": 16,
+      "startState": "discovered",
+      "risk": 0.28,
+      "loot": { "food": [1, 4], "scrap": [1, 3], "meds": [0, 1] },
+      "infected": [1, 3],
+      "neighbors": ["camp", "pharmacy", "station"]
+    },
+    {
+      "id": "apartments",
+      "name": "Bloques",
+      "x": 68,
+      "y": 46,
+      "r": 17,
+      "startState": "discovered",
+      "risk": 0.32,
+      "loot": { "food": [1, 3], "scrap": [2, 5], "ammo": [0, 1] },
+      "infected": [1, 4],
+      "neighbors": ["camp", "hospital", "park"]
+    },
+    {
+      "id": "pharmacy",
+      "name": "Farmacia",
+      "x": 18,
+      "y": 28,
+      "r": 14,
+      "startState": "unknown",
+      "risk": 0.4,
+      "loot": { "meds": [1, 4], "food": [0, 2], "scrap": [0, 2] },
+      "infected": [2, 4],
+      "neighbors": ["market", "station"]
+    },
+    {
+      "id": "station",
+      "name": "Estación",
+      "x": 42,
+      "y": 22,
+      "r": 15,
+      "startState": "unknown",
+      "risk": 0.45,
+      "loot": { "scrap": [2, 6], "ammo": [1, 3], "food": [0, 2] },
+      "infected": [2, 5],
+      "neighbors": ["market", "pharmacy", "hospital"]
+    },
+    {
+      "id": "hospital",
+      "name": "Hospital",
+      "x": 72,
+      "y": 24,
+      "r": 16,
+      "startState": "unknown",
+      "risk": 0.55,
+      "loot": { "meds": [2, 5], "food": [1, 3], "ammo": [0, 2] },
+      "infected": [3, 6],
+      "neighbors": ["apartments", "station", "park"]
+    },
+    {
+      "id": "park",
+      "name": "Parque",
+      "x": 86,
+      "y": 58,
+      "r": 15,
+      "startState": "unknown",
+      "risk": 0.35,
+      "loot": { "food": [2, 5], "scrap": [0, 2], "meds": [0, 1] },
+      "infected": [1, 3],
+      "neighbors": ["apartments", "hospital"]
+    },
+    {
+      "id": "warehouse",
+      "name": "Almacenes",
+      "x": 55,
+      "y": 78,
+      "r": 14,
+      "startState": "unknown",
+      "risk": 0.5,
+      "loot": { "scrap": [3, 7], "food": [1, 4], "ammo": [1, 2] },
+      "infected": [2, 5],
+      "neighbors": ["camp", "market"]
+    }
+  ]
+}
