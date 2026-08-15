@@ -2,9 +2,9 @@
 
 > **SYNC VERIFY DEVELOPMENT_LOG** · stamp=2026-08-15 19:41:46 · sha256_16=B66C6C0B88D974CF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
-**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
-**Fecha:** 2026-08-15  
-**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **APROBADA**. · ZZ-019 **APROBADA**. · ZZ-012 **COMPLETADA · PENDIENTE DE REVISIÓN** (HUMAN_GATE). No deploy. No ZZ-013.
+**Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
+**Fecha:** 2026-08-16  
+**Estado global:** ZZ-016…019 **APROBADAS**. · Reforma docs **2.8** entregada · **PENDIENTE DE REVISIÓN**. · ZZ-012 **CAMBIOS SOLICITADOS** (bloqueada hasta ZZ-019A). · **No ZZ-013**. No deploy. · **PARADO en documentación**.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -216,46 +216,80 @@ SÍ
 Registro: `b924e2e`.
 
 ## Sync Drive/GitHub
-OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT · HUMAN_GATE espacial B0 APROBADO.**
-Bloqueo ZZ-012 **levantado**.
-
+OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT · HUMAN_GATE espacial B0 APROBADO.**  
+Bloqueo ZZ-012 **levantado temporalmente**; **vuelve a bloquearse** tras reforma **2.8** hasta **ZZ-019A**.
 ---
 
-# FASE ZZ-012 — Tutorial D1 contextual landscape (HUMAN_GATE · retrofit 2.7)
+# FASE ZZ-012 — Tutorial D1 contextual landscape (HUMAN_GATE · retrofit 2.7→2.8)
 
-IMPLEMENTATION_PLAN 2.7 · B · **HUMAN_GATE YES** · deps ZZ-019 APROBADA + ZZ-008
+IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-019 + **ZZ-019A** + ZZ-008
 
 ## ESTADO CURSOR
-COMPLETADA (código + evidencias). **PARADO** — no ZZ-013.
+COMPLETADA (entrega previa `b86f356`) · **PAUSA** — no reimplementar hasta ZZ-019A · no ZZ-013.
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+CAMBIOS SOLICITADOS
 
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-## CAMBIOS
-- `js/onboarding.js`: tips landscape/Núcleo; `coachMessage()` en modo ghost+✓; sin cascada Continuar.
-- `js/main.js`: coach pulsa Construir / ✓ / Avanzar día; ayuda §21.3 (ghost, pan, recuperar).
-- Cache `?v=31` (play + harness-zz).
-- Tests: `smoke-d1` (flujo need_food→ready + tip Núcleo).
-- Review: 10 tomas + contact sheet → `docs/review/` + Drive.
+## MOTIVO (Neni+ChatGPT 2026-08-16)
+No porque el tutorial actual sea “incorrecto”, sino porque debe **reescribirse** tras cerrar el refinamiento espacial **2.8** (superficies edificables + escenario diseñado). ZZ-019 (ghost/✓) se mantiene APROBADA.
+
+## CAMBIOS (entrega previa, congelada)
+- Tips landscape/Núcleo; coachMessage ghost+✓; ayuda §21.3; review 10 tomas.
+- Commit feat: `b86f356` · docs: `fb2be18`.
 
 ## AUTOCRÍTICA
-1. ¿Una pista a la vez y avance por acción? Sí (GUIDE_STEPS sin CTA Continuar).
-2. ¿Tips asumen landscape/sectores/✓? Sí (Núcleo + ghost+✓ en buildMode).
-3. ¿Ayuda filtrada §21.3? Sí (solo acciones ya disponibles + ghost/pan).
-4. ¿Legible en 844×390? Evidencia review; tip largo en ghost puede apretar en pantallas bajas.
-5. Deuda: copy aún puede refinarse; no reabre B0 espacial.
+Pendiente de nueva ronda tras ZZ-019A.
 
 ## EVIDENCIA
-`docs/review/` · Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` · `review-contact-sheet.jpg`.
+Histórico en git / Drive sustituido por docs 2.8 (sin review de gameplay nuevo).
 
 ## COMMIT
-`b86f356` — feat(ZZ-012): tutorial D1 landscape + ghost/✓ (HUMAN_GATE)
+`b86f356` / `fb2be18` (previos). Cierre de esta ronda docs: ver reforma 2.8 abajo.
 
 ## Sync Drive/GitHub
-OK (masters + Review/). **PARADO en ZZ-012** — PENDIENTE DE REVISIÓN Neni/ChatGPT. No ZZ-013.
+OK en entrega previa. Re-sync con reforma 2.8.
+
+---
+
+# REFORMA DOCUMENTAL 2.8 — SUPERFICIES EDIFICABLES + ESCENARIO DISEÑADO (2026-08-16)
+
+## DECISIÓN NENI + CHATGPT (dirección)
+Refinar el *dónde* de la colocación semilibre **sin** descartar B0/ZZ-019.
+- Mundo/escenario grande continuo > viewport (mapa finito diseñado).
+- Superficies edificables orgánicas (no píxel libre absoluto; no solares prefijados; no cupo N).
+- Avisos → navegación (cámara + resalte + ficha).
+- Caminos/muros: visual ahora; mecánicas solo si sistémicas (sin inventar).
+- Arte integración edificios = deuda no bloqueante.
+- ZZ-012: CAMBIOS SOLICITADOS · no aprobar · no ZZ-013.
+
+## RESULTADO CURSOR (solo docs — sin gameplay)
+- GAME_MASTER **2.8**: §1.1, §9.2, §9.4–§9.9, §13, §16.2/16.4, §21.2, §31.4, §37, §38, §41.7.1.
+- IMPLEMENTATION_PLAN **2.8**: ZZ-019A + REVIEW_STOP; ZZ-012 deps; flujo B0.
+- DEVELOPMENT_LOG: esta sección + ZZ-012 CAMBIOS SOLICITADOS.
+
+## YA EXISTÍA EN 2.7 (no duplicado)
+Colonia > viewport · sectores orgánicos · sin macrogrid · sin cupo N · semilibre+snap+✓ · avisos→cámara · landscape · recuperación por componentes · perímetro/defensa §13 · purga arte falsa.
+
+## NUEVO / ACLARADO EN 2.8
+- Superficies edificables ≠ polígono entero del sector.
+- Mapa finito diseñado explícito.
+- Avisos abren ficha (además de cámara/resalte).
+- Caminos/muros como notas de contrato (sin mecánicas nuevas).
+- Fase ZZ-019A.
+
+## DUDAS REALES NENI/CHATGPT (PARAR Y PREGUNTAR)
+1. ¿ZZ-019A debe ser también **HUMAN_GATE**, o basta **REVIEW_STOP**? (propuesta Cursor: solo REVIEW_STOP).
+2. ¿Un sector recuperado puede tener **varias** superficies disjuntas? (propuesta Cursor: sí, si el escenario lo justifica).
+3. ¿Algún camino/valla debe ser **reparable en v1**, o queda solo visual hasta fases C/defensa? (propuesta Cursor: solo visual en ZZ-019A).
+
+## ESTADO
+Reforma docs **entregada · PENDIENTE DE REVISIÓN**. Sin implementación. Sin deploy. Sin ZZ-012/013.
+
+## APROBACIÓN REFORMA 2.8
+NO (pendiente Neni/ChatGPT)
 
 ---
 
@@ -274,7 +308,7 @@ OK (masters + Review/). **PARADO en ZZ-012** — PENDIENTE DE REVISIÓN Neni/Cha
 | ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-012 | Tutorial D1 por acciones | YES | PAUSA / CAMBIOS SOLICITADOS | CAMBIOS SOLICITADOS | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

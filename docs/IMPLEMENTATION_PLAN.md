@@ -1,44 +1,46 @@
-# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.7)
+# Zona Zero — Plan de implementación técnico (GAME_MASTER 2.8)
 
-> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-15 · source=repo
+> **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
-**Versión plan:** 2.7  
-**Estado:** Contrato espacial 2.7 **cerrado** (decisiones recuperación/sectores/max/REVIEW_STOP). Esperando autorización para implementar B0.
-**Biblia:** GAME_MASTER **2.7**.  
+**Versión plan:** 2.8  
+**Estado:** Contrato espacial **2.8** (refino superficies edificables + escenario diseñado). B0 parcial APROBADO (016–019). **ZZ-019A** pendiente · **ZZ-012** bloqueada (CAMBIOS SOLICITADOS).  
+**Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
 
-> Este plan **sustituye 2.6** en bloques A2/B afectados por espacial+landscape.  
+> Este plan **sustituye 2.7** en B0/B afectados por superficies edificables.  
 > **Fuera de alcance v1:** electricidad, generator, solar, power_grid/power_hub, needEnergy, calefacción con fuel.  
-> **Fuera de UX v1:** múltiples slots de partida manuales · GIS visible · construcción portrait dual.
+> **Fuera de UX v1:** múltiples slots de partida manuales · GIS visible · construcción portrait dual · simulador de carreteras.
 
 ---
 
 ## 0. Reglas de ejecución
 
-1. Leer GAME_MASTER **2.7** antes de cada fase.  
+1. Leer GAME_MASTER **2.8** antes de cada fase.  
 2. Tras cada fase: tests → capturas si aplica → commit → push → DEVELOPMENT_LOG → `PENDIENTE DE REVISIÓN`.  
 3. Si `HUMAN_GATE: YES`: no continuar dependientes sin `APROBADA` + `SÍ`.  
 4. Tests verdes / elogios / silencio ≠ aprobación.  
 5. Balance solo en content.  
 6. Deploy solo ZZ-183 bajo orden.  
 7. Sync Drive = GitHub en docs maestros.  
-8. **No implementar sistemas D1+ encima del patio fijo 10×8** tras 2.7: primero B0 completo (016→019).  
-9. Si `REVIEW_STOP: YES`: PARAR tras la fase; no continuar hasta autorización explícita (aunque no sea HUMAN_GATE canónico).
+8. **No implementar sistemas D1+ encima del patio fijo 10×8** tras 2.7/2.8: primero B0 (016→019) + **ZZ-019A**.  
+9. Si `REVIEW_STOP: YES`: PARAR tras la fase; no continuar hasta autorización explícita (aunque no sea HUMAN_GATE canónico).  
+10. **No** inventar bonuses/mecánicas de caminos/muros sin enlace sistémico + decisión Neni.
 
-### REVIEW_STOP (2.7)
+### REVIEW_STOP (2.8)
 
-- **ZZ-018** · Sectores + recuperar territorio → evidencia espacial → **PARAR** (Neni+ChatGPT) antes de ZZ-019.
+- **ZZ-018** · Sectores + recuperar territorio → **cerrado** (autorizado → ZZ-019).  
+- **ZZ-019A** · Escenario diseñado + superficies edificables → evidencia → **PARAR** antes de reescribir/aprobar ZZ-012.
 
-### HUMAN_GATE (canónica 2.7)
+### HUMAN_GATE (canónica 2.8)
 
 - ZZ-001
 - ZZ-007
 - ZZ-008
 - ZZ-010 *(histórica; retrofit espacial en B0)*
 - ZZ-016 · Landscape + rotate gate
-- ZZ-019 · **MODELO ESPACIAL + CONSTRUCCIÓN LANDSCAPE** *(gate temprano crítico)*
-- ZZ-012 *(replanificada; depende ZZ-019)*
+- ZZ-019 · **Colocación semilibre landscape** *(APROBADA — no reabrir ghost/✓)*
+- ZZ-012 *(replanificada; depende ZZ-019A tras 2.8)*
 - ZZ-014
 - ZZ-015
 - ZZ-021
@@ -62,12 +64,25 @@
 - ZZ-178
 - ZZ-183
 
-**Total fases:** 135  
-**Con HUMAN_GATE:** 29
+**Total fases:** 136 *(+ ZZ-019A)*  
+**Con HUMAN_GATE:** 29  
 
+> **Duda Neni (no inventada):** ¿ZZ-019A debe ser también HUMAN_GATE, o basta REVIEW_STOP? Propuesta Cursor: **solo REVIEW_STOP** (como ZZ-018), salvo que Neni quiera gate canónico extra.
 ---
 
-## 0.1 Enmienda 2.7 — qué cambia respecto a 2.6
+## 0.1 Enmienda 2.8 — qué cambia respecto a 2.7
+
+| Tema | Acción |
+|------|--------|
+| Superficies edificables orgánicas | Contrato §9.2/§9.4; fase **ZZ-019A** + **REVIEW_STOP** |
+| Escenario grande diseñado (finito) | §9.4; arte/layout en ZZ-019A (no procedural infinito) |
+| Avisos → cámara + ficha | Contrato §9.4/§21 (impl. en fases UI/alertas existentes; no sistema nuevo) |
+| Caminos / muros | Solo visual/estructura ahora; mecánicas futuras si sistémicas (§9.4) — **sin fase inventada** |
+| ZZ-019 | **APROBADA** — no reabrir ghost/✓/semilibre |
+| ZZ-012 | **CAMBIOS SOLICITADOS**; tips tras ZZ-019A; no ZZ-013 |
+| Integración arte edificios | Deuda artística no bloqueante |
+
+## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
 
 | Tema | Acción |
 |------|--------|
@@ -78,11 +93,10 @@
 | Mundo > viewport (no caber colonia en pantalla) | §9.4 aclaración escala; evidencia pan/zoom ZZ-018 |
 | radio max=1 · clinic sin max arbitrario | §9.7 |
 | Recuperación sin RNG punitivo v1 | §9.5 |
-| Construcción semilibre + snap + ✓ | Nuevo **ZZ-019 (GATE espacial temprano)** |
+| Construcción semilibre + snap + ✓ | **ZZ-019 (GATE espacial)** — APROBADA |
 | ZZ-010 | Completada históricamente; **no** es el modelo espacial final |
 | ZZ-011 | Absorbida/ampliada por ZZ-017 |
-| ZZ-012 | **Bloqueada** hasta ZZ-019 APROBADA; reescribir tips landscape/sectores |
-| ZZ-013+ | Dependen de B estable post-019/012 |
+| ZZ-012 | Depende espacial; reescribir tips |
 | ZZ-024 | Alinear a §9.2–§9.6 (confirm ✓, semilibre) |
 | Save | Migración layout/sectores en ZZ-017/018 |
 
@@ -94,7 +108,7 @@
 |--------|-------|-------|
 | A · Fundación | ZZ-001…ZZ-006 (6) | ZZ-001 |
 | A2 · Arranque y persistencia | ZZ-009, ZZ-007, ZZ-008 (3) | ZZ-007, ZZ-008 |
-| **B0 · Modelo espacial landscape** | **ZZ-016, ZZ-017, ZZ-018, ZZ-019 (4)** | **ZZ-016, ZZ-019** + **REVIEW_STOP ZZ-018** |
+| **B0 · Modelo espacial landscape** | **ZZ-016…019 + ZZ-019A (5)** | **ZZ-016, ZZ-019** + **REVIEW_STOP ZZ-018, ZZ-019A** |
 | B · Experiencia D1 | ZZ-010…ZZ-015 (6) | ZZ-010, ZZ-012, ZZ-014, ZZ-015 |
 | C · Loop D2–D5 | ZZ-020…ZZ-027 (8) | ZZ-021, ZZ-023 |
 | D · Vivienda y agua | ZZ-030…ZZ-036 (7) | ZZ-032 |
@@ -322,10 +336,10 @@
 
 
 
-## B0 · Modelo espacial y landscape (2.7)
+## B0 · Modelo espacial y landscape (2.7 → 2.8)
 
-> **Flujo:** ZZ-016 (HUMAN_GATE) → ZZ-017 → ZZ-018 (**REVIEW_STOP** · PARAR) → autorización → ZZ-019 (HUMAN_GATE espacial).  
-> **Criterio:** demostrar *«estoy construyendo mi colonia dentro de un mundo»* — no solo cámara/colocación (§9.4).
+> **Flujo:** ZZ-016 (HUMAN_GATE) → ZZ-017 → ZZ-018 (**REVIEW_STOP**) → ZZ-019 (HUMAN_GATE espacial · **APROBADA**) → **ZZ-019A (REVIEW_STOP · 2.8)** → autorización → ZZ-012.  
+> **Criterio:** *«estoy construyendo mi colonia dentro de un mundo»* — superficies reales, no patio ni libertad absoluta de píxel (§9.4).
 
 ### ZZ-016 — Landscape móvil + rotate gate
 
@@ -427,9 +441,42 @@
 **Tareas:** Implementar §9.2–§9.6; navegación básica lista→centrar; contact sheet landscape; validar criterio fantasía §9.4.
 
 **Aceptación:**
-- Fantasía B0 demostrable (§9.4)
+- Fantasía de colocación semilibre demostrable (§9.2/§9.6)
 - UX móvil landscape inequívoca
-- **Gate humano obligatorio antes de ZZ-012+**
+- **Gate humano** — APROBADA 2026-08-16 (no reabrir B0 de ghost/✓)
+- **Nota 2.8:** el *dónde* (superficies orgánicas + mapa diseñado) → **ZZ-019A**
+
+### ZZ-019A — Escenario diseñado + superficies edificables orgánicas
+
+> **2.8:** Refina el contrato espacial **sin** descartar ZZ-019. El jugador coloca semilibre **dentro** de superficies recuperadas, no en cualquier píxel ni en solares prefijados.
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · Modelo espacial landscape |
+| **HUMAN_GATE** | NO *(¿elevar a YES? → duda Neni)* |
+| **REVIEW_STOP** | **YES** |
+| **Objetivo** | Mapa grande finito con zonas reconocibles; superficies edificables orgánicas; en modo Construir solo esas superficies; capacidad = geometría+footprint; mantener ghost/✓ de ZZ-019. |
+| **Sistemas** | mapa/arte colonia, build-place, sectores |
+| **Dependencias** | ZZ-019 APROBADA |
+| **Archivos approx.** | render-map, sectors/surfaces data, build-place, assets escenario |
+| **Datos** | superficies por sector (geometría); save bump si hace falta |
+| **Assets** | escenario continuo (carreteras, ruinas, pecios, vegetación, vallas…) — tono actual, más legible |
+| **Pruebas auto** | smoke-build-place (solo en superficies); smoke-sectors |
+| **Pruebas funcionales** | 2+ layouts distintos en misma superficie; no construir fuera; pan mundo grande; sin GIS/solares beige |
+| **Revisión visual** | Sí (obligatoria + PARAR) |
+
+**Tareas:** Datos de superficies; highlight solo en build mode; adaptar freeCells/validación; enriquecer arte del mapa diseñado (sin bonuses inventados); evidencia REVIEW_STOP.
+
+**Evidencia REVIEW_STOP (mínimo):**
+- Mundo continuo legible (no superficie neutra) · pan lejos del Núcleo
+- Modo construir: solo superficies · ghost · válido/inválido · ✓/✕
+- Misma superficie: dos huertos vs huerto+otro · “sin espacio” físico
+- 844×390 · desktop · contact sheet
+
+**Aceptación:**
+- No libertad absoluta de píxel; no solares prefijados; no cupo N
+- ZZ-019 UX intacta
+- **PARAR** — no reescribir/aprobar ZZ-012 sin autorización Neni/ChatGPT
 
 ---
 
@@ -485,15 +532,15 @@
 
 ### ZZ-012 — Tutorial D1 contextual en el mundo
 
-> **2.7:** Replanificada. **No aprobar** sobre patio fijo. Depende del gate espacial **ZZ-019**. Tips deben asumir landscape + sectores + ✓ construir.
+> **2.8:** **No aprobar** todavía. CAMBIOS SOLICITADOS: reescribir tips **después** de ZZ-019A (superficies + escenario). Depende de ZZ-019 (UX) + ZZ-019A (dónde). No ZZ-013.
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B · Experiencia D1 |
 | **HUMAN_GATE** | **YES** |
-| **Objetivo** | Coach en mundo landscape: una pista contextual; avance por acción; sin cascada Continuar; ayuda §21.3. |
+| **Objetivo** | Coach en mundo landscape: una pista contextual; avance por acción; sin cascada Continuar; ayuda §21.3; tips asumen superficies edificables + ✓. |
 | **Sistemas** | UX D1, mapa, onboarding |
-| **Dependencias** | ZZ-019, ZZ-008 |
+| **Dependencias** | ZZ-019, **ZZ-019A**, ZZ-008 |
 | **Archivos approx.** | js/onboarding.js |
 | **Datos** | — |
 | **Assets** | — |
@@ -501,10 +548,10 @@
 | **Pruebas funcionales** | Partida nueva D1; skip intro → coach mundo |
 | **Revisión visual** | Sí |
 
-**Tareas:** Implementar §31.4; retirar cascadas Continuar; destacar acción; coach se apaga al dominar; enlace a ayuda.
+**Tareas:** Implementar/rehacer §31.4 tras 2.8; retirar cascadas Continuar; destacar acción; coach se apaga al dominar; enlace a ayuda.
 
 **Aceptación:**
-- Una pista a la vez; avance natural
+- Una pista a la vez; avance natural; tips 2.8
 - Gate humano
 
 ### ZZ-013 — HUD recursos D1
@@ -515,7 +562,7 @@
 | **HUMAN_GATE** | NO |
 | **Objetivo** | Comida/agua/madera legibles; sin Au/Gu. |
 | **Sistemas** | UX D1, mapa, onboarding |
-| **Dependencias** | ZZ-012, ZZ-019 |
+| **Dependencias** | ZZ-012, ZZ-019, ZZ-019A |
 | **Archivos approx.** | — |
 | **Datos** | — |
 | **Assets** | — |

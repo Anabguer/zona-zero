@@ -2,9 +2,9 @@
 
 > **SYNC VERIFY GAME_MASTER** · stamp=2026-08-15 19:41:46 · sha256_16=E699961EE3D959BF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
-**Versión de diseño:** 2.7 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)
-**Estado:** Contrato vigente post-ZZ-001 — enmienda **modelo espacial / landscape / sectores** (2026-08-15)
-**Fecha:** 2026-08-15  
+**Versión de diseño:** 2.8 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)
+**Estado:** Contrato vigente — enmienda **superficies edificables orgánicas + escenario diseñado** (2026-08-16) · no descarta B0/ZZ-019
+**Fecha:** 2026-08-16  
 **Plataforma:** Web · **gameplay landscape-first** (móvil horizontal obligatorio) · desktop panorámico · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
 **URL objetivo:** `/juegos/zona-zero/`
@@ -17,7 +17,7 @@
 | **Plan de fases** | `...\GAME_MASTER\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
 | **Log de ejecución** | `...\GAME_MASTER\ZONA_ZERO_DEVELOPMENT_LOG.md` | `docs/DEVELOPMENT_LOG.md` |
 
-> **Prioridad:** esta biblia **2.7** manda sobre diseños 1.x–2.6 previos, chats sueltos y código existente cuando haya contradicción.  
+> **Prioridad:** esta biblia **2.8** manda sobre diseños 1.x–2.7 previos, chats sueltos y código existente cuando haya contradicción.  
 > El código actual es **prototipo / motor parcial**; no define el juego definitivo.  
 > **Cómo trabajamos** está documentado en el §41 (parte integral de esta biblia, no un anexo opcional).
 
@@ -45,8 +45,7 @@
 6. Recursos  
 7. Catálogo de edificios  
 8. Mejoras de colonia (taller / hub)  
-9. Construcción y modelo espacial (sectores / landscape)  
-9. Construcción  
+9. Construcción y modelo espacial (sectores / superficies / landscape)  
 10. Producción y trabajo (modelo único)  
 11. Clima y estaciones  
 12. Salud  
@@ -127,7 +126,8 @@ A–N. Apéndices (techs, logros, misiones, costes, save, gates, inventario moto
 
 Juego de **gestión de colonia + supervivencia + expansión + exploración + eventos imprevisibles + progresión a largo plazo**.
 
-Referencias conceptuales (no clones): Infection Free Zone, Final Outpost, Banished (gestión indirecta), juegos donde construir poco a poco obliga a nuevas soluciones.
+Referencias conceptuales (no clones): Infection Free Zone, Final Outpost, Banished (gestión indirecta), juegos donde construir poco a poco obliga a nuevas soluciones.  
+**Legibilidad espacial** (no copia de arte/sistemas): city builders tipo Townsmen / bases de supervivencia móvil — el escenario es parte de la jugabilidad; el jugador lee el mundo, no un patio ni un fondo decorativo.
 
 ## 1.2 Qué NO es
 
@@ -601,11 +601,13 @@ Desbloqueo por **era** solo como *techo máximo*, nunca como única causa. La ca
 
 # 9. CONSTRUCCIÓN Y MODELO ESPACIAL DE COLONIA
 
-### CURSOR: CONSOLIDADO 2.7 — decisión Neni + ChatGPT (2026-08-15) · cierre decisiones
+### CURSOR: CONSOLIDADO 2.8 — refinamiento Neni + ChatGPT (2026-08-16)
 
-**Dirección definitiva (APROBADA):** sectores orgánicos + colocación semilibre + snap invisible + colonia > viewport + **móvil landscape**.
+**Se mantiene (B0 / ZZ-019 APROBADO — no reabrir):** sectores orgánicos · colocación semilibre · snap invisible · ghost · tint válido/inválido · ✓/✕ · no construir al soltar · colonia > viewport · **móvil landscape** · sin solares prefijados · sin cupo artificial N edificios/sector.
 
-**Prohibido:** pantalla fija · patio 2×2 · solares preasignados · imagen decorativa a rellenar · GIS visible · editor pixel-perfect · construir con segundo tap accidental · **macrocuadrícula de sectores** · **capacidad máxima artificial por sector** · **receta universal de recuperación** · **RNG punitivo al final de una recuperación cumplida**.
+**Refinamiento 2.8:** el *dónde* de esa colocación = **superficies edificables orgánicas** dentro del territorio recuperado (no libertad absoluta sobre cualquier píxel del mundo; no “todo el polígono del sector = construible”).
+
+**Prohibido:** pantalla fija · patio 2×2 · solares preasignados · 3 huecos donde el juego decide qué cabe · parcelas beige · cuadrados permanentes · imagen decorativa a rellenar · GIS visible · editor pixel-perfect · construir con segundo tap accidental · **macrocuadrícula de sectores** · **capacidad máxima artificial por sector** · **receta universal de recuperación** · **RNG punitivo al final de una recuperación cumplida** · mapa infinito procedural como sustituto de un escenario diseñado.
 
 ## 9.1 Orientación (landscape-first)
 
@@ -621,9 +623,13 @@ Desbloqueo por **era** solo como *techo máximo*, nunca como única causa. La ca
 
 1. Dock **Construir** → lista (era/tech/requisitos/coste/puestos).  
 2. Elegir tipo → **modo colocación** (ghost).  
-3. Mover ghost por suelo válido de **sectores recuperados**; tint válido/inválido.  
-4. **✓ CONSTRUIR** (confirmación explícita) · **✕ CANCELAR**.  
-5. Paga recursos → edificio aparece con snap invisible (sin grid visible).
+3. El mundo muestra **únicamente las superficies edificables** donde ese footprint puede anclarse (territorio recuperado · sin obstáculos · cabida física).  
+4. Mover ghost con **snap invisible** interno; tint válido/inválido.  
+5. **✓ CONSTRUIR** (confirmación explícita) · **✕ CANCELAR**.  
+6. Paga recursos → edificio aparece integrado en el suelo (sin grid visible).
+
+**No** = libertad absoluta sobre cualquier píxel del mapa.  
+**No** = solares/slots predeterminados ni “huecos” pintados de forma permanente fuera de modo construir.
 
 ## 9.3 D1 disponible (tipos)
 
@@ -632,14 +638,14 @@ HQ (ya), shelter, farm, well, barricade (opcional), storage (si recursos).
 
 ## 9.4 Modelo espacial (contrato)
 
-### Colonia > viewport
+### Colonia > viewport · escenario grande diseñado
 
-El viewport es una **ventana** sobre un mundo físico mayor — no un marco donde “debe caber la colonia”.
+El viewport es una **ventana** sobre un mundo físico mayor — no un marco donde “debe caber la colonia”, ni un patio, ni una imagen de fondo.
 
-**Contrato de escala (2.7 · aclaración ZZ-018):**
+**Contrato de escala (2.7 · aclaración ZZ-018 · reforzado 2.8):**
 
 - El mundo de la colonia es **físicamente mayor** que 844×390 y que 932×430.  
-- El jugador **recorre** con pan; **pinch** acerca/aleja; **Recentrar** vuelve a una referencia útil (Núcleo/HQ al inicio).  
+- El jugador **recorre** con pan; **pinch** acerca/aleja; **Recentrar** vuelve a una referencia útil (Refugio Central / Núcleo al inicio).  
 - **No** intentar mostrar todos los sectores a la vez.  
 - **No** reducir edificios para hacer caber artificialmente la colonia.  
 - Edificios con tamaño visual agradable y legible.  
@@ -647,39 +653,46 @@ El viewport es una **ventana** sobre un mundo físico mayor — no un marco dond
 - Zoom alejado = lectura más global, dentro de límites de legibilidad/performance.  
 - El límite del mundo **no** es el borde de la pantalla.
 
+**Mapa finito diseñado (2.8):** el escenario **no** tiene que generarse infinito. Puede (y en v1 debe) ser un **mapa grande deliberado** con zonas distintas y reconocibles — p. ej. antiguo aparcamiento, calle comercial destruida, descampado, zona verde, almacenes, carretera, ruinas residenciales, perímetro industrial. Cada zona puede tener características propias **solo** si enlazan con sistemas existentes (escombros, hostiles, perímetro inseguro, acceso bloqueado, terreno apto, elementos recuperables — §9.5 / §13–§16). **Prohibido** inventar bonuses “porque quedan bien” sin enlace sistémico en esta biblia.
+
 | Fase | Sensación espacial |
 |------|-------------------|
-| D1 | Principalmente Núcleo + entorno cercano |
-| Media | Desplazamiento entre áreas funcionales |
+| D1 | Refugio Central + entorno inmediato |
+| Media | Desplazamiento entre áreas funcionales / sectores recuperados |
 | Avanzada | Extensión varias veces el viewport |
 
 **Pregunta de diseño correcta:** ¿es cómodo recorrer, localizar y gestionar una colonia mayor que la pantalla desde móvil?  
 **Incorrecta:** ¿cabe la colonia en móvil?
 
-Referencia de sensación (no copia de sistemas): mundos/bases navegables tipo Day R — escala y perspectiva.
+Referencias de sensación (no copia de arte/sistemas): mundos/bases navegables tipo Day R; **legibilidad espacial** tipo Townsmen / bases de supervivencia móvil — el escenario es jugabilidad.
 
 ### Lectura visual: mundo físico, no plano de sectores
 
-- El fondo/escenario existe **debajo** de cualquier lectura de sector: calles rotas, ruinas, solares, coches, muros, vegetación, escombros, accesos.
-- En **vista normal** los sectores **no** se representan como polígonos rellenos permanentes. CONTROLADO / NO CONTROLADO / EN RECUPERACIÓN se lee por tratamiento ambiental (limpieza, escombros, luz, perímetro, actividad).
-- Límites explícitos de sector: preferentemente en **modo expansión/recuperación** (o selección), con estética integrada (contorno tenue / resplandor / borde de suelo) — **no** GIS (líneas discontinuas, relleno plano de tablero).
-- **Núcleo** = parte ya recuperada del mismo mundo (más limpia/iluminada), **no** una isla/placa sobre negro.
+- El fondo/escenario existe **debajo** de cualquier lectura de sector: **carreteras apocalípticas**, caminos, ruinas, coches/pecios, árboles muertos/vegetación, escombros, vallas, desniveles, zonas destruidas, accesos.  
+- En **vista normal** los sectores **no** se representan como polígonos rellenos permanentes. CONTROLADO / NO CONTROLADO / EN RECUPERACIÓN se lee por tratamiento ambiental (limpieza, escombros, luz, perímetro, actividad).  
+- Límites explícitos de sector: preferentemente en **modo expansión/recuperación** (o selección), con estética integrada (contorno tenue / resplandor / borde de suelo) — **no** GIS (líneas discontinuas, relleno plano de tablero).  
+- **Refugio Central / Núcleo** = origen de la colonia, parte ya recuperada del mismo mundo (más limpia/iluminada), **no** una isla/placa sobre negro.  
 - **No recuperado ≠ vacío/negro**: el lugar existe y se recorre; no es construible aún.
 
-### Avisos UI → foco en el mundo (navegación)
+### Avisos UI → navegación espacial (contrato)
 
-**Principio:** los paneles informan; el mundo es donde se resuelve el problema.
+**Principio:** los paneles informan; el mundo es donde se resuelve el problema.  
+En un mapa grande, los avisos **deben poder actuar como navegación** — no obligar a buscar a ojo objetos pequeños.
 
-La UI de avisos debe servir como **navegación por la colonia** cuando esta supera el viewport. Al tocar un aviso (p. ej. «Huerto dañado», «Valla rota», «Enfermería saturada», «Sector listo para recuperar»):
+Al tocar un aviso localizado (p. ej. «Pozo dañado», «Valla rota», «Enfermería saturada», «Falta de trabajadores en huerto», «Ataque en perímetro», «Construcción terminada», «Sector listo para recuperar»):
 
-1. La **cámara viaja / centra** el elemento o zona relacionada.  
-2. Lo **resalta** de forma breve.
+1. La **cámara viaja / centra** el elemento o zona.  
+2. Lo **resalta** de forma breve.  
+3. **Abre la ficha / panel** correspondiente cuando exista acción (p. ej. Reparar, asignar, recuperar).  
+4. El jugador actúa desde ahí.
 
-Implementación concreta puede llegar en fases posteriores de UI/alertas; el contrato espacial ya lo exige para colonias grandes.
+Aplicable a: edificio dañado · enfermos · falta de workers · ataque · obra terminada · problema de producción · incidente localizado · expansión.
+
+Implementación concreta puede llegar en fases de UI/alertas; el contrato espacial **ya lo exige**. No es un sistema nuevo: es el puente UI ↔ mundo (§21 / §13 repair).
 
 ### Sectores orgánicos (geometría del mundo)
 
-- **D1:** solo **Sector Núcleo** recuperado (alrededor del HQ).  
+- **D1:** solo **Sector Núcleo** recuperado (alrededor del Refugio Central).  
 - El resto del entorno cercano **existe** como mundo (ruinas, coches, escombros, vegetación, calles rotas, obstáculos) — **no** como casillas bloqueadas.  
 - Ampliar = **recuperar sectores colindantes** (gameplay), no “subes de nivel y aparece vacío”.
 
@@ -692,10 +705,27 @@ Al mirar la colonia debe percibirse **ciudad/entorno recuperado**, no Civilizati
 
 Los sectores **pueden continuar fuera del viewport**; no se diseñan como N piezas que deban caber todas en pantalla a la vez. El jugador las descubre/recorre espacialmente.
 
-### Capacidad de un sector = física, no cupo
+### Superficies edificables orgánicas (2.8 — refinamiento del *dónde*)
+
+**Sector recuperado ≠ “puedo construir en cualquier píxel del sector”.**
+
+Dentro del territorio recuperado existen **superficies edificables** de geometría orgánica (p. ej. una explanada/aparcamiento recuperado relativamente grande). Internamente puede existir snap/grid invisible para footprints; **el jugador no ve esa cuadrícula** en juego normal.
+
+| Idea | Contrato |
+|------|----------|
+| Qué ve al construir | Solo superficies donde el footprint elegido puede colocarse |
+| Qué decide el jugador | Cómo aprovechar el espacio (2 huertos; huerto+vivienda; reservar; reorganizar) |
+| Qué **no** | Cupo “este sector admite 2 edificios”; solares fijos; 3 huecos prefijados |
+
+La capacidad emerge de: **geometría de la superficie** · footprint del edificio · obstáculos · separaciones · suelo no edificable · edificios ya colocados.  
+Ejemplo conceptual: superficie ≈ 6×5 unidades internas; huerto 2×2; casa 2×2; casa superior / enfermería footprints mayores → decisiones espaciales reales.
+
+Un mismo sector recuperado **puede** contener una o varias superficies (p. ej. explanada + hueco tras ruinas) sin convertirse en solares pintados permanentes.
+
+### Capacidad = física, no cupo
 
 **Prohibido** “este sector admite máximo N edificios”.  
-La capacidad surge de: tamaño · forma · footprints · obstáculos · caminos · separaciones mínimas · edificios ya colocados · suelo no construible.  
+La capacidad surge de: tamaño · forma · footprints · obstáculos · caminos/estructuras · separaciones mínimas · edificios ya colocados · **límites de superficie edificable**.  
 Si caben tres huertos y el jugador asume coste/staffing/mantenimiento → **puede construir tres**.
 
 ### Recuperar territorio (§9.5)
@@ -705,25 +735,44 @@ Acción del mundo: «Hemos recuperado esta parte de la ciudad.»
 Cada sector declara **componentes de recuperación** según su situación física (§9.5).  
 Solo sistemas/recursos admitidos por esta biblia (sin reintroducir electricidad, etc.).
 
-Resultado: sector → **recuperado** → suelo construible. Expandir **aumenta perímetro vulnerable** (§9.8).
+Resultado: sector → **recuperado** → sus **superficies edificables** pasan a ser suelo válido de colocación. Expandir **aumenta perímetro vulnerable** (§9.8).
 
 ### Colocación semilibre + snap invisible
 
 - Interno: ancla discreta densa (puntos/celdas **ocultas** al jugador; no se enseña grid ni hex).  
-- Externo: sensación de colocación libre; **sin** cuadrícula, coordenadas ni GIS.  
-- Válido: footprint cabe · no solapa · dentro de sector recuperado · no sobre obstáculo · no corta conectividad mínima al HQ / acceso.
+- Externo: sensación de colocación libre **dentro de la superficie**; **sin** cuadrícula, coordenadas ni GIS.  
+- Válido: footprint cabe · no solapa · dentro de superficie edificable de sector recuperado · no sobre obstáculo · no corta conectividad mínima al HQ / acceso.
 
 ### Edificios repetibles
 
-Si el catálogo lo permite, Neni elige **dónde** integrar el 2º/3º huerto (u otro).  
+Si el catálogo lo permite, Neni elige **dónde** integrar el 2º/3º huerto (u otro) **dentro de las superficies disponibles**.  
 Límites naturales: coste, workers, producción/consumo, **espacio físico**, progresión, balance.  
 `max` solo con razón de diseño (§9.7).
 
-### Arte base (purga)
+### Caminos / carreteras (estructura visual; mecánicas solo si sistémicas)
+
+Los caminos y carreteras **preexistentes** (a menudo destruidos) dan **estructura visual** al escenario.  
+**No** convertir Zona Zero en un simulador de carreteras.
+
+Fases futuras **pueden** considerar reparar ciertos tramos, abrir accesos o conectar zonas **solo** si hay función sistémica real (p. ej. acceso bloqueado §9.5, rutas de exploración, perímetro).  
+**Prohibido** mecánicas decorativas sin propósito. Cualquier diseño concreto de “reparar camino” exige decisión Neni/ChatGPT y enlace a sistemas existentes — **no inventado aquí**.
+
+### Muros / vallas / perímetro (absorber en defensa existente)
+
+No implementar ahora un sistema independiente de murallas.  
+El escenario puede mostrar vallas destruidas, muros, accesos y perímetros recuperables.  
+Fases posteriores pueden **reparar/reforzar** elementos existentes o construir defensas del catálogo (§7.7) conectando con **ataques, perímetro, daño y repair** (§13 / §9.8).  
+**No** crear un segundo sistema de defensa paralelo.
+
+### Arte base (purga) + integración de lo construido
 
 **Si tiene función jugable, no puede venir pintado como decoración fija.**  
 Purgar pozo/huerto/taller/enfermería/defensas falsas del terreno base.  
 Permitido: ruinas, coches, árboles, basura, escombros, vallas rotas, carreteras, estructuras destruidas **no funcionales**.
+
+Mantener tono apocalíptico, suciedad y edificios legibles. Evolucionar hacia **mapa grande diseñado**, no superficie neutra enorme.
+
+**Integración visual de edificios construidos** (puede ser fase artística posterior; no bloquea sistemas): sombra de contacto · perspectiva coherente · transición con suelo · escala coherente · evitar efecto PNG/pegatina.
 
 ### Arco visual QA (no calendario rígido)
 
@@ -745,14 +794,15 @@ Ayudas suaves: footprints, separación mínima, snap/orientación, corredores or
 
 ### Navegación colonia grande
 
-Con 30–50 edificios: lista/filtros en Más · avisos → centrar · «Localizar» desde ficha/alerta.  
+Con 30–50 edificios: lista/filtros en Más · avisos → centrar + ficha (§9.4) · «Localizar» desde ficha/alerta.  
 **Sin** minimapa GIS permanente salvo necesidad demostrada en playtest.
 
 ### Criterio de fantasía del bloque B0 (PLAN)
 
 B0 **no** se aprueba porque “la cámara funciona” o “puedo colocar un edificio”.  
-Debe demostrar: **estoy construyendo mi propia colonia dentro de un mundo** (recorrer · decidir dónde · repetir edificios · quedarse sin espacio · recuperar territorio que parece ciudad · expansión con consecuencias · imaginar D1→D100 · cómodo en móvil horizontal).
+Debe demostrar: **estoy construyendo mi propia colonia dentro de un mundo** (recorrer · decidir dónde en superficies reales · repetir edificios · quedarse sin espacio físico · recuperar territorio que parece ciudad · expansión con consecuencias · imaginar D1→D100 · cómodo en móvil horizontal).
 
+**2.8:** ZZ-019 validó ghost/✓/semilibre. Queda demostrar **superficies orgánicas + escenario diseñado legible** antes de cerrar el tutorial (ZZ-012).
 ## 9.5 Recuperar un sector — plantillas / componentes
 
 ### Reglas base
@@ -827,13 +877,15 @@ Expandir tiene **coste estratégico**: más perímetro, más puntos vulnerables,
 Hordas/ataques pueden afectar sectores/perímetro (§13).  
 Decisión: «¿me expandiré ahora o aún no puedo defenderlo?»
 
+Vallas/muros/accesos del escenario alimentan este mismo modelo (§9.4 muros) — no un sistema paralelo.
+
 ## 9.9 Reglas técnicas residuales
 
-- Snap interno invisible; footprint habitual 1×1 o 2×1.  
+- Snap interno invisible sobre **superficies edificables**; footprint habitual 1×1 o 2×1 (y mayores según catálogo).  
 - Workers de construcción: ≥1 idle/build.  
 - Upgrade HQ in-place.  
 - Mover edificios: no en v1; reconstruir.  
-- Save: versionar sectores (geometría/plantilla/componentes) + posiciones.
+- Save: versionar sectores (geometría/plantilla/componentes) + **superficies edificables** + posiciones.
 
 ---
 
@@ -1080,10 +1132,11 @@ Propuesta:
 
 Cursor debe conectar esto con Taller/research sin crear un segundo minijuego de herramientas/piezas.
 
-### CURSOR: CONSOLIDADO 2.7 — expansión y perímetro
+### CURSOR: CONSOLIDADO 2.7/2.8 — expansión y perímetro
 
 Más sectores recuperados → perímetro más largo → más superficie expuesta a hordas/eventos de daño (§9.8).  
-La defensa y el repair (§13) deben poder señalar sectores/borde afectados y centrar cámara.
+La defensa y el repair (§13) deben poder señalar sectores/borde afectados y centrar cámara **+ abrir ficha** (§9.4 avisos).  
+Elementos del escenario (vallas rotas, accesos) se absorben aquí; no crear “sistema de muros” aparte.
 
 ### CURSOR: CONSOLIDADO 2.4 — daño y reparación
 
@@ -1178,9 +1231,9 @@ Beneficios de controlar: seguridad, vecinos revelados, rutas, posibles edificios
 ## 16.2 Visual
 
 Ciudad abandonada, no GIS. Landmarks con arte.  
-Colonia **integrada** en terreno: espacio grande desplazable; viewport parcial.  
+Colonia **integrada** en terreno: **escenario grande diseñado** desplazable; viewport parcial.  
 Escenografía ≠ edificios jugables (§9.4 arte).  
-Referencia de sensación espacial (no copia de sistemas): mundos tipo Day R — escala y navegación; Zona Zero sigue siendo gestión de colonia.
+Referencias de sensación espacial (no copia): Day R (escala); Townsmen / bases supervivencia (legibilidad del escenario como jugabilidad).
 
 ## 16.3 Beneficio de control (landmarks)
 
@@ -1188,8 +1241,8 @@ No “pintar verde”: reduce amenaza local, revela vecinos, bonus defensa/perí
 
 ## 16.4 Recuperación de sectores de colonia
 
-Distinto de controlar un landmark lejano: es **ampliar el patio construible** junto al camp mediante **plantillas/componentes** (§9.5), no una tasa global.  
-Geometría **orgánica del mundo** (§9.4) — sin macrogrid ni cupo N edificios/sector.  
+Distinto de controlar un landmark lejano: es **ampliar el territorio de colonia** junto al camp mediante **plantillas/componentes** (§9.5), no una tasa global.  
+Geometría **orgánica del mundo** + **superficies edificables** (§9.4) — sin macrogrid ni cupo N edificios/sector.  
 v1: recuperación cumplida → **éxito** (sin RNG punitivo final).
 
 ---
@@ -1425,8 +1478,9 @@ Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/r
 - “Explorador herido 3 días”  
 - “Movimiento infectado al norte”  
 - “Podrías construir enfermería”  
+- “Pozo dañado” / “N edificios necesitan reparación” → al tocar: **cámara + resalte + ficha** (§9.4)
 
-No mandar: orientar.
+No mandar: orientar. Las alertas localizadas son **navegación espacial**, no solo texto.
 
 ## 21.3 Ayuda consultable (v1)
 
@@ -1645,7 +1699,7 @@ El tutorial **principal ocurre dentro del mundo**, no en cascadas de modales Con
 
 La mini-intro de nueva partida (§31.6) **no** sustituye este tutorial: la intro da tono; el coach enseña mecánica en D1+.
 
-**2.7:** el tutorial contextual asume colonia landscape + sectores (§9). ZZ-012 no se aprueba sobre el patio fijo 10×8; depende del HUMAN_GATE espacial temprano (PLAN 2.7).
+**2.7/2.8:** el tutorial contextual asume colonia landscape + sectores + **superficies edificables** + ✓ construir (§9). ZZ-012 **no se aprueba** hasta cerrar el refinamiento espacial 2.8 e implementar lo que el PLAN exija (ZZ-019A); tips deben reescribirse en consecuencia.
 
 ## 31.5 Portada / inicio (arranque del juego)
 
@@ -1834,7 +1888,7 @@ Usar para calibrar, no para “aprobar UX”.
 
 Detalle exhaustivo de fases/subfases (`ZZ-XXX`), dependencias, tests, HUMAN_GATE y criterios de aceptación:
 
-→ `docs/IMPLEMENTATION_PLAN.md` (**versión 2.6**) / Drive `ZONA_ZERO_IMPLEMENTATION_PLAN.md`
+→ `docs/IMPLEMENTATION_PLAN.md` (**versión 2.8**) / Drive `ZONA_ZERO_IMPLEMENTATION_PLAN.md`
 
 Ejecución y revisiones fase a fase:
 
@@ -1846,6 +1900,16 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 ---
 
 # 38. CHANGELOG DE DISEÑO
+
+## 2.8 (2026-08-16) — superficies edificables + escenario diseñado (Neni+ChatGPT)
+- **No descarta** B0 ni ZZ-019 (ghost/✓/semilibre APROBADO).
+- **Refina el dónde:** superficies edificables orgánicas dentro de territorio recuperado; al construir solo esas superficies; capacidad = geometría+footprint (sin cupo N).
+- Mapa **finito diseñado** (no infinito procedural); zonas reconocibles; props solo con enlace sistémico.
+- Avisos → cámara + resalte + **abrir ficha** (§9.4 / §21).
+- Caminos: estructura visual; mecánicas futuras solo si sistémicas (sin inventar aquí).
+- Muros/vallas: absorber en §13 / perímetro existente.
+- Arte: integración sombra/perspectiva = fase posterior no bloqueante.
+- PLAN 2.8: fase **ZZ-019A**; ZZ-012 en CAMBIOS SOLICITADOS / bloqueada hasta 2.8+019A.
 
 ## 2.7 (2026-08-15) — modelo espacial / landscape / sectores (Neni+ChatGPT)
 - **Landscape-first** gameplay; rotate gate; portada/intro pueden ser vertical (§9.1, §31.8).  
@@ -3216,7 +3280,7 @@ Lista canónica vigente: ver **IMPLEMENTATION_PLAN 2.7** § HUMAN_GATE (incluye 
 
 ### 41.7.1 REVIEW_STOP (revisión humana intermedia, no gate canónico extra)
 
-Algunas fases marcan `REVIEW_STOP: YES` (p. ej. **ZZ-018**).  
+Algunas fases marcan `REVIEW_STOP: YES` (p. ej. **ZZ-018**, **ZZ-019A**).  
 Tras completar la fase: tests → capturas/evidencia → commit → log `PENDIENTE DE REVISIÓN` → **PARAR**.  
 **No** ejecutar la fase siguiente (p. ej. ZZ-019) hasta autorización explícita Neni/ChatGPT.  
 No cuenta como HUMAN_GATE adicional en el total canónico, pero **bloquea** igual que un gate a efectos de avance.
