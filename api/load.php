@@ -9,7 +9,7 @@ if (!zz_slot_valid($slot)) {
     zz_respond(['ok' => false, 'error' => 'slot_invalid'], 400);
 }
 
-$pdo = getDBConnection();
+$pdo = zz_pdo();
 zz_ensure_schema($pdo);
 
 $st = $pdo->prepare(

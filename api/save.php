@@ -46,7 +46,7 @@ if ($json === false) {
     zz_respond(['ok' => false, 'error' => 'json_encode'], 500);
 }
 
-$pdo = getDBConnection();
+$pdo = zz_pdo();
 zz_ensure_schema($pdo);
 
 $st = $pdo->prepare(

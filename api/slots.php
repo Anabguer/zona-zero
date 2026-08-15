@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 $user = zz_require_user();
-$pdo = getDBConnection();
+$pdo = zz_pdo();
 zz_ensure_schema($pdo);
 
 $st = $pdo->prepare(

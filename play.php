@@ -92,7 +92,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js';
+    import { bootGame } from './js/main.js?v=3';
     bootGame({
       slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,

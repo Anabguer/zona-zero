@@ -37,8 +37,19 @@ $base = zz_public_base();
     <section class="zz-slots" id="zz-slots" aria-label="Slots de partida"></section>
   </div>
   <script type="module">
-    import { bootHub } from './js/main.js';
-    bootHub();
+    import { bootHub } from './js/main.js?v=3';
+    bootHub().catch((err) => {
+      const el = document.getElementById('zz-hub-boot');
+      if (el) el.textContent = 'Error al iniciar: ' + (err && err.message ? err.message : err);
+    });
+  </script>
+  <script>
+    window.addEventListener('error', function (ev) {
+      var el = document.getElementById('zz-hub-boot');
+      if (el && el.textContent.indexOf('Cargando') === 0) {
+        el.textContent = 'Error JS: ' + (ev.message || 'módulo no cargó');
+      }
+    });
   </script>
 </body>
 </html>

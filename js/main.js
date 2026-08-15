@@ -263,9 +263,12 @@ export async function bootGame(opts) {
 export async function bootHub() {
   const boot = $('zz-hub-boot');
   const hub = $('zz-hub');
+  if (boot) boot.textContent = 'Cargando slots…';
   try {
     const data = await api.fetchSlots();
-    if (!data.ok) throw new Error(data.error || 'slots');
+    if (!data.ok) {
+      throw new Error(data.error || 'slots');
+    }
     $('zz-user').textContent = data.user?.nombre || 'Jugador';
     const grid = $('zz-slots');
     grid.innerHTML = '';
@@ -302,8 +305,22 @@ export async function bootHub() {
     boot.hidden = true;
     hub.hidden = false;
   } catch (e) {
-    if (e.message !== 'auth') {
-      boot.textContent = 'No se pudieron cargar los slots. ¿Estás conectado a Intocables?';
+    const msg = String(e && e.message ? e.message : e);
+    if (msg === 'auth') {
+      if (boot) boot.textContent = 'Redirigiendo al login…';
+      return;
+    }
+    let human = 'No se pudieron cargar los slots.';
+    if (msg === 'timeout') human = 'La API tardó demasiado (timeout). Reintenta.';
+    else if (msg === 'network') human = 'Error de red al hablar con la API.';
+    else if (msg === 'db_connection' || msg === 'db_schema') human = 'Error de base de datos. Reintenta en un momento.';
+    else if (msg && msg !== 'slots') human += ' (' + msg + ')';
+    if (boot) {
+      boot.innerHTML =
+        human +
+        ' <button type="button" class="zz-btn zz-btn--primary" id="zz-retry-slots">Reintentar</button>';
+      const btn = document.getElementById('zz-retry-slots');
+      if (btn) btn.addEventListener('click', () => bootHub());
     }
   }
 }
