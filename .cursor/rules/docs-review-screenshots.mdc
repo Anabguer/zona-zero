@@ -1,9 +1,9 @@
 ---
-description: Capturas de revisión visual en docs/review/ para ChatGPT/GitHub
+description: Capturas de revisión visual en docs/review/ y Google Drive
 alwaysApply: true
 ---
 
-# Revisión visual (docs/review/)
+# Revisión visual (docs/review/ + Google Drive)
 
 Cuando termines una versión o cambio que requiera revisión visual:
 
@@ -12,6 +12,11 @@ Cuando termines una versión o cambio que requiera revisión visual:
 3. Mantén **solo** las capturas de la revisión actual: sustituye/borra las anteriores en `docs/review/` para no acumular.
 4. No dejes las capturas únicamente en `scripts/screenshots-*` local; deben estar en el repo bajo `docs/review/`.
 5. **Actualiza siempre** `docs/review/index.html` para que la galería muestre exactamente las capturas actuales (título debajo de cada una). Preferible regenerarla con `node scripts/review-shots.mjs`.
+6. **Copia** (nunca muevas ni borres los originales) las mismas capturas a Google Drive:
+   - Ruta local Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\`
+   - Sustituye allí las capturas antiguas; **no acumules historial** en Drive (el histórico está en Git).
+   - Solo capturas de revisión — **nunca** sincronizar el proyecto completo con Drive.
+7. Si procede, publica solo `docs/review/` en producción para la URL HTTP de galería (sin deploy del juego salvo que lo pidan).
 
 ## Mínimo cuando corresponda
 
@@ -20,7 +25,8 @@ Cuando termines una versión o cambio que requiera revisión visual:
 - `gameplay.png`
 - Más capturas específicas necesarias para entender el cambio (p. ej. `poblacion.png`, `construir.png`, `explorador.png`).
 - `index.html` (galería de la revisión actual)
+- Copia equivalente en `G:\Mi unidad\Juegos\Zona Zero\Review\`
 
 ## Entrega al usuario
 
-Indica el **commit**, la galería (`docs/review/index.html`) y **qué archivos** has dejado en `docs/review/`.
+Indica el **commit**, la galería (`docs/review/index.html` / URL prod si aplica), **qué archivos** hay en `docs/review/`, y confirma la copia a Drive (`G:\Mi unidad\Juegos\Zona Zero\Review\`).
