@@ -312,6 +312,58 @@ function handleSheetAction(action, btn) {
   }
 }
 
+function categoryDayImpact(key) {
+  const labor = state.population?.labor || {};
+  const n = labor[key] || 0;
+  if (key === 'idle') return { text: 'libres para asignar', deficit: null };
+  if (key === 'build') {
+    return {
+      text: n > 0 ? 'pueden construir' : 'sin mano de obra',
+      deficit: n < 1 ? 'Asignad construcción para edificar' : null,
+    };
+  }
+  if (key === 'defense') {
+    return {
+      text: n > 0 ? `patrulla +${Math.round(n * (content.balance.defensePerAssigned || 2.5))} def` : 'sin patrulla',
+      deficit: null,
+    };
+  }
+  if (key === 'medicine') {
+    return { text: n > 0 ? 'curan heridos/enfermos' : 'sin cuidado', deficit: null };
+  }
+  let est = 0;
+  let slots = 0;
+  let staffed = 0;
+  (state.base.buildings || []).forEach((b) => {
+    if (b.hp <= 0) return;
+    const def = content.buildings[b.type];
+    const k = laborKeyForBuilding(def);
+    if (k !== key || !def?.produces) return;
+    const jobs = Math.max(1, def.jobs || 1);
+    slots += jobs;
+    staffed += b.workers || 0;
+    const ratio = (b.workers || 0) <= 0 ? 0 : Math.min(1.15, (b.workers || 0) / jobs);
+    Object.values(def.produces).forEach((v) => {
+      est += Math.round(v * ratio);
+    });
+  });
+  const labels = { food: 'comida', water: 'agua', produce: 'mat.' };
+  const res = labels[key] || key;
+  if (slots === 0) {
+    return {
+      text: 'sin edificios',
+      deficit:
+        key === 'food' || key === 'water'
+          ? `Construid ${key === 'food' ? 'huerto' : 'pozo'}`
+          : 'Construid un edificio de producción',
+    };
+  }
+  if (staffed === 0) {
+    return { text: `0 ${res}/día`, deficit: 'Edificios sin trabajadores' };
+  }
+  return { text: `≈ +${est} ${res}/día`, deficit: staffed < slots ? `Puestos libres ${slots - staffed}` : null };
+}
+
 function openPopulationSheet() {
   syncLaborFromColony(state, content);
   const pop = state.population;
@@ -319,6 +371,7 @@ function openPopulationSheet() {
   const labor = pop.labor || {};
   const rows = ['idle', 'food', 'water', 'build', 'produce', 'defense', 'medicine']
     .map((k) => {
+      const impact = categoryDayImpact(k);
       const steppers =
         k === 'idle'
           ? `<span class="zz-labor-val">${labor[k] || 0}</span>`
@@ -327,13 +380,20 @@ function openPopulationSheet() {
               <span>${labor[k] || 0}</span>
               <button type="button" data-labor="${k}" data-delta="1" aria-label="Más">+</button>
             </div>`;
-      return `<div class="zz-labor-row"><div><strong>${LABOR_LABEL[k]}</strong></div>${steppers}</div>`;
+      return `<div class="zz-labor-row">
+        <div>
+          <strong>${LABOR_LABEL[k]}</strong>
+          <div class="zz-labor-impact">${escapeHtml(impact.text)}</div>
+          ${impact.deficit ? `<div class="zz-labor-deficit">${escapeHtml(impact.deficit)}</div>` : ''}
+        </div>
+        ${steppers}
+      </div>`;
     })
     .join('');
   openSheet(`
-    <h2>Población ${pop.total} / ${cap}</h2>
-    <p>Disponibles: <strong>${labor.idle || 0}</strong> · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}</p>
-    <p class="zz-muted" style="font-size:0.8rem">Asignación numérica. Comida/agua/producción van a edificios con puestos.</p>
+    <h2>Colonia ${pop.total} / ${cap}</h2>
+    <p>Disponibles <strong>${labor.idle || 0}</strong> · Asignados <strong>${workforce(pop) - (labor.idle || 0)}</strong>
+      ${pop.injured || pop.sick ? ` · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}` : ''}</p>
     ${rows}
     <p style="margin-top:0.75rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>
   `);
@@ -392,9 +452,17 @@ function openExplorerSheet(id) {
     .join('');
   const stLabel =
     e.status === 'ready' ? 'Disponible' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
+  const xp = Math.min(100, Math.round((e.xp || 0) % 100));
+  const level = e.level || 1;
   openSheet(`
-    <h2>${escapeHtml(e.name)}</h2>
-    <p>Explorador · Nv.${e.level || 1}</p>
+    <div class="zz-explorer-hero">
+      <span data-portrait="${e.id}"></span>
+      <div>
+        <h2 style="margin:0">${escapeHtml(e.name)}</h2>
+        <p style="margin:0.15rem 0 0">Explorador · Nv.${level}</p>
+        <div class="zz-xp-bar" title="Progreso al siguiente nivel"><i style="width:${xp}%"></i></div>
+      </div>
+    </div>
     <div class="zz-skill-list">${skills}</div>
     <p>Estado: <strong>${stLabel}</strong></p>
     ${
@@ -408,6 +476,14 @@ function openExplorerSheet(id) {
       <button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button>
     </p>
   `);
+  const host = $('zz-sheet-body')?.querySelector('[data-portrait]');
+  if (host) {
+    try {
+      host.appendChild(renderPortraitSvg({ id: e.id, name: e.name, portraitSeed: e.portraitSeed }, 56));
+    } catch {
+      /* ignore */
+    }
+  }
   paint();
 }
 
@@ -477,7 +553,16 @@ function openBuildSheet() {
       const cost = Object.entries(b.cost || {})
         .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
         .join(' · ');
-      const jobs = b.jobs > 0 ? `Trabajadores 0–${b.jobs}` : 'Sin puestos';
+      const jobs = b.jobs > 0 ? `${b.jobs} puesto${b.jobs > 1 ? 's' : ''}` : 'Pasivo';
+      const benefit = b.produces
+        ? Object.entries(b.produces)
+            .map(([k, v]) => `+${v} ${RES_LABEL_UI[k] || k}/día a plena plantilla`)
+            .join(' · ')
+        : b.defense
+          ? `+${b.defense} defensa`
+          : b.housing
+            ? `+${b.housing} capacidad`
+            : b.desc || '';
       let lockReason = '';
       if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
       else if (reqTech.length) lockReason = 'Falta investigación';
@@ -490,18 +575,18 @@ function openBuildSheet() {
         <span class="zz-build-card__art" data-thumb="${b.id}"></span>
         <span class="zz-build-card__body">
           <strong>${escapeHtml(b.name)}</strong>
-          <em>${escapeHtml(b.desc || '')}</em>
-          <span class="zz-build-card__meta">${jobs}</span>
+          <em>${escapeHtml((b.desc || '').slice(0, 72))}</em>
+          <span class="zz-build-card__meta">${jobs}${benefit ? ` · ${escapeHtml(benefit)}` : ''}</span>
           <span class="zz-build-cost">${cost || 'Gratis'}</span>
-          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Construir</span>'}
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar en el mapa</span>'}
         </span>
       </button>`;
     })
     .join('');
   openSheet(`
     <h2>Construir</h2>
-    <p>Elegid un edificio y colocadlo en el refugio.</p>
-    <p class="zz-muted" style="font-size:0.8rem">Mano de obra construcción: ${state.population.labor?.build || 0} (+ disponibles ${state.population.labor?.idle || 0})</p>
+    <p>Elegid y colocad en el refugio. La colonia crece a la vista.</p>
+    <p class="zz-muted" style="font-size:0.8rem">Construcción: ${state.population.labor?.build || 0} · libres ${state.population.labor?.idle || 0}</p>
     <div class="zz-build-grid">${list}</div>
   `);
 }
@@ -716,14 +801,19 @@ function paint() {
 
 function paintObjective() {
   const el = $('zz-objective');
+  const fold = $('zz-objective-fold');
   if (!el) return;
   const obj = currentObjective(state, content);
   if (!obj || state.flags?.objectivesOff) {
     el.hidden = true;
+    if (fold) fold.hidden = true;
     return;
   }
+  if (fold) fold.hidden = false;
   el.hidden = false;
-  el.innerHTML = `<strong>${escapeHtml(obj.title)}</strong><span>${escapeHtml(obj.text)}</span>`;
+  const sum = fold?.querySelector('summary');
+  if (sum) sum.textContent = obj.title || 'Misión';
+  el.innerHTML = `<span>${escapeHtml(obj.text)}</span>`;
 }
 
 function paintModeBanner() {

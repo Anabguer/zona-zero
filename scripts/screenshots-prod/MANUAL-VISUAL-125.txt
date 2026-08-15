@@ -1,0 +1,11 @@
+Prueba visual crecimiento 1.2.5
+
+D1 tier=1 bld=5 pop=3 · OK farm; OK well
+D3 tier=1 bld=6 pop=3 · OK house
+D5 tier=1 bld=8 pop=3 · OK workshop; OK barricade
+D8 tier=2 bld=10 pop=3 · OK storage; OK medkit
+D12 tier=2 bld=11 pop=3 · FAIL greenhouse: Aún no desbloqueado (era); OK fence
+D18 tier=2 bld=12 pop=3 · OK watchtower; FAIL cistern: Aún no desbloqueado (era)
+D25 tier=2 bld=14 pop=3 · OK infirmary; OK sawmill
+D32 tier=2 bld=15 pop=2 · OK house
+D40 tier=2 bld=15 pop=2 · —

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <title>Zona Zero · harness 1.2</title>
-  <link rel="stylesheet" href="../css/game.css?v=15" />
-  <link rel="stylesheet" href="../css/world.css?v=15" />
+  <title>Zona Zero · harness 1.2.5</title>
+  <link rel="stylesheet" href="../css/game.css?v=16" />
+  <link rel="stylesheet" href="../css/world.css?v=16" />
   <script type="importmap">
   {
     "imports": {
@@ -25,29 +25,28 @@
         <span id="zz-day-label">Día 1</span>
       </div>
       <div class="zz-world-top__actions">
-        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound">Sonido</button>
+        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound">Audio</button>
         <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
         <span id="zz-save-state" class="zz-save-state"></span>
       </div>
     </header>
-    <p class="zz-coach" id="zz-coach" hidden>
-      <span id="zz-coach-text"></span>
-      <button type="button" id="zz-coach-dismiss">×</button>
-    </p>
-    <p class="zz-objective" id="zz-objective" hidden></p>
+    <details class="zz-objective-fold" id="zz-objective-fold">
+      <summary>Misión</summary>
+      <p class="zz-objective" id="zz-objective" hidden></p>
+    </details>
     <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
-    <section class="zz-chip-hud">
-      <button type="button" class="zz-chip-hud__pop" id="zz-open-pop">
-        <span class="zz-ico zz-ico--pop"></span>
+    <section class="zz-chip-hud zz-chip-hud--dense" aria-label="Estado">
+      <button type="button" class="zz-chip-hud__pop" id="zz-open-pop" title="Población">
+        <span class="zz-ico zz-ico--pop" aria-hidden="true"></span>
         <strong id="zz-pop">0/0</strong>
       </button>
       <ul class="zz-chip-hud__res" id="zz-resources"></ul>
       <div class="zz-chip-hud__meta">
         <span id="zz-era" class="zz-chip-hud__era">—</span>
-        <span id="zz-weather" class="zz-weather" data-weather="clear">—</span>
-        <span class="zz-chip-hud__m"><em>Est.</em><i></i><strong id="zz-stability">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--threat"><em>Amz.</em><i></i><strong id="zz-threat">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--def"><em>Def.</em><i></i><strong id="zz-defense">0</strong></span>
+        <span id="zz-weather" class="zz-weather" data-weather="clear" hidden>—</span>
+        <span class="zz-chip-hud__m" title="Estabilidad"><i></i><strong id="zz-stability">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><i></i><strong id="zz-threat">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><i></i><strong id="zz-defense">0</strong></span>
       </div>
     </section>
     <main class="zz-world-stage">
@@ -79,7 +78,11 @@
       <div class="zz-defeat__card"><h2>Derrota</h2><p id="zz-defeat-msg"></p></div>
     </div>
     <div id="zz-victory" class="zz-victory" hidden>
-      <div class="zz-victory__card"><h2>Victoria</h2><button type="button" class="zz-btn" id="zz-endless">Endless</button></div>
+      <div class="zz-victory__card">
+        <h2>Victoria</h2>
+        <p>Zona Zero está estabilizada.</p>
+        <button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Continuar endless</button>
+      </div>
     </div>
     <div id="zz-choice-modal" class="zz-choice" hidden>
       <div class="zz-choice__card">
@@ -92,10 +95,13 @@
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=15';
-    window.__zzReady = bootGame({ slot: 1, mode: 'new', name: 'Harness' })
-      .then(() => { window.__zzOk = true; })
-      .catch((e) => { window.__zzOk = false; window.__zzErr = String(e && e.message ? e.message : e); throw e; });
+    import { bootGame } from '../js/main.js?v=16';
+    bootGame({ slot: 1, mode: 'new', name: 'Harness' }).then(() => {
+      window.__zzOk = true;
+    }).catch((e) => {
+      window.__zzErr = String(e?.message || e);
+      console.error(e);
+    });
   </script>
 </body>
 </html>

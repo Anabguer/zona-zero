@@ -23,8 +23,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=15" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=15" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=16" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=16" />
 </head>
 <body class="zz-body zz-body--play zz-body--world">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -36,21 +36,19 @@ $base = zz_public_base();
         <span id="zz-day-label">Día 1</span>
       </div>
       <div class="zz-world-top__actions">
-        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound" aria-pressed="true">Sonido</button>
+        <button type="button" class="zz-btn zz-btn--compact zz-sound" id="zz-sound" aria-pressed="true">Audio</button>
         <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
       </div>
     </header>
 
-    <p class="zz-coach" id="zz-coach" hidden>
-      <span id="zz-coach-text"></span>
-      <button type="button" id="zz-coach-dismiss" aria-label="Cerrar">×</button>
-    </p>
-
-    <p class="zz-objective" id="zz-objective" hidden></p>
+    <details class="zz-objective-fold" id="zz-objective-fold">
+      <summary>Misión</summary>
+      <p class="zz-objective" id="zz-objective" hidden></p>
+    </details>
     <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
 
-    <!-- HUD compacto iconográfico -->
-    <section class="zz-chip-hud" aria-label="Estado">
+    <!-- HUD compacto: una franja -->
+    <section class="zz-chip-hud zz-chip-hud--dense" aria-label="Estado">
       <button type="button" class="zz-chip-hud__pop" id="zz-open-pop" title="Población">
         <span class="zz-ico zz-ico--pop" aria-hidden="true"></span>
         <strong id="zz-pop">0/0</strong>
@@ -58,14 +56,13 @@ $base = zz_public_base();
       <ul class="zz-chip-hud__res" id="zz-resources"></ul>
       <div class="zz-chip-hud__meta">
         <span id="zz-era" class="zz-chip-hud__era">—</span>
-        <span id="zz-weather" class="zz-weather" data-weather="clear">—</span>
-        <span class="zz-chip-hud__m" title="Estabilidad"><em>Est.</em><i></i><strong id="zz-stability">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><em>Amz.</em><i></i><strong id="zz-threat">0</strong></span>
-        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><em>Def.</em><i></i><strong id="zz-defense">0</strong></span>
+        <span id="zz-weather" class="zz-weather" data-weather="clear" hidden>—</span>
+        <span class="zz-chip-hud__m" title="Estabilidad"><i></i><strong id="zz-stability">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--threat" title="Amenaza"><i></i><strong id="zz-threat">0</strong></span>
+        <span class="zz-chip-hud__m zz-chip-hud__m--def" title="Defensa"><i></i><strong id="zz-defense">0</strong></span>
       </div>
     </section>
 
-    <!-- Mundo continuo -->
     <main class="zz-world-stage">
       <div class="zz-world-map-wrap">
         <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
@@ -78,7 +75,6 @@ $base = zz_public_base();
       <div class="zz-explorer-rail" id="zz-explorer-rail" aria-label="Exploradores"></div>
     </main>
 
-    <!-- Panel contextual (bottom sheet / lateral) -->
     <aside id="zz-sheet" class="zz-sheet" hidden>
       <div class="zz-sheet__handle" aria-hidden="true"></div>
       <button type="button" class="zz-sheet__close" id="zz-sheet-close" aria-label="Cerrar">×</button>
@@ -117,7 +113,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=15';
+    import { bootGame } from './js/main.js?v=16';
     const params = new URLSearchParams(location.search);
     bootGame({
       slot: <?= (int) $slot ?>,

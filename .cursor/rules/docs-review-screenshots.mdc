@@ -16,17 +16,20 @@ Cuando termines una versión o cambio que requiera revisión visual:
    - Ruta local Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\`
    - Sustituye allí las capturas antiguas; **no acumules historial** en Drive (el histórico está en Git).
    - Solo capturas de revisión — **nunca** sincronizar el proyecto completo con Drive.
-7. Si procede, publica solo `docs/review/` en producción para la URL HTTP de galería (sin deploy del juego salvo que lo pidan).
+7. **Genera siempre** `review-contact-sheet.jpg`:
+   - Una sola imagen grande con **todas** las capturas actuales.
+   - Cada pantalla claramente separada y rotulada.
+   - Guardar en `G:\Mi unidad\Juegos\Zona Zero\Review\` **y** en `docs/review/` (sustituir la anterior).
+8. No hace falta regenerar PDF ni galería pública adicional salvo que lo pidan.
+9. Si procede, publica solo `docs/review/` en producción para la URL HTTP de galería (sin deploy del juego salvo que lo pidan).
 
 ## Mínimo cuando corresponda
 
-- `mobile.png`
-- `desktop.png`
-- `gameplay.png`
-- Más capturas específicas necesarias para entender el cambio (p. ej. `poblacion.png`, `construir.png`, `explorador.png`).
-- `index.html` (galería de la revisión actual)
-- Copia equivalente en `G:\Mi unidad\Juegos\Zona Zero\Review\`
+- `mobile.png`, `desktop.png`, `gameplay.png` (+ específicas)
+- `index.html` (galería repo)
+- `review-contact-sheet.jpg` (contact sheet completo)
+- Copia en `G:\Mi unidad\Juegos\Zona Zero\Review\` (mismas capturas + contact sheet)
 
 ## Entrega al usuario
 
-Indica el **commit**, la galería (`docs/review/index.html` / URL prod si aplica), **qué archivos** hay en `docs/review/`, y confirma la copia a Drive (`G:\Mi unidad\Juegos\Zona Zero\Review\`).
+Indica el **commit**, la galería / URL prod si aplica, archivos en `docs/review/`, copia a Drive y que el contact sheet está regenerado.

@@ -322,33 +322,29 @@ export function currentObjective(state, content) {
   if ((!hasFarm || farmStaff < 1 || !hasWell || wellStaff < 1) && (daysFood < 4 || daysWater < 4 || !hasFarm || !hasWell)) {
     return {
       id: 'survive',
-      title: 'Objetivo actual',
-      text: 'Asegura comida y agua para tu refugio.',
-      hint: 'Construye huerto/pozo y asigna trabajadores.',
+      title: 'Supervivencia',
+      text: 'Asegura comida y agua: huerto, pozo y trabajadores.',
     };
   }
   if (pop >= cap - 1 || cap <= 6) {
     return {
       id: 'housing',
-      title: 'Objetivo actual',
-      text: 'Aumenta la capacidad del refugio.',
-      hint: 'Construye refugios o casas.',
+      title: 'Ampliación',
+      text: 'Aumenta la capacidad del refugio con casas.',
     };
   }
   if (explored < 1 || controlled < 2) {
     return {
       id: 'explore',
-      title: 'Objetivo actual',
-      text: 'Explora los alrededores.',
-      hint: 'Toca a tu explorador y elige un destino en el mapa.',
+      title: 'Exploración',
+      text: 'Explora los alrededores con tu explorador.',
     };
   }
   if ((state.population?.labor?.defense || 0) < 1 && (state.director?.threat || 0) >= 18) {
     return {
       id: 'defend',
-      title: 'Objetivo actual',
-      text: 'Refuerza la defensa del perímetro.',
-      hint: 'Asigna gente a defensa o construye una torre.',
+      title: 'Defensa',
+      text: 'Refuerza el perímetro (gente o torre).',
     };
   }
   if (state.day >= 12 && state.flags?.objectivesDismissed !== true) {

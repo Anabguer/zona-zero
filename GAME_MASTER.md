@@ -1289,13 +1289,13 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.2.4 — núcleo de gestión activa (colonia interactiva)  
+**Versión técnica:** 1.2.5 — UX + representación visual del mundo (sin redesplegar mecánicas)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=15`
+**save_version / v:** **4** · cache assets `?v=16`
 
 ## Arquitectura real (1.2)
 - Cliente: `js/` state, sim, director, population, **colony**, explorers, render-map, render-base, icons, sound, api, main, rng, util
@@ -1315,9 +1315,30 @@ Y periódicamente el juego debe responder:
 
 ## Pendiente
 - Recalibración de dificultad **después** de validar el loop de gestión con jugadoras
-- Pulido continuo de glifos / colocación en mapa
+- Assets raster/PNG de dirección artística (hoy glifos SVG procedurales alineados a paleta)
+- Equipamiento de exploradores (cuando GAME_MASTER lo active)
+- Deploy de 1.2.5 (explícitamente aplazado)
+
+## Decisiones consolidadas 1.2.5 (UX / visual)
+- Mecánicas 1.2.4 intocables: población colectiva, workers, máx. 3 exploradores, construir, explorar, recursos, amenaza/defensa, días
+- Mapa: zonas por iluminación/borde/niebla/edificios; evitar overlays geométricos grandes (rectángulos blancos, triángulos de peligro, círculos dominantes)
+- Colonia: crecimiento visual inmediato al construir (glifos, cultivos, luces, personas, defensas, vehículo si aplica); D1 ≠ D40 a ojo
+- HUD móvil: franja densa (pop + iconos recurso + est/amz/def); misión en `<details>` plegado
+- Desktop: mapa panorámico protagonista; sheets flotantes laterales sin comer el mundo
+- Población: impacto esperado por categoría (`≈ +N comida/día`) y déficit visible
+- Construir: cards con thumb + coste + puestos + beneficio; colocación en mapa
+- Explorador: retrato SVG + nivel + barra XP + skills; resto de habitantes no son fichas
+- Arte: sin emoji como arte definitivo; thumbs/glifos/retratos en `js/icons.js` coherentes con `docs/art-direction/`
 
 ## Changelog técnico
+### 1.2.5 — Pasada UX + representación del mundo
+- Mapa: fills suaves, niebla multiply, selección discreta, less overlays; asentamiento a escala mayor con labels/cultivos/luces/defensas/vehículo
+- HUD denso + misión plegable; desktop panorámico (viewport mapa)
+- Población con impacto/día; construir con beneficio; explorador con retrato/XP
+- Harness alineado a play.php; cache `?v=16`
+- Capturas: día1, media, avanzada, construir, población, explorador, mapa explorando, desktop panorámico, móvil + `review-contact-sheet.jpg`
+- **Sin deploy** · **sin recalibrar dificultad**
+
 ### 1.2.4 — Núcleo de gestión activa
 - Panel población: asignación numérica (comida/agua/construcción/producción/defensa/medicina)
 - Edificios con cupos `workers` (huerto 0–3, pozo, taller, etc.); producción 0 si 0 trabajadores
