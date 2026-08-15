@@ -122,10 +122,11 @@ function drawRoads(parent, zones, tier) {
   const rng = createRng(hashSeed('roads-broken'));
   const camp = zones.find((z) => z.type === 'camp');
   const early = tier <= 0;
-  // Pocos tramos irregulares cerca del campamento y landmarks
+  // Pocos tramos irregulares cerca del campamento — D1 más discreto (no rutas tipo Maps)
   const anchors = zones.filter((z) => z.type === 'camp' || z.state === 'discovered' || z.state === 'controlled');
   const pts = anchors.length ? anchors : camp ? [camp] : [{ x: 48, y: 62 }];
   pts.forEach((a, ai) => {
+    if (early && a.type === 'camp') return; // calles lejos del núcleo D1
     const len = early ? rng.float(10, 18) : rng.float(14, 28);
     const ang = rng.float(0, Math.PI * 2);
     const x1 = a.x + Math.cos(ang) * len * 0.15;
@@ -175,8 +176,8 @@ function drawUrbanBlocks(parent, zones, _grid, tier) {
     let y = rng.float(8, 92);
     if (camp) {
       const d = Math.hypot(x - camp.x, y - camp.y);
-      // Hueco alrededor del refugio para que respire
-      if (d < (early ? 14 : 11)) continue;
+      // Hueco amplio alrededor del refugio D1 para que respire como lugar
+      if (d < (early ? 18 : 11)) continue;
     }
     const w = rng.float(1.4, early ? 3.2 : 4.2);
     const h = rng.float(1.1, early ? 2.6 : 3.6);
@@ -300,45 +301,87 @@ function irregularPatch(cx, cy, rx, ry, rng, n = 7) {
   return pts;
 }
 
-function drawSettlementYard(layer, buildings, scale, bw, bh, rng) {
-  // Sin mancha geométrica: solo suelo bajo cada edificio + restos locales
-  buildings.forEach((b) => {
-    const lx = (b.x - bw / 2 + 0.5) * scale;
-    const ly = (b.y - bh / 2 + 0.5) * scale;
-    const patch = irregularPatch(lx, ly + scale * 0.15, scale * 0.55, scale * 0.38, rng, 7);
-    layer.appendChild(svgEl('polygon', { points: ptsStr(patch), class: 'zz-settle-yard-patch' }));
-  });
-  // Escombros y cajas alrededor del cluster (no perímetro)
-  if (buildings.length) {
-    const xs = buildings.map((b) => (b.x - bw / 2 + 0.5) * scale);
-    const ys = buildings.map((b) => (b.y - bh / 2 + 0.5) * scale);
-    const ox = (Math.min(...xs) + Math.max(...xs)) / 2;
-    const oy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    for (let i = 0; i < 3; i++) {
-      const x = ox + rng.float(-scale * 1.4, scale * 1.4);
-      const y = oy + rng.float(-scale * 1.0, scale * 1.0);
+/**
+ * Patio físico D1: claro de tierra, acceso, restos y espacio para crecer.
+ * Prohibido: círculo/parche GIS, polígonos de zona, rejilla permanente.
+ */
+function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day) {
+  const early = day <= 2;
+  // Claro irregular (elipse deformada, sin stroke) — suelo pisado muy sutil
+  const clearRx = early ? spanX * 1.25 : spanX * 1.1;
+  const clearRy = early ? spanY * 1.15 : spanY * 1.0;
+  const clearing = irregularPatch(ox, oy + scale * 0.12, clearRx, clearRy, rng, 9);
+  layer.appendChild(svgEl('polygon', { points: ptsStr(clearing), class: 'zz-settle-clearing' }));
+  const edge = irregularPatch(ox - scale * 0.15, oy + scale * 0.35, clearRx * 1.08, clearRy * 0.5, rng, 8);
+  layer.appendChild(svgEl('polygon', { points: ptsStr(edge), class: 'zz-settle-clearing-edge' }));
+
+  // Camino de acceso: franja de tierra (fill), no línea tipo Maps
+  const pathY0 = oy + clearRy * 0.4;
+  const pathY1 = oy + clearRy * 1.25;
+  const pathStrip = [
+    [ox - scale * 0.28, pathY0],
+    [ox + scale * 0.22, pathY0 + scale * 0.08],
+    [ox + scale * 0.32, pathY1],
+    [ox - scale * 0.18, pathY1 + scale * 0.05],
+  ];
+  layer.appendChild(svgEl('polygon', { points: ptsStr(pathStrip), class: 'zz-settle-path-strip' }));
+
+  // Caminos cortos entre edificios (si hay más de uno) — fill suave, no dash
+  if (buildings.length >= 2) {
+    const pts = buildings.map((b) => [(b.x - bw / 2 + 0.5) * scale, (b.y - bh / 2 + 0.5) * scale]);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      const mx = (a[0] + b[0]) / 2 + rng.float(-0.35, 0.35);
+      const my = (a[1] + b[1]) / 2 + rng.float(-0.35, 0.35);
       layer.appendChild(
-        svgEl('rect', {
-          x,
-          y,
-          width: rng.float(0.35, 0.7),
-          height: rng.float(0.2, 0.35),
-          class: 'zz-settle-rubble',
-          transform: `rotate(${rng.float(-30, 30)} ${x} ${y})`,
+        svgEl('path', {
+          d: `M${a[0]} ${a[1]} Q${mx} ${my} ${b[0]} ${b[1]}`,
+          class: 'zz-settle-path-dirt',
+          fill: 'none',
         })
       );
     }
-    // Un solo tramo de valla improvisada
+  }
+
+  // Restos físicos junto al acceso (sin círculos-marcador)
+  drawProp(layer, 'crate', ox + spanX * 0.62, oy + spanY * 0.55, 0.75);
+  drawProp(layer, 'barrel', ox - spanX * 0.55, oy + spanY * 0.58, 0.7);
+
+  for (let i = 0; i < (early ? 5 : 3); i++) {
+    const x = ox + rng.float(-clearRx * 0.9, clearRx * 0.9);
+    const y = oy + rng.float(-clearRy * 0.7, clearRy * 0.85);
     layer.appendChild(
-      svgEl('line', {
-        x1: ox - scale * 1.5,
-        y1: oy + scale * 0.9,
-        x2: ox - scale * 0.6,
-        y2: oy + scale * 1.15,
-        class: 'zz-settle-fence-seg',
+      svgEl('rect', {
+        x,
+        y,
+        width: rng.float(0.3, 0.65),
+        height: rng.float(0.18, 0.32),
+        class: 'zz-settle-rubble',
+        transform: `rotate(${rng.float(-35, 35)} ${x} ${y})`,
       })
     );
   }
+
+  // Valla improvisada: tramos rotos, NUNCA anillo cerrado
+  layer.appendChild(
+    svgEl('line', {
+      x1: ox - clearRx * 0.85,
+      y1: oy + clearRy * 0.35,
+      x2: ox - clearRx * 0.35,
+      y2: oy + clearRy * 0.55,
+      class: 'zz-settle-fence-seg',
+    })
+  );
+  layer.appendChild(
+    svgEl('line', {
+      x1: ox + clearRx * 0.4,
+      y1: oy + clearRy * 0.45,
+      x2: ox + clearRx * 0.75,
+      y2: oy + clearRy * 0.2,
+      class: 'zz-settle-fence-seg',
+    })
+  );
 }
 
 function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCell } = {}) {
@@ -353,8 +396,8 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
 
-  // Escala protagonista D1 (desktop un poco más)
-  const scale = day <= 2 ? (wide ? 5.1 : 4.7) : day <= 5 ? 3.8 : 2.95 + life * 0.18;
+  // Escala protagonista D1 — HQ grande, espacio visible alrededor
+  const scale = day <= 2 ? (wide ? 5.4 : 5.0) : day <= 5 ? 3.8 : 2.95 + life * 0.18;
   let minX = 0;
   let maxX = 0;
   let minY = 0;
@@ -375,44 +418,22 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
   }
   const ox = buildings.length ? (minX + maxX) / 2 : 0;
   const oy = buildings.length ? (minY + maxY) / 2 : 0;
-  const spanX = Math.max(scale * 2.2, (maxX - minX) / 2 + scale * 1.1);
-  const spanY = Math.max(scale * 1.8, (maxY - minY) / 2 + scale * 0.95);
+  const spanX = Math.max(scale * 2.4, (maxX - minX) / 2 + scale * 1.35);
+  const spanY = Math.max(scale * 2.0, (maxY - minY) / 2 + scale * 1.15);
 
-  drawSettlementYard(layer, buildings, scale, bw, bh, rng);
-
-  if (buildings.length >= 2) {
-    const pts = buildings.map((b) => [(b.x - bw / 2 + 0.5) * scale, (b.y - bh / 2 + 0.5) * scale]);
-    for (let i = 0; i < pts.length - 1; i++) {
-      const a = pts[i];
-      const b = pts[i + 1];
-      const mx = (a[0] + b[0]) / 2 + rng.float(-0.35, 0.35);
-      const my = (a[1] + b[1]) / 2 + rng.float(-0.35, 0.35);
-      layer.appendChild(
-        svgEl('path', {
-          d: `M${a[0]} ${a[1]} Q${mx} ${my} ${b[0]} ${b[1]}`,
-          class: 'zz-settle-path-dirt',
-          fill: 'none',
-        })
-      );
-    }
-  }
-
-  // Props discretos (sin “marcadores”)
-  drawProp(layer, 'crate', ox - spanX * 0.55, oy + spanY * 0.28, 0.85);
-  drawProp(layer, 'barrel', ox + spanX * 0.52, oy + spanY * 0.2, 0.8);
-  drawProp(layer, 'fire', ox - spanX * 0.05, oy + spanY * 0.12, 0.9);
+  drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day);
 
   const buildMode = state.uiMode === 'build' && state.buildMode;
   let ghost = null;
   if (buildMode) {
-    const gw = scale * 1.2;
+    const gw = scale * 1.15;
     ghost = svgEl('image', {
       href: buildingArtUrl(state.buildMode),
       x: 0,
       y: 0,
       width: gw,
       height: gw,
-      opacity: '0.65',
+      opacity: '0.7',
       class: 'zz-settle-ghost',
       style: 'pointer-events:none',
       preserveAspectRatio: 'xMidYMid meet',
@@ -426,23 +447,25 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
         if (!near && buildings.length) continue;
         const lx = (x - bw / 2 + 0.5) * scale;
         const ly = (y - bh / 2 + 0.5) * scale;
-        const cell = scale * 0.95;
+        const cell = scale * 0.92;
         const slot = svgEl('rect', {
           x: lx - cell / 2,
           y: ly - cell / 2,
           width: cell,
           height: cell,
           class: 'zz-settle-slot',
-          rx: 0.25,
+          rx: 0.35,
         });
         slot.style.cursor = 'pointer';
         slot.addEventListener('pointerenter', () => {
           ghost.setAttribute('visibility', 'visible');
           ghost.setAttribute('x', String(lx - gw / 2));
           ghost.setAttribute('y', String(ly - gw / 2));
+          slot.classList.add('is-hot');
         });
         slot.addEventListener('pointerleave', () => {
           ghost.setAttribute('visibility', 'hidden');
+          slot.classList.remove('is-hot');
         });
         slot.addEventListener('click', (ev) => {
           ev.preventDefault();
@@ -459,16 +482,24 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
     .forEach((b) => {
       const lx = (b.x - bw / 2 + 0.5) * scale;
       const ly = (b.y - bh / 2 + 0.5) * scale;
-      const cell = scale * 1.4;
+      const isHq = String(b.type).startsWith('hq_');
+      const cell = scale * (isHq ? 1.65 : 1.35);
       const selected = state.selectedBuildingId === b.id;
       const wrap = svgEl('g', {
-        class: `zz-settle-bldg${selected ? ' is-selected' : ''}`,
+        class: `zz-settle-bldg${selected ? ' is-selected' : ''}${isHq ? ' zz-settle-bldg--hq' : ''}`,
         transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
         'data-type': b.type,
         'data-id': b.id,
       });
       wrap.appendChild(
-        svgEl('ellipse', { cx: cell * 0.5, cy: cell * 0.9, rx: cell * 0.36, ry: cell * 0.11, fill: '#000', opacity: 0.4 })
+        svgEl('ellipse', {
+          cx: cell * 0.5,
+          cy: cell * 0.92,
+          rx: cell * 0.38,
+          ry: cell * 0.12,
+          fill: '#000',
+          opacity: 0.45,
+        })
       );
       wrap.appendChild(
         svgEl('image', {
@@ -494,15 +525,15 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onPlaceCel
 }
 
 
-function drawIrregularFog(g, z, rng) {
+function drawIrregularFog(g, z, rng, early = false) {
   const fogG = svgEl('g', { class: 'zz-zone-fog-group', style: 'pointer-events:none' });
   const uid = String(z.id || 'z').replace(/[^a-zA-Z0-9_-]/g, '');
   const maskId = `fogMask_${uid}`;
-  // Máscara irregular (no rectángulo): varias elipses solapadas
   const defs = svgEl('defs', {});
   const mask = svgEl('mask', { id: maskId, maskUnits: 'userSpaceOnUse' });
   mask.appendChild(svgEl('rect', { x: z.x - z.r * 1.6, y: z.y - z.r * 1.5, width: z.r * 3.2, height: z.r * 3, fill: '#000' }));
-  for (let i = 0; i < 7; i++) {
+  const blobN = early ? 4 : 7;
+  for (let i = 0; i < blobN; i++) {
     mask.appendChild(
       svgEl('ellipse', {
         cx: z.x + rng.float(-z.r * 0.45, z.r * 0.45),
@@ -524,22 +555,25 @@ function drawIrregularFog(g, z, rng) {
       y: z.y - z.r * 1.25,
       width: z.r * 2.7,
       height: z.r * 2.5,
-      opacity: '0.92',
+      opacity: early ? '0.55' : '0.92',
       preserveAspectRatio: 'xMidYMid slice',
       class: 'zz-zone-fog-tex',
     })
   );
-  for (let i = 0; i < 4; i++) {
-    veiled.appendChild(
-      svgEl('ellipse', {
-        cx: z.x + rng.float(-z.r * 0.3, z.r * 0.3),
-        cy: z.y + rng.float(-z.r * 0.25, z.r * 0.25),
-        rx: z.r * rng.float(0.4, 0.85),
-        ry: z.r * rng.float(0.35, 0.7),
-        class: 'zz-zone-fog-blob',
-        opacity: String(0.35 + i * 0.08),
-      })
-    );
+  // En D1 no añadir elipses-blob encima (parecen nodos GIS al borde del encuadre)
+  if (!early) {
+    for (let i = 0; i < 4; i++) {
+      veiled.appendChild(
+        svgEl('ellipse', {
+          cx: z.x + rng.float(-z.r * 0.3, z.r * 0.3),
+          cy: z.y + rng.float(-z.r * 0.25, z.r * 0.25),
+          rx: z.r * rng.float(0.4, 0.85),
+          ry: z.r * rng.float(0.35, 0.7),
+          class: 'zz-zone-fog-blob',
+          opacity: String(0.35 + i * 0.08),
+        })
+      );
+    }
   }
   fogG.appendChild(veiled);
   g.appendChild(fogG);
@@ -631,7 +665,7 @@ function drawZone(layer, z, state, tier, handlers) {
   if (z.type === 'camp') {
     drawSettlementCore(g, state, z, tier, { onSelectBuilding, onPlaceCell });
   } else if (z.state === 'unknown') {
-    drawIrregularFog(g, z, rng);
+    drawIrregularFog(g, z, rng, (state.day || 1) <= 2);
   } else {
     const zArt = zoneArtUrl(z);
     const s = Math.min(7.2, z.r * 0.9);
@@ -773,7 +807,7 @@ function drawLegend() {
 }
 
 const ZOOM_MIN = 1.55;
-const ZOOM_MAX = 3.35;
+const ZOOM_MAX = 3.45;
 
 export function recenterCamera(state) {
   if (!state) return;
@@ -781,7 +815,8 @@ export function recenterCamera(state) {
   state.mapCamera = state.mapCamera || {};
   if (camp) {
     state.mapCamera.x = camp.x;
-    state.mapCamera.y = camp.y;
+    // Ligero sesgo hacia abajo para mostrar acceso + espacio de crecimiento
+    state.mapCamera.y = camp.y + (state.day <= 2 ? 1.2 : 0);
   } else {
     state.mapCamera.x = 50;
     state.mapCamera.y = 50;
@@ -789,7 +824,7 @@ export function recenterCamera(state) {
   const day = state.day || 1;
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
-  if (day <= 1) state.mapCamera.zoom = wide ? 3.15 : 3.05;
+  if (day <= 1) state.mapCamera.zoom = wide ? 3.25 : 3.15;
   else if (day <= 3) state.mapCamera.zoom = wide ? 2.55 : 2.45;
   else if (day <= 5) state.mapCamera.zoom = 2.1;
   else state.mapCamera.zoom = 1.65;
@@ -797,11 +832,13 @@ export function recenterCamera(state) {
 
 export function clampCamera(state) {
   if (!state?.mapCamera) return;
-  state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, ZOOM_MIN, ZOOM_MAX);
+  const day = state.day || 1;
+  // Early game: no alejarse tanto como para “perder” la colonia
+  const minZ = day <= 2 ? 2.15 : day <= 5 ? 1.75 : ZOOM_MIN;
+  state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, minZ, ZOOM_MAX);
   const camp = state.zones?.find((z) => z.type === 'camp');
   if (camp) {
-    const day = state.day || 1;
-    const maxDist = day <= 2 ? 12 : day <= 5 ? 18 : 26;
+    const maxDist = day <= 2 ? 10 : day <= 5 ? 16 : 26;
     const dx = (state.mapCamera.x || camp.x) - camp.x;
     const dy = (state.mapCamera.y || camp.y) - camp.y;
     const d = Math.hypot(dx, dy);
@@ -817,7 +854,9 @@ export function clampCamera(state) {
 export function cameraViewBox(state, m) {
   clampCamera(state);
   const cam = state.mapCamera || { x: 50, y: 48, zoom: 1.4 };
-  const zoom = clamp(cam.zoom || 1.4, ZOOM_MIN, ZOOM_MAX);
+  const day = state.day || 1;
+  const minZ = day <= 2 ? 2.15 : day <= 5 ? 1.75 : ZOOM_MIN;
+  const zoom = clamp(cam.zoom || 1.4, minZ, ZOOM_MAX);
   const vw = m.vbW / zoom;
   const vh = m.vbH / zoom;
   const worldW = 100;

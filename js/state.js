@@ -141,13 +141,21 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     }
   });
 
+  // D1: solo Refugio Central (vivienda = capacidad, no una casa por habitante).
+  // HQ housing 6 cubre pop 3; shelters se construyen después si hace falta.
   const hq = buildings.hq_central_l1 || Object.values(buildings).find((b) => b.category === 'core');
-  const shelterDef = buildings.shelter;
   const buildingsPlaced = [];
-  if (hq) buildingsPlaced.push({ id: uid('b'), type: hq.id, x: 4, y: 3, hp: 100, workers: 0 });
-  if (shelterDef) {
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 3, y: 3, hp: 100, workers: 0 });
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 5, y: 3, hp: 100, workers: 0 });
+  if (hq) {
+    const gw = balance.baseGrid?.w || 10;
+    const gh = balance.baseGrid?.h || 8;
+    buildingsPlaced.push({
+      id: uid('b'),
+      type: hq.id,
+      x: Math.floor(gw / 2),
+      y: Math.floor(gh / 2) - 1,
+      hp: 100,
+      workers: 0,
+    });
   }
 
   const templates = factionsDoc.templates || factionsDoc.factions || [];

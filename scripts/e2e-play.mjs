@@ -87,7 +87,7 @@ assert(state.flags.defeated === false, 'nueva partida no derrotada');
 assert(livingSurvivors(state).length === 3, '3 supervivientes visibles en estado');
 assert(state.resources.food > 0 && state.resources.water > 0, 'recursos iniciales');
 assert(state.zones.some((z) => z.state === 'discovered'), 'hay zona descubierta');
-assert(state.base.buildings.some((b) => b.type === 'shelter'), 'hay refugios');
+assert(state.base.buildings.some((b) => String(b.type).startsWith('hq_')), 'hay HQ');
 assert(
   livingSurvivors(state).every((s) => s.skills && s.skills.produce != null),
   'supervivientes tienen skill produce'

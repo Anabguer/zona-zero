@@ -5,10 +5,12 @@
 export const ART_BASE = new URL('../assets/art/', import.meta.url).href.replace(/\/$/, '') + '/';
 
 export const BUILDING_ART = {
+  // HQ = edificio ancla sólido (shelter.webp). Refugio improvisado = misma base hasta arte propio.
+  // camp-d1.webp es viñeta circular: NO usarlo como sprite de mapa (recrea parche/GIS).
   shelter: 'buildings/shelter.webp',
   hq_central_l1: 'buildings/shelter.webp',
-  hq_central_l2: 'buildings/shelter.webp',
-  hq_central_l3: 'buildings/shelter.webp',
+  hq_central_l2: 'buildings/house.webp',
+  hq_central_l3: 'buildings/house.webp',
   house: 'buildings/house.webp',
   farm: 'buildings/farm.webp',
   greenhouse: 'buildings/farm.webp',

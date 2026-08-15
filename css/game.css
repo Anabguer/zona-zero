@@ -384,7 +384,25 @@ body.zz-body {
 .zz-map-bldg--mid { fill: #262a2e; opacity: 0.3; }
 .zz-map-bldg--low { fill: #222628; opacity: 0.26; }
 
-/* Patio de colonia — orgánico, sin círculo */
+/* Patio de colonia — lugar físico, sin círculo GIS */
+.zz-settle-clearing {
+  fill: #3a3228;
+  opacity: 0.22;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-clearing-edge {
+  fill: #2a2620;
+  opacity: 0.18;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-future-plot {
+  display: none !important;
+}
+.zz-settle-yard-patch {
+  display: none !important;
+}
 .zz-settle-rubble {
   fill: #2a2824;
   opacity: 0.4;
@@ -402,12 +420,21 @@ body.zz-body {
 .zz-prop-barrel { fill: #2e3a40; opacity: 0.65; }
 .zz-prop-fire-glow { fill: #c06020; opacity: 0.35; }
 .zz-prop-fire { fill: #e08030; opacity: 0.7; }
+.zz-settle-path-strip {
+  fill: #3a342c;
+  opacity: 0.28;
+  stroke: none;
+  pointer-events: none;
+}
 .zz-settle-path-dirt {
   stroke: #4a4034;
-  stroke-width: 1.0;
+  stroke-width: 0.7;
   stroke-linecap: round;
-  opacity: 0.6;
+  opacity: 0.32;
   pointer-events: none;
+}
+.zz-settle-path-approach {
+  display: none !important;
 }
 .zz-settle-soil,
 .zz-settle-soil-patch {
@@ -418,21 +445,25 @@ body.zz-body {
   cursor: pointer;
 }
 .zz-settle-bldg:hover .zz-settle-bldg-img {
-  filter: brightness(1.14) drop-shadow(0 0 0.7px #f0d080);
+  filter: brightness(1.1);
 }
 .zz-settle-bldg.is-selected .zz-settle-bldg-img {
-  filter: drop-shadow(0 0 1.5px #f0d080) brightness(1.16);
+  filter: brightness(1.12);
+}
+.zz-settle-bldg--hq .zz-settle-bldg-img {
+  filter: none;
 }
 .zz-settle-warn-dot { display: none !important; }
+/* Slots solo visibles al hover/tap — sin rejilla permanente */
 .zz-settle-slot {
-  fill: rgba(70, 55, 35, 0.18);
-  stroke: rgba(210, 180, 120, 0.28);
-  stroke-width: 0.12;
-  stroke-dasharray: none;
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0.14;
 }
+.zz-settle-slot.is-hot,
 .zz-settle-slot:hover {
-  fill: rgba(110, 90, 45, 0.35);
-  stroke: rgba(230, 200, 120, 0.7);
+  fill: rgba(110, 90, 45, 0.32);
+  stroke: rgba(230, 200, 120, 0.65);
 }
 .zz-map-park { fill: #2a3a28; stroke: #4a6a40; stroke-width: 0.2; opacity: 0.8; }
 .zz-map-tree { fill: #3a5a34; opacity: 0.65; }
@@ -464,7 +495,7 @@ body.zz-body {
 
 .zz-settle-bldg { pointer-events: auto; cursor: pointer; }
 .zz-settle-bldg.is-selected {
-  filter: drop-shadow(0 0 1.2px #f0d080) brightness(1.12);
+  filter: none;
 }
 .zz-settle-warn-dot {
   fill: #e09070;
@@ -602,10 +633,16 @@ body.zz-body {
   stroke-linecap: round;
 }
 .zz-settle-slot {
-  fill: rgba(120, 160, 90, 0.12);
-  stroke: rgba(180, 200, 120, 0.45);
-  stroke-width: 0.2;
-  stroke-dasharray: 0.6 0.4;
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0.14;
+  stroke-dasharray: none;
+}
+.zz-settle-slot.is-hot,
+.zz-settle-slot:hover {
+  fill: rgba(110, 90, 45, 0.32);
+  stroke: rgba(230, 200, 120, 0.65);
+  stroke-dasharray: none;
 }
 .zz-settle-warn-dot {
   fill: #e07050;

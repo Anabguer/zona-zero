@@ -45,6 +45,8 @@ recenterCamera(state);
 clampCamera(state);
 assert(state.day === 1, 'día 1');
 assert((state.mapCamera.zoom || 0) >= 2.4, 'zoom D1 cercano: ' + state.mapCamera.zoom);
+const startB = state.base.buildings.filter((b) => b.hp > 0);
+assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo HQ (capacidad, no 1 casa/habitante)');
 assert(onboardingStatus(state)?.step?.id === 'welcome', 'welcome');
 advanceOnboarding(state);
 assert(onboardingStatus(state)?.step?.id === 'build_farm', 'build_farm');

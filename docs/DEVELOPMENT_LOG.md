@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.5** + PLAN **2.5**  
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-001 **APROBADA** · Fundación ZZ-002…006 hecha · **Siguiente HUMAN_GATE: ZZ-010** (colonia D1). Implementación no-gate autorizada según PLAN 2.5.  
+**Estado global:** ZZ-001 **APROBADA** · Fundación ZZ-002…006 **aceptadas** · **ZZ-010 COMPLETADA → HUMAN_GATE pendiente de revisión ChatGPT**. No continuar dependientes.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -34,13 +34,13 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ID | Nombre | HUMAN_GATE | ESTADO CURSOR | ESTADO REVISIÓN | APROBACIÓN FINAL |
 |----|--------|------------|---------------|-----------------|------------------|
 | ZZ-001 | Aprobar contrato GAME_MASTER 2.5 + este plan | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-002 | Auditoría motor vs GAME_MASTER 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-003 | Schemas content 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-010 | Colonia física D1 sin GIS | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-011 | Cámara D1 protagonista | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-002 | Auditoría motor vs GAME_MASTER 2.5 | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-003 | Schemas content 2.5 | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-011 | Cámara D1 protagonista | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -432,31 +432,63 @@ NO
 # FASE ZZ-010 — Colonia física D1 sin GIS
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-010).
+Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-010). HUMAN_GATE YES. Contrato: GAME_MASTER 2.5 (colonia física, D1, mapa sin GIS, cámara, vivienda=capacidad).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+Implementada colonia D1 como **lugar físico**:
+- Arranque solo **Refugio Central I** (housing 6 para pop 3) — sin 3 casas por 3 habitantes.
+- Patio: claro de tierra sutil + franja de acceso + restos (caja/barril) + valla rota (no anillo).
+- Sin parche circular GIS, sin slots visibles fuera de build-hover, sin fog-blobs D1, sin rutas Maps en núcleo.
+- Cámara D1: zoom alto, clamp anti-pérdida, recenter.
+- Asset HQ = edificio sólido aprobado (`shelter.webp`); no viñeta circular `camp-d1.webp` (recrearía parche).
 
 ## ARCHIVOS MODIFICADOS
-—
+- `js/state.js` — D1 solo HQ
+- `js/render-map.js` — settlement físico, fog D1, cámara
+- `js/art.js` — nota HQ/shelter; L2/L3 → house.webp
+- `css/game.css` — clearing/slots/path anti-GIS
+- `scripts/smoke-d1.mjs` — assert solo HQ
+- `scripts/e2e-play.mjs` — assert HQ
+- `scripts/review-shots-zz010.mjs` — capturas gate
+- `docs/review/*` + Drive Review
 
 ## PRUEBAS
-—
+- `node scripts/smoke-d1.mjs` OK (día 1, zoom≥2.4, solo HQ, onboarding farm→staff→well)
+- `node scripts/smoke.mjs` OK
+- QA Playwright móvil 390×844 + desktop 1920×1080: zoom/pan/recenter/tap-HQ
 
 ## CAPTURAS
-—
+Repo: `docs/review/`
+- `01-mobile-d1.png` … `04-mobile-d1-recenter.png`
+- `05-desktop-d1.png` … `08-desktop-d1-recenter.png`
+- `09-mobile-d1-hq-tap.png`, `10-desktop-d1-hq-hover.png`
+- `review-contact-sheet.jpg`
+- `index.html`
+Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\` (mismas, sustituidas)
+
+## CURSOR — REVISIÓN VISUAL ZZ-010
+1. **¿Lugar físico o mapa técnico?** Lugar físico anclado por HQ lit + terreno ruinoso. Quedan residuos leves de textura/city.webp (líneas de asfalto) y sombra elíptica bajo HQ — no polígono GIS ni círculo de colonia.
+2. **¿Se entiende dónde empieza la colonia?** Sí: un solo refugio iluminado, encuadre centrado D1, HUD 3/6 (capacidad).
+3. **¿Algo visible sin función clara?** Props caja/barril son restos de campamento. Textura de ciudad puede sugerir “nodos” lejanos — no son UI interactiva. Coach oculto en capturas de composición.
+4. **¿Composición móvil?** Sí: HQ protagonista, dock abajo, controles cámara.
+5. **¿Composición desktop?** Sí: más contexto de ruinas; HQ sigue ancla. Espacio vacío = crecimiento futuro.
+6. **¿Cámara controlable?** Sí: zoom/pan con clamp early; recenter recupera colonia.
+7. **Tres mejoras que yo haría:** (a) terreno más “solar/calle rota” menos abstracto cerca del HQ; (b) asset HQ diferenciado del futuro shelter improvisado; (c) vida ambiental mínima (1–2 siluetas) sin Sims — fase Q2.
 
 ## PROBLEMAS / LIMITACIONES
-—
+- Terreno `city.webp` aún aporta lectura “mapa aéreo” en desktop zoom-out.
+- HQ y `shelter` buildable comparten arte base (diferenciación artística = fases arte).
+- Electricidad/fuel legado en motor NO tocado aquí (fuera de ZZ-010).
+- ZZ-011 (cámara polish) sigue pendiente según plan (HUMAN_GATE NO).
 
 ## COMMIT
-—
+(pendiente push de este cierre)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente — HUMAN_GATE visual.
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
