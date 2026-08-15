@@ -83,6 +83,7 @@ import {
 } from './onboarding.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
+import { hudResourceKeys } from './hud-resources.js';
 
 const RES_LABEL_UI = {
   food: 'Comida',
@@ -907,20 +908,7 @@ function paintHud() {
   }
   const res = $('zz-resources');
   if (res) {
-    const day = state.day || 1;
-    const guideOn = !!(state.flags?.onboardingActive && !state.flags?.onboardingDone);
-    // D1: solo supervivencia. Madera/metal al construir o desde D2. Medicina cuando hace falta.
-    let show = ['food', 'water'];
-    if (day >= 2 || state.uiMode === 'build' || state.buildMode || !guideOn) {
-      show = ['food', 'water', 'wood', 'metal'];
-    }
-    if (
-      (state.explorers || []).some((e) => e.status === 'wounded' || (e.wounds || 0) > 0) ||
-      day >= 4 ||
-      (state.resources.medicine || 0) < 2
-    ) {
-      if (!show.includes('medicine') && day >= 3) show.push('medicine');
-    }
+    const show = hudResourceKeys(state);
     const popN = Math.max(1, pop.total || 1);
     res.innerHTML = '';
     show.forEach((k) => {
@@ -930,6 +918,7 @@ function paintHud() {
       if (daysLeft < 2) li.classList.add('is-crit');
       else if (daysLeft < 4) li.classList.add('is-low');
       const label = RES_LABEL_UI[k] || k;
+      li.dataset.res = k;
       li.title = `${label}: ${val}`;
       li.setAttribute('aria-label', `${label}: ${val}`);
       const row = document.createElement('span');

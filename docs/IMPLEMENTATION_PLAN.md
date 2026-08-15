@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 **APROBADO** (016–019 + **019A**). **ZZ-012** en HUMAN_GATE (PENDIENTE DE REVISIÓN). No ZZ-013.  
+**Estado:** Contrato espacial **2.8**. B0 **APROBADO** (016–019A). **ZZ-012 APROBADA**. **ZZ-013** PENDIENTE DE REVISIÓN. No ZZ-014 sin revisión.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -79,7 +79,8 @@
 | Avisos → cámara + ficha | Contrato §9.4/§21 (impl. en fases UI/alertas existentes; no sistema nuevo) |
 | Caminos / muros | Solo visual/estructura ahora; mecánicas futuras si sistémicas (§9.4) — **sin fase inventada** |
 | ZZ-019 | **APROBADA** — no reabrir ghost/✓/semilibre |
-| ZZ-012 | **HUMAN_GATE** · tips 2.8 · PENDIENTE DE REVISIÓN · no ZZ-013 |
+| ZZ-012 | **APROBADA** · tips 2.8 |
+| ZZ-013 | HUD comida/agua/madera · PENDIENTE DE REVISIÓN |
 | Integración arte edificios | Deuda artística no bloqueante |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
@@ -532,7 +533,7 @@
 
 ### ZZ-012 — Tutorial D1 contextual en el mundo
 
-> **2.8:** Tips reescritos tras ZZ-019A APROBADA. HUMAN_GATE activo. No ZZ-013 sin autorización.
+> **2.8:** **APROBADA** (Neni+ChatGPT). Tips 2.8 cerrados. No reabrir 019/019A.
 
 | Campo | Valor |
 |-------|-------|

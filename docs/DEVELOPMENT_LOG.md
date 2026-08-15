@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019 + **ZZ-019A APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-012 PENDIENTE DE REVISIÓN (HUMAN_GATE)**. · No ZZ-013. No deploy.
+**Estado global:** ZZ-016…019 + **019A** + **ZZ-012 APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-013 PENDIENTE DE REVISIÓN**. · No ZZ-014. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -225,7 +225,33 @@ Bloqueo ZZ-012 **levantado temporalmente**; **vuelve a bloquearse** tras reforma
 IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-019 + **ZZ-019A** + ZZ-008
 
 ## ESTADO CURSOR
-COMPLETADA (código + evidencias). **PARADO HUMAN_GATE** — no ZZ-013.
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA
+
+## APROBACIÓN FINAL CHATGPT
+SÍ
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Tutorial 2.8 validado (superficies, ghost/✓, mundo>viewport, progresión contextual, ayuda, landscape).  
+No reabrir ZZ-019/019A. Deuda arte integración = no bloqueante.  
+Evidencias archivadas en `docs/review-archive/zz-012/`.
+
+## COMMIT
+`a437e79` · docs `3bf11be`
+
+## Sync Drive/GitHub
+OK. **Cerrada formalmente. Siguiente: ZZ-013.**
+
+---
+
+# FASE ZZ-013 — HUD recursos D1
+
+IMPLEMENTATION_PLAN 2.8 · B · HUMAN_GATE NO · deps ZZ-012 + ZZ-019 + ZZ-019A
+
+## ESTADO CURSOR
+COMPLETADA (código + evidencias).
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -233,35 +259,27 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-## RONDA tras ZZ-019A APROBADA (2026-08-16)
-Reescritura tips al mundo 2.8 aprobado:
-- Superficies edificables (áreas, no huecos) en tip comida/agua.
-- Coach en modo Construir: ghost + snap invisible + ✓/✕ + pan fuera del fantasma.
-- Tip final: pan/zoom + avanzar día.
-- Ayuda §21.3: superficies, snap, landscape, recuperar territorio.
-- Ghost/✓/landscape de ZZ-019 **intactos**.
-
 ## CAMBIOS
-- `js/onboarding.js` — GUIDE_STEPS + coachMessage 2.8.
-- `js/main.js` — ayuda filtrada actualizada.
-- `scripts/smoke-d1.mjs` — asserts tip/coach 2.8.
-- `scripts/review-shots-zz012.mjs` — 12 tomas (pan, superficies, ghost, help, landscape, desktop).
-- Cache `?v=34`.
+- `js/hud-resources.js`: comida/agua/madera siempre en HUD D1; nunca fuel/ammo/gold (Au/Gu).
+- `js/main.js`: usa `hudResourceKeys`; labels Comida/Agua/Madera.
+- `css/world.css`: nombres visibles en landscape (corrige deuda ZZ-016 chips sin nombre).
+- Smoke + review 7 tomas.
+- Cache `?v=35`.
 
 ## AUTOCRÍTICA
-1. ¿Una pista / avance por acción / sin Continuar? Sí.
-2. ¿Tips nombran superficies + ghost/✓ + mundo>viewport? Sí (texto + coach + ayuda).
-3. ¿Recuperación territorial? En ayuda (D1 solo Núcleo recuperado; no fuerza expand prematuro).
-4. Arte SVG provisional = deuda 019A no bloqueante; tutorial no embellece blobs.
+1. ¿Comida/agua/madera legibles en 844 landscape? Sí (nombre bajo el valor).
+2. ¿Sin Au/Gu/fuel/ammo en barra? Sí.
+3. Metal solo cuando build/guía off/D2+ — OK supervivencia D1.
 
 ## EVIDENCIA
-`docs/review/` (12 + contact sheet) · Drive `Review\`
+`docs/review/` · Drive Review\ · `review-contact-sheet.jpg`  
+Archivo ZZ-012: `docs/review-archive/zz-012/`
 
 ## COMMIT
-`a437e79`
+_(tras commit)_
 
 ## Sync Drive/GitHub
-OK · Review/ · **PARADO HUMAN_GATE**. No ZZ-013. No deploy.
+Pendiente.
 
 ---
 
@@ -356,8 +374,8 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-013 | HUD recursos D1 | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-020 | Brief diario ritual | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

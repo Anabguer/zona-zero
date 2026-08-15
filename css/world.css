@@ -1008,14 +1008,18 @@ body.zz-need-landscape #zz-toast {
     display: none;
   }
   .zz-hud__res li {
-    min-width: 1.85rem;
-    padding: 0.08rem 0.2rem;
+    min-width: 2.35rem;
+    padding: 0.1rem 0.22rem;
   }
   .zz-hud__res li strong {
     font-size: 0.72rem;
   }
+  /* ZZ-013: nombres legibles en landscape (comida/agua/madera) */
   .zz-hud__res-name {
-    display: none;
+    display: block;
+    font-size: 0.48rem;
+    max-width: 2.8rem;
+    letter-spacing: 0;
   }
   .zz-hud__res li img {
     width: 12px;

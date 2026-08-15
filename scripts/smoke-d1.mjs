@@ -106,5 +106,10 @@ assert(adjustBuildingWorkers(state, content, well.id, 1).ok, 'asignar pozo');
 checkOnboardingProgress(state);
 assert(onboardingStatus(state)?.step?.id === 'ready', 'ready tip avanzar día');
 
+const { hudResourceKeys } = await import(pathToFileURL(join(root, 'js', 'hud-resources.js')).href);
+const hudKeys = hudResourceKeys(state);
+assert(hudKeys.includes('food') && hudKeys.includes('water') && hudKeys.includes('wood'), 'HUD D1 comida/agua/madera');
+assert(!hudKeys.includes('fuel') && !hudKeys.includes('ammo') && !hudKeys.includes('gold'), 'HUD sin fuel/ammo/Au');
+
 if (fails) process.exit(1);
 console.log('Smoke D1 OK');
