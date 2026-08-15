@@ -276,10 +276,10 @@ NO
 Archivo ZZ-012: `docs/review-archive/zz-012/`
 
 ## COMMIT
-_(tras commit)_
+`8f57a8b`
 
 ## Sync Drive/GitHub
-Pendiente.
+OK · Review/ · **No ZZ-014** hasta revisión. No deploy.
 
 ---
 
