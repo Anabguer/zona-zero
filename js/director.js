@@ -3,13 +3,12 @@
  */
 import { createRng } from './rng.js';
 import {
-  livingSurvivors,
   allLiving,
   pushLog,
   defenseValue,
   housingCapacity,
-  makeSurvivor,
 } from './state.js';
+import { changePopulation, applyCasualties, workforce } from './population.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) ^ (state.day * 7919));
@@ -20,7 +19,7 @@ function clampNum(n, a, b) {
 }
 
 function colonyForce(state, content) {
-  const pop = livingSurvivors(state).length;
+  const pop = state.population?.total || workforce(state.population) || allLiving(state).length;
   const def = defenseValue(state, content.buildings, content.balance);
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
   const tech = (state.research.unlocked || []).length;
@@ -30,16 +29,16 @@ function colonyForce(state, content) {
 }
 
 function fragility(state, content) {
-  const pop = Math.max(1, allLiving(state).length);
+  const pop = Math.max(1, state.population?.total || allLiving(state).length || 1);
   const foodDays = (state.resources.food || 0) / pop;
   const waterDays = (state.resources.water || 0) / pop;
-  const wounded = livingSurvivors(state).filter((s) => s.status === 'wounded' || s.status === 'sick').length;
+  const wounded = (state.population?.injured || 0) + (state.population?.sick || 0);
   const cap = housingCapacity(state, content.buildings);
   let f = 0;
   if (foodDays < 2) f += 25;
   if (waterDays < 2) f += 25;
-  f += wounded * 8;
-  if (allLiving(state).length > cap) f += 15;
+  f += wounded * 4;
+  if (pop > cap) f += 15;
   f += Math.max(0, 40 - state.stability);
   f += state.director.recentLosses * 10;
   return f;
@@ -69,7 +68,7 @@ function updateIndices(state, content) {
 
 function conditionsMet(ev, state) {
   const c = ev.conditions || {};
-  const pop = allLiving(state).length;
+  const pop = state.population?.total || allLiving(state).length;
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
   if (ev.minDay != null && state.day < ev.minDay) return false;
   if (ev.minEra != null && state.era < ev.minEra) return false;
@@ -122,25 +121,12 @@ export function applyEventEffects(state, content, effects = {}, rng) {
   if (effects.setFlag) state.flags.narrative[effects.setFlag] = true;
   if (effects.clearFlag) delete state.flags.narrative[effects.clearFlag];
   if (effects.damageSurvivor) {
-    const s = rng.pick(livingSurvivors(state));
-    if (s) {
-      s.hp -= effects.damageSurvivor;
-      if (s.hp <= 0) {
-        s.status = 'dead';
-        s.hp = 0;
-        state.stats.deaths += 1;
-      } else if (s.hp < 50) s.status = 'wounded';
-    }
+    applyCasualties(state, content.balance, { injured: 1 });
   }
   if (effects.killSurvivorChance && rng.chance(effects.killSurvivorChance)) {
-    const s = rng.pick(livingSurvivors(state));
-    if (s) {
-      s.status = 'dead';
-      s.hp = 0;
-      state.stats.deaths += 1;
-      state.director.recentLosses += 1;
-      pushLog(state, `${s.name} no sobrevive al incidente.`, 'bad');
-    }
+    applyCasualties(state, content.balance, { dead: 1 });
+    state.director.recentLosses += 1;
+    pushLog(state, 'Alguien no sobrevive al incidente.', 'bad');
   }
   if (effects.damageBuildingChance && rng.chance(effects.damageBuildingChance)) {
     const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
@@ -150,9 +136,8 @@ export function applyEventEffects(state, content, effects = {}, rng) {
     }
   }
   if (effects.spawnSurvivorChance && rng.chance(effects.spawnSurvivorChance)) {
-    const s = makeSurvivor(rng, content.survivorsDoc);
-    state.survivors.push(s);
-    pushLog(state, `${s.name} se une al refugio.`, 'good');
+    changePopulation(state, 1, content.balance, 'immigrant');
+    pushLog(state, 'Alguien se une al refugio. Población +1.', 'good');
   }
   if (effects.discoverZone) {
     const z = state.zones.find((x) => x.state === 'unknown');

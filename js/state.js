@@ -1,10 +1,13 @@
 /**
- * Estado Zona Zero v3
+ * Estado Zona Zero v4 — población colectiva + exploradores
  */
 import { createRng, hashSeed } from './rng.js';
 import { clamp, uid } from './util.js';
+import { emptyLabor, redistributeLabor, workforce } from './population.js';
+import { makeExplorer, livingExplorers } from './explorers.js';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
+/** @deprecated legacy individual skills — solo migración */
 export const SKILL_KEYS = ['scout', 'gather', 'build', 'produce', 'fight'];
 
 const DEFAULT_RESOURCES = {
@@ -34,10 +37,12 @@ export async function loadContent() {
     'locations',
   ];
   const files = await Promise.all(
-    names.map((n) => fetch(new URL(`${n}.json`, base)).then((r) => {
-      if (!r.ok) throw new Error(n);
-      return r.json();
-    }))
+    names.map((n) =>
+      fetch(new URL(`${n}.json`, base)).then((r) => {
+        if (!r.ok) throw new Error(n);
+        return r.json();
+      })
+    )
   );
   const [
     balance,
@@ -51,7 +56,6 @@ export async function loadContent() {
     erasDoc,
     locationsDoc,
   ] = files;
-  // compat zones
   const zonesDoc = {
     zones: (locationsDoc.seedLayout || []).map((z) => ({
       ...z,
@@ -88,44 +92,27 @@ export function normalizeResources(raw = {}) {
   return out;
 }
 
-function makeSurvivor(rng, survivorsDoc, forcedName = null) {
-  const skills = {};
-  SKILL_KEYS.forEach((k) => {
-    skills[k] = rng.int(1, 3);
-  });
-  const focus = rng.pick(SKILL_KEYS);
-  skills[focus] = clamp(skills[focus] + rng.int(1, 2), 1, 5);
-  const traits = survivorsDoc.traits || [];
-  const trait = rng.chance(0.55) && traits.length ? rng.pick(traits) : null;
-  if (trait?.effects?.scoutBonus) skills.scout = clamp(skills.scout + trait.effects.scoutBonus, 1, 5);
-  const hpBonus = trait?.effects?.hpBonus || 0;
-  const names = survivorsDoc.names || ['Sam'];
-  const name = forcedName || rng.pick(names);
-  return {
-    id: uid('s'),
-    name,
-    hp: 100 + hpBonus,
-    maxHp: 100 + hpBonus,
-    skills,
-    status: 'ok',
-    busyUntilDay: 0,
-    jobBuildingId: null,
-    traitId: trait?.id || null,
-    ageGroup: 'adult',
-    xp: { scout: 0, gather: 0, build: 0, produce: 0, fight: 0 },
-  };
-}
-
 export function createNewState(content, colonyName = 'Refugio 0', seedInput = null) {
   const { balance, locationsDoc, survivorsDoc, buildings, factionsDoc, erasDoc } = content;
   const seed = seedInput || `zz-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
   const rng = createRng(seed);
-  const names = [...(survivorsDoc.names || [])];
-  const survivors = [];
-  for (let i = 0; i < balance.startingSurvivors; i++) {
-    const name = names.length ? names.splice(rng.int(0, names.length - 1), 1)[0] : null;
-    survivors.push(makeSurvivor(rng, survivorsDoc, name));
-  }
+
+  const startPop = balance.startingPopulation || balance.startingSurvivors || 3;
+  const population = {
+    total: startPop,
+    sick: 0,
+    injured: 0,
+    dependents: 0,
+    labor: emptyLabor(),
+    manual: {},
+  };
+
+  const explorer = makeExplorer(rng, survivorsDoc, {
+    skillRange: balance.explorers?.startingSkillRange || [1, 2],
+  });
+  // El primer explorador sale de la colonia
+  population.total = Math.max(1, population.total);
+  redistributeLabor({ population }, balance);
 
   const layout = locationsDoc.seedLayout || content.zonesDoc?.zones || [];
   const types = locationsDoc.locationTypes || {};
@@ -147,7 +134,6 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       controlProgress: z.startState === 'controlled' ? 1 : 0,
     };
   });
-  // roll infected on non-controlled
   zones.forEach((z) => {
     if (z.state !== 'controlled' && z.infected) {
       z.infectedLeft = rng.int(z.infected[0] || 0, z.infected[1] || 0);
@@ -157,13 +143,12 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
   const hq = buildings.hq_central_l1 || Object.values(buildings).find((b) => b.category === 'core');
   const shelterDef = buildings.shelter;
   const buildingsPlaced = [];
-  if (hq) buildingsPlaced.push({ id: uid('b'), type: hq.id, x: 4, y: 3, hp: 100, workers: [] });
+  if (hq) buildingsPlaced.push({ id: uid('b'), type: hq.id, x: 4, y: 3, hp: 100 });
   if (shelterDef) {
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 3, y: 3, hp: 100, workers: [] });
-    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 5, y: 3, hp: 100, workers: [] });
+    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 3, y: 3, hp: 100 });
+    buildingsPlaced.push({ id: uid('b'), type: 'shelter', x: 5, y: 3, hp: 100 });
   }
 
-  // factions 3-5
   const templates = factionsDoc.templates || factionsDoc.factions || [];
   const factionCount = rng.int(3, Math.min(6, templates.length || 3));
   const picked = rng.shuffle(templates).slice(0, factionCount);
@@ -175,7 +160,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     discovered: false,
   }));
 
-  return {
+  const state = {
     v: SAVE_VERSION,
     seed,
     rngState: rng.seed,
@@ -184,7 +169,11 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     era: 0,
     resources: normalizeResources(balance.startingResources),
     energy: { produced: 0, demand: 0 },
-    survivors,
+    population,
+    explorers: [explorer],
+    explorerRecruitReadyDay: 0,
+    // compat vacío — ya no se gestiona gente individual
+    survivors: [],
     base: {
       w: balance.baseGrid?.w || 10,
       h: balance.baseGrid?.h || 8,
@@ -192,9 +181,12 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     },
     zones,
     expedition: null,
+    expeditions: [],
     expeditionsDone: 0,
-    selectedSurvivorIds: [],
+    selectedExplorerId: explorer.id,
     selectedZoneId: null,
+    selectedBuildingId: null,
+    uiPanel: null,
     buildMode: null,
     equipment: { weapon: 'none', armor: 'none', vehicleId: null },
     vehiclesOwned: [],
@@ -225,7 +217,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       finalCrisisDone: false,
       finalCrisisActive: false,
       narrative: {},
-      coach: { people: false, explore: false, build: false, dismissed: false },
+      coach: { explore: false, labor: false, build: false, dismissed: false },
     },
     pendingChoice: null,
     log: [
@@ -240,14 +232,18 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       zonesControlled: zones.filter((z) => z.state === 'controlled').length,
       buildingsBuilt: buildingsPlaced.length,
       deaths: 0,
-      maxPop: survivors.length,
+      maxPop: population.total,
       maxControlled: 1,
       births: 0,
       immigrants: 0,
       attacksSurvived: 0,
+      explorersLost: 0,
     },
     eraDocRef: erasDoc?.eras?.[0]?.id || 'era0',
   };
+
+  redistributeLabor(state, balance);
+  return state;
 }
 
 export function migrateState(state, content) {
@@ -267,22 +263,44 @@ export function migrateState(state, content) {
   if (!next.weather) next.weather = 'clear';
   if (!next.flags) next.flags = {};
   if (!next.flags.narrative) next.flags.narrative = {};
-  if (!next.flags.coach) next.flags.coach = { people: false, explore: false, build: false, dismissed: false };
+  if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };
   if (!next.director) next.director = { threat: 10, tension: 15, cooldowns: {}, familyCooldowns: {}, recentFamilies: [] };
-  if (!next.director.familyCooldowns) next.director.familyCooldowns = {};
-  if (!next.director.recentFamilies) next.director.recentFamilies = [];
-  next.survivors = (next.survivors || []).map((s) => {
-    const skills = { scout: 1, gather: 1, build: 1, produce: 1, fight: 1, ...(s.skills || {}) };
-    if (skills.produce == null) skills.produce = skills.build || 1;
-    return {
-      ...s,
-      skills,
-      xp: s.xp || { scout: 0, gather: 0, build: 0, produce: 0, fight: 0 },
-      jobBuildingId: s.jobBuildingId ?? null,
-      traitId: s.traitId ?? null,
-      ageGroup: s.ageGroup || 'adult',
+  if (!next.expeditions) next.expeditions = [];
+
+  // Migrar supervivientes individuales → población + 1 explorador
+  if (!next.population) {
+    const alive = (next.survivors || []).filter((s) => s.status !== 'dead');
+    const wounded = alive.filter((s) => s.status === 'wounded').length;
+    next.population = {
+      total: Math.max(1, alive.length || balance.startingPopulation || 3),
+      sick: 0,
+      injured: wounded,
+      dependents: 0,
+      labor: emptyLabor(),
+      manual: {},
     };
-  });
+  }
+  if (!next.explorers) {
+    const rng = createRng(hashSeed(next.seed || 'mig'));
+    const best =
+      (next.survivors || [])
+        .filter((s) => s.status !== 'dead')
+        .sort((a, b) => (b.skills?.scout || 0) - (a.skills?.scout || 0))[0] || null;
+    const ex = makeExplorer(rng, content?.survivorsDoc, {
+      name: best?.name,
+      skillRange: [1, 2],
+    });
+    if (best) {
+      ex.skills.explore = clamp(best.skills?.scout || 1, 1, 5);
+      ex.skills.loot = clamp(best.skills?.gather || 1, 1, 5);
+      ex.skills.fight = clamp(best.skills?.fight || 1, 1, 5);
+      ex.skills.resist = clamp(Math.ceil(((best.skills?.build || 1) + (best.skills?.produce || 1)) / 2), 1, 5);
+    }
+    next.explorers = [ex];
+    next.selectedExplorerId = ex.id;
+  }
+
+  next.survivors = [];
   if (!next.base || !next.base.w) {
     next.base = {
       w: balance?.baseGrid?.w || 10,
@@ -290,29 +308,43 @@ export function migrateState(state, content) {
       buildings: next.base?.buildings || [],
     };
   }
-  next.base.buildings = (next.base.buildings || []).map((b) => ({
-    workers: [],
-    hp: 100,
-    ...b,
-  }));
+  next.base.buildings = (next.base.buildings || []).map((b) => {
+    const { workers, ...rest } = b;
+    return { hp: 100, ...rest };
+  });
   (next.zones || []).forEach((z) => {
     if (z.controlProgress == null) z.controlProgress = z.state === 'controlled' ? 1 : 0;
     if (z.infectedLeft == null) z.infectedLeft = 0;
   });
+
+  redistributeLabor(next, balance);
   return next;
 }
 
-export function livingSurvivors(state) {
-  return state.survivors.filter((s) => s.status !== 'dead' && s.ageGroup !== 'child');
+/** Compat: población total viva */
+export function allLiving(state) {
+  if (state.population) {
+    return Array.from({ length: state.population.total }, (_, i) => ({ id: `p${i}`, status: 'ok' }));
+  }
+  return (state.survivors || []).filter((s) => s.status !== 'dead');
 }
 
-export function allLiving(state) {
-  return state.survivors.filter((s) => s.status !== 'dead');
+export function livingSurvivors(state) {
+  // Compat para código legado: fuerza laboral abstracta
+  const n = workforce(state.population || { total: 0 });
+  return Array.from({ length: n }, (_, i) => ({
+    id: `w${i}`,
+    status: 'ok',
+    busyUntilDay: 0,
+    skills: { scout: 1, gather: 1, build: 1, produce: 1, fight: 1 },
+    xp: {},
+    jobBuildingId: null,
+  }));
 }
 
 export function maxSurvivorsCap(balance) {
-  const n = Number(balance?.maxSurvivors);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 120;
+  const n = Number(balance?.maxPopulation ?? balance?.maxSurvivors);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 150;
 }
 
 export function housingCapacity(state, buildingsContent) {
@@ -332,9 +364,13 @@ export function defenseValue(state, buildingsContent, balance) {
     const d = buildingsContent[b.type];
     if (d?.defense) def += d.defense;
   });
-  const armed = livingSurvivors(state).filter((s) => s.skills.fight >= 3).length;
-  def += armed * (balance.defensePerArmedSurvivor || 3);
+  const assigned = state.population?.labor?.defense || 0;
+  def += assigned * (balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5);
   def += Math.floor((state.resources.ammo || 0) * (balance.ammoDefenseFactor ?? 1.2));
+  // Bonus exploradores en casa
+  livingExplorers(state).forEach((e) => {
+    if (e.status === 'ready') def += (e.skills.fight || 1) * 0.8;
+  });
   if (state.equipment?.weapon === 'basic') def += 3;
   if (state.equipment?.weapon === 'improved') def += 7;
   if (state.equipment?.armor === 'light') def += 2;
@@ -349,19 +385,17 @@ export function pushLog(state, text, kind = 'info') {
 }
 
 export function summarizeState(state) {
-  const alive = allLiving(state).length;
+  const alive = state.population?.total ?? allLiving(state).length;
   if (state.flags.defeated) return `Derrota · Día ${state.day}`;
   if (state.flags.victory && !state.flags.endless) return `Victoria · Día ${state.day}`;
-  return `Día ${state.day} · Era ${state.era} · ${alive} vivos · estab. ${Math.round(state.stability)}`;
+  return `Día ${state.day} · Era ${state.era} · ${alive} hab. · estab. ${Math.round(state.stability)}`;
 }
 
-export function gainSkill(state, survivor, key, amount = 1) {
-  if (!survivor || survivor.status === 'dead') return;
-  survivor.xp[key] = (survivor.xp[key] || 0) + amount;
-  while (survivor.xp[key] >= 5 && survivor.skills[key] < 5) {
-    survivor.xp[key] -= 5;
-    survivor.skills[key] += 1;
-  }
+/** @deprecated */
+export function gainSkill() {}
+
+export function makeSurvivor() {
+  return null;
 }
 
-export { makeSurvivor, hashSeed, createRng };
+export { hashSeed, createRng, workforce };

@@ -608,53 +608,38 @@ function drawZone(layer, z, state, onSelectZone) {
 /* ── expedición ──────────────────────────────────────── */
 
 function drawExpedition(svg, state) {
-  const ex = state.expedition;
-  if (!ex) return;
-  const dest = state.zones.find((z) => z.id === ex.zoneId);
-  const camp = state.zones.find((z) => z.id === 'camp' || z.type === 'camp') || state.zones.find((z) => z.state === 'controlled');
-  if (!dest || !camp) return;
+  const list = state.expeditions?.length
+    ? state.expeditions
+    : state.expedition
+      ? [state.expedition]
+      : [];
+  if (!list.length) return;
+  const camp =
+    state.zones.find((z) => z.id === 'camp' || z.type === 'camp') ||
+    state.zones.find((z) => z.state === 'controlled');
+  if (!camp) return;
 
-  const g = svgEl('g', { class: 'zz-map-expedition' });
-  const mx = (camp.x + dest.x) / 2 + (dest.y - camp.y) * 0.08;
-  const my = (camp.y + dest.y) / 2 - (dest.x - camp.x) * 0.08;
-  const d = `M${camp.x} ${camp.y} Q${mx} ${my} ${dest.x} ${dest.y}`;
+  list.forEach((ex, idx) => {
+    const dest = state.zones.find((z) => z.id === ex.zoneId);
+    if (!dest) return;
+    const explorer = (state.explorers || []).find((e) => e.id === ex.explorerId || (ex.survivorIds || [])[0]);
+    const label = explorer ? `${explorer.name} · D${ex.returnDay}` : `Expedición · D${ex.returnDay}`;
 
-  g.appendChild(
-    svgEl('path', {
-      d,
-      class: 'zz-map-route',
-      fill: 'none',
-    })
-  );
-
-  // Marcador a ~55% del trayecto (progreso visual)
-  const t = 0.55;
-  const px = (1 - t) * (1 - t) * camp.x + 2 * (1 - t) * t * mx + t * t * dest.x;
-  const py = (1 - t) * (1 - t) * camp.y + 2 * (1 - t) * t * my + t * t * dest.y;
-
-  g.appendChild(
-    svgEl('circle', {
-      cx: px,
-      cy: py,
-      r: 1.6,
-      class: 'zz-map-route-marker',
-    })
-  );
-
-  g.appendChild(
-    svgEl(
-      'text',
-      {
-        x: px,
-        y: py - 2.8,
-        'text-anchor': 'middle',
-        class: 'zz-map-route-label',
-      },
-      [`Expedición · vuelve D${ex.returnDay}`]
-    )
-  );
-
-  svg.appendChild(g);
+    const g = svgEl('g', { class: 'zz-map-expedition' });
+    const bend = (idx % 2 === 0 ? 1 : -1) * (0.08 + idx * 0.02);
+    const mx = (camp.x + dest.x) / 2 + (dest.y - camp.y) * bend;
+    const my = (camp.y + dest.y) / 2 - (dest.x - camp.x) * bend;
+    const d = `M${camp.x} ${camp.y} Q${mx} ${my} ${dest.x} ${dest.y}`;
+    g.appendChild(svgEl('path', { d, class: 'zz-map-route', fill: 'none' }));
+    const t = 0.45 + idx * 0.08;
+    const px = (1 - t) * (1 - t) * camp.x + 2 * (1 - t) * t * mx + t * t * dest.x;
+    const py = (1 - t) * (1 - t) * camp.y + 2 * (1 - t) * t * my + t * t * dest.y;
+    g.appendChild(svgEl('circle', { cx: px, cy: py, r: 1.8, class: 'zz-map-route-marker' }));
+    g.appendChild(
+      svgEl('text', { x: px, y: py - 2.8, 'text-anchor': 'middle', class: 'zz-map-route-label' }, [label])
+    );
+    svg.appendChild(g);
+  });
 }
 
 /* ── clima ───────────────────────────────────────────── */

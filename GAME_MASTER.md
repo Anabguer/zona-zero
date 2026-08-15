@@ -1,12 +1,18 @@
 # ZONA ZERO — GAME MASTER / MEGA PLAN
 
-**Versión de diseño:** 1.0  
-**Estado:** Diseño integral aprobado para implementación  
+**Versión de diseño:** 1.2  
+**Estado:** Corrección arquitectónica 1.2 aplicada — **muestra artística pendiente de aprobación**  
 **Plataforma:** Web responsive (móvil + escritorio)  
 **Stack objetivo:** HTML/CSS/JS + PHP + MySQL, sin APK  
 **Repositorio:** `Anabguer/zona-zero`  
 **Hosting:** Intocables / Hostalia  
 **URL objetivo:** `/juegos/zona-zero/`
+
+> ### CORRECCIÓN 1.2 (sustituye diseños incompatibles)
+> - **Población colectiva** (números + labor con +/−). Prohibido gestionar individualmente a toda la colonia.
+> - **Exploradores** (máx. 3) son los únicos personajes individuales. **No hay patrullas.**
+> - **UI mundo continuo** sin pestañas principales `Mapa | Base | Gente | Más`.
+> - Dirección artística objetivo: `docs/art-direction/` (aprobar antes del lote final de assets).
 
 ---
 
@@ -16,9 +22,9 @@ Zona Zero debe ser un juego de **gestión indirecta, expansión territorial y su
 
 La experiencia que debe provocar es:
 
-> Empiezo con 3 supervivientes y casi nada. Veo algo que necesito. Asigno gente. Arriesgo. Consigo recursos. Construyo. Ocupo edificios. Mi zona crece. Llega más gente. Cuando creo que lo tengo controlado, sucede algo inesperado. Pierdo recursos, edificios o población. Me reorganizo y sigo creciendo. Nunca sé exactamente qué ocurrirá en la siguiente partida.
+> Veo mi pequeña Zona Zero. Necesito recursos. Veo una zona interesante. Mando a mi explorador. Mientras tanto gestiono población y producción con números. El explorador vuelve. Consigo recursos. Construyo. Mi asentamiento cambia. Crece la población. Desbloqueo cosas. Puedo mandar varios exploradores a la vez. Conquisto ciudad. Ocurre algo inesperado. Pierdo recursos/gente/territorio. Me reorganizo y sigo.
 
-No es un RPG. No se controla directamente a ningún personaje. No hay campaña lineal. No hay misiones idénticas en todas las partidas.
+No es un RPG de colonia. No se controla a cada habitante. No hay campaña lineal. No hay misiones idénticas en todas las partidas.
 
 ---
 
@@ -29,9 +35,8 @@ No es un RPG. No se controla directamente a ningún personaje. No hay campaña l
 El jugador decide **qué**, **quién** y **dónde**. El sistema resuelve la acción.
 
 Acciones típicas:
-- asignar trabajadores;
-- elegir supervivientes para una expedición;
-- seleccionar destino;
+- ajustar labor colectiva (comida / agua / construcción / producción / defensa / medicina / disponibles);
+- elegir **un explorador** y un destino de expedición;
 - construir;
 - producir;
 - defender;
@@ -40,7 +45,8 @@ Acciones típicas:
 - comerciar;
 - responder a eventos.
 
-No hay movimiento manual de personajes ni combate táctico controlado unidad por unidad.
+No hay movimiento manual de unidades ni combate táctico controlado unidad por unidad.  
+**Prohibido (1.2):** lista de toda la colonia, caras/nombres/habilidades de cada habitante, pestaña Gente, asignación manual trabajador-a-edificio.
 
 ## 1.2 Crecimiento visible
 
@@ -198,73 +204,73 @@ Ejemplos:
 
 ---
 
-# 5. SUPERVIVIENTES
+# 5. POBLACIÓN COLECTIVA + EXPLORADORES
 
-## 5.1 Filosofía
+> **1.2:** Esta sección sustituye el diseño anterior de gestión individual de todos los supervivientes y cualquier sistema de patrullas.
 
-Son población funcional, no protagonistas narrativos.
+## 5.1 Población colectiva
 
-Cada uno tiene:
-- nombre procedural/gracioso;
-- retrato procedural sencillo;
-- salud;
-- estado (ok/herido/enfermo/ocupado);
-- habilidades visibles y simples;
-- posible rasgo ligero.
+La colonia puede llegar a 50, 100 o más habitantes. Se gestiona solo con números.
 
-## 5.2 Habilidades
+Ejemplo de UI:
 
-Cinco habilidades base:
-- Explorar;
-- Recolectar;
-- Construir;
-- Producir;
-- Defender.
+**Población: 46 / 58**
+- Disponibles: 8
+- Comida: 10
+- Agua: 5
+- Construcción: 6
+- Producción: 7
+- Defensa: 8
+- Medicina: 2
 
-Medicina puede aparecer como especialidad/rasgo o sexta habilidad si el balance lo justifica.
+El jugador ajusta con `− / +`.  
+El sistema redistribuye automáticamente ante muertes, enfermedad, crecimiento, ataques, etc., respetando prioridades de `balance.laborPriorities` / `laborTargets` y overrides manuales.
 
-Escala recomendada 1–5, visible con icono + barra/puntos.
+No existen:
+- lista de todos los supervivientes;
+- nombres/caras/habilidades de cada habitante;
+- pestaña Gente;
+- asignación manual trabajador→edificio.
 
-Las habilidades suben con uso.
+Nacimientos, inmigración y bajas modifican el contador total (y heridos/enfermos agregados). Dependientes pueden restar fuerza laboral sin micromanejo.
 
-## 5.3 Aptitud natural
+## 5.2 Exploradores (únicos personajes)
 
-Cada superviviente nace/aparece con pequeñas diferencias.
+Máximo **3 exploradores activos**.
 
-Ejemplo:
-- +1 inicial a Recolectar;
-- aprendizaje de Construir ligeramente mayor;
-- rasgo “resistente”;
-- rasgo “rápido”.
+Progresión de plazas (centralizada en `balance.explorers`, calibrable por simulación):
+- inicio: 1 plaza;
+- slot 2: umbrales de población / territorio / era;
+- slot 3: umbrales avanzados.
 
-No más de 1–2 rasgos por persona.
+Cada explorador tiene:
+- retrato propio;
+- nombre procedural **editable**;
+- nivel / XP;
+- estado (`ready` / `away` / `wounded` / `dead`);
+- equipamiento ligero;
+- vehículo opcional.
 
-## 5.4 Muerte
+### Habilidades (escala 1–5, visual simple)
+- Explorar
+- Saquear
+- Combatir
+- Resistir
 
-Permanente.
+**Aprender haciendo** (progresión lenta a propósito):
+- explorar zonas → Explorar;
+- recuperar recursos → Saquear;
+- enfrentarse a infectados → Combatir;
+- expediciones difíciles / heridas / clima adverso → Resistir.
 
-Puede producirse por:
-- expedición;
-- ataque;
-- hambre/sed;
-- enfermedad;
-- catástrofe;
-- evento.
+### Muerte del explorador
+Permanente. Se pierde el personaje y su experiencia. El equipo puede recuperarse o no según azar/balance.  
+Se puede reclutar un sustituto desde la población (el nuevo empieza verde).  
+Debe doler perder un veterano — sin convertir el juego entero en historia de personajes.
 
-## 5.5 Población natural
+## 5.3 Población natural
 
-No gestionar parejas.
-
-El sistema global calcula nacimientos cuando existen:
-- población suficiente;
-- vivienda;
-- estabilidad;
-- comida/agua;
-- seguridad razonable.
-
-Los niños no requieren micromanejo. Pueden representarse como población dependiente hasta alcanzar edad funcional mediante una abstracción temporal acelerada compatible con el juego.
-
-También llegan supervivientes por rescates, radio, migración y eventos.
+Sin gestionar parejas. El sistema global calcula nacimientos/inmigración con vivienda, estabilidad, comida/agua y seguridad. Los dependientes son abstracción, no fichas.
 
 ---
 
@@ -471,56 +477,43 @@ Controlar zonas amplía seguridad, alcance y posibilidades.
 
 # 10. EXPEDICIONES
 
-## 10.1 Flujo
+## 10.1 Flujo (1.2)
 
-1. tocar localización;
-2. ver estimación simple: distancia, peligro, botín probable;
-3. elegir 1–3+ supervivientes según desbloqueos;
-4. opcional: equipamiento rápido;
-5. enviar;
-6. resolver automáticamente;
-7. recibir informe/botín/consecuencias.
+1. tocar destino en el mundo;
+2. elegir **uno** de los exploradores disponibles;
+3. elegir equipamiento si procede;
+4. elegir vehículo si existe;
+5. ENVIAR.
+
+No seleccionar 7 habitantes. El explorador lidera; el sistema puede calcular apoyo humano interno sin UI.
+
+Antes de enviar (simple):
+- distancia;
+- duración;
+- peligro estimado;
+- botín probable/conocido;
+- estado del explorador;
+- equipo;
+- vehículo.
+
+Durante: el explorador se ve en el mapa (ruta / marcador). Varios exploradores pueden estar fuera a la vez.
+
+Después: informe breve (botín, heridas, muerte, descubrimientos, control territorial).
 
 ## 10.2 Riesgo
 
-La probabilidad considera:
-- peligro local;
-- número de expedicionarios;
-- habilidad Explorar/Defender;
-- salud;
-- armas/munición;
-- protección;
-- distancia;
-- vehículo;
-- clima/eventos;
-- información previa.
-
-Mostrar al usuario una categoría, no fórmula exacta:
-- Bajo;
-- Moderado;
-- Alto;
-- Extremo.
+Considera peligro local, skills del explorador, equipo, vehículo, clima, información previa.  
+Mostrar categoría: Bajo / Moderado / Alto / Extremo.
 
 ## 10.3 Botín
 
-Tablas por tipo de lugar + modificadores + rareza.
-
-Nunca “farmacia siempre = exactamente 4 medicinas”.
-
-Puede encontrarse:
-- recursos;
-- supervivientes;
-- equipamiento;
-- pistas;
-- amenazas;
-- eventos;
-- nada útil.
+Tablas por tipo de lugar + modificadores + rareza. Nunca resultado fijo idéntico.
 
 ## 10.4 Equipamiento rápido
 
-No inventario RPG.
+No inventario RPG. Categorías ligeras (arma / protección / vehículo).
 
-Categorías:
+---
 - sin arma / arma básica / arma mejorada;
 - sin protección / ligera / reforzada;
 - vehículo si disponible.
@@ -845,148 +838,92 @@ Pantalla de derrota muestra:
 
 ## 20.1 Filosofía
 
-Debe parecer videojuego, NO dashboard.
+Debe parecer videojuego mirando **Zona Zero**, NO una app con pestañas ni un dashboard.
 
 ## 20.2 HUD
 
-Siempre visibles de forma compacta:
-- día;
-- población/capacidad;
-- recursos;
-- amenaza/tensión aproximada si procede;
-- defensa.
+Compacto permanente con iconografía propia:
+- población/capacidad (tocable → labor colectiva);
+- comida, agua, madera, metal, medicinas, combustible, munición;
+- día / era / clima / estabilidad / amenaza / defensa (secundario).
 
-Iconos SVG propios.
+No debe parecer una tabla.
 
-## 20.3 Navegación principal
+## 20.3 Navegación (1.2) — sin pestañas principales
 
-- Ciudad;
-- Base;
-- Gente;
-- Expediciones;
-- Investigación (cuando se desbloquee).
+**Prohibido como estructura principal:** `Mapa | Base | Gente | Más`.
 
-En móvil: dock inferior o navegación táctil clara.
+La pantalla principal es el **mundo continuo** (ciudad + territorio + asentamiento).
 
-## 20.4 Gente
+Desde ahí:
+- tocar edificio → panel contextual;
+- tocar zona → información / enviar explorador;
+- tocar explorador → ficha pequeña;
+- tocar población → gestión colectiva +/−;
+- tocar recursos → detalle;
+- investigación / facciones / vehículos → sheet “Más” u overlay.
 
-Lista compacta. Cada persona muestra:
-- retrato;
-- nombre;
-- salud;
-- ocupación;
-- habilidades mediante iconos/barras.
+Móvil: bottom sheets. Escritorio: panel lateral si hay espacio.  
+Acciones globales mínimas en dock: Construir · Avanzar día · Más.
 
-Nada como `E3 C2 B2 R4` sin explicación.
+## 20.4 Población (sustituye “Gente”)
 
-Filtros cuando población sea grande:
-- disponibles;
-- heridos;
-- trabajando;
-- expedición;
-- habilidad.
+Solo números y steppers. Sin lista de personas.
 
 ## 20.5 Diario
 
-Secundario y plegable.
-
-Eventos importantes mediante cards/toasts/modales ligeros.
+Secundario. Eventos relevantes = cards. Sin spam de rutina.
 
 ## 20.6 Tutorial
 
-Contextual y corto.
-
-Primera partida guía solo:
-1. seleccionar gente;
-2. explorar;
-3. conseguir materiales;
-4. construir;
-5. avanzar.
-
-Después desaparece.
+Contextual:
+1. comida corta;
+2. población (asignar);
+3. zona cercana;
+4. enviar explorador;
+5. construir.
 
 ---
 
 # 21. DIRECCIÓN ARTÍSTICA
 
+## 21.0 Aprobación pendiente
+
+Muestra real en `docs/art-direction/` (`sample-mobile.png`, `sample-desktop.png`, `index.html`).  
+**No producir el lote final de assets hasta aprobación explícita:** “Sí, quiero que Zona Zero se vea así.”
+
 ## 21.1 Paleta
 
-No monocromo verde.
-
-Usar:
-- carbón/negro verdoso para fondos;
-- tierra/ocre;
-- hormigón/grises;
-- metal;
-- vegetación apagada;
-- luces cálidas;
-- verde luminoso SOLO para seguro/controlado/éxito;
-- ámbar para advertencia;
-- rojo/coral para peligro.
+No monocromo verde. Tierra/ocre, hormigón, metal, vegetación apagada, luces cálidas; verde solo para control/éxito; ámbar aviso; rojo peligro. Sin púrpura neón.
 
 ## 21.2 Estilo
 
-- indie moderno;
-- minimalista;
-- formas limpias;
-- ligera vista isométrica o pseudoisométrica para edificios si resulta viable;
-- sin realismo pesado;
-- legible a tamaño móvil.
+Indie gestión postapocalíptica: minimalista pero **rico**, legible en móvil, SVG/CSS ligeros.  
+No wireframe, no emojis, no cajas con letras, no círculos gigantes como zonas, no aspecto dashboard.
 
-## 21.3 Assets obligatorios
+## 21.3 Assets obligatorios (tras aprobación)
 
-Cursor debe crear un set coherente de SVG/arte propio para:
+Set coherente de SVG/arte propio:
 
 ### Recursos
-7 iconos principales + secundarios usados.
+7 iconos principales + secundarios.
 
 ### Edificios
-Ilustración individual para cada edificio y nivel visual relevante.
+Ilustración individual por tipo y nivel visual relevante (refugios, viviendas, huertos, pozos, almacenes, taller, clínica, generadores, defensas, investigación, garaje, avanzados).
 
-### Mapa
-- carreteras;
-- edificios urbanos por categoría;
-- solares;
-- vegetación;
-- ruinas;
-- niebla;
-- marcadores;
-- control/peligro.
+### Mundo / mapa
+Calles, manzanas, solares, vegetación, ruinas, coches abandonados, niebla, control/peligro, límites urbanos. Localizaciones integradas en la ciudad (no círculos-nodo).
 
-### Base
-- suelos;
-- caminos;
-- vallas;
-- parcelas;
-- cada construcción;
-- estados construcción/dañado/mejorado.
+### Base / núcleo
+Terreno, caminos, vallas, cada construcción, estados dañado/mejorado — integrado visualmente en el mismo mundo cuando sea posible (zoom/detalle OK).
 
-### Personas
-Sistema procedural de retratos combinando:
-- varias cabezas;
-- pelo;
-- ropa;
-- tonos/rasgos gráficos;
-- accesorios mínimos.
+### Exploradores
+Retratos propios (procedurales o set pequeño). **No** retratos para toda la población.
 
-Objetivo: decenas de combinaciones sin dibujar cientos de retratos.
+### Infectados / vehículos / UI
+Siluetas de tipos, vehículos por categoría, botones/alertas/skills/estados/investigación.
 
-### Enemigos
-Siluetas/figuras para tipos de infectado y hordas.
-
-### Vehículos
-Cada categoría.
-
-### UI
-- botones;
-- alertas;
-- salud;
-- habilidades;
-- estados;
-- investigación;
-- expediciones.
-
-No emojis como arte principal.
+No emojis como arte principal. No cajas con letras. No placeholders.
 
 ---
 
@@ -1352,46 +1289,49 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.1.0 — Game Experience  
+**Versión técnica:** 1.2.0-arch — corrección arquitectónica (arte pendiente de aprobación)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **3** · cache assets `?v=9`
+**save_version / v:** **4** · cache assets `?v=10`
 
-## Arquitectura real
-- Cliente: `js/` (state, sim, director, render-map, render-base, icons, sound, api, main, rng, util)
-- Contenido: `content/*.json` (balance, buildings×32, locations×18, events×110/15 familias, survivors, research, vehicles, infected, factions, eras)
-- API PHP: `api/` + tabla `zona_zero_saves`
-- Tools: `scripts/balance-sim.mjs`, E2E Playwright, `scripts/screenshots-1.1.mjs`, `scripts/manual-play-1.1.mjs`
-- Harness: `dev/harness.html` (sin login)
+## Arquitectura real (1.2)
+- Cliente: `js/` state, sim, director, population, explorers, render-map, render-base, icons, sound, api, main, rng, util
+- UI: `play.php` mundo continuo + `css/world.css` (sin pestañas Gente)
+- Contenido: `content/*.json` — `balance.explorers` / laborTargets; buildings×32; locations×18; events×110; research; vehicles; infected; factions; eras
+- Muestra artística: `docs/art-direction/`
+- API PHP + `zona_zero_saves`
+- Tools: balance-sim, screenshots, manual-play, harness
 
-## Decisiones implementadas (v1 → v1.1)
-- Gestión indirecta, 5 skills, población procedural, muerte permanente
-- 32 edificios, 18 localizaciones, Director adaptativo, clima, ataques abstractos
-- Investigación 4 ramas, vehículos, facciones 3–6, eras 0–4, victoria + endless
-- Arte SVG propio; sin emojis como arte principal
-- **v1.1 Game Experience:** mapa ciudad (manzanas/calles/niebla/control), base terreno ilustrada por tipo/nivel, HUD móvil dock, onboarding jugable, sonido ON/OFF, cards de evento (sin rutina vacía), progreso de eras, expediciones visibles en mapa, filtros de gente, overlays clima, ataques como acontecimiento
+## Decisiones 1.2 (sustituyen gente individual / patrullas)
+- Población = contador + pools de labor (+/−) + redistribución automática
+- Exploradores máx. 3; skills Explorar/Saquear/Combatir/Resistir; muerte permanente; reclutamiento desde población
+- Expediciones = 1 explorador por salida; varias en paralelo
+- UI sin tabs Mapa/Base/Gente; sheets contextuales
+- Migración saves v3→v4 (supervivientes → population + 1 explorador)
 
-## Balance (simulador headless, última calibración v1)
-- ~360 partidas (4 perfiles ×80 @60d + 40 @120d)
-- balanced@60 ~80% supervivencia; mismanaged@60 ~42%; balanced@120 ~87%
-- Victoria forzada OK; victoria natural larga a propósito
+## Pendiente (tras “Sí, se ve así”)
+- Lote artístico completo alineado a `docs/art-direction/sample-*.png`
+- Integración visual mundo+núcleo al nivel de la muestra
+- Recalibración balance-sim con población colectiva
+- Pulido / pruebas / producción
+
+## Balance (última calibración conocida = v1, pre-1.2)
+- ~360 partidas headless @60/120d — **requiere re-sim tras 1.2**
 - Ver `scripts/balance-report.json`
 
 ## Changelog técnico
+### 1.2.0-arch
+- Población colectiva + exploradores; save v4
+- UX mundo continuo (play.php / world.css / main.js)
+- GAME_MASTER actualizado (sección 5/10/20/21)
+- Muestra artística en docs/art-direction (parada de aprobación)
+
 ### 1.1.0 — Game Experience
-- GAME_MASTER conserva MEGA PLAN completo + apéndice técnico
-- Mapa ciudad SVG (no diagrama de nodos); niebla sin “?”; control verde perceptible
-- Base terreno; glifos por edificio/nivel; densidad ambiental con población
-- Expediciones/eventos/eras/investigación/vehículos/facciones/ataques en UI
-- Clima visual, sonido Web Audio, onboarding, dock móvil, feedback toast/pulse
-- Screenshots + partida manual automatizada Día 1→19
+- Mapa ciudad, base terreno, sonido, onboarding, cards, etc.
 
-### 1.0.0
-- Implementación completa según diseño integral v1 (save v3)
-
-### 0.3.x–0.1.0
-- MVP + UX temprana + fix `[hidden]`/Derrota
+### 1.0.0 / 0.3.x–0.1.0
+- Implementación v1 + MVP + fix Derrota
 

@@ -17,7 +17,7 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=9" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=10" />
 </head>
 <body class="zz-body zz-body--hub">
   <div id="zz-hub-boot" class="zz-boot">Cargando slots…</div>
@@ -38,7 +38,7 @@ $base = zz_public_base();
     <section class="zz-slots" id="zz-slots" aria-label="Slots de partida"></section>
   </div>
   <script type="module">
-    import { bootHub } from './js/main.js?v=9';
+    import { bootHub } from './js/main.js?v=10';
     bootHub().catch((err) => {
       const el = document.getElementById('zz-hub-boot');
       const hub = document.getElementById('zz-hub');

@@ -1,18 +1,31 @@
 /**
- * Simulación diaria Zona Zero v1
+ * Simulación diaria Zona Zero v4 — población colectiva + exploradores
  */
-import { chance, clamp, pick, rollRange, uid } from './util.js';
+import { clamp, uid } from './util.js';
 import { createRng } from './rng.js';
 import {
-  livingSurvivors,
   allLiving,
   pushLog,
   defenseValue,
   housingCapacity,
   maxSurvivorsCap,
-  gainSkill,
-  makeSurvivor,
 } from './state.js';
+import {
+  redistributeLabor,
+  changePopulation,
+  applyCasualties,
+  healPopulationTick,
+  clearLaborManual,
+  adjustLabor,
+  workforce,
+} from './population.js';
+import {
+  readyExplorers,
+  livingExplorers,
+  gainExplorerSkill,
+  killExplorer,
+  explorerSlotsUnlocked,
+} from './explorers.js';
 import { runDirector, applyEventEffects } from './director.js';
 
 export const RES_LABEL = {
@@ -63,8 +76,10 @@ export function placeBuilding(state, content, type, x, y) {
   if (state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) {
     return { ok: false, error: 'Celda ocupada' };
   }
-  const builders = livingSurvivors(state).filter((s) => s.busyUntilDay <= state.day);
-  if (!builders.length) return { ok: false, error: 'Nadie libre para construir' };
+  const buildLabor = state.population?.labor?.build || 0;
+  const idle = state.population?.labor?.idle || 0;
+  if (buildLabor + idle < 1) return { ok: false, error: 'Sin mano de obra para construir' };
+
   payCost(state, def.cost);
   if (def.upgradeFrom) {
     const old = state.base.buildings.find((b) => b.type === def.upgradeFrom && b.hp > 0);
@@ -72,66 +87,25 @@ export function placeBuilding(state, content, type, x, y) {
       old.type = type;
       pushLog(state, `Mejoráis a ${def.name}.`, 'good');
       state.stats.buildingsBuilt += 1;
-      gainSkill(state, builders[0], 'build', 2);
       return { ok: true, upgraded: true };
     }
   }
-  state.base.buildings.push({ id: uid('b'), type, x, y, hp: 100, workers: [] });
+  state.base.buildings.push({ id: uid('b'), type, x, y, hp: 100 });
   state.stats.buildingsBuilt += 1;
-  const best = builders.sort((a, b) => b.skills.build - a.skills.build)[0];
-  gainSkill(state, best, 'build', 2);
-  pushLog(state, `Construís ${def.name} (${best.name}).`, 'good');
+  pushLog(state, `Construís ${def.name}.`, 'good');
   return { ok: true };
 }
 
-export function assignWorker(state, buildingId, survivorId) {
-  const b = state.base.buildings.find((x) => x.id === buildingId);
-  const s = state.survivors.find((x) => x.id === survivorId);
-  if (!b || !s || s.status === 'dead') return { ok: false, error: 'Inválido' };
-  const def = null;
-  void def;
-  if (!b.workers) b.workers = [];
-  if (s.jobBuildingId && s.jobBuildingId !== buildingId) {
-    const prev = state.base.buildings.find((x) => x.id === s.jobBuildingId);
-    if (prev?.workers) prev.workers = prev.workers.filter((id) => id !== s.id);
-  }
-  if (b.workers.includes(s.id)) return { ok: true };
-  b.workers.push(s.id);
-  s.jobBuildingId = b.id;
-  return { ok: true };
+/** Compat stubs — la asignación es colectiva */
+export function assignWorker() {
+  return { ok: false, error: 'Asignación colectiva: usad el panel de población' };
 }
-
-export function unassignWorker(state, survivorId) {
-  const s = state.survivors.find((x) => x.id === survivorId);
-  if (!s) return;
-  if (s.jobBuildingId) {
-    const b = state.base.buildings.find((x) => x.id === s.jobBuildingId);
-    if (b?.workers) b.workers = b.workers.filter((id) => id !== s.id);
-  }
-  s.jobBuildingId = null;
-}
-
+export function unassignWorker() {}
 export function autoAssignWorkers(state, content) {
-  livingSurvivors(state).forEach((s) => unassignWorker(state, s.id));
-  const jobs = [];
-  state.base.buildings.forEach((b) => {
-    if (b.hp <= 0) return;
-    const def = content.buildings[b.type];
-    if (!def?.jobs || !def.produces) return;
-    for (let i = 0; i < def.jobs; i++) jobs.push({ b, def, skill: 'produce' });
-  });
-  const free = livingSurvivors(state)
-    .filter((s) => s.busyUntilDay <= state.day)
-    .sort((a, b) => b.skills.produce - a.skills.produce);
-  jobs.forEach((j) => {
-    const s = free.shift();
-    if (!s) return;
-    if (!j.b.workers) j.b.workers = [];
-    j.b.workers.push(s.id);
-    s.jobBuildingId = j.b.id;
-  });
-  return { ok: true, assigned: state.base.buildings.reduce((n, b) => n + (b.workers?.length || 0), 0) };
+  clearLaborManual(state, content.balance);
+  return { ok: true, assigned: workforce(state.population) };
 }
+export { adjustLabor };
 
 function riskCategory(score) {
   if (score < 0.25) return 'Bajo';
@@ -140,78 +114,88 @@ function riskCategory(score) {
   return 'Extremo';
 }
 
-export function expeditionPreview(state, content, zoneId, survivorIds) {
+export function expeditionPreview(state, content, zoneId, explorerId) {
   const zone = state.zones.find((z) => z.id === zoneId);
-  if (!zone) return null;
-  const team = livingSurvivors(state).filter((s) => survivorIds.includes(s.id));
-  const scout = Math.max(0, ...team.map((s) => s.skills.scout));
-  const fight = Math.max(0, ...team.map((s) => s.skills.fight));
-  let risk = zone.risk - scout * 0.04 - fight * 0.03 - team.length * 0.03;
-  if (state.equipment.weapon === 'basic') risk -= 0.05;
-  if (state.equipment.weapon === 'improved') risk -= 0.1;
-  if (state.equipment.armor !== 'none') risk -= 0.04;
-  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === state.equipment.vehicleId);
+  const explorer = (state.explorers || []).find((e) => e.id === explorerId);
+  if (!zone || !explorer) return null;
+  const explore = explorer.skills.explore || 1;
+  const fight = explorer.skills.fight || 1;
+  const resist = explorer.skills.resist || 1;
+  let risk = zone.risk - explore * 0.045 - fight * 0.035 - resist * 0.02;
+  const gear = explorer.gear || state.equipment || {};
+  if (gear.weapon === 'basic') risk -= 0.05;
+  if (gear.weapon === 'improved') risk -= 0.1;
+  if (gear.armor && gear.armor !== 'none') risk -= 0.04;
+  const vehicleId = explorer.vehicleId || state.equipment?.vehicleId;
+  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === vehicleId);
   if (veh) risk -= (veh.protection || 0) * 0.02;
   if (state.weather === 'storm' || state.weather === 'fog') risk += 0.08;
   risk = clamp(risk, 0.05, 0.95);
   let days = content.balance.expeditionBaseDurationDays || 1;
   if (zone.state === 'unknown') days += 1;
   if (veh?.speedBonus) days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
-  return { risk, category: riskCategory(risk), days, fuel: content.balance.expeditionFuelCost || 1 };
+  const camp = state.zones.find((z) => z.type === 'camp') || state.zones[0];
+  const dist = camp
+    ? Math.hypot((zone.x || 0) - (camp.x || 0), (zone.y || 0) - (camp.y || 0))
+    : 20;
+  return {
+    risk,
+    category: riskCategory(risk),
+    days,
+    fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost || 1,
+    distance: Math.round(dist),
+    lootHint: Object.keys(zone.loot || {}).slice(0, 3),
+    explorerName: explorer.name,
+    explorerStatus: explorer.status,
+  };
 }
 
-export function startExpedition(state, content, zoneId, survivorIds) {
+export function startExpedition(state, content, zoneId, explorerId) {
   if (state.flags.defeated) return { ok: false, error: 'Partida terminada' };
-  if (state.expedition) return { ok: false, error: 'Ya hay una expedición en curso' };
   const zone = state.zones.find((z) => z.id === zoneId);
   if (!zone) return { ok: false, error: 'Zona inválida' };
   if (zone.state === 'unknown') return { ok: false, error: 'Zona aún no descubierta' };
   if (zone.id === 'camp' || zone.type === 'camp') return { ok: false, error: 'El campamento ya es vuestro' };
 
-  const preview = expeditionPreview(state, content, zoneId, survivorIds);
-  const fuelCost = preview.fuel + (state.equipment.vehicleId && state.equipment.vehicleId !== 'bike' ? 1 : 0);
-  if ((state.resources.fuel || 0) < fuelCost && fuelCost > 0) {
-    const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === state.equipment.vehicleId);
-    if (veh && veh.fuelPerTrip > 0) return { ok: false, error: 'Sin combustible' };
-    if (fuelCost > 0 && (state.resources.fuel || 0) < (content.balance.expeditionFuelCost || 1)) {
-      // allow foot expeditions with 0 fuel if no vehicle
-      if (state.equipment.vehicleId && state.equipment.vehicleId !== 'bike') {
-        return { ok: false, error: 'Sin combustible para el vehículo' };
-      }
-    }
-  }
+  const explorer = (state.explorers || []).find((e) => e.id === explorerId);
+  if (!explorer || explorer.status !== 'ready') return { ok: false, error: 'Explorador no disponible' };
+  if (explorer.expeditionId) return { ok: false, error: 'Ese explorador ya está fuera' };
 
-  const max = (content.balance.expeditionMaxSurvivors || 3) + ((state.research.unlocked || []).includes('log_bigger_teams') ? 1 : 0);
-  const ids = [...new Set(survivorIds)].slice(0, max);
-  const team = livingSurvivors(state).filter(
-    (s) => ids.includes(s.id) && s.busyUntilDay <= state.day && s.status !== 'dead'
-  );
-  if (team.length < 1) return { ok: false, error: 'Selecciona supervivientes libres' };
+  // Una expedición activa por explorador; varias en paralelo OK
+  const busyZones = (state.expeditions || []).map((x) => x.zoneId);
+  if (busyZones.includes(zoneId)) return { ok: false, error: 'Ya hay una expedición a esa zona' };
 
-  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === state.equipment.vehicleId);
+  const preview = expeditionPreview(state, content, zoneId, explorerId);
+  const vehicleId = explorer.vehicleId || state.equipment?.vehicleId || null;
+  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === vehicleId);
   const payFuel = veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost || 0;
   if (payFuel > 0) {
     if ((state.resources.fuel || 0) < payFuel) return { ok: false, error: `Hace falta ${payFuel} combustible` };
     state.resources.fuel -= payFuel;
   }
 
-  team.forEach((s) => {
-    s.busyUntilDay = state.day + preview.days;
-    unassignWorker(state, s.id);
-  });
-
-  state.expedition = {
+  const exId = uid('xp');
+  const gear = { ...(explorer.gear || { weapon: 'none', armor: 'none' }) };
+  const entry = {
+    id: exId,
     zoneId,
-    survivorIds: team.map((s) => s.id),
+    explorerId: explorer.id,
     returnDay: state.day + preview.days,
     risk: preview.risk,
-    vehicleId: state.equipment.vehicleId,
-    weapon: state.equipment.weapon,
-    armor: state.equipment.armor,
+    vehicleId,
+    weapon: gear.weapon,
+    armor: gear.armor,
   };
+  if (!state.expeditions) state.expeditions = [];
+  state.expeditions.push(entry);
+  // Compat mapa 1.1
+  state.expedition = state.expeditions[0] || null;
+
+  explorer.status = 'away';
+  explorer.expeditionId = exId;
   state.stats.expeditions += 1;
-  pushLog(state, `Expedición a ${zone.name} (riesgo ${preview.category}).`, 'info');
-  return { ok: true, preview };
+  pushLog(state, `${explorer.name} parte hacia ${zone.name} (riesgo ${preview.category}).`, 'info');
+  return { ok: true, preview, expeditionId: exId };
 }
 
 function rollLoot(rng, lootSpec, cargoBonus = 0) {
@@ -235,53 +219,56 @@ function resolveCombat(rng, teamPower, enemyPower) {
   return 'fail';
 }
 
-export function resolveExpedition(state, content) {
-  if (!state.expedition || state.day < state.expedition.returnDay) return;
+function resolveOneExpedition(state, content, ex) {
   const rng = rngOf(state);
-  const ex = state.expedition;
   const zone = state.zones.find((z) => z.id === ex.zoneId);
-  const team = state.survivors.filter((s) => ex.survivorIds.includes(s.id) && s.status !== 'dead');
-  state.expedition = null;
-  if (!zone || !team.length) {
-    pushLog(state, 'La expedición no regresa.', 'bad');
+  const explorer = (state.explorers || []).find((e) => e.id === ex.explorerId);
+  if (!zone || !explorer || explorer.status === 'dead') {
+    pushLog(state, 'Una expedición se pierde en el silencio.', 'bad');
     return;
   }
 
-  const scout = team.reduce((n, s) => n + s.skills.scout, 0);
-  const fight = team.reduce((n, s) => n + s.skills.fight, 0);
-  const gather = team.reduce((n, s) => n + s.skills.gather, 0);
-  let teamPower = fight * 4 + scout * 2 + team.length * 3 + (state.resources.ammo || 0) * 0.5;
+  const explore = explorer.skills.explore || 1;
+  const fight = explorer.skills.fight || 1;
+  const lootSk = explorer.skills.loot || 1;
+  const resist = explorer.skills.resist || 1;
+
+  let teamPower =
+    fight * 5 + explore * 2 + resist * 2 + 4 + (state.resources.ammo || 0) * 0.4;
   if (ex.weapon === 'basic') teamPower += 6;
   if (ex.weapon === 'improved') teamPower += 12;
   if (ex.armor === 'light') teamPower += 3;
   if (ex.armor === 'heavy') teamPower += 7;
+  // Apoyo humano interno (no micromanagement)
+  const support = Math.min(4, Math.floor((state.population?.labor?.idle || 0) * 0.15));
+  teamPower += support * 2;
+
   const enemyPower = 4 + zone.infectedLeft * 3 + zone.risk * 20;
   const outcome = resolveCombat(rng, teamPower, enemyPower);
 
-  team.forEach((s) => {
-    gainSkill(state, s, 'scout', 1);
-    gainSkill(state, s, 'gather', 1);
-    if (outcome !== 'clean') gainSkill(state, s, 'fight', 1);
-    s.busyUntilDay = 0;
-  });
+  gainExplorerSkill(explorer, 'explore', 1, content.balance);
+  if (outcome !== 'fail') gainExplorerSkill(explorer, 'loot', 1, content.balance);
+  if (outcome !== 'clean') gainExplorerSkill(explorer, 'fight', 1, content.balance);
+  if (outcome === 'wounded' || outcome === 'retreat' || state.weather !== 'clear') {
+    gainExplorerSkill(explorer, 'resist', 1, content.balance);
+  }
+
+  explorer.expeditionId = null;
 
   if (outcome === 'fail') {
-    const victim = rng.pick(team);
-    victim.hp = 0;
-    victim.status = 'dead';
+    killExplorer(state, explorer, content.balance);
+    state.stats.explorersLost = (state.stats.explorersLost || 0) + 1;
     state.stats.deaths += 1;
     state.director.recentLosses += 1;
     state.stability -= 8;
-    pushLog(state, `Fracaso en ${zone.name}. ${victim.name} no vuelve.`, 'bad');
+    pushLog(state, `Fracaso en ${zone.name}. ${explorer.name} no vuelve.`, 'bad');
     return;
   }
 
   if (outcome === 'retreat') {
-    team.forEach((s) => {
-      s.hp -= rng.int(10, 25);
-      if (s.hp <= 40) s.status = 'wounded';
-    });
-    pushLog(state, `Retirada de ${zone.name}. Heridos, poco botín.`, 'warn');
+    explorer.status = 'wounded';
+    explorer.wounds = (explorer.wounds || 0) + 1;
+    pushLog(state, `${explorer.name} se retira de ${zone.name}. Herido, poco botín.`, 'warn');
     const scraps = rollLoot(rng, { wood: [0, 1], metal: [0, 1] });
     Object.entries(scraps).forEach(([k, v]) => {
       state.resources[k] = (state.resources[k] || 0) + v;
@@ -289,33 +276,32 @@ export function resolveExpedition(state, content) {
     return;
   }
 
-  // clean or wounded success
   if (outcome === 'wounded') {
-    const hurt = rng.pick(team);
-    hurt.hp -= rng.int(15, 35);
-    if (hurt.hp <= 0) {
-      hurt.hp = 0;
-      hurt.status = 'dead';
+    explorer.status = 'wounded';
+    explorer.wounds = (explorer.wounds || 0) + 1;
+    if (rng.chance(0.12 - resist * 0.015)) {
+      killExplorer(state, explorer, content.balance);
+      state.stats.explorersLost = (state.stats.explorersLost || 0) + 1;
       state.stats.deaths += 1;
-      pushLog(state, `${hurt.name} cae limpiando ${zone.name}.`, 'bad');
-    } else {
-      hurt.status = 'wounded';
-      pushLog(state, `${hurt.name} vuelve herido de ${zone.name}.`, 'warn');
+      pushLog(state, `${explorer.name} cae limpiando ${zone.name}.`, 'bad');
+      return;
     }
+    pushLog(state, `${explorer.name} vuelve herido de ${zone.name}.`, 'warn');
+  } else {
+    explorer.status = 'ready';
   }
 
-  zone.infectedLeft = Math.max(0, zone.infectedLeft - rng.int(1, 3));
+  zone.infectedLeft = Math.max(0, zone.infectedLeft - rng.int(1, 2 + Math.floor(fight / 2)));
   const typeLoot = content.locationsDoc?.locationTypes?.[zone.type]?.lootBias || zone.loot || {};
   const lootMap = {};
   Object.entries(typeLoot).forEach(([k, bias]) => {
     const n = typeof bias === 'number' ? bias : 1;
-    lootMap[k] = [Math.max(0, Math.floor(n)), Math.max(1, Math.ceil(n + 2 + gather * 0.15))];
+    lootMap[k] = [Math.max(0, Math.floor(n)), Math.max(1, Math.ceil(n + 1 + lootSk * 0.35))];
   });
   if (!Object.keys(lootMap).length) {
     lootMap.food = [0, 2];
-    lootMap.scrap = [0, 2];
+    lootMap.metal = [0, 2];
   }
-  // map scrap to metal
   const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === ex.vehicleId);
   const loot = rollLoot(rng, lootMap, veh?.cargoBonus || 0);
   if (loot.scrap) {
@@ -328,10 +314,10 @@ export function resolveExpedition(state, content) {
   const lootTxt = Object.entries(loot)
     .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
     .join(', ');
-  pushLog(state, `Regreso de ${zone.name}: ${lootTxt || 'casi nada'}.`, 'good');
+  pushLog(state, `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}.`, 'good');
 
   if (zone.state === 'discovered' || zone.state === 'hostile') {
-    zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + 0.35 + scout * 0.02);
+    zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + 0.3 + explore * 0.03);
     if (zone.infectedLeft <= 0 && zone.controlProgress >= (content.balance.controlClearThreshold || 0.55)) {
       zone.state = 'controlled';
       zone.controlProgress = 1;
@@ -339,7 +325,6 @@ export function resolveExpedition(state, content) {
       state.stats.maxControlled = Math.max(state.stats.maxControlled, state.stats.zonesControlled);
       state.stability += 4;
       pushLog(state, `¡${zone.name} pasa a control de Zona Zero!`, 'good');
-      // reveal neighbors
       (zone.neighbors || []).forEach((nid) => {
         const n = state.zones.find((z) => z.id === nid);
         if (n && n.state === 'unknown') {
@@ -352,63 +337,94 @@ export function resolveExpedition(state, content) {
     }
   }
 
-  if (rng.chance(0.08)) {
+  if (rng.chance(0.1)) {
     const cap = housingCapacity(state, content.buildings);
-    if (allLiving(state).length < cap && allLiving(state).length < maxSurvivorsCap(content.balance)) {
-      const s = makeSurvivor(rng, content.survivorsDoc);
-      state.survivors.push(s);
-      state.stats.immigrants += 1;
-      pushLog(state, `Rescatáis a ${s.name} en ${zone.name}.`, 'good');
+    if ((state.population?.total || 0) < cap && (state.population?.total || 0) < maxSurvivorsCap(content.balance)) {
+      changePopulation(state, 1, content.balance, 'immigrant');
+      pushLog(state, `Rescatáis a alguien en ${zone.name}. Población +1.`, 'good');
     }
   }
+}
+
+export function resolveExpedition(state, content) {
+  if (!state.expeditions) state.expeditions = [];
+  // Migrar singular
+  if (state.expedition && !state.expeditions.find((x) => x.id === state.expedition.id)) {
+    state.expeditions.push(state.expedition);
+  }
+  const due = state.expeditions.filter((ex) => state.day >= ex.returnDay);
+  due.forEach((ex) => resolveOneExpedition(state, content, ex));
+  state.expeditions = state.expeditions.filter((ex) => state.day < ex.returnDay);
+  state.expedition = state.expeditions[0] || null;
+
+  // Curar exploradores heridos en casa
+  livingExplorers(state).forEach((e) => {
+    if (e.status === 'wounded' && !e.expeditionId) {
+      e.wounds = Math.max(0, (e.wounds || 1) - 1);
+      if (e.wounds <= 0) e.status = 'ready';
+    }
+  });
 }
 
 function applyProduction(state, content) {
   const stabMod = clamp(0.6 + state.stability / 200, 0.6, 1.15);
   const weatherMod =
     state.weather === 'heat' || state.weather === 'cold' ? 0.85 : state.weather === 'storm' ? 0.75 : 1;
+  const labor = state.population?.labor || {};
+  const per = content.balance.productionPerWorker || {};
+
   let energyProd = 0;
   let energyDemand = 1;
+  let buildingFood = 0;
+  let buildingWater = 0;
+  let buildingOther = {};
+
   state.base.buildings.forEach((b) => {
     if (b.hp <= 0) return;
     const def = content.buildings[b.type];
     if (!def) return;
     if (def.energy > 0) energyProd += def.energy;
     if (def.energy < 0) energyDemand += Math.abs(def.energy);
-    if (def.fuelSave) {
-      // handled in fuel need
-    }
     if (!def.produces) return;
-    const jobs = def.jobs || 0;
-    const workers = (b.workers || [])
-      .map((id) => state.survivors.find((s) => s.id === id))
-      .filter((s) => s && s.status !== 'dead' && s.busyUntilDay <= state.day);
-    // Producción pasiva mínima si el edificio existe (colonia temprana)
-    const staffRatio = jobs ? clamp(workers.length / jobs, 0.35, 1) : 0.55;
-    const skill = workers.length
-      ? workers.reduce((n, s) => n + (s.skills.produce || 1), 0) / workers.length
-      : 2;
-    const mult = staffRatio * stabMod * weatherMod * (0.85 + skill * 0.1);
+    const jobs = def.jobs || 1;
     Object.entries(def.produces).forEach(([k, v]) => {
-      const amt = Math.max(0, Math.round(v * mult));
-      if (amt) state.resources[k] = (state.resources[k] || 0) + amt;
+      // Capacidad del edificio × cobertura laboral
+      let staff = labor.produce || 0;
+      if (k === 'food') staff = labor.food || 0;
+      if (k === 'water') staff = labor.water || 0;
+      const ratio = clamp(staff / Math.max(1, jobs * 2), 0.25, 1.15);
+      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod));
+      if (k === 'food') buildingFood += amt;
+      else if (k === 'water') buildingWater += amt;
+      else buildingOther[k] = (buildingOther[k] || 0) + amt;
     });
-    workers.forEach((s) => gainSkill(state, s, 'produce', 1));
   });
-  // research bonuses
-  if ((state.research.unlocked || []).includes('surv_crops')) {
-    state.resources.food += 1;
+
+  // Producción directa por trabajadores asignados (colonia temprana sin edificios)
+  const foodExtra = Math.round((labor.food || 0) * (per.food || 1.5) * 0.35 * stabMod);
+  const waterExtra = Math.round((labor.water || 0) * (per.water || 1.4) * 0.35 * stabMod);
+  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.0) * 0.25 * stabMod);
+
+  state.resources.food = (state.resources.food || 0) + buildingFood + foodExtra;
+  state.resources.water = (state.resources.water || 0) + buildingWater + waterExtra;
+  if (produceExtra > 0) {
+    state.resources.wood = (state.resources.wood || 0) + Math.ceil(produceExtra / 2);
+    state.resources.metal = (state.resources.metal || 0) + Math.floor(produceExtra / 2);
   }
-  if ((state.research.unlocked || []).includes('surv_filters')) {
-    state.resources.water += 1;
-  }
+  Object.entries(buildingOther).forEach(([k, v]) => {
+    state.resources[k] = (state.resources[k] || 0) + v;
+  });
+
+  if ((state.research.unlocked || []).includes('surv_crops')) state.resources.food += 1;
+  if ((state.research.unlocked || []).includes('surv_filters')) state.resources.water += 1;
   state.energy.produced = energyProd;
   state.energy.demand = energyDemand;
 }
 
 function fuelNeed(state, content) {
   let need = content.balance.fuelPerDayBase || 0.5;
-  need += livingSurvivors(state).length * (content.balance.fuelPerSurvivorPerDay || 0.08);
+  const pop = state.population?.total || 0;
+  need += pop * (content.balance.fuelPerPersonPerDay || content.balance.fuelPerSurvivorPerDay || 0.08);
   state.base.buildings.forEach((b) => {
     const def = content.buildings[b.type];
     if (def?.fuelSave) need = Math.max(0, need - def.fuelSave);
@@ -417,7 +433,7 @@ function fuelNeed(state, content) {
   return Math.ceil(need);
 }
 
-function consumeNeed(state, key, need, dmgKey, label, balance) {
+function consumeNeed(state, key, need, label, balance) {
   const have = state.resources[key] || 0;
   if (have >= need) {
     state.resources[key] = have - need;
@@ -427,52 +443,18 @@ function consumeNeed(state, key, need, dmgKey, label, balance) {
   const missing = need - have;
   state.stability -= 2 + Math.min(4, missing);
   pushLog(state, `Escasez de ${label}.`, 'bad');
-  // Daño gradual: no aniquilar la colonia en un solo día
-  const victims = livingSurvivors(state)
-    .slice()
-    .sort((a, b) => a.hp - b.hp)
-    .slice(0, Math.min(2, Math.max(1, Math.ceil(missing / 3))));
-  const dmg = (balance[dmgKey] || 12) * 0.55;
-  victims.forEach((s) => {
-    s.hp -= dmg;
-    if (s.hp <= 40) s.status = 'wounded';
-    if (s.hp <= 0) {
-      s.hp = 0;
-      s.status = 'dead';
-      state.stats.deaths += 1;
-      state.director.recentLosses += 1;
-      pushLog(state, `${s.name} sucumbe (${label}).`, 'bad');
-    }
-  });
-}
-
-function healTick(state, content) {
-  const hasClinic = state.base.buildings.some((b) =>
-    ['clinic', 'infirmary', 'medkit'].includes(b.type) && b.hp > 0
-  );
-  const meds = state.resources.medicine || 0;
-  livingSurvivors(state).forEach((s) => {
-    if (s.status === 'wounded' || s.status === 'sick') {
-      let heal = hasClinic ? 8 : 3;
-      if (meds > 0) {
-        state.resources.medicine -= 1;
-        heal += 14;
-      }
-      s.hp = Math.min(s.maxHp, s.hp + heal);
-      if (s.hp >= 80) s.status = 'ok';
-    } else if (s.hp < s.maxHp) {
-      s.hp = Math.min(s.maxHp, s.hp + (hasClinic ? 4 : 2));
-    }
-  });
+  const loss = Math.min(2, Math.max(1, Math.ceil(missing / 4)));
+  applyCasualties(state, balance, { dead: loss > 1 && missing >= 3 ? 1 : 0, injured: loss });
+  if (loss) pushLog(state, `La colonia sufre por falta de ${label}.`, 'bad');
 }
 
 function updateStability(state, content) {
-  const alive = livingSurvivors(state).length;
+  const pop = state.population?.total || 0;
   const cap = housingCapacity(state, content.buildings);
   let d = 0;
-  if ((state.resources.food || 0) > alive) d += 1;
-  if ((state.resources.water || 0) > alive) d += 1;
-  if (alive <= cap) d += 1;
+  if ((state.resources.food || 0) > pop) d += 1;
+  if ((state.resources.water || 0) > pop) d += 1;
+  if (pop <= cap) d += 1;
   else d -= 2;
   if (state.director.recentLosses > 0) d -= state.director.recentLosses;
   d += Math.min(2, Math.floor(state.stats.zonesControlled / 3));
@@ -483,55 +465,54 @@ function updateStability(state, content) {
 function populationTick(state, content) {
   const rng = rngOf(state);
   const bal = content.balance;
-  const alive = allLiving(state).length;
+  const pop = state.population?.total || 0;
   const cap = housingCapacity(state, content.buildings);
   const max = maxSurvivorsCap(bal);
-  state.stats.maxPop = Math.max(state.stats.maxPop, alive);
+  state.stats.maxPop = Math.max(state.stats.maxPop || 0, pop);
 
-  if (alive > cap + (bal.housingOverflowGrace || 2)) {
+  // Desbloqueo plazas explorador (mensaje)
+  const slots = explorerSlotsUnlocked(state, bal);
+  if (slots > (state._lastExplorerSlots || 1)) {
+    pushLog(state, `Nueva plaza de explorador disponible (${slots}/3).`, 'good');
+    state._lastExplorerSlots = slots;
+  }
+
+  if (pop > cap + (bal.housingOverflowGrace || 2)) {
     state.stability -= 2;
     if (rng.chance(0.2)) {
-      const s = rng.pick(livingSurvivors(state));
-      if (s) {
-        s.status = 'dead';
-        s.hp = 0;
-        state.stats.deaths += 1;
-        pushLog(state, `${s.name} abandona el hacinamiento… y no vuelve.`, 'bad');
-      }
+      changePopulation(state, -1, bal, 'death');
+      pushLog(state, 'Alguien abandona el hacinamiento… y no vuelve.', 'bad');
     }
   }
 
   if (
     state.day % (bal.birthCheckInterval || 5) === 0 &&
-    alive >= (bal.birthMinPop || 6) &&
-    alive < cap &&
-    alive < max &&
+    pop >= (bal.birthMinPop || 8) &&
+    pop < cap &&
+    pop < max &&
     state.stability >= 45 &&
-    (state.resources.food || 0) > alive * 2
+    (state.resources.food || 0) > pop * 2
   ) {
-    if (rng.chance(bal.birthChance || 0.12)) {
-      const s = makeSurvivor(rng, content.survivorsDoc);
-      s.name = s.name;
-      state.survivors.push(s);
-      state.stats.births += 1;
-      pushLog(state, `Nueva vida en el refugio: ${s.name}.`, 'good');
+    if (rng.chance(bal.birthChance || 0.14)) {
+      changePopulation(state, 1, bal, 'birth');
+      pushLog(state, 'Nueva vida en el refugio. Población +1.', 'good');
     }
   }
 
   if (
-    rng.chance((bal.immigrantBaseChance || 0.08) * 0.6) &&
-    alive < cap &&
-    alive < max &&
+    rng.chance((bal.immigrantBaseChance || 0.1) * 0.6) &&
+    pop < cap &&
+    pop < max &&
     state.stability >= 45 &&
     state.stats.zonesControlled >= 2 &&
-    (state.resources.food || 0) >= alive * 3 &&
-    (state.resources.water || 0) >= alive * 3
+    (state.resources.food || 0) >= pop * 3 &&
+    (state.resources.water || 0) >= pop * 3
   ) {
-    const s = makeSurvivor(rng, content.survivorsDoc);
-    state.survivors.push(s);
-    state.stats.immigrants += 1;
-    pushLog(state, `${s.name} llega buscando refugio.`, 'good');
+    changePopulation(state, 1, bal, 'immigrant');
+    pushLog(state, 'Llega gente buscando refugio. Población +1.', 'good');
   }
+
+  redistributeLabor(state, bal);
 }
 
 export function resolveBaseAttack(state, content, intensity = 2) {
@@ -548,12 +529,7 @@ export function resolveBaseAttack(state, content, intensity = 2) {
     return 'win';
   }
   if (roll >= 0.75) {
-    const hurt = rng.pick(livingSurvivors(state));
-    if (hurt) {
-      hurt.hp -= rng.int(20, 40);
-      hurt.status = hurt.hp <= 0 ? 'dead' : 'wounded';
-      if (hurt.status === 'dead') state.stats.deaths += 1;
-    }
+    applyCasualties(state, content.balance, { injured: rng.int(1, 2), dead: rng.chance(0.25) ? 1 : 0 });
     const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
     if (b && rng.chance(0.4)) {
       b.hp -= rng.int(20, 50);
@@ -563,16 +539,11 @@ export function resolveBaseAttack(state, content, intensity = 2) {
     pushLog(state, 'Ataque contenido con pérdidas.', 'warn');
     return 'messy';
   }
-  // heavy loss
-  const victims = rng.shuffle(livingSurvivors(state)).slice(0, Math.min(2, intensity));
-  victims.forEach((s) => {
-    s.hp = 0;
-    s.status = 'dead';
-    state.stats.deaths += 1;
-  });
+  const dead = Math.min(state.population?.total || 1, Math.min(3, intensity));
+  applyCasualties(state, content.balance, { dead, injured: intensity });
   state.stability -= 12;
-  state.director.recentLosses += victims.length;
-  pushLog(state, 'El perímetro cede. Bajas graves.', 'bad');
+  state.director.recentLosses += dead;
+  pushLog(state, 'El perímetro cede. Bajas graves entre la población.', 'bad');
   return 'lose';
 }
 
@@ -593,8 +564,7 @@ export function tickResearch(state, content) {
     state.research.active = null;
     state.research.progress = 0;
     pushLog(state, `Investigación completada: ${tech.name}.`, 'good');
-    if (tech.effects?.vehicleUnlock && !state.vehiclesOwned.includes(tech.effects.vehicleUnlock)) {
-      // unlock ability to build/buy later
+    if (tech.effects?.vehicleUnlock) {
       state.flags.narrative[`veh_${tech.effects.vehicleUnlock}`] = true;
     }
   }
@@ -640,7 +610,7 @@ export function buyVehicle(state, content, vehicleId) {
 export function updateEra(state, content) {
   const eras = content.erasDoc?.eras || [];
   let era = 0;
-  const pop = allLiving(state).length;
+  const pop = state.population?.total || 0;
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
   const tech = (state.research.unlocked || []).length;
   eras.forEach((e, idx) => {
@@ -649,7 +619,6 @@ export function updateEra(state, content) {
     const okCtrl = controlled >= (u.minControlled || 0);
     const okTech = tech >= (u.minResearch || 0);
     const okDay = state.day >= (u.minDay || 0);
-    // need majority of soft gates
     const checks = [okPop, okCtrl, okTech, okDay || !u.minDay];
     if (checks.filter(Boolean).length >= 2 && okPop) era = Math.max(era, idx);
   });
@@ -663,7 +632,7 @@ export function checkVictory(state, content) {
   if (state.flags.victory && state.flags.endless) return;
   if (state.flags.defeated) return;
   const v = content.balance.victory || {};
-  const pop = allLiving(state).length;
+  const pop = state.population?.total || 0;
   const controlled = state.zones.filter((z) => z.state === 'controlled').length;
   const hasHospital = state.base.buildings.some((b) => ['clinic', 'infirmary'].includes(b.type) && b.hp > 0);
   const energyOk = state.energy.produced >= state.energy.demand && state.energy.produced > 0;
@@ -683,24 +652,22 @@ export function checkVictory(state, content) {
     resolveBaseAttack(state, content, 5);
     state.flags.finalCrisisActive = false;
     state.flags.finalCrisisDone = true;
-    if (!state.flags.defeated && allLiving(state).length > 0) {
+    if (!state.flags.defeated && (state.population?.total || 0) > 0) {
       state.flags.victory = true;
       pushLog(state, 'ZONA ZERO ESTÁ ESTABILIZADA.', 'good');
     }
-    return;
   }
 }
 
 function checkDefeat(state) {
-  const alive = allLiving(state);
-  if (!alive.length) {
+  if ((state.population?.total || 0) <= 0) {
     state.flags.defeated = true;
-    state.flags.defeatReason = 'No quedan supervivientes.';
+    state.flags.defeatReason = 'No queda población.';
     pushLog(state, 'DERROTA: el refugio queda vacío.', 'bad');
     return;
   }
   const hq = state.base.buildings.find((b) => String(b.type).startsWith('hq_central') && b.hp > 0);
-  if (!hq && alive.length < 2) {
+  if (!hq && (state.population?.total || 0) < 2) {
     state.flags.defeated = true;
     state.flags.defeatReason = 'El Refugio Central se ha perdido.';
     pushLog(state, 'DERROTA: sin centro ni esperanza.', 'bad');
@@ -710,17 +677,16 @@ function checkDefeat(state) {
 export function advanceDay(state, content) {
   if (state.flags.defeated) return { ok: false, error: 'Partida terminada' };
   if (state.flags.victory && !state.flags.endless) {
-    // allow advancing only if endless
     return { ok: false, error: 'Victoria alcanzada. Continuad en modo endless o nueva partida.' };
   }
 
   resolveExpedition(state, content);
 
-  const alive = livingSurvivors(state);
-  const foodNeed = allLiving(state).length * (content.balance.foodPerSurvivorPerDay || 1);
-  const waterNeed = allLiving(state).length * (content.balance.waterPerSurvivorPerDay || 1);
-  consumeNeed(state, 'food', foodNeed, 'starvationDamage', 'hambre', content.balance);
-  consumeNeed(state, 'water', waterNeed, 'dehydrationDamage', 'sed', content.balance);
+  const pop = state.population?.total || 0;
+  const foodNeed = pop * (content.balance.foodPerPersonPerDay || content.balance.foodPerSurvivorPerDay || 1);
+  const waterNeed = pop * (content.balance.waterPerPersonPerDay || content.balance.waterPerSurvivorPerDay || 1);
+  consumeNeed(state, 'food', foodNeed, 'comida', content.balance);
+  consumeNeed(state, 'water', waterNeed, 'agua', content.balance);
 
   const fNeed = fuelNeed(state, content);
   if (fNeed > 0) {
@@ -728,13 +694,16 @@ export function advanceDay(state, content) {
     else {
       const missing = fNeed - (state.resources.fuel || 0);
       state.resources.fuel = 0;
-      state.resources.food = Math.max(0, state.resources.food - (content.balance.noFuelExtraFoodLoss || 1) * missing);
+      state.resources.food = Math.max(
+        0,
+        state.resources.food - (content.balance.noFuelExtraFoodLoss || 1) * missing
+      );
       pushLog(state, 'Sin combustible: se pierde comida al improvisar.', 'warn');
     }
   }
 
   applyProduction(state, content);
-  healTick(state, content);
+  healPopulationTick(state, content.balance);
   tickResearch(state, content);
 
   if (state.weatherDaysLeft > 0) {
@@ -755,12 +724,7 @@ export function advanceDay(state, content) {
   checkVictory(state, content);
   checkDefeat(state);
 
-  livingSurvivors(state).forEach((s) => {
-    if (s.busyUntilDay < state.day) s.busyUntilDay = 0;
-  });
-
   state.rngState = (state.rngState || 1) + 17;
-
   return { ok: true, director: dir };
 }
 
@@ -771,4 +735,4 @@ export function continueEndless(state) {
   return { ok: true };
 }
 
-export { applyEventEffects, riskCategory };
+export { applyEventEffects, riskCategory, readyExplorers };

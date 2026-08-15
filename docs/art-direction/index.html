@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zona Zero · Art Direction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12100e;
+      --panel: #1c1814;
+      --text: #e8dcc8;
+      --muted: #9a8a78;
+      --accent: #d4a574;
+      --safe: #5a8a62;
+      --line: rgba(255,255,255,0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: radial-gradient(ellipse at 30% 0%, #2a2218, var(--bg) 55%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header, section { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+    h1, h2 { font-family: Rajdhani, sans-serif; letter-spacing: 0.04em; margin: 0 0 0.5rem; }
+    h1 { font-size: 2.2rem; }
+    .kicker { color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem; font-weight: 700; }
+    .ask {
+      margin-top: 1.5rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(212,165,116,0.45);
+      background: rgba(212,165,116,0.08);
+      border-radius: 12px;
+      font-family: Rajdhani, sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1.35fr; align-items: start; }
+    }
+    figure {
+      margin: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    }
+    figure img { display: block; width: 100%; height: auto; }
+    figcaption {
+      padding: 0.75rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--line);
+    }
+    ul { color: var(--muted); }
+    strong { color: var(--text); }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="kicker">Propuesta artística · diseño 1.2</p>
+    <h1>Zona Zero — ¿se ve así?</h1>
+    <p>Muestra de dirección para aprobar antes del lote final de assets. Mundo continuo, población colectiva, exploradores como únicos rostros.</p>
+    <p class="ask">Sí / No: ¿esta es la dirección visual definitiva de Zona Zero?</p>
+  </header>
+
+  <section class="grid">
+    <figure>
+      <img src="sample-mobile.png" alt="Mockup móvil Zona Zero" />
+      <figcaption><strong>Móvil</strong> — HUD compacto, ciudad+núcleo, niebla, explorador en ruta, infectados, bottom sheet de expedición.</figcaption>
+    </figure>
+    <figure>
+      <img src="sample-desktop.png" alt="Mockup escritorio Zona Zero" />
+      <figcaption><strong>Escritorio</strong> — mismo mundo a pantalla completa; panel lateral con explorador (4 skills) y labor colectiva +/−.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Notas de estilo</h2>
+    <ul>
+      <li><strong>Paleta:</strong> tierra quemada, hormigón, óxido, verde de control, niebla carbón.</li>
+      <li><strong>Mapa:</strong> manzanas, calles, ruinas, coches, vegetación — no nodos ni círculos gigantes.</li>
+      <li><strong>UI:</strong> sin pestañas Mapa/Base/Gente; paneles contextuales.</li>
+      <li><strong>Personajes:</strong> máximo 3 exploradores con retrato; el resto es número.</li>
+      <li>Detalle: <a href="README.md">README.md</a></li>
+    </ul>
+  </section>
+</body>
+</html>
