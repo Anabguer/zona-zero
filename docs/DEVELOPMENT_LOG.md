@@ -712,6 +712,9 @@ Repo `docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\`
 ## ESTADO CURSOR
 COMPLETADA
 
+## COMMIT
+`be8071d` — feat(ZZ-011/009/007): cámara D1, save main+backup y portada GATE
+
 ## REVISIÓN CHATGPT
 Pendiente — HUMAN_GATE.
 
