@@ -11,7 +11,7 @@
   "skillKeys": ["scout", "fight", "build", "gather"],
   "skillLabels": {
     "scout": "Explorar",
-    "fight": "Combatir",
+    "fight": "Defender",
     "build": "Construir",
     "gather": "Recolectar"
   }

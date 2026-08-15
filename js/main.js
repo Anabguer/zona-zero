@@ -10,9 +10,17 @@ import {
   summarizeState,
   migrateState,
 } from './state.js';
-import { advanceDay, startExpedition, placeBuilding, RES_LABEL } from './sim.js';
+import { advanceDay, startExpedition, placeBuilding, RES_LABEL, canAfford } from './sim.js';
 import { renderMap } from './render-map.js';
 import { renderBase } from './render-base.js';
+import {
+  RES_ICONS,
+  SKILL_META,
+  SKILL_ORDER,
+  skillIcon,
+  renderPortraitSvg,
+  buildingThumb,
+} from './icons.js';
 import * as api from './api.js';
 
 const RES_LABEL_UI = {
@@ -25,13 +33,31 @@ const RES_LABEL_UI = {
   ammo: 'Munición',
 };
 
+const ZONE_STATE_LABEL = {
+  controlled: 'Vuestro',
+  discovered: 'Explorado',
+  unknown: 'Desconocido',
+};
+
 let content = null;
 let state = null;
 let slot = 1;
 let saveTimer = null;
 let dirty = false;
+let activeTab = 'map';
 
 const $ = (id) => document.getElementById(id);
+
+function ensureCoach() {
+  if (!state.flags.coach) {
+    state.flags.coach = {
+      people: false,
+      explore: false,
+      build: false,
+      dismissed: false,
+    };
+  }
+}
 
 function toast(msg, kind = 'info') {
   const el = $('zz-toast');
@@ -68,10 +94,44 @@ async function saveNow() {
   }
 }
 
+function renderCoach() {
+  const box = $('zz-coach');
+  const text = $('zz-coach-text');
+  if (!box || !text || state.flags.defeated) {
+    if (box) box.hidden = true;
+    return;
+  }
+  ensureCoach();
+  const c = state.flags.coach;
+  if (c.dismissed) {
+    box.hidden = true;
+    return;
+  }
+  let msg = '';
+  if (activeTab === 'people' && !c.people) {
+    msg = 'Selecciona supervivientes para la expedición (mira quién explora mejor).';
+  } else if (activeTab === 'map' && !c.explore) {
+    msg = 'Explora una zona cercana conocida y envía una expedición.';
+  } else if (activeTab === 'base' && !c.build) {
+    const wood = state.resources.wood || 0;
+    msg =
+      wood < 4
+        ? 'Necesitas madera para construir. Explora o produce en el asentamiento.'
+        : 'Elige un edificio y tócalo sobre el terreno libre.';
+  }
+  if (!msg) {
+    box.hidden = true;
+    return;
+  }
+  text.textContent = msg;
+  box.hidden = false;
+}
+
 function renderHud() {
   const alive = livingSurvivors(state);
+  const cap = housingCapacity(state, content.buildings, content.balance);
   $('zz-day').textContent = String(state.day);
-  $('zz-pop').textContent = `${alive.length}/${housingCapacity(state, content.buildings, content.balance)}`;
+  $('zz-pop').textContent = `${alive.length}/${cap}`;
   $('zz-threat').textContent = String(state.director.threat);
   $('zz-defense').textContent = String(defenseValue(state, content.balance));
   const res = $('zz-resources');
@@ -79,9 +139,16 @@ function renderHud() {
   const order = content.balance.resourceOrder || Object.keys(state.resources);
   order.forEach((k) => {
     if (state.resources[k] == null) return;
-    const v = state.resources[k];
     const li = document.createElement('li');
-    li.innerHTML = `<span class="zz-res-ico zz-res-ico--${k}" aria-hidden="true"></span><strong>${v}</strong><span>${RES_LABEL_UI[k] || RES_LABEL[k] || k}</span>`;
+    li.title = RES_LABEL_UI[k] || RES_LABEL[k] || k;
+    const icoFn = RES_ICONS[k];
+    if (icoFn) li.appendChild(icoFn(18));
+    const strong = document.createElement('strong');
+    strong.textContent = String(state.resources[k]);
+    li.appendChild(strong);
+    const lab = document.createElement('span');
+    lab.textContent = RES_LABEL_UI[k] || RES_LABEL[k] || k;
+    li.appendChild(lab);
     res.appendChild(li);
   });
   $('zz-colony').textContent = state.colonyName;
@@ -99,22 +166,54 @@ function renderHud() {
   }
 }
 
+function skillBarsHtml(s) {
+  const bestKey = SKILL_ORDER.reduce((a, b) => ((s.skills[b] || 0) > (s.skills[a] || 0) ? b : a));
+  return SKILL_ORDER.map((key) => {
+    const val = Math.round(s.skills[key] || 0);
+    const pct = Math.max(6, Math.min(100, (val / 10) * 100));
+    const meta = SKILL_META[key];
+    const best = key === bestKey ? ' is-best' : '';
+    return `<div class="zz-skill${best}" title="${meta.label}">
+      <span class="zz-skill-ico-wrap" data-skill="${key}"></span>
+      <span class="zz-skill__bar"><i style="width:${pct}%;background:${meta.color}"></i></span>
+      <span class="zz-skill__val">${val}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderPeople() {
   const list = $('zz-people');
   list.innerHTML = '';
   state.survivors.forEach((s) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'zz-person' + (state.selectedSurvivorIds.includes(s.id) ? ' is-selected' : '') + (s.status === 'dead' ? ' is-dead' : '');
+    btn.className =
+      'zz-person' +
+      (state.selectedSurvivorIds.includes(s.id) ? ' is-selected' : '') +
+      (s.status === 'dead' ? ' is-dead' : '');
     btn.disabled = s.status === 'dead';
-    const busy = s.busyUntilDay > state.day ? ` · expedición` : '';
-    btn.innerHTML = `
-      <span class="zz-person__avatar" data-status="${s.status}"></span>
-      <span class="zz-person__meta">
-        <strong>${s.name}</strong>
-        <small>PV ${Math.max(0, Math.round(s.hp))} · ${s.status}${busy}</small>
-        <small>E${Math.round(s.skills.scout)} C${Math.round(s.skills.fight)} B${Math.round(s.skills.build)} R${Math.round(s.skills.gather)}</small>
-      </span>`;
+    const busy = s.busyUntilDay > state.day ? ' · en expedición' : '';
+    const statusLabel =
+      s.status === 'dead' ? 'Caído' : s.status === 'wounded' ? 'Herido' : 'Listo';
+
+    const avatarWrap = document.createElement('span');
+    avatarWrap.appendChild(renderPortraitSvg(s, 52));
+
+    const meta = document.createElement('span');
+    meta.className = 'zz-person__meta';
+    meta.innerHTML = `
+      <span class="zz-person__head">
+        <strong>${escapeHtml(s.name)}</strong>
+        <span class="zz-person__status">PV ${Math.max(0, Math.round(s.hp))} · ${statusLabel}${busy}</span>
+      </span>
+      <div class="zz-skills">${skillBarsHtml(s)}</div>`;
+
+    btn.appendChild(avatarWrap);
+    btn.appendChild(meta);
+    meta.querySelectorAll('[data-skill]').forEach((el) => {
+      el.replaceWith(skillIcon(el.getAttribute('data-skill'), 13));
+    });
+
     btn.addEventListener('click', () => {
       if (s.status === 'dead') return;
       const i = state.selectedSurvivorIds.indexOf(s.id);
@@ -125,6 +224,8 @@ function renderPeople() {
         }
         state.selectedSurvivorIds.push(s.id);
       }
+      ensureCoach();
+      if (state.selectedSurvivorIds.length >= 1) state.flags.coach.people = true;
       paint();
     });
     list.appendChild(btn);
@@ -137,25 +238,48 @@ function renderBuildBar() {
   Object.values(content.buildings).forEach((b) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'zz-build-btn' + (state.buildMode === b.id ? ' is-selected' : '');
-    const cost = Object.entries(b.cost || {})
-      .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || RES_LABEL[k] || k}`)
+    const afford = canAfford(state, b.cost);
+    btn.className =
+      'zz-build-btn' +
+      (state.buildMode === b.id ? ' is-selected' : '') +
+      (!afford ? ' is-disabled' : '');
+    const costBits = Object.entries(b.cost || {})
+      .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
       .join(' · ');
-    btn.innerHTML = `<strong>${b.name}</strong><small>${cost}</small>`;
-    btn.title = b.desc;
+    btn.appendChild(buildingThumb(b.id, 40));
+    const name = document.createElement('strong');
+    name.textContent = b.name;
+    btn.appendChild(name);
+    const desc = document.createElement('span');
+    desc.className = 'zz-build-desc';
+    desc.textContent = b.desc;
+    btn.appendChild(desc);
+    const cost = document.createElement('span');
+    cost.className = 'zz-build-cost';
+    cost.textContent = costBits;
+    btn.appendChild(cost);
     btn.addEventListener('click', () => {
       state.buildMode = state.buildMode === b.id ? null : b.id;
       paint();
     });
     bar.appendChild(btn);
   });
+  const hint = $('zz-build-hint');
+  if (hint) {
+    hint.textContent = state.buildMode
+      ? 'Toca una parcela libre del terreno para construir.'
+      : 'Elige un edificio y tócalo sobre el terreno libre.';
+  }
 }
 
 function renderLog() {
   const box = $('zz-log');
   box.innerHTML = state.log
-    .slice(0, 24)
-    .map((e) => `<li class="zz-log__item zz-log__item--${e.kind}"><span>D${e.day}</span>${escapeHtml(e.text)}</li>`)
+    .slice(0, 12)
+    .map(
+      (e) =>
+        `<li class="zz-log__item zz-log__item--${e.kind}"><span>D${e.day}</span>${escapeHtml(e.text)}</li>`
+    )
     .join('');
 }
 
@@ -163,15 +287,26 @@ function renderExpeditionPanel() {
   const z = state.zones.find((x) => x.id === state.selectedZoneId);
   const panel = $('zz-zone-panel');
   if (!z || z.state === 'unknown') {
-    panel.innerHTML = '<p class="zz-muted">Selecciona una zona descubierta o controlada en el mapa.</p>';
+    panel.innerHTML =
+      '<p class="zz-muted">Toca un sector conocido en el mapa. La niebla aún oculta el resto.</p>';
     return;
   }
   const ex = state.expedition;
+  const badge = ZONE_STATE_LABEL[z.state] || z.state;
+  const riskPct = (z.risk * 100) | 0;
+  const riskNote = z.risk >= 0.45 ? ' · peligroso' : '';
   panel.innerHTML = `
+    <span class="zz-zone-badge zz-zone-badge--${z.state}">${badge}</span>
     <h3>${escapeHtml(z.name)}</h3>
-    <p class="zz-muted">Estado: <strong>${z.state}</strong> · Riesgo base ${(z.risk * 100) | 0}%</p>
-    <p>${ex ? `Expedición en curso → día ${ex.returnDay}` : 'Elige gente y envía una expedición automática.'}</p>
-    <button type="button" class="zz-btn zz-btn--primary" id="zz-send-exp" ${ex || state.flags.defeated ? 'disabled' : ''}>Enviar expedición</button>
+    <p class="zz-muted">Riesgo ${riskPct}%${riskNote}</p>
+    <p>${
+      ex
+        ? `Expedición en curso → vuelven el día ${ex.returnDay}`
+        : 'Elige gente en la pestaña Gente y envía una expedición.'
+    }</p>
+    <button type="button" class="zz-btn zz-btn--primary" id="zz-send-exp" ${
+      ex || state.flags.defeated || z.id === 'camp' ? 'disabled' : ''
+    }>Enviar expedición</button>
   `;
   const send = $('zz-send-exp');
   if (send) {
@@ -179,6 +314,8 @@ function renderExpeditionPanel() {
       const r = startExpedition(state, content, z.id, state.selectedSurvivorIds);
       if (!r.ok) toast(r.error, 'bad');
       else {
+        ensureCoach();
+        state.flags.coach.explore = true;
         toast('Expedición enviada', 'good');
         scheduleSave();
       }
@@ -200,6 +337,7 @@ function paint() {
   renderBuildBar();
   renderLog();
   renderExpeditionPanel();
+  renderCoach();
   renderMap($('zz-map'), state, {
     onSelectZone: (id) => {
       state.selectedZoneId = id;
@@ -212,8 +350,10 @@ function paint() {
       const r = placeBuilding(state, content, state.buildMode, x, y);
       if (!r.ok) toast(r.error, 'bad');
       else {
+        ensureCoach();
+        state.flags.coach.build = true;
         state.buildMode = null;
-        toast('Edificio colocado', 'good');
+        toast('El asentamiento crece', 'good');
         scheduleSave();
       }
       paint();
@@ -223,10 +363,17 @@ function paint() {
 
 function bindChrome() {
   $('zz-advance').addEventListener('click', () => {
+    const beforeLog = state.log[0]?.text;
     const r = advanceDay(state, content);
     if (!r.ok) toast(r.error, 'bad');
     else {
-      toast(`Día ${state.day}`, 'info');
+      const latest = state.log.find((e) => e.day === state.day && e.kind !== 'story');
+      if (latest && (latest.kind === 'bad' || latest.kind === 'warn' || latest.kind === 'good')) {
+        toast(latest.text, latest.kind === 'bad' ? 'bad' : latest.kind === 'warn' ? 'warn' : 'good');
+      } else {
+        toast(`Amanece el día ${state.day}`, 'info');
+      }
+      void beforeLog;
       scheduleSave();
     }
     paint();
@@ -235,6 +382,15 @@ function bindChrome() {
   $('zz-tab-map').addEventListener('click', () => setTab('map'));
   $('zz-tab-base').addEventListener('click', () => setTab('base'));
   $('zz-tab-people').addEventListener('click', () => setTab('people'));
+  const dismiss = $('zz-coach-dismiss');
+  if (dismiss) {
+    dismiss.addEventListener('click', () => {
+      ensureCoach();
+      state.flags.coach.dismissed = true;
+      renderCoach();
+      scheduleSave();
+    });
+  }
   document.querySelectorAll('[data-zz-back]').forEach((a) => {
     a.addEventListener('click', (ev) => {
       if (dirty && !confirm('Hay cambios sin guardar. ¿Salir igual?')) ev.preventDefault();
@@ -243,8 +399,10 @@ function bindChrome() {
 }
 
 function setTab(name) {
+  activeTab = name;
   document.querySelectorAll('.zz-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.tab === name));
   document.querySelectorAll('.zz-panel').forEach((p) => p.classList.toggle('is-active', p.dataset.panel === name));
+  renderCoach();
 }
 
 export async function bootGame(opts) {
@@ -270,6 +428,7 @@ export async function bootGame(opts) {
     if (state.flags.defeated) {
       throw new Error('Estado inicial marcado como derrota (bug)');
     }
+    ensureCoach();
     try {
       const saved = await api.saveSlot(slot, state, state.colonyName, summarizeState(state));
       if (!saved.ok) {
@@ -285,9 +444,9 @@ export async function bootGame(opts) {
     const res = await api.loadSlot(slot);
     if (!res.ok) throw new Error(res.error || 'load');
     state = migrateState(res.state, content.balance);
+    ensureCoach();
   }
   bindChrome();
-  // Primera selección útil: primer vivo + zona descubierta
   if (!state.selectedSurvivorIds.length) {
     const first = livingSurvivors(state)[0];
     if (first) state.selectedSurvivorIds = [first.id];
@@ -298,7 +457,6 @@ export async function bootGame(opts) {
       state.zones.find((x) => x.state === 'discovered' || (x.state === 'controlled' && x.id !== 'camp'));
     if (z) state.selectedZoneId = z.id;
   }
-  // Arrancar en Gente para que se vean los 3 supervivientes de inmediato
   setTab(opts.mode === 'new' && !state.flags.defeated ? 'people' : 'map');
   paint();
   if (defeat && !state.flags.defeated) {
@@ -306,17 +464,6 @@ export async function bootGame(opts) {
   }
   if (app) app.removeAttribute('hidden');
   if (boot) boot.setAttribute('hidden', '');
-  const howto = $('zz-howto');
-  if (howto && !state.flags.defeated) {
-    const n = livingSurvivors(state).length;
-    howto.innerHTML =
-      `<strong>Cómo jugar:</strong> Tienes <em>${n} supervivientes</em>. ` +
-      `1) Aquí en <em>Gente</em> elige equipo (hasta 3) · ` +
-      `2) <em>Mapa</em> → zona amarilla/verde · ` +
-      `3) <em>Enviar expedición</em> · ` +
-      `4) <em>Avanzar día</em> · ` +
-      `5) <em>Base</em> → construye.`;
-  }
   toast(
     state.flags.defeated
       ? 'Esta partida ya terminó en derrota'
@@ -325,7 +472,6 @@ export async function bootGame(opts) {
   );
 }
 
-// Hub de slots en index
 export async function bootHub() {
   const boot = $('zz-hub-boot');
   const hub = $('zz-hub');
@@ -368,8 +514,6 @@ export async function bootHub() {
         bootHub();
       });
     });
-    boot.hidden = true;
-    hub.hidden = false;
     if (boot) boot.setAttribute('hidden', '');
     if (hub) hub.removeAttribute('hidden');
   } catch (e) {

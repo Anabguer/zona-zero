@@ -54,7 +54,7 @@ Estas reglas guían el juego. No deben cambiarse unilateralmente en código sin 
 
 | Campo | Valor |
 |-------|--------|
-| Versión técnica | **0.2.1** |
+| Versión técnica | **0.3.0** |
 | Ubicación local | `W:\juegos\zona-zero\` |
 | URL | https://intocables13.com/juegos/zona-zero/ |
 | Biblioteca | https://intocables13.com/juegos/ |
@@ -91,6 +91,16 @@ Estas reglas guían el juego. No deben cambiarse unilateralmente en código sin 
 ---
 
 ## 4. Changelog
+
+### 0.3.0
+- Pasada UX/UI completa del MVP (sin sistemas nuevos)
+- Paleta tierra/hormigón/metal/calor; verde solo para territorio seguro
+- HUD de videojuego con iconos SVG de recursos; amenaza vs defensa diferenciadas
+- Gente: retratos procedurales + barras Explorar/Recolectar/Construir/Defender
+- Mapa: sectores urbanos, calles, niebla, peligro, halo de control
+- Base: terreno, caminos, cerca, edificios ilustrados; grid solo en modo construir
+- Construcción con miniatura + coste + aporte; diario compacto; tips contextuales
+- Cache bust `?v=6`
 
 ### 0.2.1
 - **Fix crítico UI:** `display:grid/flex` anulaba el atributo HTML `hidden` → overlay **Derrota** visible al iniciar y hub podía quedarse en «Cargando slots»

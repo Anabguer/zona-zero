@@ -11,13 +11,13 @@ $base = zz_public_base();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0f0c" />
+  <meta name="theme-color" content="#1a1612" />
   <title>Zona Zero</title>
   <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=5" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=6" />
 </head>
 <body class="zz-body zz-body--hub">
   <div id="zz-hub-boot" class="zz-boot">Cargando slots…</div>
@@ -38,7 +38,7 @@ $base = zz_public_base();
     <section class="zz-slots" id="zz-slots" aria-label="Slots de partida"></section>
   </div>
   <script type="module">
-    import { bootHub } from './js/main.js?v=5';
+    import { bootHub } from './js/main.js?v=6';
     bootHub().catch((err) => {
       const el = document.getElementById('zz-hub-boot');
       const hub = document.getElementById('zz-hub');

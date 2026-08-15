@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Zona Zero · harness local</title>
-  <link rel="stylesheet" href="../css/game.css?v=5" />
+  <link rel="stylesheet" href="../css/game.css?v=6" />
   <script type="importmap">
   {
     "imports": {
@@ -25,12 +25,22 @@
       </div>
       <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
     </header>
-    <p class="zz-howto" id="zz-howto"><strong>Cómo jugar:</strong> …</p>
+    <p class="zz-coach" id="zz-coach" hidden>
+      <span id="zz-coach-text"></span>
+      <button type="button" id="zz-coach-dismiss" aria-label="Cerrar">×</button>
+    </p>
     <section class="zz-hud" aria-label="Estado">
-      <div class="zz-hud__stat"><span>Día</span><strong id="zz-day">1</strong></div>
-      <div class="zz-hud__stat"><span>Población</span><strong id="zz-pop">0</strong></div>
-      <div class="zz-hud__stat"><span>Amenaza</span><strong id="zz-threat">0</strong></div>
-      <div class="zz-hud__stat"><span>Defensa</span><strong id="zz-defense">0</strong></div>
+      <div class="zz-hud__row">
+        <div class="zz-hud__pill"><span>Día</span><strong id="zz-day">1</strong></div>
+        <div class="zz-hud__pop">
+          <span class="zz-hud__pop-ico" aria-hidden="true"></span>
+          <div><strong id="zz-pop">0</strong><small>Población / camas</small></div>
+        </div>
+        <div class="zz-hud__combat">
+          <div class="zz-hud__meter zz-hud__meter--threat"><span>Amenaza</span><span></span><strong id="zz-threat">0</strong></div>
+          <div class="zz-hud__meter zz-hud__meter--def"><span>Defensa</span><span></span><strong id="zz-defense">0</strong></div>
+        </div>
+      </div>
       <ul class="zz-resources" id="zz-resources"></ul>
     </section>
     <nav class="zz-tabs" aria-label="Vistas">
@@ -50,6 +60,7 @@
           <svg id="zz-base" class="zz-base"></svg>
         </div>
         <div class="zz-build-bar" id="zz-build-bar"></div>
+        <p class="zz-hint" id="zz-build-hint"></p>
       </section>
       <section class="zz-panel" data-panel="people">
         <div class="zz-people" id="zz-people"></div>
@@ -72,7 +83,7 @@
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=5';
+    import { bootGame } from '../js/main.js?v=6';
     window.__zzReady = bootGame({ slot: 1, mode: 'new', name: 'Harness' }).then(() => {
       window.__zzOk = true;
       return true;

@@ -17,13 +17,13 @@ $base = zz_public_base();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#0b0f0c" />
+  <meta name="theme-color" content="#1a1612" />
   <title>Jugar · Zona Zero</title>
   <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=5" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=6" />
 </head>
 <body class="zz-body zz-body--play">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -37,20 +37,37 @@ $base = zz_public_base();
       <button type="button" class="zz-btn zz-btn--compact" id="zz-save">Guardar</button>
     </header>
 
-    <p class="zz-howto" id="zz-howto">
-      <strong>Cómo jugar:</strong>
-      1) Pestaña <em>Gente</em> → elige hasta 3 ·
-      2) Pestaña <em>Mapa</em> → toca una zona descubierta ·
-      3) <em>Enviar expedición</em> ·
-      4) <em>Avanzar día</em> hasta que vuelvan ·
-      5) Pestaña <em>Base</em> → construye.
+    <p class="zz-coach" id="zz-coach" hidden>
+      <span id="zz-coach-text"></span>
+      <button type="button" id="zz-coach-dismiss" aria-label="Cerrar">×</button>
     </p>
 
     <section class="zz-hud" aria-label="Estado">
-      <div class="zz-hud__stat"><span>Día</span><strong id="zz-day">1</strong></div>
-      <div class="zz-hud__stat"><span>Población</span><strong id="zz-pop">0</strong></div>
-      <div class="zz-hud__stat"><span>Amenaza</span><strong id="zz-threat">0</strong></div>
-      <div class="zz-hud__stat"><span>Defensa</span><strong id="zz-defense">0</strong></div>
+      <div class="zz-hud__row">
+        <div class="zz-hud__pill">
+          <span>Día</span>
+          <strong id="zz-day">1</strong>
+        </div>
+        <div class="zz-hud__pop">
+          <span class="zz-hud__pop-ico" aria-hidden="true"></span>
+          <div>
+            <strong id="zz-pop">0</strong>
+            <small>Población / camas</small>
+          </div>
+        </div>
+        <div class="zz-hud__combat" aria-label="Amenaza y defensa">
+          <div class="zz-hud__meter zz-hud__meter--threat">
+            <span>Amenaza</span>
+            <span></span>
+            <strong id="zz-threat">0</strong>
+          </div>
+          <div class="zz-hud__meter zz-hud__meter--def">
+            <span>Defensa</span>
+            <span></span>
+            <strong id="zz-defense">0</strong>
+          </div>
+        </div>
+      </div>
       <ul class="zz-resources" id="zz-resources"></ul>
     </section>
 
@@ -73,12 +90,12 @@ $base = zz_public_base();
           <svg id="zz-base" class="zz-base" role="img" aria-label="Asentamiento"></svg>
         </div>
         <div class="zz-build-bar" id="zz-build-bar"></div>
-        <p class="zz-hint">Elige un edificio y toca una parcela libre.</p>
+        <p class="zz-hint" id="zz-build-hint">Elige un edificio y toca el terreno libre.</p>
       </section>
 
       <section class="zz-panel" data-panel="people">
         <div class="zz-people" id="zz-people"></div>
-        <p class="zz-hint">Toca para seleccionar equipo de expedición (máx. 3).</p>
+        <p class="zz-hint">Toca para formar el equipo de expedición (máx. 3).</p>
       </section>
     </main>
 
@@ -101,7 +118,7 @@ $base = zz_public_base();
   </div>
   <div id="zz-toast" class="zz-toast" hidden></div>
   <script type="module">
-    import { bootGame } from './js/main.js?v=5';
+    import { bootGame } from './js/main.js?v=6';
     bootGame({
       slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,

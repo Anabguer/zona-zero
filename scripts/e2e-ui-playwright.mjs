@@ -102,14 +102,24 @@ try {
   const people = await page.locator('.zz-person:not(.is-dead)').count();
   assert(people === 3, '3 supervivientes visibles: ' + people);
 
+  const skillBars = await page.locator('.zz-skill').count();
+  assert(skillBars >= 12, 'barras de habilidad visibles: ' + skillBars);
+
+  const portraits = await page.locator('.zz-portrait').count();
+  assert(portraits === 3, 'retratos SVG: ' + portraits);
+
   const pop = await page.locator('#zz-pop').innerText();
   assert(/^3\//.test(pop), 'HUD población 3/x: ' + pop);
 
   const resCount = await page.locator('#zz-resources li').count();
   assert(resCount >= 6, 'recursos visibles: ' + resCount);
 
-  // Mapa → enviar expedición
+  // Mapa urbano
   await page.click('#zz-tab-map');
+  await page.waitForTimeout(200);
+  const sectors = await page.locator('.zz-zone-poly').count();
+  assert(sectors >= 5, 'sectores de mapa: ' + sectors);
+
   await page.waitForSelector('#zz-send-exp:not([disabled])');
   await page.click('#zz-send-exp');
   await page.waitForTimeout(500);
@@ -141,12 +151,19 @@ try {
   const buildBtns = page.locator('.zz-build-btn');
   const nBuild = await buildBtns.count();
   assert(nBuild >= 3, 'botones de construcción: ' + nBuild);
+  const thumbs = await page.locator('.zz-bthumb').count();
+  assert(thumbs >= 3, 'miniaturas edificio: ' + thumbs);
   await buildBtns.first().click();
   const baseBox = await page.locator('#zz-base').boundingBox();
   if (baseBox) {
     await page.mouse.click(baseBox.x + baseBox.width * 0.7, baseBox.y + baseBox.height * 0.7);
     await page.waitForTimeout(200);
   }
+
+  await page.click('#zz-tab-people');
+  await page.waitForTimeout(100);
+  await page.click('#zz-tab-map');
+  await page.waitForTimeout(100);
 
   await page.click('#zz-save');
   await page.waitForTimeout(500);
