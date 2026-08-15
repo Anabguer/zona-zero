@@ -331,7 +331,10 @@ NO
 `docs/review/` Â· Drive Review\ Â· `review-contact-sheet.jpg`
 
 ## COMMIT
-_(tras commit)_
+`36795fd` — feat(ZZ-019A): escenario diseñado + superficies edificables (REVIEW_STOP)
+
+## Sync Drive/GitHub
+OK · Review/ · **PARADO REVIEW_STOP**. No ZZ-012.
 
 ## Sync Drive/GitHub
 Pendiente push.
