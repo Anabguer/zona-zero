@@ -288,6 +288,9 @@ Colonia > viewport · sectores orgánicos · sin macrogrid · sin cupo N · semi
 ## ESTADO
 Reforma docs **entregada · PENDIENTE DE REVISIÓN**. Sin implementación. Sin deploy. Sin ZZ-012/013.
 
+## COMMIT
+`e3af894` — docs(2.8): superficies edificables + escenario diseñado (PARAR)
+
 ## APROBACIÓN REFORMA 2.8
 NO (pendiente Neni/ChatGPT)
 
