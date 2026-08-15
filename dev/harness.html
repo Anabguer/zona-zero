@@ -103,7 +103,7 @@
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
     import { bootGame } from '../js/main.js?v=20';
-    bootGame({ slot: 1, mode: 'new', name: 'Refugio Norte' }).then(() => {
+    bootGame({ mode: 'new', name: 'Refugio Norte', clearExisting: true }).then(() => {
       window.__zzOk = true;
     }).catch((e) => {
       window.__zzErr = String(e?.message || e);

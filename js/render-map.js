@@ -922,6 +922,22 @@ export function clampCamera(state) {
   state.mapCamera.y = clamp(state.mapCamera.y ?? 50, 8, 92);
 }
 
+/** Zoom relativo (±) respetando clamp D1. factor>1 acerca. */
+export function zoomCameraBy(state, factor) {
+  if (!state?.mapCamera) return;
+  const f = Number(factor) || 1;
+  state.mapCamera.zoom = (state.mapCamera.zoom || 1) * f;
+  clampCamera(state);
+}
+
+/** Pan relativo en unidades de mundo. */
+export function panCameraBy(state, dx, dy) {
+  if (!state?.mapCamera) return;
+  state.mapCamera.x = (state.mapCamera.x || 50) + (Number(dx) || 0);
+  state.mapCamera.y = (state.mapCamera.y || 50) + (Number(dy) || 0);
+  clampCamera(state);
+}
+
 export function cameraViewBox(state, m) {
   clampCamera(state);
   const cam = state.mapCamera || { x: 50, y: 48, zoom: 1.4 };
@@ -972,8 +988,7 @@ export function bindMapCamera(wrap, getState, onChange) {
       if (!state?.mapCamera) return;
       ev.preventDefault();
       const factor = ev.deltaY > 0 ? 0.9 : 1.1;
-      state.mapCamera.zoom = clamp((state.mapCamera.zoom || 1) * factor, ZOOM_MIN, ZOOM_MAX);
-      clampCamera(state);
+      zoomCameraBy(state, factor);
       applyMapCamera(svg(), state);
       onChange && onChange();
     },

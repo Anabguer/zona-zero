@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA (SÍ)**. Siguiente: ZZ-011 → A2 (ZZ-009 → ZZ-007 GATE). No deploy.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 APROBADA**. · **ZZ-011 + ZZ-009 hechas**. · **PARADO en ZZ-007 HUMAN_GATE** (PENDIENTE DE REVISIÓN). No ZZ-008+ / no deploy.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -39,11 +39,11 @@ APROBACIÓN FINAL CHATGPT: SÍ
 | ZZ-004 | Una fuente de mapa (locations) | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-005 | Balance skeleton 2.5 | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-006 | Sync Drive ↔ GitHub de los 3 maestros | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-009 | Save v1: 1 partida + autosave + backup | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-007 | Portada / Continuar · Nueva partida | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-009 | Save v1: 1 partida + autosave + backup | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-007 | Portada / Continuar · Nueva partida | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-008 | Nueva partida: confirmación + mini-intro | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-011 | Cámara D1 protagonista | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-012 | Tutorial D1 por acciones | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
@@ -603,51 +603,147 @@ Documentación sincronizada. **PARADO** — sin ZZ-011 ni A2 hasta orden.
 # FASE ZZ-011 — Cámara D1 protagonista
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.6 (§ ZZ-011).
+Ver IMPLEMENTATION_PLAN 2.6 (§ ZZ-011). Dependencia ZZ-010 APROBADA.
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
+- `zoomCameraBy` / `panCameraBy` con clamp D1 (no perder colonia).
+- Botones +/− usan zoom tipado; `__zz.zoomBy` / `panBy` / `clampCam` en harness.
+- Controles zoom z-index/hit-area mejorados.
+- Smoke D1 ampliado: zoom in/out, pan clamp, recenter.
 
 ## ARCHIVOS MODIFICADOS
-—
+`js/render-map.js`, `js/main.js`, `css/world.css`, `scripts/smoke-d1.mjs`
 
 ## PRUEBAS
-—
+`node scripts/smoke-d1.mjs` OK
 
 ## CAPTURAS
-—
+No gate visual propio (HUMAN_GATE NO). Cámara validada en smoke.
 
 ## PROBLEMAS / LIMITACIONES
 —
 
 ## COMMIT
-—
+(incluido en commit de lote A2/ZZ-007)
 
 ## ESTADO CURSOR
-NO INICIADA
+COMPLETADA
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN (sin HUMAN_GATE; revisión en bloque ok)
+
+## APROBACIÓN FINAL CHATGPT
+NO (no aplica gate)
+
+---
+
+# FASE ZZ-009 — Save v1: main + autosave + backup
+
+## PLAN
+IMPLEMENTATION_PLAN 2.6 § ZZ-009 · GAME_MASTER §31.7 / Ap. E.
+
+## RESULTADO CURSOR
+- Persistencia **main (slot 1) + backup (slot 2)**; sin UX multi-slot.
+- Rotación segura: validar payload → copiar main→backup → escribir main.
+- Load: main; si falla → backup + mensaje humano + restore a main.
+- Migración legado: promover mejor de slots 1–3 a main.
+- Cliente: `saveGame` / `loadGame` / `clearGame` / `fetchSaveStatus`.
+- Mock harness alineado; autosave debounce + intervalo 90s + pagehide.
+- `smoke-save.mjs` OK.
+
+## ARCHIVOS MODIFICADOS
+`api/bootstrap.php`, `api/save.php`, `api/load.php`, `api/slots.php`, `api/delete.php`, `js/api.js`, `dev/api-mock.js`, `js/main.js`, `play.php`, `scripts/smoke-save.mjs`
+
+## PRUEBAS
+`node scripts/smoke-save.mjs` OK · `smoke.mjs` OK
+
+## CAPTURAS
+No (HUMAN_GATE NO)
+
+## PROBLEMAS / LIMITACIONES
+- Migración multi-slot completa diferida también a ZZ-180.
+- Confirmación formal Nueva partida se pule en ZZ-008 (aviso mínimo ya en hub).
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN (sin HUMAN_GATE)
+
+## APROBACIÓN FINAL CHATGPT
+NO (no aplica gate)
+
+---
+
+# FASE ZZ-007 — Portada / Continuar · Nueva partida
+
+## PLAN
+IMPLEMENTATION_PLAN 2.6 § ZZ-007 · GAME_MASTER §31.5. Dependencia ZZ-009.
+
+## RESULTADO CURSOR
+- Portada brand-first: **Zona Zero** hero + atmósfera; sin grid de slots.
+- Sin partida → **Nueva partida** (primaria).
+- Con partida → **Continuar** (primaria) + meta + **Nueva partida** (secundaria).
+- `index.php` + `css/hub.css` + `bootHub`.
+- Evidencias: móvil/desktop empty+continue + contact sheet.
+- Archivo ZZ-010 en `docs/review-archive/zz-010/` (git + carpeta).
+
+## ARCHIVOS MODIFICADOS
+`index.php`, `css/hub.css`, `js/main.js`, `dev/hub-empty.html`, `dev/hub-continue.html`, `scripts/review-shots-zz007.mjs`, `scripts/smoke-boot.mjs`, `docs/review/*`
+
+## PRUEBAS
+`node scripts/smoke-boot.mjs` OK · `smoke-save` / `smoke-d1` OK
+
+## CAPTURAS
+Repo `docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\`
+- `01-mobile-hub-empty.png` … `04-desktop-hub-continue.png`
+- `review-contact-sheet.jpg`, `index.html`
+
+## CURSOR — REVISIÓN VISUAL ZZ-007
+1. ¿Portada de juego (no gestor de slots)? Sí.
+2. ¿Continuar primario con partida? Sí.
+3. ¿Brand hero legible? Sí (Zona Zero + tag + CTA).
+4. ¿Sin jerga de slots? Sí.
+
+## PROBLEMAS / LIMITACIONES
+- Mini-intro / confirmación pulida = ZZ-008.
+- cover.svg atmosférico a baja opacidad (no foto aérea del mapa).
+
+## ESTADO CURSOR
+COMPLETADA
 
 ## REVISIÓN CHATGPT
-Pendiente inicialmente.
+Pendiente — HUMAN_GATE.
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
 
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
-
 ## APROBACIÓN FINAL CHATGPT
 NO
+
+**PARADO en ZZ-007.** No ZZ-008+ sin APROBADA + SÍ.
+
+---
+
+# ENMIENDA CONTRATO 2.6 — Arranque / tutorial / save (2026-08-15)
+
+## DECISIÓN NENI (pre-revisión visual ZZ-010)
+Incorporada a GAME_MASTER **2.6** + IMPLEMENTATION_PLAN **2.6**.
+
+| Tema | Dónde en GM | Fases PLAN |
+|------|-------------|------------|
+| Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) — **en revisión** |
+| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) |
+| Tutorial contextual | §31.4 | ZZ-012 (ampliada) |
+| Ayuda consultable | §21.3 | ZZ-152 (ampliada) |
+| Save 1+autosave+backup | §31.7 + Ap. E | ZZ-009 (hecha), ZZ-180 |
 
 ---
 
 # FASE ZZ-012 — Tutorial D1 por acciones
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-012).
-
+Ver IMPLEMENTATION_PLAN 2.6 (§ ZZ-012).
 ## RESULTADO CURSOR
 Pendiente de ejecución (fase no iniciada).
 

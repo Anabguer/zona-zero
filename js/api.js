@@ -1,4 +1,6 @@
-/** API cliente Zona Zero */
+/**
+ * API cliente Zona Zero — partida única (main) + backup interno.
+ */
 const BASE = new URL('../api/', import.meta.url);
 
 async function req(path, options = {}) {
@@ -38,26 +40,47 @@ async function req(path, options = {}) {
   return data;
 }
 
-export function fetchSlots() {
+/** Estado de portada: ¿hay partida principal? */
+export function fetchSaveStatus() {
   return req('slots.php', { timeoutMs: 15000 });
 }
 
-export function saveSlot(slot, state, title, summary) {
+/** @deprecated alias — usar fetchSaveStatus */
+export function fetchSlots() {
+  return fetchSaveStatus();
+}
+
+export function saveGame(state, title, summary) {
   return req('save.php', {
     method: 'POST',
-    body: JSON.stringify({ slot, state, title, summary }),
+    body: JSON.stringify({ state, title, summary }),
     timeoutMs: 20000,
   });
 }
 
-export function loadSlot(slot) {
-  return req(`load.php?slot=${slot}`, { timeoutMs: 15000 });
+/** @deprecated alias */
+export function saveSlot(_slot, state, title, summary) {
+  return saveGame(state, title, summary);
 }
 
-export function deleteSlot(slot) {
+export function loadGame() {
+  return req('load.php', { timeoutMs: 15000 });
+}
+
+/** @deprecated alias — ignora slot */
+export function loadSlot(_slot) {
+  return loadGame();
+}
+
+export function clearGame() {
   return req('delete.php', {
     method: 'POST',
-    body: JSON.stringify({ slot }),
+    body: JSON.stringify({}),
     timeoutMs: 15000,
   });
+}
+
+/** @deprecated alias */
+export function deleteSlot(_slot) {
+  return clearGame();
 }

@@ -6,43 +6,25 @@ require_once __DIR__ . '/bootstrap.php';
 $user = zz_require_user();
 $pdo = zz_pdo();
 zz_ensure_schema($pdo);
+$userId = (int) $user['id'];
+zz_migrate_legacy_to_main($pdo, $userId);
 
-$st = $pdo->prepare(
-    'SELECT slot, save_version, title, summary, day_num, population, is_alive, updated_at
-     FROM zona_zero_saves WHERE user_id = ? ORDER BY slot ASC'
-);
-$st->execute([(int) $user['id']]);
-$rows = $st->fetchAll();
-
-$slots = [];
-for ($i = 1; $i <= 3; $i++) {
-    $slots[$i] = [
-        'slot' => $i,
-        'empty' => true,
-        'title' => null,
-        'summary' => null,
-        'day' => 0,
-        'population' => 0,
-        'alive' => true,
-        'updated_at' => null,
-        'save_version' => ZZ_SAVE_VERSION,
-    ];
+$decoded = zz_decode_save_row(zz_fetch_save_row($pdo, $userId, zz_slot_main()));
+if (!$decoded) {
+    $decoded = zz_decode_save_row(zz_fetch_save_row($pdo, $userId, zz_slot_backup()));
 }
-foreach ($rows as $r) {
-    $s = (int) $r['slot'];
-    if ($s < 1 || $s > 3) {
-        continue;
-    }
-    $slots[$s] = [
-        'slot' => $s,
+
+$save = null;
+if ($decoded) {
+    $save = [
         'empty' => false,
-        'title' => $r['title'],
-        'summary' => $r['summary'],
-        'day' => (int) $r['day_num'],
-        'population' => (int) $r['population'],
-        'alive' => (bool) (int) $r['is_alive'],
-        'updated_at' => $r['updated_at'],
-        'save_version' => (int) $r['save_version'],
+        'title' => $decoded['meta']['title'],
+        'summary' => $decoded['meta']['summary'],
+        'day' => $decoded['meta']['day'],
+        'population' => $decoded['meta']['population'],
+        'alive' => $decoded['meta']['alive'],
+        'updated_at' => $decoded['meta']['updated_at'],
+        'save_version' => $decoded['meta']['save_version'],
     ];
 }
 
@@ -52,5 +34,31 @@ zz_respond([
         'id' => (int) $user['id'],
         'nombre' => (string) ($user['nombre'] ?? $user['usuario'] ?? 'Jugador'),
     ],
-    'slots' => array_values($slots),
+    'save' => $save,
+    // Compat legado (hub antiguo): un solo “slot” lógico
+    'slots' => [
+        $save
+            ? [
+                'slot' => 1,
+                'empty' => false,
+                'title' => $save['title'],
+                'summary' => $save['summary'],
+                'day' => $save['day'],
+                'population' => $save['population'],
+                'alive' => $save['alive'],
+                'updated_at' => $save['updated_at'],
+                'save_version' => $save['save_version'],
+            ]
+            : [
+                'slot' => 1,
+                'empty' => true,
+                'title' => null,
+                'summary' => null,
+                'day' => 0,
+                'population' => 0,
+                'alive' => true,
+                'updated_at' => null,
+                'save_version' => ZZ_SAVE_VERSION,
+            ],
+    ],
 ]);

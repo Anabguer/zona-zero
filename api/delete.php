@@ -8,15 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $user = zz_require_user();
-$data = zz_json_input();
-$slot = (int) ($data['slot'] ?? 0);
-if (!zz_slot_valid($slot)) {
-    zz_respond(['ok' => false, 'error' => 'slot_invalid'], 400);
-}
-
 $pdo = zz_pdo();
 zz_ensure_schema($pdo);
-$st = $pdo->prepare('DELETE FROM zona_zero_saves WHERE user_id = ? AND slot = ?');
-$st->execute([(int) $user['id'], $slot]);
+$userId = (int) $user['id'];
 
-zz_respond(['ok' => true, 'slot' => $slot]);
+// Borra main + backup (Nueva partida tras confirmación). No expone slots.
+$st = $pdo->prepare('DELETE FROM zona_zero_saves WHERE user_id = ? AND slot IN (?, ?)');
+$st->execute([$userId, zz_slot_main(), zz_slot_backup()]);
+
+zz_respond(['ok' => true, 'cleared' => true]);

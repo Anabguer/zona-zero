@@ -1,0 +1,139 @@
+/* Portada ZZ-007 — atmósfera, brand hero, sin slots */
+.zz-body--hub {
+  min-height: 100dvh;
+  margin: 0;
+  background: #0e0c0a;
+  color: #e8e0d4;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+.zz-hub {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.zz-hub__atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 35%, rgba(90, 70, 40, 0.35), transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(20, 16, 12, 0.95), #0a0908),
+    linear-gradient(165deg, #1a1612 0%, #0e0c0a 45%, #15110e 100%);
+  pointer-events: none;
+}
+.zz-hub__atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../assets/cover.svg");
+  background-size: min(92vw, 720px);
+  background-repeat: no-repeat;
+  background-position: center 18%;
+  opacity: 0.14;
+  filter: saturate(0.7) contrast(1.05);
+}
+.zz-hub__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+}
+.zz-hub__top .zz-back {
+  color: rgba(232, 224, 212, 0.7);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.zz-hub__top .zz-user {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.zz-hub__hero {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  max-width: 40rem;
+  margin: 0 auto;
+  width: 100%;
+  animation: zzHubIn 0.7s ease-out both;
+}
+@keyframes zzHubIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.zz-hub__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4a574;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 600;
+}
+.zz-hub__brand {
+  margin: 0;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 12vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+}
+.zz-hub__tag {
+  margin: 0.75rem 0 1.75rem;
+  max-width: 28rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: rgba(232, 224, 212, 0.82);
+}
+.zz-hub__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 20rem;
+}
+.zz-hub__actions .zz-btn--hero {
+  width: 100%;
+  min-height: 3.1rem;
+  font-size: 1.15rem;
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.zz-hub__save-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+.zz-hub__actions .zz-btn--ghost {
+  width: 100%;
+  min-height: 2.6rem;
+}
+
+@media (min-width: 900px) {
+  .zz-hub__hero {
+    justify-content: center;
+    padding-bottom: 4rem;
+  }
+  .zz-hub__atmosphere::after {
+    background-position: center 28%;
+    opacity: 0.18;
+  }
+}

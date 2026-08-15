@@ -29,7 +29,9 @@ const { placeBuilding, adjustBuildingWorkers } = await import(pathToFileURL(join
 const { ensureOnboarding, advanceOnboarding, checkOnboardingProgress, onboardingStatus } = await import(
   pathToFileURL(join(root, 'js', 'onboarding.js')).href
 );
-const { recenterCamera, clampCamera } = await import(pathToFileURL(join(root, 'js', 'render-map.js')).href);
+const { recenterCamera, clampCamera, zoomCameraBy, panCameraBy } = await import(
+  pathToFileURL(join(root, 'js', 'render-map.js')).href
+);
 
 let fails = 0;
 function assert(c, m) {
@@ -45,6 +47,18 @@ recenterCamera(state);
 clampCamera(state);
 assert(state.day === 1, 'día 1');
 assert((state.mapCamera.zoom || 0) >= 2.4, 'zoom D1 cercano: ' + state.mapCamera.zoom);
+const z0 = state.mapCamera.zoom;
+zoomCameraBy(state, 1.15);
+assert(state.mapCamera.zoom > z0, 'zoom in: ' + state.mapCamera.zoom);
+const z1 = state.mapCamera.zoom;
+zoomCameraBy(state, 1 / 1.15);
+assert(state.mapCamera.zoom < z1 + 0.001, 'zoom out: ' + state.mapCamera.zoom);
+const camp = state.zones.find((z) => z.type === 'camp');
+panCameraBy(state, 40, -40);
+assert(Math.hypot(state.mapCamera.x - camp.x, state.mapCamera.y - camp.y) <= 10.01, 'pan clamp D1');
+recenterCamera(state);
+assert(Math.abs(state.mapCamera.x - camp.x) < 0.01, 'recenter x');
+assert((state.mapCamera.zoom || 0) >= 2.4, 'recenter zoom D1');
 const startB = state.base.buildings.filter((b) => b.hp > 0);
 assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo HQ (capacidad, no 1 casa/habitante)');
 assert(onboardingStatus(state)?.step?.id === 'welcome', 'welcome');

@@ -26,7 +26,7 @@ import {
   syncLaborFromColony,
 } from './sim.js';
 import { resolvePendingChoice } from './director.js';
-import { renderMap, bindMapCamera, recenterCamera, clampCamera } from './render-map.js';
+import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy } from './render-map.js';
 import {
   readyExplorers,
   livingExplorers,
@@ -91,11 +91,11 @@ const SKILL_LABEL = {
 
 let content = null;
 let state = null;
-let slot = 1;
 let dirty = false;
 let chromeBound = false;
 let eventCardTimer = 0;
 let saveTimer = 0;
+let autosaveInterval = 0;
 
 const $ = (id) => document.getElementById(id);
 
@@ -129,7 +129,7 @@ function scheduleSave() {
 async function doSave() {
   if (!state) return;
   try {
-    const r = await api.saveSlot(slot, state, state.colonyName, summarizeState(state));
+    const r = await api.saveGame(state, state.colonyName, summarizeState(state));
     if (!r.ok) throw new Error(r.error || 'save');
     dirty = false;
     if ($('zz-save-state')) $('zz-save-state').textContent = 'Guardado';
@@ -137,6 +137,20 @@ async function doSave() {
     if ($('zz-save-state')) $('zz-save-state').textContent = 'Error al guardar';
     toast('No se pudo guardar', 'bad');
   }
+}
+
+function startAutosaveLoop() {
+  clearInterval(autosaveInterval);
+  // Autoguardado periódico (~90s) además del debounce por acción
+  autosaveInterval = setInterval(() => {
+    if (dirty && state) doSave();
+  }, 90000);
+  window.addEventListener('pagehide', () => {
+    if (dirty && state) {
+      // best-effort; navegadores pueden cancelar async
+      doSave();
+    }
+  });
 }
 
 function openSheet(html) {
@@ -1316,18 +1330,22 @@ function bindChrome() {
     state.flags.objectivesOff = true;
     paint();
   });
-  // zoom buttons
-  $('zz-zoom-in')?.addEventListener('click', () => {
+  // zoom buttons (ZZ-011)
+  $('zz-zoom-in')?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = (state.mapCamera.zoom || 1) * 1.12;
-    clampCamera(state);
+    zoomCameraBy(state, 1.12);
     paint();
+    scheduleSave();
   });
-  $('zz-zoom-out')?.addEventListener('click', () => {
+  $('zz-zoom-out')?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
     if (!state.mapCamera) return;
-    state.mapCamera.zoom = (state.mapCamera.zoom || 1) / 1.12;
-    clampCamera(state);
+    zoomCameraBy(state, 1 / 1.12);
     paint();
+    scheduleSave();
   });
   $('zz-endless')?.addEventListener('click', () => {
     continueEndless(state);
@@ -1346,21 +1364,35 @@ export async function bootGame(opts) {
   } catch (e) {
     throw new Error('No se pudo cargar content/ (JSON).');
   }
-  slot = opts.slot;
   initSound();
 
   if (opts.mode === 'new') {
+    if (opts.clearExisting) {
+      await api.clearGame().catch(() => {});
+    }
     state = createNewState(content, opts.name || 'Refugio 0');
-    const saved = await api.saveSlot(slot, state, state.colonyName, summarizeState(state));
+    const saved = await api.saveGame(state, state.colonyName, summarizeState(state));
     if (!saved.ok) throw new Error(saved.error || 'save_failed');
     dirty = false;
   } else {
-    const res = await api.loadSlot(slot);
+    const res = await api.loadGame();
     if (!res.ok) throw new Error(res.error || 'load');
     state = migrateState(res.state, content);
+    if (res.recoveredFromBackup) {
+      const banner = $('zz-recover-banner');
+      if (banner) {
+        banner.hidden = false;
+        banner.textContent = res.message || 'Recuperamos tu colonia desde una copia de seguridad.';
+        setTimeout(() => {
+          banner.hidden = true;
+        }, 6000);
+      }
+      toast(res.message || 'Colonia recuperada', 'warn');
+    }
   }
 
   bindChrome();
+  startAutosaveLoop();
   ensureOnboarding(state);
   if (!state.selectedExplorerId) {
     state.selectedExplorerId = livingExplorers(state)[0]?.id || null;
@@ -1376,6 +1408,15 @@ export async function bootGame(opts) {
     getState: () => state,
     getContent: () => content,
     paint,
+    clampCam: () => clampCamera(state),
+    zoomBy: (f) => {
+      zoomCameraBy(state, f);
+      paint();
+    },
+    panBy: (dx, dy) => {
+      panCameraBy(state, dx, dy);
+      paint();
+    },
     place: (type, x, y) => {
       const r = placeBuilding(state, content, type, x, y);
       if (r.ok) {
@@ -1400,50 +1441,78 @@ export async function bootGame(opts) {
   };
 }
 
-export async function bootHub() {
+export async function bootHub(opts = {}) {
   const boot = $('zz-hub-boot');
   const hub = $('zz-hub');
-  if (boot) boot.textContent = 'Cargando slots…';
+  if (boot) boot.textContent = 'Cargando…';
   try {
-    const data = await api.fetchSlots();
-    if (!data.ok) throw new Error(data.error || 'slots');
+    if (opts.demoContinue) {
+      await api.clearGame().catch(() => {});
+      content = await loadContent();
+      const st = createNewState(content, 'Refugio Norte');
+      st.day = 4;
+      await api.saveGame(st, 'Refugio Norte', 'Día 4 · 3 vivos');
+    } else if (opts.demoEmpty) {
+      await api.clearGame().catch(() => {});
+    }
+
+    const data = await api.fetchSaveStatus();
+    if (!data.ok) throw new Error(data.error || 'status');
     const userEl = $('zz-user');
     if (userEl) userEl.textContent = data.user?.nombre || 'Jugador';
-    const grid = $('zz-slots');
-    if (!grid) return;
-    grid.innerHTML = '';
-    data.slots.forEach((s) => {
-      const card = document.createElement('article');
-      card.className = 'zz-slot' + (s.empty ? ' is-empty' : '') + (!s.alive && !s.empty ? ' is-dead' : '');
-      card.innerHTML = s.empty
-        ? `<h2>Partida ${s.slot}</h2><p>Vacía</p><button type="button" class="zz-btn zz-btn--primary" data-new="${s.slot}">Nueva partida</button>`
-        : `<h2>${escapeHtml(s.title || 'Zona Zero')}</h2>
-           <p>${escapeHtml(s.summary || '')}</p>
-           <div class="zz-slot__actions">
-             <a class="zz-btn zz-btn--primary" href="play.php?slot=${s.slot}">Continuar</a>
-             <button type="button" class="zz-btn" data-new="${s.slot}">Reiniciar</button>
-             <button type="button" class="zz-btn zz-btn--ghost" data-del="${s.slot}">Borrar</button>
-           </div>`;
-      grid.appendChild(card);
-    });
-    grid.querySelectorAll('[data-new]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const sl = btn.getAttribute('data-new');
-        const name = prompt('Nombre del refugio', 'Refugio 0') || 'Refugio 0';
-        window.location.href = `play.php?slot=${sl}&new=1&name=${encodeURIComponent(name)}`;
+
+    const save = data.save && data.save.empty !== true ? data.save : null;
+    const hasSave = !!save;
+    const actions = $('zz-hub-actions');
+    if (!actions) return;
+    actions.innerHTML = '';
+    if (hasSave) {
+      const cont = document.createElement('a');
+      cont.className = 'zz-btn zz-btn--primary zz-btn--hero';
+      cont.href = 'play.php';
+      cont.textContent = 'Continuar';
+      actions.appendChild(cont);
+
+      const meta = document.createElement('p');
+      meta.className = 'zz-hub__save-meta';
+      meta.textContent = [save.title, save.summary || `Día ${save.day || 1}`].filter(Boolean).join(' · ');
+      actions.appendChild(meta);
+
+      const neu = document.createElement('button');
+      neu.type = 'button';
+      neu.className = 'zz-btn zz-btn--ghost';
+      neu.textContent = 'Nueva partida';
+      neu.addEventListener('click', () => {
+        const ok = window.confirm(
+          'Ya tienes una colonia en curso. Empezar de nuevo sustituirá esta partida.'
+        );
+        if (!ok) return;
+        const name = window.prompt('Nombre de la colonia', 'Refugio Norte') || 'Refugio Norte';
+        window.location.href = `play.php?new=1&clear=1&name=${encodeURIComponent(name)}`;
       });
-    });
-    grid.querySelectorAll('[data-del]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('¿Borrar partida?')) return;
-        await api.deleteSlot(Number(btn.getAttribute('data-del')));
-        bootHub();
+      actions.appendChild(neu);
+    } else {
+      const neu = document.createElement('button');
+      neu.type = 'button';
+      neu.className = 'zz-btn zz-btn--primary zz-btn--hero';
+      neu.textContent = 'Nueva partida';
+      neu.addEventListener('click', () => {
+        const name = window.prompt('Nombre de la colonia', 'Refugio Norte') || 'Refugio Norte';
+        window.location.href = `play.php?new=1&name=${encodeURIComponent(name)}`;
       });
-    });
+      actions.appendChild(neu);
+    }
+
     if (boot) boot.hidden = true;
     if (hub) hub.hidden = false;
   } catch (e) {
-    if (boot) boot.textContent = 'Error: ' + (e.message || e);
+    if (boot) {
+      boot.hidden = false;
+      boot.innerHTML =
+        '<p><strong>Error al iniciar</strong></p><p>' +
+        escapeHtml(e.message || e) +
+        '</p><button type="button" class="zz-btn zz-btn--primary" onclick="location.reload()">Reintentar</button>';
+    }
     throw e;
   }
 }

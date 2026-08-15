@@ -4,40 +4,47 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 $user = zz_require_user();
-$slot = (int) ($_GET['slot'] ?? 0);
-if (!zz_slot_valid($slot)) {
-    zz_respond(['ok' => false, 'error' => 'slot_invalid'], 400);
-}
-
 $pdo = zz_pdo();
 zz_ensure_schema($pdo);
+$userId = (int) $user['id'];
+zz_migrate_legacy_to_main($pdo, $userId);
 
-$st = $pdo->prepare(
-    'SELECT save_version, title, summary, day_num, population, is_alive, payload, updated_at
-     FROM zona_zero_saves WHERE user_id = ? AND slot = ? LIMIT 1'
-);
-$st->execute([(int) $user['id'], $slot]);
-$row = $st->fetch();
-if (!$row) {
-    zz_respond(['ok' => false, 'error' => 'empty_slot'], 404);
+$recovered = false;
+$decoded = zz_decode_save_row(zz_fetch_save_row($pdo, $userId, zz_slot_main()));
+if (!$decoded) {
+    $decoded = zz_decode_save_row(zz_fetch_save_row($pdo, $userId, zz_slot_backup()));
+    if ($decoded) {
+        $recovered = true;
+        // Restaurar backup → main sin destruir backup
+        try {
+            zz_upsert_save(
+                $pdo,
+                $userId,
+                zz_slot_main(),
+                $decoded['state'],
+                (string) ($decoded['meta']['title'] ?? 'Zona Zero'),
+                (string) ($decoded['meta']['summary'] ?? ''),
+                (int) ($decoded['meta']['day'] ?? 1),
+                (int) ($decoded['meta']['population'] ?? 0),
+                (bool) ($decoded['meta']['alive'] ?? true)
+            );
+        } catch (Throwable $e) {
+            error_log('Zona Zero restore backup: ' . $e->getMessage());
+        }
+    }
 }
 
-$state = json_decode((string) $row['payload'], true);
-if (!is_array($state)) {
-    zz_respond(['ok' => false, 'error' => 'corrupt_save'], 500);
+if (!$decoded) {
+    zz_respond(['ok' => false, 'error' => 'empty_save'], 404);
 }
 
 zz_respond([
     'ok' => true,
-    'slot' => $slot,
-    'meta' => [
-        'title' => $row['title'],
-        'summary' => $row['summary'],
-        'day' => (int) $row['day_num'],
-        'population' => (int) $row['population'],
-        'alive' => (bool) (int) $row['is_alive'],
-        'save_version' => (int) $row['save_version'],
-        'updated_at' => $row['updated_at'],
-    ],
-    'state' => $state,
+    'key' => 'main',
+    'recoveredFromBackup' => $recovered,
+    'message' => $recovered
+        ? 'Recuperamos tu colonia desde una copia de seguridad.'
+        : null,
+    'meta' => $decoded['meta'],
+    'state' => $decoded['state'],
 ]);

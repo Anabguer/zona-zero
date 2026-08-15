@@ -4,11 +4,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/zz-auth.php';
 zz_page_require_login();
 
-$slot = max(1, min(3, (int) ($_GET['slot'] ?? 1)));
 $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
-$name = trim((string) ($_GET['name'] ?? 'Refugio 0'));
+$clear = isset($_GET['clear']) && (string) $_GET['clear'] === '1';
+$name = trim((string) ($_GET['name'] ?? 'Refugio Norte'));
 if ($name === '') {
-    $name = 'Refugio 0';
+    $name = 'Refugio Norte';
 }
 $base = zz_public_base();
 ?>
@@ -45,7 +45,7 @@ $base = zz_public_base();
     <!-- HUD overlay superior -->
     <header class="zz-hud" id="zz-hud">
       <div class="zz-hud__row zz-hud__row--top">
-        <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Partidas</a>
+        <a class="zz-back" data-zz-back href="<?= htmlspecialchars($base) ?>">Inicio</a>
         <div class="zz-hud__title">
           <strong id="zz-colony">Zona Zero</strong>
           <span id="zz-day-label">Día 1</span>
@@ -130,12 +130,11 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=20';
-    const params = new URLSearchParams(location.search);
+    import { bootGame } from './js/main.js?v=21';
     bootGame({
-      slot: <?= (int) $slot ?>,
       mode: <?= $isNew ? "'new'" : "'load'" ?>,
       name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
+      clearExisting: <?= $clear ? 'true' : 'false' ?>,
     }).catch((e) => {
       const boot = document.getElementById('zz-boot');
       if (boot) boot.textContent = 'Error: ' + (e?.message || e);
