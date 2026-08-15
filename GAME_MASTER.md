@@ -1,6 +1,6 @@
 # ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
-**Versión de diseño:** 2.4 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
+**Versión de diseño:** 2.5 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)  
 **Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana (ZZ-001)  
 **Fecha:** 2026-08-15  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
@@ -470,7 +470,7 @@ Ver §4 (`shelter`, `house`, `insulated_house`, `block`, `block_reinforced`).
 | garage | Garaje | requiere para vehículos ≥ coche | 2 |
 | radio | Radio | misiones/radio events más frecuentes | 1 |
 
-**CURSOR: PROPUESTA / DUDA — radio vs centro de expediciones**
+**CURSOR: PROPUESTA / DUDA — radio vs centro de expediciones** *(CERRADA Ronda 2 → opción A)*
 
 Riesgo de dos edificios mid-game que “mejoran exploración/info” sin diferencia clara.
 
@@ -769,7 +769,7 @@ Factores que pueden elevar riesgo: población alta/densa, frío o calor prolonga
 
 El brote debe tener fases y feedback: casos iniciales → contagio posible → pico → recuperación. El número de nuevos enfermos por día debe ser aleatorio dentro de una distribución condicionada por el estado real de la colonia. No todos los brotes se comportan igual.
 
-**Decisión jugable:** ante un brote, el jugador puede mover trabajadores a sanidad, gastar medicinas, sacrificar producción, cancelar expediciones o priorizar research/infraestructura. Debe existir posibilidad de que una mala preparación convierta un brote pequeño en crisis, pero también de contenerlo.
+**Decisión jugable:** ante un brote, el jugador puede mover trabajadores a sanidad (y por tanto dejar de producir en otros edificios), gastar medicinas, cancelar expediciones o priorizar research/infra. La pérdida de producción es consecuencia de enfermos/aislados + reasignación, no un slider de cuarentena. Mala preparación puede convertir un brote pequeño en crisis; buena prep + protocolo lo contiene.
 
 **CURSOR: diseñar varios arquetipos de enfermedad/evento**, con parámetros y consecuencias diferentes, sin inventar una lista médica realista innecesaria. El objetivo es variedad jugable, no simulación epidemiológica.
 
@@ -782,7 +782,7 @@ Crear crisis sanitarias **imprevisibles pero justas**, que obliguen a reasignar 
 - Estado agregado: `sick`, `outbreakSeverity` (0–3), `outbreakType`, `daysInOutbreak`.
 - Cada día en riesgo: tirada ponderada `P(nuevosCasos | factores)` — **nunca** “día 15 = plaga”.
 - Factores ↑ riesgo: pop alta, overflow vivienda, exposición frío/calor, agua baja, heridos sin tratar, estación, evento semilla.
-- Factores ↓ riesgo: camas libres, medicinas, staff sanitario, techs medicina, estabilidad, post-protección Director.
+- Factores ↓ riesgo: camas libres, medicinas, staff sanitario, techs medicina (esp. protocolo de cuarentena, antibiotics), estabilidad, post-protección Director.
 
 #### Fases de un brote
 1. **Germen** — 1–3 enfermos; alerta suave.  
@@ -800,11 +800,27 @@ Crear crisis sanitarias **imprevisibles pero justas**, que obliguen a reasignar 
 | `winter_cough` | Tras frío | madera + aislamiento + sanidad |
 | `mystery_radio` | Señal + enfermos | misión + riesgo |
 
+#### Pérdida de producción durante brote (regla 2.5)
+La producción cae **solo** por causas reales:
+1. Población `sick` / aislada que **no trabaja** (agregado).
+2. El jugador **reasigna** workers a enfermería/clínica con controles +/- (menos gente en huerto/aserradero/etc.).
+**Prohibido** un modificador global artificial de producción “por cuarentena activada”.
+
+#### Protocolo de cuarentena (tech — Ronda 3 CERRADA)
+Una vez investigado `quarantine_protocol` / `quarantine_drill`:
+- Es **permanente y pasivo** (no botón, no toggle diario).
+- Ante brote: la colonia detecta/aisla antes (agregado: más enfermos “en cuidado”, menos en circulación productiva).
+- Reduce **probabilidad de contagio** y **duración esperada** del brote.
+- Eficacia = f(camas médicas, workers sanitarios, medicinas, gravedad del brote, azar).
+- Ejemplo de diseño (no cadencia fija): un brote que sin protocolo podría alargarse ~15 días puede controlarse ~5–7 si infra+staff+meds acompañan.
+- Sin protocolo + mala sanidad → brote pequeño puede escalar a crisis.
+- Con protocolo + buena sanidad → más fácil contención; el jugador sigue moviendo staff y gastando meds.
+
 #### Decisión de staffing
-Durante brote, ficha enfermería muestra preview: “+1 worker → −30% riesgo mañana (est.)”. Quitar del aserradero duele en invierno (madera).
+Durante brote, ficha enfermería muestra preview de efecto esperado al añadir workers. Quitar del aserradero duele en invierno (madera): ese es el coste real.
 
 #### Conexiones
-Director §19/§25 ↔ clima §11 ↔ vivienda overcrowding ↔ medicinas ↔ research medicina ↔ vida visual §32B.
+Director §19/§25 ↔ clima §11 ↔ vivienda overcrowding ↔ medicinas ↔ research cuarentena §18 ↔ vida visual §32B.
 
 ---
 
@@ -980,10 +996,7 @@ Reparación: abstracta (coste metal/fuel + taller mecánico), no inventario de p
 
 **Limpieza vs JSON actual:** quitar unlocks a `wall` / `power_hub` inexistentes; `fortify` no “desbloquea barricade” si ya es buildable en era 0 — debe mejorar barricadas/defensa, no gatear el edificio.
 
-**CURSOR: PROPUESTA / DUDA**  
-Árbol objetivo 28 techs (Apéndice A) vs 20 en JSON:  
-- **Recomendación:** adoptar Apéndice A como canónico; migrar JSON en ZZ-081; no implementar techs stub “para rellenar”.  
-- Alternativa: quedarse en 20 pero **todas** con efecto real (menos fantasía, más foco). Cursor prefiere **menos techs pero todas deseables** si Neni quiere ritmo más corto; si quiere arco 100+ días, 28 bien cableadas.
+**CURSOR:** número de techs = orgánico (§18). Duda 20 vs 28 **cerrada**.
 
 
 ### CHATGPT: DECISIÓN NENI — número de tecnologías ORGÁNICO + investigación con trabajadores (Ronda 2)
@@ -1046,7 +1059,7 @@ Cada tech: problema · req · coste orient. · días base (1 worker) · efecto �
 | `field_medicine` | heridos lentos | banco | medicine | 4 | +curación | “volver a tener manos” |
 | `triage` | camas saturadas | field_medicine | — | 4 | +camas efectivas | “cabemos más enfermos” |
 | `antibiotics_protocol` | brotes se disparan | triage | medicine | 6 | −spread brote | “contener la plaga” |
-| `quarantine_drill` | crisis sanitaria | antibiotics | wood | 5 | opcional: −prod leve a cambio de −spread fuerte (decisión) | “aislar para salvar” |
+| `quarantine_protocol` (id:`quarantine_drill`) | brotes largos / contagio | antibiotics | wood+medicine | 5 | **pasivo permanente**: −spread y −duración esperada del brote; eficacia escala con camas, staff sanitario, meds, gravedad y azar. **NO toggle. NO −prod artificial.** | “quiero que el próximo brote no se me vaya de las manos” |
 | `field_surgery` | explorador herido días | triage | medicine | 6 | −1 día wounded explorador | “no perder al bueno” |
 | `public_health` | camino victoria / clínica | antibiotics+clinic | — | 7 | unlock path clínica avanzada / bonus estabilidad sanidad | “colonia sana = victoria” |
 
@@ -1067,7 +1080,7 @@ Cada tech: problema · req · coste orient. · días base (1 worker) · efecto �
 - 1 research activa · staffing en banco/lab · efectos reales obligatorios · `minEra` solo techo.
 
 ## 18.3 Deseo
-“Aislamiento antes del invierno.” · “Antibióticos porque hay brote.” · “Reparación rápida tras la horda.” · “Coche para la gasolinera lejana.”
+“Aislamiento antes del invierno.” · “Protocolo de cuarentena antes del próximo brote.” · “Antibióticos.” · “Reparación rápida tras la horda.” · “Coche para la gasolinera lejana.”
 
 ---
 
@@ -1549,6 +1562,7 @@ Huecos cubiertos: estaciones, misiones, logros, vivienda climática, curva D1–
 | Daño/repair | Consecuencia ataques | No craft piezas | Ataques sin huella | **Keep** |
 | Vida ambiental | Feedback vivo | No 100 NPCs | Mapa estático | **Keep** |
 | Plantillas expedición | Variedad | No misiones-build | Repetición | **Keep** |
+| Protocolo cuarentena | Contener brotes sin micro | No toggle/−prod | Brotes siempre iguales de duros | **Keep** |
 
 # 40. DECISIONES QUE CAMBIAN EL DISEÑO ANTERIOR
 
@@ -2880,11 +2894,34 @@ Cuando una fase pide revisión visual:
 | Misiones/expediciones plantillas | **CONSOLIDADO** |
 | Director sin cadencia fija | **CONSOLIDADO** |
 
-**CURSOR: PROPUESTA / DUDA restantes (menores):**
-1. ¿`quarantine_drill` como tech con tradeoff −prod? (rec: sí, opcional).  
-2. Coste HQ L2/L3: **ya aplicado wood/metal sin fuel** (alineado con “fuel = vehículos”). Si Neni prefiere flavor “generador del cuartel”, revertir.
+**DECISIONES CERRADAS — NENI + CHATGPT (Ronda 3):**
+1. Protocolo de cuarentena = tech sanitaria **permanente/pasiva** (ver §12 + §18). Sin toggle. Sin −prod artificial.
+2. HQ L2/L3 sin fuel: **confirmado**.
+3. Fuel ≈ vehículos / usos con función jugable real.
 
-**ZZ-001 sigue NO aprobada** hasta que ChatGPT marque el GAME_MASTER tras consolidación 2.4.
+### CURSOR: CONSOLIDADO 2.5 — Ronda 3 aplicada
+- §12 y §18 actualizados; definición antigua “−prod leve / decisión toggle” **eliminada**.
+- Brotes siguen probabilísticos, sin calendario fijo.
+- Dudas menores de 2.4 sobre cuarentena y fuel en HQ: **cerradas**.
+
+### Auditoría final 2.5 — resultado
+| Check | Resultado |
+|-------|-----------|
+| Calefacción = madera auto | OK |
+| Sin electricidad v1 | OK |
+| Fuel ≠ calor / ≠ HQ | OK |
+| Pozo ≠ cisterna | OK |
+| Radio ≠ Centro (roles) | OK |
+| Research = workers, sin cuota | OK |
+| Cuarentena pasiva, no toggle/−prod | OK |
+| Brotes sin cadencia fija | OK |
+| Daño/repair visible | OK |
+| Victoria sin needEnergy | OK |
+| Prod en brote = sick + reasignación | OK |
+
+**Dudas reales abiertas para Neni/ChatGPT:** ninguna bloqueante de diseño tras Ronda 3. Queda solo **ZZ-001** (aprobación formal de la biblia+plan).
+
+**ZZ-001 sigue NO aprobada** hasta revisión final ChatGPT de esta consolidación 2.5.
 
 ---
 

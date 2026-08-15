@@ -1,3 +1,5 @@
+> **ERRATA 2.5:** Protocolo de cuarentena = tech pasiva permanente (no toggle, no −prod artificial). Pérdida de prod en brote = sick/aislados + reasignación real de workers. HQ sin fuel. Fases health/research deben reflejar esto.
+
 > **ERRATA 2.4 (obligatoria):** Electricidad eliminada de v1. Fases/techs/edificios `generator`/`solar`/`power_*`/`needEnergy` quedan **INVALIDADAS o a reescribir** como reparación/clínica/HQ. Calefacción = madera. Research = workers en banco/lab. Brotes/daño/vida visual/misiones plantilla = nuevos requisitos de diseño antes de implementar.
 
 # Zona Zero — Plan de implementación técnico (Diseño 2.1)
