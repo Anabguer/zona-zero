@@ -212,7 +212,7 @@ NO
 `docs/review/` + Drive `Review\` + `review-contact-sheet.jpg`
 
 ## COMMIT
-*(hash tras commit)*
+`9e5c0cb` — feat(ZZ-019): construcción semilibre ghost + ✓/✕ (HUMAN_GATE)
 
 ## Sync Drive/GitHub
 Masters + Review. **No deploy. PARAR.**
