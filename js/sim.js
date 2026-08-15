@@ -102,7 +102,17 @@ export function assignWorker() {
 }
 export function unassignWorker() {}
 export function autoAssignWorkers(state, content) {
-  clearLaborManual(state, content.balance);
+  if (!state.population) return { ok: false, error: 'Sin población' };
+  const wf = Math.max(
+    0,
+    (state.population.total || 0) - (state.population.sick || 0) - (state.population.injured || 0) - (state.population.dependents || 0)
+  );
+  state.population.manual = {
+    food: Math.max(1, Math.floor(wf * 0.35)),
+    water: Math.max(wf >= 2 ? 1 : 0, Math.floor(wf * 0.2)),
+    defense: Math.floor(wf * 0.12),
+  };
+  redistributeLabor(state, content.balance, { preserveManual: true });
   return { ok: true, assigned: workforce(state.population) };
 }
 export { adjustLabor };
@@ -392,8 +402,8 @@ function applyProduction(state, content) {
       let staff = labor.produce || 0;
       if (k === 'food') staff = labor.food || 0;
       if (k === 'water') staff = labor.water || 0;
-      const ratio = clamp(staff / Math.max(1, jobs * 2), 0.25, 1.15);
-      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod));
+      const ratio = clamp(staff / Math.max(1, jobs * 1.5), 0.4, 1.25);
+      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * 1.2));
       if (k === 'food') buildingFood += amt;
       else if (k === 'water') buildingWater += amt;
       else buildingOther[k] = (buildingOther[k] || 0) + amt;
@@ -401,9 +411,9 @@ function applyProduction(state, content) {
   });
 
   // Producción directa por trabajadores asignados (colonia temprana sin edificios)
-  const foodExtra = Math.round((labor.food || 0) * (per.food || 1.5) * 0.35 * stabMod);
-  const waterExtra = Math.round((labor.water || 0) * (per.water || 1.4) * 0.35 * stabMod);
-  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.0) * 0.25 * stabMod);
+  const foodExtra = Math.round((labor.food || 0) * (per.food || 2.4) * 0.55 * stabMod);
+  const waterExtra = Math.round((labor.water || 0) * (per.water || 2.2) * 0.55 * stabMod);
+  const produceExtra = Math.round((labor.produce || 0) * (per.produce || 1.4) * 0.35 * stabMod);
 
   state.resources.food = (state.resources.food || 0) + buildingFood + foodExtra;
   state.resources.water = (state.resources.water || 0) + buildingWater + waterExtra;
@@ -443,8 +453,10 @@ function consumeNeed(state, key, need, label, balance) {
   const missing = need - have;
   state.stability -= 2 + Math.min(4, missing);
   pushLog(state, `Escasez de ${label}.`, 'bad');
-  const loss = Math.min(2, Math.max(1, Math.ceil(missing / 4)));
-  applyCasualties(state, balance, { dead: loss > 1 && missing >= 3 ? 1 : 0, injured: loss });
+  const loss = Math.min(1, Math.max(0, Math.ceil(missing / 6)));
+  const softDead =
+    missing >= 6 && loss && rngOf(state).chance(balance.starvationLossPerDay ?? 0.65) ? 1 : 0;
+  applyCasualties(state, balance, { dead: softDead, injured: Math.max(softDead ? 0 : 1, loss) });
   if (loss) pushLog(state, `La colonia sufre por falta de ${label}.`, 'bad');
 }
 
@@ -522,6 +534,11 @@ export function resolveBaseAttack(state, content, intensity = 2) {
   const ratio = def / Math.max(1, atk);
   const roll = rng.float(0.8, 1.2) * ratio;
   state.resources.ammo = Math.max(0, (state.resources.ammo || 0) - intensity);
+  const camp = state.zones.find((z) => z.type === 'camp');
+  if (camp) {
+    camp._attackFlash = true;
+    state.flags.lastAttackZoneId = camp.id;
+  }
   if (roll >= 1.1) {
     state.stats.attacksSurvived += 1;
     state.stability += 2;
@@ -681,6 +698,11 @@ export function advanceDay(state, content) {
   }
 
   resolveExpedition(state, content);
+  // Limpiar flash de ataque del día anterior
+  (state.zones || []).forEach((z) => {
+    z._attackFlash = false;
+  });
+  if (state.flags) state.flags.lastAttackZoneId = null;
 
   const pop = state.population?.total || 0;
   const foodNeed = pop * (content.balance.foodPerPersonPerDay || content.balance.foodPerSurvivorPerDay || 1);

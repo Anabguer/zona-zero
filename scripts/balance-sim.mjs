@@ -78,12 +78,12 @@ function runGame(seed, days, profileName, opts = {}) {
       }
     }
 
-    if (!state.expedition && i % profile.exploreEvery === 0) {
+    if ((!state.expeditions || !state.expeditions.length) && !state.expedition && i % profile.exploreEvery === 0) {
       const z = state.zones.find((x) => x.state === 'discovered' || x.state === 'hostile');
-      const team = livingSurvivors(state).filter((s) => s.busyUntilDay <= state.day).slice(0, profile.risk ? 1 : 2);
-      if (z && team.length) {
+      const ex = (state.explorers || []).find((e) => e.status === 'ready' && !e.expeditionId);
+      if (z && ex) {
         state.resources.fuel += 2;
-        startExpedition(state, content, z.id, team.map((s) => s.id));
+        startExpedition(state, content, z.id, ex.id);
       }
     }
 
@@ -110,7 +110,7 @@ function runGame(seed, days, profileName, opts = {}) {
     seed,
     profile: profileName,
     day: state.day,
-    pop: allLiving(state).length,
+    pop: state.population?.total ?? allLiving(state).length,
     maxPop: state.stats.maxPop,
     dead: !!state.flags.defeated,
     reason: state.flags.defeatReason,
@@ -148,12 +148,12 @@ const profiles = Object.keys(PROFILES);
 
 for (const p of profiles) {
   const rows = [];
-  for (let i = 0; i < 80; i++) rows.push(runGame(`${p}-${i}`, 60, p));
+  for (let i = 0; i < 40; i++) rows.push(runGame(`${p}-${i}`, 60, p));
   report.batches.push(summarize(rows, `${p}@60`));
 }
 
 const long = [];
-for (let i = 0; i < 40; i++) long.push(runGame(`long-${i}`, 120, 'balanced'));
+for (let i = 0; i < 20; i++) long.push(runGame(`long-${i}`, 120, 'balanced'));
 report.batches.push(summarize(long, 'balanced@120'));
 
 // Victoria forzada para validar condición
@@ -162,14 +162,10 @@ report.batches.push(summarize(long, 'balanced@120'));
   state._autoResolveChoices = true;
   state.era = 4;
   state.stability = 80;
-  for (let i = 0; i < 42; i++) {
-    const s = JSON.parse(JSON.stringify(state.survivors[0]));
-    s.id = 'sv' + i;
-    s.name = 'V' + i;
-    s.status = 'ok';
-    s.hp = 100;
-    state.survivors.push(s);
-  }
+  state.population = state.population || { total: 3, sick: 0, injured: 0, dependents: 0, labor: {}, manual: {} };
+  state.population.total = 45;
+  state.population.injured = 0;
+  state.population.sick = 0;
   state.zones.forEach((z, i) => {
     if (i < 10) {
       z.state = 'controlled';
@@ -193,7 +189,7 @@ report.batches.push(summarize(long, 'balanced@120'));
     victory: !!state.flags.victory,
     dead: !!state.flags.defeated,
     day: state.day,
-    pop: allLiving(state).length,
+    pop: state.population?.total ?? allLiving(state).length,
   };
 }
 

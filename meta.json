@@ -1,0 +1,20 @@
+{
+  "slug": "zona-zero",
+  "name": "Zona Zero",
+  "description": "Tras el colapso, un refugio mínimo. Explora la ciudad, construye, sobrevive a la amenaza.",
+  "cover": "assets/cover.svg",
+  "category": "supervivencia",
+  "status": "jugable",
+  "url": "/juegos/zona-zero/",
+  "requires_login": true,
+  "saves_progress": true,
+  "ranking": false,
+  "guest_ok": false,
+  "stack": "html-js",
+  "tag": "Supervivencia",
+  "save": {
+    "schema_version": 2,
+    "strategy": "slots_specialized",
+    "note": "Usa zona_zero_saves; aún no jg_progress"
+  }
+}

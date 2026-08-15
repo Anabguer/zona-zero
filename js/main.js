@@ -142,7 +142,7 @@ function openSheet(html) {
 
 function closeSheet() {
   const sheet = $('zz-sheet');
-  if (sheet && window.matchMedia('(max-width: 899px)').matches) sheet.hidden = true;
+  if (sheet) sheet.hidden = true;
 }
 
 function handleSheetAction(action, btn) {
@@ -288,44 +288,21 @@ function openExplorerSheet(id) {
   if (!e) return;
   state.selectedExplorerId = id;
   const skills = Object.entries(e.skills || {})
-    .map(([k, v]) => `<span>${SKILL_LABEL[k] || k} ${v}</span>`)
+    .map(([k, v]) => `<span>${SKILL_LABEL[k] || k} ${'●'.repeat(v)}${'○'.repeat(5 - v)}</span>`)
     .join('');
-  const vehOpts = ['<option value="">A pie</option>']
-    .concat(
-      (state.vehiclesOwned || []).map(
-        (vid) =>
-          `<option value="${vid}" ${e.vehicleId === vid ? 'selected' : ''}>${
-            content.vehiclesDoc?.vehicles?.find((v) => v.id === vid)?.name || vid
-          }</option>`
-      )
-    )
-    .join('');
+  const stLabel =
+    e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
   openSheet(`
     <h2>${escapeHtml(e.name)}</h2>
-    <p>Nivel ${e.level || 1} · ${e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído'}</p>
+    <p>Explorador · Nv.${e.level || 1} · ${stLabel}</p>
     <div class="zz-skill-mini">${skills}</div>
     <p>
       <button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button>
+      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="basic">Arma básica</button>
+      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="improved">Arma mejorada</button>
     </p>
-    <p>Arma:
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="none">Ninguna</button>
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="basic">Básica</button>
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-weapon" data-id="${e.id}" data-val="improved">Mejorada</button>
-    </p>
-    <p>Vehículo:
-      ${(state.vehiclesOwned || [])
-        .map(
-          (vid) =>
-            `<button type="button" class="zz-btn zz-btn--compact" data-action="equip-vehicle" data-id="${e.id}" data-val="${vid}">${
-              content.vehiclesDoc?.vehicles?.find((v) => v.id === vid)?.name || vid
-            }</button>`
-        )
-        .join(' ') || 'Ninguno aún'}
-      <button type="button" class="zz-btn zz-btn--compact" data-action="equip-vehicle" data-id="${e.id}" data-val="">A pie</button>
-    </p>
-    <p class="zz-muted">Tocad una zona en el mapa para enviar a este explorador.</p>
+    <p class="zz-muted">Tocad un lugar del mapa para enviarlo. Cerrad este panel cuando no lo necesitéis.</p>
   `);
-  void vehOpts;
   paint();
 }
 
@@ -678,6 +655,10 @@ function bindChrome() {
     openMoreSheet();
   });
   $('zz-sheet-close')?.addEventListener('click', closeSheet);
+  // Cerrar panel al tocar el mapa (fondo), no las zonas
+  $('zz-map')?.addEventListener('click', (ev) => {
+    if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) closeSheet();
+  });
   $('zz-coach-dismiss')?.addEventListener('click', () => {
     state.flags.coach.dismissed = true;
     paint();
@@ -721,13 +702,29 @@ export async function bootGame(opts) {
   paint();
   if (app) app.hidden = false;
   if (boot) boot.hidden = true;
-  toast(`Día ${state.day} · ${state.population.total} habitantes`, 'good');
+  toast(
+    state.flags.defeated
+      ? 'Esta partida ya terminó en derrota'
+      : state.flags.victory && !state.flags.endless
+        ? 'Victoria alcanzada'
+        : `Día ${state.day} · ${state.population.total} habitantes`,
+    state.flags.defeated ? 'bad' : 'good'
+  );
 
   window.__zz = {
     getState: () => state,
     getContent: () => content,
     paint,
-    place: (type, x, y) => placeBuilding(state, content, type, x, y),
+    place: (type, x, y) => {
+      const r = placeBuilding(state, content, type, x, y);
+      if (r.ok) paint();
+      return r;
+    },
+    sendExpedition: (zoneId, explorerId) => {
+      const r = startExpedition(state, content, zoneId, explorerId);
+      if (r.ok) paint();
+      return r;
+    },
   };
 }
 

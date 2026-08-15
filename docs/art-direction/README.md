@@ -1,8 +1,8 @@
 # Zona Zero — Dirección artística (muestra para aprobación)
 
-**Estado:** pendiente de aprobación visual  
+**Estado:** Dirección artística **aprobada** · producción visual 1.2.1 en curso/integrada  
 **Fecha:** 2026-08-15  
-**Versión de diseño:** 1.2 (población colectiva + exploradores + mundo continuo)
+**Versión de diseño:** 1.2.1
 
 ## Cómo revisar
 

@@ -317,10 +317,12 @@ function paintHq(g, lv) {
 }
 
 function paintShelter(g) {
-  append(g, 'path', { d: 'M7 32V20l13-11 13 11v12H7z', fill: '#6b5344', stroke: '#c4a882', 'stroke-width': 1.3 });
-  append(g, 'path', { d: 'M8 20l12-10 12 10', fill: 'none', stroke: '#8a7060', 'stroke-width': 1 });
-  append(g, 'rect', { x: 17, y: 23, width: 6, height: 9, fill: '#2e241c' });
-  append(g, 'path', { d: 'M10 18l4 3M26 18l-4 3', fill: 'none', stroke: '#5a4a3a', 'stroke-width': 1.2 });
+  append(g, 'rect', { x: 6, y: 30, width: 28, height: 4, fill: '#3a3428', opacity: 0.5 });
+  append(g, 'path', { d: 'M7 32V18l13-12 13 12v14H7z', fill: '#7a5a44', stroke: '#e0c090', 'stroke-width': 1.4 });
+  append(g, 'path', { d: 'M8 18l12-11 12 11', fill: '#8a6048', stroke: '#d4a882', 'stroke-width': 1.1 });
+  append(g, 'rect', { x: 17, y: 22, width: 6, height: 10, fill: '#2a2018' });
+  append(g, 'rect', { x: 10, y: 20, width: 4, height: 3.5, fill: '#f0b860', opacity: 0.85 });
+  append(g, 'rect', { x: 26, y: 20, width: 4, height: 3.5, fill: '#f0b860', opacity: 0.55 });
 }
 
 function paintHouse(g) {
@@ -353,17 +355,18 @@ function paintBlock(g) {
 }
 
 function paintFarm(g) {
-  append(g, 'rect', { x: 5, y: 28, width: 30, height: 5, fill: '#3a3020' });
+  append(g, 'rect', { x: 4, y: 26, width: 32, height: 8, rx: 1, fill: '#4a3a22', stroke: '#6a5a38', 'stroke-width': 0.8 });
   for (let i = 0; i < 5; i++) {
     append(g, 'path', {
-      d: `M${8 + i * 6} 28v-14c0-2 2-4 3-4s3 2 3 4v14`,
+      d: `M${7 + i * 6.2} 30v-12c0-2.2 2.2-4.2 3.2-4.2s3.2 2 3.2 4.2v12`,
       fill: 'none',
-      stroke: '#6a8a3a',
-      'stroke-width': 1.4,
+      stroke: '#6aaa40',
+      'stroke-width': 1.5,
       'stroke-linecap': 'round',
     });
-    append(g, 'circle', { cx: 11 + i * 6, cy: 12, r: 1.8, fill: '#8aaa4a' });
+    append(g, 'circle', { cx: 10.2 + i * 6.2, cy: 12, r: 2.1, fill: '#8aca48' });
   }
+  append(g, 'rect', { x: 28, y: 8, width: 7, height: 6, rx: 0.5, fill: '#6a5040', stroke: '#a08060', 'stroke-width': 0.8 });
 }
 
 function paintGreenhouse(g) {

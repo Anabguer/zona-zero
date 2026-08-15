@@ -1,0 +1,10 @@
+Inicio OK
+Construidos huerto y pozo
+Expedición enviada
+D2 pop=3 food=42.45 ctrl=1 bld=5 ex=1
+D7 pop=4 food=47.45000000000001 ctrl=1 bld=5 ex=1
+Mid: almacén, torre, taller
+D12 pop=4 food=46.45000000000002 ctrl=1 bld=8 ex=1
+D17 pop=1 food=47.00000000000002 ctrl=1 bld=8 ex=1
+D22 pop=1 food=52.750000000000014 ctrl=1 bld=8 ex=1
+Duración wall-clock: 0.15 min (~25 turnos jugados)

@@ -1,21 +1,23 @@
 /* Zona Zero — presentación postapocalíptica (tierra / hormigón / metal / calor) */
 :root {
-  --zz-bg0: #100e0c;
-  --zz-bg1: #1a1612;
-  --zz-bg2: #242018;
-  --zz-panel: rgba(28, 24, 20, 0.94);
-  --zz-panel-2: rgba(36, 32, 28, 0.96);
-  --zz-line: rgba(180, 150, 110, 0.22);
-  --zz-text: #efe6d8;
-  --zz-muted: #a89880;
-  --zz-accent: #d4a574;
-  --zz-accent-2: #e8c090;
-  --zz-warm: #e0a050;
+  --zz-bg0: #0e1214;
+  --zz-bg1: #161c1e;
+  --zz-bg2: #1e2824;
+  --zz-panel: rgba(22, 28, 26, 0.94);
+  --zz-panel-2: rgba(28, 34, 32, 0.96);
+  --zz-line: rgba(160, 180, 140, 0.2);
+  --zz-text: #eef2e8;
+  --zz-muted: #9aab98;
+  --zz-accent: #d4b06a;
+  --zz-accent-2: #e8c878;
+  --zz-warm: #e09850;
   --zz-warn: #e0b050;
   --zz-bad: #d45a4a;
-  --zz-safe: #5a8a62;
-  --zz-safe-glow: rgba(90, 138, 98, 0.45);
-  --zz-fog: rgba(18, 16, 14, 0.78);
+  --zz-safe: #4a9a62;
+  --zz-safe-glow: rgba(90, 180, 110, 0.5);
+  --zz-life: #7ab84a;
+  --zz-sky: #3a5560;
+  --zz-fog: rgba(14, 18, 22, 0.86);
   --zz-radius: 12px;
   --zz-font: "IBM Plex Sans", system-ui, sans-serif;
   --zz-display: "Rajdhani", "IBM Plex Sans", sans-serif;
@@ -31,9 +33,10 @@ body.zz-body {
   font-family: var(--zz-font);
   color: var(--zz-text);
   background:
-    radial-gradient(900px 420px at 8% -8%, rgba(212, 165, 116, 0.09), transparent 55%),
-    radial-gradient(700px 380px at 100% 0%, rgba(90, 70, 50, 0.18), transparent 50%),
-    linear-gradient(180deg, var(--zz-bg0), var(--zz-bg1) 42%, #0e0c0a);
+    radial-gradient(900px 420px at 12% -8%, rgba(74, 154, 98, 0.12), transparent 55%),
+    radial-gradient(700px 380px at 100% 0%, rgba(58, 85, 96, 0.22), transparent 50%),
+    radial-gradient(500px 300px at 70% 100%, rgba(212, 176, 106, 0.06), transparent 45%),
+    linear-gradient(180deg, var(--zz-bg0), var(--zz-bg1) 42%, #0a0e10);
 }
 
 .zz-boot {
@@ -352,52 +355,50 @@ body.zz-body {
 .zz-map { width: 100%; height: auto; aspect-ratio: 1 / 1; display: block; touch-action: manipulation; }
 .zz-base { width: 100%; height: auto; display: block; touch-action: manipulation; }
 
-/* Mapa ciudad — tejido urbano */
-.zz-map-avenue { fill: #3a352c; opacity: 0.92; }
-.zz-map-street-fill { fill: #2e2a24; opacity: 0.88; }
+/* Mapa ciudad — tejido urbano + vida en territorio recuperado */
+.zz-map-avenue { fill: #4a453c; opacity: 0.92; }
+.zz-map-street-fill { fill: #3a3630; opacity: 0.88; }
 .zz-map-street { fill: none; stroke: #5a5244; stroke-width: 0.25; opacity: 0.45; }
-.zz-map-link {
-  fill: none;
-  stroke: #4a4238;
-  stroke-width: 0.85;
-  opacity: 0.4;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.zz-map-block { fill: #221e1a; stroke: #302b26; stroke-width: 0.2; opacity: 0.85; }
-.zz-map-bldg { fill: #2c2822; stroke: #3a3530; stroke-width: 0.15; }
-.zz-map-bldg--tall { fill: #322e28; }
-.zz-map-bldg--mid { fill: #2a2620; }
-.zz-map-bldg--low { fill: #26221e; }
-.zz-map-park { fill: #2a3224; stroke: #3a4830; stroke-width: 0.2; opacity: 0.75; }
-.zz-map-tree { fill: #3a4830; opacity: 0.7; }
-.zz-map-shed { fill: #2a2622; stroke: #4a4038; stroke-width: 0.25; opacity: 0.8; }
-.zz-map-ruin { fill: #2a2620; stroke: #3a3530; stroke-width: 0.2; opacity: 0.65; }
-.zz-map-car { fill: #3a342c; opacity: 0.75; }
-.zz-map-debris { fill: #353028; opacity: 0.55; }
-.zz-map-legend-t { fill: #8a7a68; font-size: 2.8px; font-family: var(--zz-font); }
+.zz-map-block { fill: #24282a; stroke: #32383a; stroke-width: 0.2; opacity: 0.9; }
+.zz-map-bldg { fill: #2e3234; stroke: #42484a; stroke-width: 0.15; }
+.zz-map-bldg--tall { fill: #343a3e; }
+.zz-map-bldg--mid { fill: #2c3034; }
+.zz-map-bldg--low { fill: #282c2e; }
+.zz-map-park { fill: #2a3a28; stroke: #4a6a40; stroke-width: 0.2; opacity: 0.8; }
+.zz-map-tree { fill: #3a5a34; opacity: 0.65; }
+.zz-map-life-tree { fill: #5a9a48; opacity: 0.75; }
+.zz-map-crop { fill: #3a5028; stroke: #6a8a40; stroke-width: 0.15; opacity: 0.85; }
+.zz-map-crop-row { stroke: #8aba50; stroke-width: 0.2; opacity: 0.7; }
+.zz-map-life-light { fill: #f0c070; opacity: 0.85; filter: drop-shadow(0 0 1.2px #f0c070); }
+.zz-map-car { fill: #4a4038; opacity: 0.8; }
+.zz-map-debris { fill: #353840; opacity: 0.55; }
+.zz-map-legend-t { fill: #8a9a88; font-size: 2.8px; font-family: var(--zz-font); }
+
+.zz-settle-ground { fill: #3a4a32; stroke: #6a8a50; stroke-width: 0.35; opacity: 0.9; }
+.zz-settle-path { fill: #5a5548; opacity: 0.85; }
+.zz-settle-person { fill: #c4a882; opacity: 0.8; }
+.zz-settle-bldg { pointer-events: none; }
 
 .zz-zone-plot,
-.zz-zone-poly { stroke-width: 0.35; fill-opacity: 0.28; }
+.zz-zone-poly { stroke-width: 0.35; fill-opacity: 0.22; }
 .zz-zone--unknown .zz-zone-plot,
-.zz-zone--unknown .zz-zone-poly { fill: #141210; stroke: #2a2824; stroke-width: 0.2; fill-opacity: 0.15; }
-.zz-zone--unknown .zz-zone-sil { fill: #1e1c18; stroke: #2a2622; stroke-width: 0.12; opacity: 0.35; }
+.zz-zone--unknown .zz-zone-poly { fill: #141820; stroke: #2a3038; stroke-width: 0.2; fill-opacity: 0.12; }
+.zz-zone--unknown .zz-zone-sil { fill: #1e2228; stroke: #2a2e34; stroke-width: 0.12; opacity: 0.3; }
 .zz-zone-fog {
   fill: url(#zzFogGrad);
   stroke: none;
-  opacity: 0.92;
+  opacity: 0.94;
   pointer-events: none;
 }
-.zz-zone-q { display: none; }
 
 .zz-zone--discovered .zz-zone-plot,
 .zz-zone--discovered .zz-zone-poly {
-  fill: #3a3224;
+  fill: #3a3830;
   stroke: #c4a060;
-  fill-opacity: 0.22;
+  fill-opacity: 0.2;
   stroke-width: 0.45;
 }
-.zz-zone--discovered .zz-zone-sil { fill: #5a4a38; stroke: #a88858; stroke-width: 0.3; }
+.zz-zone--discovered .zz-zone-sil { fill: #5a5040; stroke: #a88858; stroke-width: 0.3; }
 .zz-zone--discovered.is-risky .zz-zone-plot,
 .zz-zone--discovered.is-risky .zz-zone-poly {
   fill: #3a2824;
@@ -407,68 +408,68 @@ body.zz-body {
 
 .zz-zone--hostile .zz-zone-plot,
 .zz-zone--hostile .zz-zone-poly {
-  fill: #4a2818;
-  stroke: #d07040;
+  fill: #4a2018;
+  stroke: #e06040;
   stroke-width: 0.55;
-  fill-opacity: 0.32;
+  fill-opacity: 0.35;
 }
-.zz-zone--hostile .zz-zone-sil {
-  fill: #5a3020;
-  stroke: #c07050;
-  stroke-width: 0.25;
+.zz-zone--hostile .zz-zone-sil { fill: #5a3020; stroke: #c07050; stroke-width: 0.25; }
+.zz-zone.is-attacked .zz-zone-plot { stroke: #ff6040; stroke-width: 0.85; animation: zz-atk-pulse 1s ease-in-out infinite; }
+@keyframes zz-atk-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
 }
-.zz-zone-tint { pointer-events: none; }
 
 .zz-zone--controlled .zz-zone-plot,
 .zz-zone--controlled .zz-zone-poly {
-  fill: #2a4a34;
+  fill: #2a5a38;
   stroke: var(--zz-safe);
   stroke-width: 0.55;
-  fill-opacity: 0.38;
+  fill-opacity: 0.42;
 }
-.zz-zone-halo {
-  pointer-events: none;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 2.2px var(--zz-safe-glow));
+.zz-zone--controlled.is-recovered .zz-zone-plot {
+  fill: #348048;
+  fill-opacity: 0.5;
+  stroke: #7dffa0;
 }
-.zz-zone--controlled .zz-zone-sil { fill: #3a5844; stroke: #8aca90; stroke-width: 0.28; }
-.zz-zone-window { fill: #e0b060; opacity: 0.9; pointer-events: none; }
-.zz-zone-beacon { fill: #7dffa0; stroke: #3d5c42; stroke-width: 0.25; filter: drop-shadow(0 0 1.2px #7dffa0); }
+.zz-zone-halo { pointer-events: none; opacity: 0.9; }
+.zz-zone--controlled .zz-zone-sil { fill: #3a6848; stroke: #8aca90; stroke-width: 0.28; }
+.zz-zone-window { fill: #f0c878; opacity: 0.95; pointer-events: none; }
+.zz-zone-beacon { fill: #7dffa0; stroke: #3d5c42; stroke-width: 0.25; filter: drop-shadow(0 0 1.5px #7dffa0); }
 .zz-zone-danger { fill: #d45a4a; stroke: #8a3028; stroke-width: 0.2; }
 .zz-zone-label {
-  fill: #e8dcc8;
-  font-size: 2.9px;
+  fill: #e8f0e0;
+  font-size: 3.2px;
   font-family: var(--zz-display);
   font-weight: 600;
   paint-order: stroke;
-  stroke: rgba(0,0,0,0.65);
-  stroke-width: 0.5px;
+  stroke: rgba(0,0,0,0.55);
+  stroke-width: 0.6px;
   pointer-events: none;
 }
 .zz-zone.is-selected .zz-zone-plot,
 .zz-zone.is-selected .zz-zone-poly {
-  stroke: #fff4e0;
-  stroke-width: 1.15;
+  stroke: #fff8e8;
+  stroke-width: 0.85;
+  filter: drop-shadow(0 0 1.5px rgba(255,248,220,0.5));
 }
-
 .zz-map-route {
-  stroke: #d0a060;
-  stroke-width: 0.7;
-  stroke-dasharray: 1.6 1.2;
+  stroke: #e8c090;
+  stroke-width: 0.55;
+  stroke-dasharray: 1.2 1.1;
   opacity: 0.9;
 }
+.zz-map-route-label {
+  fill: #f0e0c0;
+  font-size: 2.6px;
+  font-family: var(--zz-display);
+  font-weight: 600;
+}
+.zz-map-infected { pointer-events: none; opacity: 0.9; }
 .zz-map-route-marker {
   fill: #f0c070;
   stroke: #8a6030;
   stroke-width: 0.3;
-}
-.zz-map-route-label {
-  fill: #e8d0a0;
-  font-size: 2.6px;
-  font-family: var(--zz-font);
-  paint-order: stroke;
-  stroke: rgba(0,0,0,0.7);
-  stroke-width: 0.45px;
 }
 
 .zz-map-weather { pointer-events: none; }

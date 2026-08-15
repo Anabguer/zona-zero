@@ -104,6 +104,9 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--zz-accent);
+  padding-right: 0.45rem;
+  border-right: 1px solid var(--zz-line);
+  margin-right: 0.15rem;
 }
 .zz-chip-hud__m {
   display: inline-flex;
@@ -278,40 +281,41 @@
 
 @media (min-width: 900px) {
   .zz-world {
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr auto;
     padding-bottom: 1rem;
+    max-width: 1600px;
   }
-  .zz-world-top { grid-column: 1 / -1; }
-  .zz-coach { grid-column: 1 / -1; }
-  .zz-chip-hud { grid-column: 1 / -1; }
-  .zz-world-stage { grid-column: 1; }
+  .zz-world-top { grid-column: 1; }
+  .zz-coach { grid-column: 1; }
+  .zz-chip-hud { grid-column: 1; }
+  .zz-world-stage { grid-column: 1; min-height: 62vh; }
+  .zz-world-map-wrap {
+    max-width: min(92vh, 900px);
+    margin: 0.5rem auto;
+  }
+  /* Panel contextual: oculto hasta abrir; flotante, no come el mundo */
   .zz-sheet {
-    position: static;
-    max-height: none;
+    position: fixed;
+    top: 5.5rem;
+    right: 1rem;
+    bottom: auto;
+    left: auto;
+    width: min(360px, 34vw);
+    max-height: min(70vh, 640px);
     border-radius: 14px;
-    margin: 0 0.75rem 0.75rem 0;
-    padding: 0.85rem;
-    grid-column: 2;
-    grid-row: 3 / 5;
-    display: block !important;
+    padding: 0.85rem 0.85rem 1rem;
+    margin: 0;
+    z-index: 30;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.55);
   }
-  .zz-sheet[hidden] {
-    display: block !important;
-    opacity: 0.55;
-  }
-  .zz-sheet[hidden] .zz-sheet__body::before {
-    content: 'Tocad el mundo, un explorador o la población.';
-    display: block;
-    color: var(--zz-muted);
-    font-size: 0.9rem;
-  }
-  .zz-sheet[hidden] .zz-sheet__body > *:not(:first-child) { display: none; }
-  .zz-sheet:not([hidden]) .zz-sheet__body::before { display: none; }
-  .zz-sheet__handle, .zz-sheet__close { display: none; }
+  .zz-sheet[hidden] { display: none !important; }
+  .zz-sheet__handle { display: none; }
+  .zz-sheet__close { display: block; }
   .zz-world-dock {
     position: static;
-    grid-column: 1;
+    max-width: min(92vh, 900px);
+    margin: 0 auto;
     border: 0;
     background: transparent;
     padding: 0.35rem 0.55rem;

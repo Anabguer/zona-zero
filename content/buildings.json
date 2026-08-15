@@ -129,7 +129,7 @@
     "max": 12,
     "jobs": 2,
     "produces": {
-      "food": 5
+      "food": 7
     },
     "minEra": 0,
     "requires": [],

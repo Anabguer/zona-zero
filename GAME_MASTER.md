@@ -1289,13 +1289,13 @@ Y periódicamente el juego debe responder:
 
 # ESTADO TÉCNICO E IMPLEMENTACIÓN (Cursor)
 
-**Versión técnica:** 1.2.0-arch — corrección arquitectónica (arte pendiente de aprobación)  
+**Versión técnica:** 1.2.1 — producción visual (dirección art-direction aprobada)  
 **Repo:** Anabguer/zona-zero · `main`  
 **Local:** `W:\juegos\zona-zero\`  
 **URL:** https://intocables13.com/juegos/zona-zero/  
 **Stack:** HTML/CSS/JS + PHP + MySQL · sin APK · 3 slots · auth Intocables  
 **Prefijo SQL:** `zona_zero_*`  
-**save_version / v:** **4** · cache assets `?v=10`
+**save_version / v:** **4** · cache assets `?v=12`
 
 ## Arquitectura real (1.2)
 - Cliente: `js/` state, sim, director, population, explorers, render-map, render-base, icons, sound, api, main, rng, util
@@ -1313,21 +1313,22 @@ Y periódicamente el juego debe responder:
 - Migración saves v3→v4 (supervivientes → population + 1 explorador)
 
 ## Pendiente (tras “Sí, se ve así”)
-- Lote artístico completo alineado a `docs/art-direction/sample-*.png`
-- Integración visual mundo+núcleo al nivel de la muestra
-- Recalibración balance-sim con población colectiva
-- Pulido / pruebas / producción
-
-## Balance (última calibración conocida = v1, pre-1.2)
-- ~360 partidas headless @60/120d — **requiere re-sim tras 1.2**
-- Ver `scripts/balance-report.json`
+- ~~Lote artístico completo alineado a docs/art-direction~~ **HECHO en 1.2.1**
+- Recalibración periódica balance-sim
+- Pulido continuo de glifos por edificio según feedback
 
 ## Changelog técnico
+### 1.2.1 — Producción visual
+- Arte/mapa por capas: ciudad, niebla, control vivo (vegetación/cultivos/luces), hostil, ataque
+- Núcleo con edificios reconocibles en el mapa; tiers visuales Día1 / media / avanzada
+- UI castellano; paneles contextuales plegables (escritorio no come el mundo)
+- Exploradores compactos (no ficha RPG permanente); población colectiva
+- Capturas prod + partida manual; balance-sim adaptado a exploradores
+- Balance orientativo (40 seeds): balanced@60 ≈60% · expansive@60 ≈62% · mismanaged@60 ≈30% · victoryTest OK
+- Cache assets `?v=12`
+
 ### 1.2.0-arch
-- Población colectiva + exploradores; save v4
-- UX mundo continuo (play.php / world.css / main.js)
-- GAME_MASTER actualizado (sección 5/10/20/21)
-- Muestra artística en docs/art-direction (parada de aprobación)
+- Población colectiva + exploradores; save v4; muestra art-direction
 
 ### 1.1.0 — Game Experience
 - Mapa ciudad, base terreno, sonido, onboarding, cards, etc.
