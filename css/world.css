@@ -7,6 +7,19 @@
   background: #0a0908;
 }
 
+/* Llegada desde mini-intro ZZ-008 */
+body.zz-from-intro .zz-world--overlay {
+  opacity: 0;
+}
+body.zz-from-intro-in .zz-world--overlay {
+  opacity: 1;
+  transition: opacity 0.75s ease;
+}
+body.zz-from-intro #zz-boot {
+  background: #080705;
+  color: transparent;
+}
+
 .zz-world--overlay {
   position: relative;
   width: 100%;

@@ -1,5 +1,5 @@
 /**
- * ZZ-008 — secuencia Nueva partida → confirmación → intro → D1.
+ * ZZ-008 R2 — intro con arte + composiciones distintas → D1.
  * Requiere: npx --yes serve -l 8765 .
  * Uso: node scripts/review-shots-zz008.mjs
  */
@@ -28,7 +28,7 @@ const gallery = [];
 const addShot = (file, title, note) => gallery.push({ file, title, note });
 
 async function shot(page, file, title, note) {
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(500);
   await page.screenshot({ path: join(out, file), fullPage: false });
   addShot(file, title, note);
 }
@@ -45,9 +45,19 @@ async function openHub(page, mode) {
   await page.waitForTimeout(350);
 }
 
-async function waitCine(page) {
+async function waitCine(page, layout) {
   await page.waitForSelector('#zz-cine.is-open', { timeout: 10000 });
-  await page.waitForTimeout(200);
+  if (layout) {
+    await page.waitForSelector(`#zz-cine.zz-cine--${layout}`, { timeout: 5000 });
+  }
+  await page.waitForFunction(() => {
+    const art = document.getElementById('zz-cine-art');
+    if (!art) return true;
+    const bg = getComputedStyle(art).backgroundImage;
+    if (!bg || bg === 'none') return true;
+    return art.classList.contains('is-kenburns');
+  });
+  await page.waitForTimeout(400);
 }
 
 async function clickNewGame(page) {
@@ -55,9 +65,9 @@ async function clickNewGame(page) {
   await waitCine(page);
 }
 
-async function clickCinePrimary(page) {
-  await page.locator('#zz-cine-actions .zz-btn--primary').click();
-  await page.waitForTimeout(350);
+async function advanceIntro(page) {
+  await page.locator('#zz-cine-next').click({ force: true });
+  await page.waitForTimeout(450);
 }
 
 async function waitDay1(page) {
@@ -65,12 +75,11 @@ async function waitDay1(page) {
   const err = await page.evaluate(() => window.__zzErr || null);
   if (err) throw new Error(err);
   await page.waitForSelector('#zz-app:not([hidden])', { timeout: 15000 });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(900);
 }
 
 const browser = await chromium.launch({ headless: true });
 
-// —— MÓVIL: secuencia completa (con partida → confirmación) ——
 {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -82,46 +91,46 @@ const browser = await chromium.launch({ headless: true });
   const page = await context.newPage();
 
   await openHub(page, 'continue');
-  await shot(page, '01-mobile-portada.png', '01 · Móvil portada', 'Con partida · Continuar + Nueva');
+  await shot(page, '01-mobile-portada.png', '01 · Móvil portada', 'Con partida');
 
   await clickNewGame(page);
-  await shot(page, '02-mobile-confirm.png', '02 · Móvil confirmación', 'Sobrescribir partida existente');
+  await waitCine(page, 'confirm');
+  await shot(page, '02-mobile-confirm.png', '02 · Móvil confirmación', 'Sobrescribir colonia');
 
-  await clickCinePrimary(page); // Empezar de nuevo → intro 1
-  await waitCine(page);
-  await shot(page, '03-mobile-intro-1.png', '03 · Móvil intro 1', 'Contexto / colapso');
+  await page.locator('#zz-cine-actions .zz-btn--primary').click();
+  await waitCine(page, 'collapse');
+  await shot(page, '03-mobile-intro-1.png', '03 · Móvil intro 1', 'Colapso · arte');
 
-  await clickCinePrimary(page);
-  await waitCine(page);
-  await shot(page, '04-mobile-intro-2.png', '04 · Móvil intro 2', 'La colonia');
+  await advanceIntro(page);
+  await waitCine(page, 'refuge');
+  await shot(page, '04-mobile-intro-2.png', '04 · Móvil intro 2', 'Refugio · supervivientes');
 
-  await clickCinePrimary(page);
-  await waitCine(page);
-  await shot(page, '05-mobile-intro-3.png', '05 · Móvil intro 3', 'Objetivo · Entrar al Día 1');
+  await advanceIntro(page);
+  await waitCine(page, 'mission');
+  await shot(page, '05-mobile-intro-3.png', '05 · Móvil intro 3', 'Misión · Entrar en Zona Zero');
+  await shot(page, '05b-mobile-pre-d1.png', '05b · Móvil pre-D1', 'Puente visual a la colonia');
 
   await Promise.all([
     page.waitForURL(/\/dev\/harness/, { timeout: 30000 }),
-    clickCinePrimary(page),
+    page.locator('#zz-cine-next').click(),
   ]);
   await waitDay1(page);
-  await shot(page, '06-mobile-d1.png', '06 · Móvil Día 1', 'Entrada tras intro');
+  await shot(page, '06-mobile-d1.png', '06 · Móvil Día 1', 'Tras fade desde intro');
 
-  // Skip intro (hub vacío)
   await openHub(page, 'empty');
   await clickNewGame(page);
-  await waitCine(page);
-  await shot(page, '11-mobile-skip-ready.png', '11 · Móvil skip disponible', 'Saltar intro visible');
+  await waitCine(page, 'collapse');
+  await shot(page, '11-mobile-skip.png', '11 · Móvil Saltar', 'Skip discreto');
   await Promise.all([
     page.waitForURL(/\/dev\/harness/, { timeout: 30000 }),
     page.locator('#zz-cine-skip').click(),
   ]);
   await waitDay1(page);
-  await shot(page, '12-mobile-skip-d1.png', '12 · Móvil D1 tras skip', 'Salto directo al Día 1');
+  await shot(page, '12-mobile-skip-d1.png', '12 · Móvil D1 tras skip', 'Entrada directa');
 
   await context.close();
 }
 
-// —— DESKTOP ——
 {
   const context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
@@ -131,30 +140,29 @@ const browser = await chromium.launch({ headless: true });
   const page = await context.newPage();
 
   await openHub(page, 'empty');
-  await shot(page, '07-desktop-portada.png', '07 · Desktop portada', 'Sin partida · Nueva');
-
   await clickNewGame(page);
-  await waitCine(page);
-  await shot(page, '08-desktop-intro-1.png', '08 · Desktop intro 1', 'Contexto');
+  await waitCine(page, 'collapse');
+  await shot(page, '07-desktop-intro-1.png', '07 · Desktop intro 1', 'Colapso');
 
-  await clickCinePrimary(page);
-  await waitCine(page);
-  await shot(page, '09-desktop-intro-2.png', '09 · Desktop intro 2', 'Colonia');
+  await advanceIntro(page);
+  await waitCine(page, 'refuge');
+  await shot(page, '08-desktop-intro-2.png', '08 · Desktop intro 2', 'Refugio');
 
-  await clickCinePrimary(page); // intro 3
-  await waitCine(page);
+  await advanceIntro(page);
+  await waitCine(page, 'mission');
+  await shot(page, '09-desktop-intro-3.png', '09 · Desktop intro 3', 'Misión + CTA');
+
   await Promise.all([
     page.waitForURL(/\/dev\/harness/, { timeout: 30000 }),
-    clickCinePrimary(page),
+    page.locator('#zz-cine-next').click(),
   ]);
   await waitDay1(page);
-  await shot(page, '10-desktop-d1.png', '10 · Desktop Día 1', 'Entrada tras intro');
+  await shot(page, '10-desktop-d1.png', '10 · Desktop Día 1', 'Continuidad visual');
 
-  // Confirm overwrite desktop
   await openHub(page, 'continue');
   await clickNewGame(page);
-  await waitCine(page);
-  await shot(page, '13-desktop-confirm.png', '13 · Desktop confirmación', 'Sustituir colonia');
+  await waitCine(page, 'confirm');
+  await shot(page, '13-desktop-confirm.png', '13 · Desktop confirmación', 'Overwrite');
 
   await context.close();
 }
@@ -166,7 +174,7 @@ const index = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Zona Zero — Review ZZ-008</title>
+<title>Zona Zero — Review ZZ-008 R2</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#12100e;color:#e8e0d4}
 header{padding:1.2rem 1.5rem;border-bottom:1px solid #2a2620}
@@ -180,8 +188,8 @@ figcaption{padding:.75rem 1rem;font-size:.9rem}
 </head>
 <body>
 <header>
-  <h1>Zona Zero — Review ZZ-008 Intro</h1>
-  <p>HUMAN_GATE · Confirmación + mini-intro → Día 1 · GAME_MASTER 2.6 §31.6</p>
+  <h1>Zona Zero — Review ZZ-008 R2 Intro</h1>
+  <p>HUMAN_GATE · Arte propio + composiciones · GAME_MASTER 2.6 §31.6</p>
 </header>
 <div class="grid">
 ${gallery
@@ -198,7 +206,7 @@ writeFileSync(join(out, 'index.html'), index);
 const contact = join(out, 'review-contact-sheet.jpg');
 {
   const b2 = await chromium.launch({ headless: true });
-  const p = await b2.newPage({ viewport: { width: 1800, height: 2200 } });
+  const p = await b2.newPage({ viewport: { width: 1800, height: 2400 } });
   const cards = gallery
     .map((g) => {
       const buf = readFileSync(join(out, g.file));
@@ -218,7 +226,7 @@ figcaption{padding:.45rem .6rem;font-size:.75rem}
 figcaption strong{display:block}
 figcaption span{opacity:.65;font-size:.68rem}
 </style></head><body>
-<header><h1>ZZ-008 — Confirmación + mini-intro → Día 1</h1>
+<header><h1>ZZ-008 R2 — Intro cinemática → Día 1</h1>
 <p>HUMAN_GATE · PENDIENTE DE REVISIÓN · GAME_MASTER 2.6 §31.6</p></header>
 <div class="grid">${cards}</div></body></html>`);
   await p.waitForTimeout(600);
@@ -239,7 +247,5 @@ for (const f of readdirSync(drive)) {
   }
 }
 
-console.log('ZZ-008 review shots OK →', out);
-console.log('Contact sheet →', contact);
-console.log('Drive copy →', drive);
+console.log('ZZ-008 R2 review shots OK →', out);
 gallery.forEach((g) => console.log(' -', g.file));

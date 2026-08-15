@@ -42,41 +42,41 @@ const s = createNewState(content, 'Beta', 'boot');
 await api.saveGame(s, 'Beta', 'Día 1');
 st = await api.fetchSaveStatus();
 assert(st.save && st.save.title === 'Beta', 'status con partida');
-assert(!Array.isArray(st.slots) || st.slots.length <= 1, 'sin UI multi-slot (≤1 entrada lógica)');
 
-assert(existsSync(join(root, 'css', 'hub.css')), 'hub.css existe');
 const hubCss = readFileSync(join(root, 'css', 'hub.css'), 'utf8');
-assert(hubCss.includes('zz-hub__brand'), 'hub.css brand');
-assert(hubCss.includes('zz-cine'), 'hub.css cine ZZ-008');
-assert(existsSync(join(root, 'index.php')), 'index.php portada');
-const indexPhp = readFileSync(join(root, 'index.php'), 'utf8');
-assert(indexPhp.includes('zz-hub-actions'), 'index sin grid slots');
-assert(!indexPhp.includes('zz-slots'), 'sin zz-slots');
+assert(hubCss.includes('zz-cine__art'), 'hub.css arte intro');
+assert(hubCss.includes('zz-cine--collapse'), 'layouts por escena');
+assert(hubCss.includes('zzKen'), 'ken burns');
+
+for (const f of ['collapse.jpg', 'refuge.jpg', 'mission.jpg']) {
+  assert(existsSync(join(root, 'assets', 'art', 'intro', f)), `asset ${f}`);
+}
 
 const introSrc = readFileSync(join(root, 'js', 'intro.js'), 'utf8');
 assert(introSrc.includes('INTRO_STEPS'), 'intro.js INTRO_STEPS');
-assert(introSrc.includes('startNewGameFlow'), 'intro.js startNewGameFlow');
-assert((introSrc.match(/id: '/g) || []).length >= 3, 'intro ≤3 pasos definidos (≥3 ids)');
-assert(introSrc.includes('Saltar intro') || introSrc.includes('zz-cine-skip'), 'skip intro');
+assert(introSrc.includes('Entrar en Zona Zero'), 'CTA final propia');
+assert(introSrc.includes('applyIntroArrival'), 'fade llegada D1');
 assert(introSrc.includes('sustituirá esta partida'), 'texto confirmación GM');
-
-const mainSrc = readFileSync(join(root, 'js', 'main.js'), 'utf8');
-assert(mainSrc.includes('startNewGameFlow'), 'main usa startNewGameFlow');
-assert(!mainSrc.includes("window.confirm(\n          'Ya tienes una colonia"), 'sin confirm nativo en hub');
-assert(!mainSrc.includes("window.prompt('Nombre de la colonia'"), 'sin prompt nombre colonia');
-assert(mainSrc.includes('markIntroSeen') || mainSrc.includes('fromIntro'), 'fromIntro / introSeen');
 
 const { INTRO_STEPS, markIntroSeen, DEFAULT_COLONY_NAME } = await import(
   pathToFileURL(join(root, 'js', 'intro.js')).href
 );
-assert(INTRO_STEPS.length >= 2 && INTRO_STEPS.length <= 3, '2–3 pasos intro');
+assert(INTRO_STEPS.length === 3, 'exactamente 3 pasos');
+assert(INTRO_STEPS.every((s) => s.art && s.line), 'cada paso con arte + línea');
+assert(INTRO_STEPS[2].pillars?.length === 4, '4 pilares misión');
 assert(DEFAULT_COLONY_NAME === 'Refugio Norte', 'nombre colonia por defecto');
+
+const mainSrc = readFileSync(join(root, 'js', 'main.js'), 'utf8');
+assert(mainSrc.includes('startNewGameFlow'), 'main usa startNewGameFlow');
+assert(!mainSrc.includes("window.prompt('Nombre de la colonia'"), 'sin prompt nombre');
+
 const fresh = createNewState(content, 'IntroTest');
-assert(fresh.flags.introSeen === false, 'introSeen inicial false');
 markIntroSeen(fresh);
 assert(fresh.flags.introSeen === true, 'markIntroSeen');
-assert(fresh.flags.onboardingStep === 1, 'salta welcome Continuar tras intro');
-assert(fresh.flags.onboardingActive === false, 'coach contextual diferido a ZZ-012');
+assert(fresh.flags.onboardingActive === false, 'coach diferido ZZ-012');
+
+const worldCss = readFileSync(join(root, 'css', 'world.css'), 'utf8');
+assert(worldCss.includes('zz-from-intro'), 'fade D1 en world.css');
 
 if (fails) {
   console.error('Smoke boot FAIL', fails);

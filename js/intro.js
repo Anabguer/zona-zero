@@ -1,31 +1,36 @@
 /**
- * ZZ-008 — Confirmación Nueva partida + mini-intro cinemática (≤3 pasos).
- * Pantallas full-bleed: no modales de formulario, no prompt/confirm nativos.
+ * ZZ-008 — Confirmación + mini-intro (3 momentos con arte e identidad propia).
  */
 
 export const DEFAULT_COLONY_NAME = 'Refugio Norte';
 
+/** @type {Array<{id:string,layout:string,art:string,line:string,sub?:string,pillars?:string[],cta:string,ctaClass?:string}>} */
 export const INTRO_STEPS = [
   {
-    id: 'aftermath',
-    motif: 'ash',
-    kicker: 'El colapso',
-    title: 'El mundo se quedó en silencio',
-    body: 'Algo rompió la ciudad. Quedan ruinas, escasez… y quienes todavía resisten.',
+    id: 'collapse',
+    layout: 'collapse',
+    art: 'collapse.jpg',
+    line: 'La ciudad se apagó.',
+    cta: '›',
+    ctaClass: 'zz-cine__tap',
   },
   {
-    id: 'colony',
-    motif: 'colony',
-    kicker: 'La colonia',
-    title: 'Este es vuestro refugio',
-    body: 'Un puñado de supervivientes. Dependen de vosotros para no caer.',
+    id: 'refuge',
+    layout: 'refuge',
+    art: 'refuge.jpg',
+    line: 'Esto es lo poco que tenemos.',
+    sub: 'Un refugio. Un puñado de supervivientes.',
+    cta: '›',
+    ctaClass: 'zz-cine__tap',
   },
   {
-    id: 'purpose',
-    motif: 'horizon',
-    kicker: 'La misión',
-    title: 'Sobrevivir no basta',
-    body: 'Estabilizad el refugio. Explorad lo que queda. Recuperad territorio, paso a paso.',
+    id: 'mission',
+    layout: 'mission',
+    art: 'mission.jpg',
+    line: 'Zona Zero',
+    pillars: ['Sobrevive', 'Estabiliza', 'Explora', 'Recupera'],
+    cta: 'Entrar en Zona Zero',
+    ctaClass: 'zz-cine__enter',
   },
 ];
 
@@ -35,12 +40,14 @@ export const INTRO_STEPS = [
  *   hasSave?: boolean,
  *   playUrl?: string,
  *   colonyName?: string,
+ *   assetBase?: string,
  *   onEnterDay1?: (url: string) => void,
  * }} opts
  */
 export function startNewGameFlow(root, opts = {}) {
   const playUrl = opts.playUrl || 'play.php';
   const colonyName = opts.colonyName || DEFAULT_COLONY_NAME;
+  const assetBase = opts.assetBase || 'assets/art/intro/';
   const navigate =
     opts.onEnterDay1 ||
     ((url) => {
@@ -55,7 +62,6 @@ export function startNewGameFlow(root, opts = {}) {
     });
     if (opts.hasSave) q.set('clear', '1');
     const base = playUrl.split(/[?#]/)[0];
-    // serve estático reescribe .html y pierde ?query — hash sí sobrevive
     if (/harness/i.test(base)) {
       return `${base}#${q.toString()}`;
     }
@@ -64,16 +70,27 @@ export function startNewGameFlow(root, opts = {}) {
   }
 
   function enterDay1() {
-    navigate(day1Url());
+    const el = root.querySelector('#zz-cine');
+    try {
+      sessionStorage.setItem('zzFromIntro', '1');
+    } catch {
+      /* ignore */
+    }
+    if (el) {
+      el.classList.add('is-exit');
+      setTimeout(() => navigate(day1Url()), 520);
+    } else {
+      navigate(day1Url());
+    }
   }
 
   if (opts.hasSave) {
     showConfirm(root, {
       onCancel: () => hideCine(root),
-      onConfirm: () => showIntro(root, 0, enterDay1),
+      onConfirm: () => showIntro(root, 0, enterDay1, assetBase),
     });
   } else {
-    showIntro(root, 0, enterDay1);
+    showIntro(root, 0, enterDay1, assetBase);
   }
 }
 
@@ -87,14 +104,13 @@ function ensureShell(root) {
   el.setAttribute('role', 'dialog');
   el.setAttribute('aria-modal', 'true');
   el.innerHTML = `
-    <div class="zz-cine__veil" aria-hidden="true"></div>
-    <div class="zz-cine__motif" data-motif="ash" aria-hidden="true"></div>
-    <button type="button" class="zz-cine__skip" id="zz-cine-skip" hidden>Saltar intro</button>
-    <div class="zz-cine__stage">
-      <p class="zz-cine__kicker" id="zz-cine-kicker"></p>
-      <h2 class="zz-cine__title" id="zz-cine-title"></h2>
-      <p class="zz-cine__body" id="zz-cine-body"></p>
-      <div class="zz-cine__dots" id="zz-cine-dots" hidden></div>
+    <div class="zz-cine__art" id="zz-cine-art" aria-hidden="true"></div>
+    <div class="zz-cine__scrim" aria-hidden="true"></div>
+    <button type="button" class="zz-cine__skip" id="zz-cine-skip" hidden>Saltar</button>
+    <div class="zz-cine__frame" id="zz-cine-frame">
+      <p class="zz-cine__line" id="zz-cine-line"></p>
+      <p class="zz-cine__sub" id="zz-cine-sub" hidden></p>
+      <ul class="zz-cine__pillars" id="zz-cine-pillars" hidden></ul>
       <div class="zz-cine__actions" id="zz-cine-actions"></div>
     </div>
   `;
@@ -106,7 +122,8 @@ function hideCine(root) {
   const el = root.querySelector('#zz-cine');
   if (el) {
     el.hidden = true;
-    el.classList.remove('is-open');
+    el.classList.remove('is-open', 'is-exit', 'zz-cine--confirm');
+    el.classList.remove('zz-cine--collapse', 'zz-cine--refuge', 'zz-cine--mission');
   }
   document.body.classList.remove('zz-cine-open');
 }
@@ -114,6 +131,7 @@ function hideCine(root) {
 function openCine(root) {
   const el = ensureShell(root);
   el.hidden = false;
+  el.classList.remove('is-exit');
   requestAnimationFrame(() => el.classList.add('is-open'));
   document.body.classList.add('zz-cine-open');
   return el;
@@ -121,16 +139,37 @@ function openCine(root) {
 
 function showConfirm(root, { onCancel, onConfirm }) {
   const el = openCine(root);
-  const motif = el.querySelector('.zz-cine__motif');
-  if (motif) motif.dataset.motif = 'warn';
+  el.classList.add('zz-cine--confirm');
+  el.classList.remove('zz-cine--collapse', 'zz-cine--refuge', 'zz-cine--mission');
+  const art = el.querySelector('#zz-cine-art');
+  if (art) {
+    art.style.backgroundImage = '';
+    art.classList.remove('is-kenburns');
+  }
   const skip = el.querySelector('#zz-cine-skip');
   if (skip) skip.hidden = true;
-  const dots = el.querySelector('#zz-cine-dots');
-  if (dots) dots.hidden = true;
-  el.querySelector('#zz-cine-kicker').textContent = 'Nueva partida';
-  el.querySelector('#zz-cine-title').textContent = '¿Empezar de nuevo?';
-  el.querySelector('#zz-cine-body').textContent =
+  const pillars = el.querySelector('#zz-cine-pillars');
+  if (pillars) {
+    pillars.hidden = true;
+    pillars.innerHTML = '';
+  }
+  const sub = el.querySelector('#zz-cine-sub');
+  if (sub) {
+    sub.hidden = true;
+    sub.textContent = '';
+  }
+  el.querySelector('#zz-cine-line').textContent = '¿Empezar de nuevo?';
+  const frame = el.querySelector('#zz-cine-frame');
+  let warn = frame.querySelector('.zz-cine__warn');
+  if (!warn) {
+    warn = document.createElement('p');
+    warn.className = 'zz-cine__warn';
+    frame.insertBefore(warn, el.querySelector('#zz-cine-actions'));
+  }
+  warn.hidden = false;
+  warn.textContent =
     'Ya tienes una colonia en curso. Empezar de nuevo sustituirá esta partida.';
+
   const actions = el.querySelector('#zz-cine-actions');
   actions.innerHTML = '';
   const cancel = document.createElement('button');
@@ -146,7 +185,7 @@ function showConfirm(root, { onCancel, onConfirm }) {
   actions.append(cancel, ok);
 }
 
-function showIntro(root, index, onDone) {
+function showIntro(root, index, onDone, assetBase) {
   const steps = INTRO_STEPS;
   const step = steps[index];
   if (!step) {
@@ -154,51 +193,102 @@ function showIntro(root, index, onDone) {
     return;
   }
   const el = openCine(root);
-  const motif = el.querySelector('.zz-cine__motif');
-  if (motif) motif.dataset.motif = step.motif;
+  el.classList.remove('zz-cine--confirm', 'zz-cine--collapse', 'zz-cine--refuge', 'zz-cine--mission');
+  el.classList.add(`zz-cine--${step.layout}`);
+
+  const art = el.querySelector('#zz-cine-art');
+  if (art) {
+    const url = `${assetBase.replace(/\/?$/, '/')}${step.art}`;
+    art.style.backgroundImage = `url("${url}")`;
+    art.classList.remove('is-kenburns');
+    void art.offsetWidth;
+    art.classList.add('is-kenburns');
+  }
+
   const skip = el.querySelector('#zz-cine-skip');
   if (skip) {
     skip.hidden = false;
-    skip.onclick = () => onDone();
+    skip.onclick = (e) => {
+      e.stopPropagation();
+      onDone();
+    };
   }
-  const stage = el.querySelector('.zz-cine__stage');
-  stage.classList.remove('zz-cine__stage--in');
-  void stage.offsetWidth;
-  stage.classList.add('zz-cine__stage--in');
 
-  el.querySelector('#zz-cine-kicker').textContent = step.kicker;
-  el.querySelector('#zz-cine-title').textContent = step.title;
-  el.querySelector('#zz-cine-body').textContent = step.body;
+  const warn = el.querySelector('.zz-cine__warn');
+  if (warn) warn.hidden = true;
 
-  const dots = el.querySelector('#zz-cine-dots');
-  dots.hidden = false;
-  dots.innerHTML = steps
-    .map(
-      (_, i) =>
-        `<span class="zz-cine__dot${i === index ? ' is-on' : ''}" aria-hidden="true"></span>`
-    )
-    .join('');
+  const frame = el.querySelector('#zz-cine-frame');
+  frame.classList.remove('zz-cine__frame--in');
+  void frame.offsetWidth;
+  frame.classList.add('zz-cine__frame--in');
+
+  el.querySelector('#zz-cine-line').textContent = step.line || '';
+
+  const sub = el.querySelector('#zz-cine-sub');
+  if (step.sub) {
+    sub.hidden = false;
+    sub.textContent = step.sub;
+  } else {
+    sub.hidden = true;
+    sub.textContent = '';
+  }
+
+  const pillars = el.querySelector('#zz-cine-pillars');
+  if (step.pillars?.length) {
+    pillars.hidden = false;
+    pillars.innerHTML = step.pillars.map((p) => `<li>${p}</li>`).join('');
+  } else {
+    pillars.hidden = true;
+    pillars.innerHTML = '';
+  }
 
   const actions = el.querySelector('#zz-cine-actions');
   actions.innerHTML = '';
   const next = document.createElement('button');
   next.type = 'button';
-  next.className = 'zz-btn zz-btn--primary zz-cine__btn zz-cine__btn--hero';
-  const last = index >= steps.length - 1;
-  next.textContent = last ? 'Entrar al Día 1' : 'Seguir';
-  next.addEventListener('click', () => {
-    if (last) onDone();
-    else showIntro(root, index + 1, onDone);
+  next.id = 'zz-cine-next';
+  next.className = `zz-cine__next ${step.ctaClass || ''}`.trim();
+  next.textContent = step.cta;
+  next.setAttribute('aria-label', index >= steps.length - 1 ? 'Entrar en Zona Zero' : 'Siguiente');
+  const go = () => {
+    if (index >= steps.length - 1) onDone();
+    else showIntro(root, index + 1, onDone, assetBase);
+  };
+  next.addEventListener('click', (e) => {
+    e.stopPropagation();
+    go();
   });
   actions.appendChild(next);
+
+  // Escenas 1–2: tocar la imagen también avanza (ritmo de apertura)
+  el.onclick = (e) => {
+    if (index >= steps.length - 1) return;
+    if (e.target.closest('#zz-cine-skip, #zz-cine-next, .zz-cine__btn')) return;
+    go();
+  };
 }
 
 export function markIntroSeen(state) {
   if (!state.flags) state.flags = {};
   state.flags.introSeen = true;
-  // Evita cascada «Continuar» de bienvenida. El tutorial contextual es ZZ-012.
   if (state.flags.onboardingStep == null || state.flags.onboardingStep === 0) {
     state.flags.onboardingStep = 1;
   }
   state.flags.onboardingActive = false;
+}
+
+/** Fade-in del mundo tras la intro (play / harness). */
+export function applyIntroArrival() {
+  let from = false;
+  try {
+    from = sessionStorage.getItem('zzFromIntro') === '1';
+    sessionStorage.removeItem('zzFromIntro');
+  } catch {
+    /* ignore */
+  }
+  if (!from) return;
+  document.body.classList.add('zz-from-intro');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => document.body.classList.add('zz-from-intro-in'));
+  });
 }

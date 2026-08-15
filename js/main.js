@@ -34,7 +34,7 @@ import {
   recruitExplorer,
   explorerSlotsUnlocked,
 } from './explorers.js';
-import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME } from './intro.js';
+import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
 import { workforce } from './population.js';
 import {
   currentObjective,
@@ -1407,6 +1407,9 @@ export async function bootGame(opts) {
   paint();
   if (app) app.hidden = false;
   if (boot) boot.hidden = true;
+  if (opts.fromIntro) {
+    applyIntroArrival();
+  }
 
   window.__zz = {
     getState: () => state,
@@ -1476,6 +1479,7 @@ export async function bootHub(opts = {}) {
         hasSave,
         playUrl,
         colonyName: DEFAULT_COLONY_NAME,
+        assetBase: opts.assetBase || 'assets/art/intro/',
       });
 
     actions.innerHTML = '';

@@ -758,14 +758,10 @@ Portada no gana elementos nuevos.
 - `node scripts/smoke-save.mjs` OK
 
 ## CAPTURAS
-`docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\`:
-01–06 móvil (portada→confirm→intro×3→D1), 07–10 desktop, 11–12 skip, 13 confirm desktop, `review-contact-sheet.jpg`, `index.html`.
+`docs/review/` + Drive (RONDA 2): portada, confirm, intro×3, pre-D1, D1, skip, desktop intro×3+D1, confirm desktop, contact sheet.
 
-## CURSOR — REVISIÓN VISUAL ZZ-008 (autocrítica)
-
-**¿Parece el comienzo de un videojuego terminado o una sucesión de modales de una web?**
-
-Tras corrección: **comienzo de videojuego**. Primera versión dejaba la portada (CTAs/brand) transparentes detrás → aspecto overlay web; se ocultó el hero y se cerró el velo a escena full-bleed. Confirmación e intro son pantallas de atmósfera con tipografía corta, dots y un CTA; D1 entra limpio sin cascada Continuar.
+## CURSOR — REVISIÓN VISUAL ZZ-008 (autocrítica R1)
+Tras R1: velo opaco; aún demasiado «slide» (texto+CTA uniforme). Corregido en RONDA 2 (ver respuesta abajo).
 
 ## PROBLEMAS / LIMITACIONES
 - Tutorial contextual en mundo = ZZ-012 (no en estas pantallas).
@@ -775,10 +771,11 @@ Tras corrección: **comienzo de videojuego**. Primera versión dejaba la portada
 COMPLETADA
 
 ## COMMIT
-`8110b34` � feat(ZZ-008) intro + cierre ZZ-007
+`8110b34` — feat(ZZ-008) intro + cierre ZZ-007 · R2 pendiente registrar
 
 ## REVISIÓN CHATGPT
-Pendiente — HUMAN_GATE.
+**RONDA 1:** CAMBIOS SOLICITADOS · APROBACIÓN FINAL NO.  
+Estructura funcional OK; presentación intro = slides (fondo + texto + Continuar). Pedido: 3 momentos con arte/identidad, menos texto, CTA propia, puente a D1.
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
@@ -786,7 +783,33 @@ PENDIENTE DE REVISIÓN
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-**PARADO en ZZ-008.** No ZZ-012+ sin APROBADA + SÍ. No deploy.
+## CORRECCIONES SOLICITADAS
+Ver feedback HUMAN_GATE R1 (presentación intro, no rehacer portada/ZZ-010/ZZ-012).
+
+## RESPUESTA CURSOR A LA REVISIÓN — RONDA 2
+
+### Cambios
+- Arte propio `assets/art/intro/{collapse,refuge,mission}.jpg` (paleta ZZ, 3 composiciones distintas).
+- Layouts distintos: colapso (texto lateral / imagen dominante), refugio (íntimo fuego + línea), misión (colonia isométrica + 4 pilares + **Entrar en Zona Zero**).
+- Menos texto; skip «Saltar» discreto; tap/`›` en 1–2 (no botón Continuar).
+- Fade-out intro → fade-in D1 (`zz-from-intro`).
+- Confirmación overwrite intacta.
+
+### Autocrítica obligatoria
+**Si quitara los botones, ¿estas tres capturas parecerían tres momentos de una introducción de videojuego o tres slides de una web?**
+
+**Momentos de videojuego.** Cada una es un encuadre distinto (carretera/ruinas → fuego/supervivientes → colonia que vas a controlar). Sin botones siguen leyéndose como beats de apertura; la 3ª ya enseña el tipo de mundo del D1.
+
+### Evidencias
+Review regenerada + Drive. Smoke boot/d1 OK.
+
+## COMMIT
+(pendiente en este cierre R2)
+
+## ESTADO CURSOR
+COMPLETADA
+
+**PARADO en ZZ-008.** No ZZ-012+ · no deploy.
 
 ---
 
@@ -798,7 +821,7 @@ Incorporada a GAME_MASTER **2.6** + IMPLEMENTATION_PLAN **2.6**.
 | Tema | Dónde en GM | Fases PLAN |
 |------|-------------|------------|
 | Portada Continuar/Nueva | §31.5 | ZZ-007 (GATE) — **APROBADA** |
-| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) — **en revisión** |
+| Intro + confirm overwrite | §31.6 | ZZ-008 (GATE) — **RONDA 2 en revisión** |
 | Tutorial contextual | §31.4 | ZZ-012 (ampliada) |
 | Ayuda consultable | §21.3 | ZZ-152 (ampliada) |
 | Save 1+autosave+backup | §31.7 + Ap. E | ZZ-009 (hecha), ZZ-180 |
