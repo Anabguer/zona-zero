@@ -1,8 +1,11 @@
 # ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
-**Versión de diseño:** 2.0 · **Contrato funcional**  
+**Versión de diseño:** 2.1 · **Contrato funcional / BIBLIA COMPLETA**  
 **Estado:** Diseño integral — **sin implementación autorizada** hasta revisión humana  
 **Fecha:** 2026-08-15  
+**Copia de trabajo Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md`  
+**Copia repo:** `GAME_MASTER.md` (idénticas)  
+**Plan técnico Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` · **Repo:** `docs/IMPLEMENTATION_PLAN.md`  
 **Plataforma:** Web responsive (móvil + escritorio) · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
 **URL objetivo:** `/juegos/zona-zero/`
@@ -1031,6 +1034,870 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
 
 ---
 
+
+---
+
+# APÉNDICE G — INVENTARIO EXHAUSTIVO DEL MOTOR ACTUAL (content/*.json)
+
+> Auditoría factual del prototipo. **No sacraliza** el diseño 2.1: donde contradiga este documento, gana el diseño 2.1.
+> Fecha de dump: 2026-08-15.
+
+## G.1 Edificios presentes en código (32)
+
+### `hq_central_l1` — Refugio Central I
+- **Categoría:** core
+- **Descripción:** Núcleo del asentamiento. Vivienda básica y centro de mando.
+- **Coste:** wood: 0, metal: 0
+- **Tamaño:** 2×2 · **max:** 1
+- **Jobs:** 1 · **Housing:** 6 · **Defense:** 4
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `hq_central_l2` — Refugio Central II
+- **Categoría:** core
+- **Descripción:** Ampliación del núcleo: más camas, mejor coordinación y defensa.
+- **Coste:** wood: 18, metal: 12, fuel: 2
+- **Tamaño:** 2×2 · **max:** 1
+- **Jobs:** 2 · **Housing:** 10 · **Defense:** 8
+- **minEra:** 1
+- **upgradeFrom:** `hq_central_l1`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `hq_central_l3` — Refugio Central III
+- **Categoría:** core
+- **Descripción:** Cuartel general fortificado. Máxima capacidad de mando y vivienda.
+- **Coste:** wood: 28, metal: 22, fuel: 4, ammo: 2
+- **Tamaño:** 2×2 · **max:** 1
+- **Jobs:** 3 · **Housing:** 16 · **Defense:** 14
+- **minEra:** 2
+- **upgradeFrom:** `hq_central_l2`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `shelter` — Refugio
+- **Categoría:** housing
+- **Descripción:** Camas y techo improvisado. +2 capacidad.
+- **Coste:** wood: 5, metal: 2
+- **Tamaño:** 1×1 · **max:** 40
+- **Jobs:** 0 · **Housing:** 2 · **Defense:** 0
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `house` — Casa
+- **Categoría:** housing
+- **Descripción:** Vivienda reforzada con más camas y algo de privacidad.
+- **Coste:** wood: 10, metal: 4
+- **Tamaño:** 1×1 · **max:** 20
+- **Jobs:** 0 · **Housing:** 4 · **Defense:** 0
+- **minEra:** 0
+- **requiresBuilding:** `shelter`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `block` — Bloque
+- **Categoría:** housing
+- **Descripción:** Edificio de varias plantas. Mucha capacidad en poco suelo.
+- **Coste:** wood: 16, metal: 12, fuel: 1
+- **Tamaño:** 2×1 · **max:** 8
+- **Jobs:** 0 · **Housing:** 8 · **Defense:** 0
+- **minEra:** 1
+- **requiresBuilding:** `house`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `farm` — Huerto
+- **Categoría:** production
+- **Descripción:** Cultivos a cielo abierto. Produce comida con personal.
+- **Coste:** wood: 4, water: 2
+- **Tamaño:** 1×1 · **max:** 12
+- **Jobs:** 3 · **Housing:** 0 · **Defense:** 0
+- **Produce:** food: 5
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `greenhouse` — Invernadero
+- **Categoría:** production
+- **Descripción:** Cultivo protegido. Más rendimiento y menos mermas.
+- **Coste:** wood: 8, metal: 4, water: 3
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** food: 8
+- **minEra:** 1
+- **requiresBuilding:** `farm`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `well` — Pozo
+- **Categoría:** production
+- **Descripción:** Extrae agua potable cada día.
+- **Coste:** metal: 5, wood: 2
+- **Tamaño:** 1×1 · **max:** 8
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** water: 5
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `cistern` — Cisterna
+- **Categoría:** production
+- **Descripción:** Almacena y filtra agua. Mayor caudal con personal.
+- **Coste:** metal: 8, wood: 3
+- **Tamaño:** 1×1 · **max:** 4
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **Produce:** water: 7
+- **minEra:** 1
+- **requiresBuilding:** `well`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `sawmill` — Aserradero
+- **Categoría:** production
+- **Descripción:** Procesa madera útil a partir de restos y troncos.
+- **Coste:** metal: 4, wood: 3
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** wood: 3
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `scrapyard` — Chatarrería
+- **Categoría:** production
+- **Descripción:** Clasifica chatarra y recupera metal usable.
+- **Coste:** wood: 4, metal: 3
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** metal: 2
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `storage` — Almacén
+- **Categoría:** logistics
+- **Descripción:** Reduce pérdidas por saqueos, humedad y pudrición.
+- **Coste:** wood: 5, metal: 2
+- **Tamaño:** 1×1 · **max:** 4
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `workshop` — Taller
+- **Categoría:** production
+- **Descripción:** Forja y repara piezas. Produce metal refinado.
+- **Coste:** wood: 4, metal: 4
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** metal: 2
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `kitchen` — Cocina
+- **Categoría:** production
+- **Descripción:** Raciona y conserva comida. Mejora el rendimiento alimentario.
+- **Coste:** wood: 5, metal: 3, water: 1
+- **Tamaño:** 1×1 · **max:** 4
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** food: 2
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `mech_shop` — Taller mecánico
+- **Categoría:** production
+- **Descripción:** Mantiene vehículos y herramientas. Produce piezas y metal.
+- **Coste:** wood: 6, metal: 8, fuel: 2
+- **Tamaño:** 2×1 · **max:** 3
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** metal: 3
+- **minEra:** 1
+- **requiresBuilding:** `workshop`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `medkit` — Botiquín
+- **Categoría:** health
+- **Descripción:** Puesto de primeros auxilios. Poca producción, cura básica.
+- **Coste:** wood: 2, metal: 2, medicine: 1
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **Produce:** medicine: 1
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `infirmary` — Enfermería
+- **Categoría:** health
+- **Descripción:** Camas de cura y triaje. Mejora la recuperación de heridos.
+- **Coste:** wood: 6, metal: 4, medicine: 2
+- **Tamaño:** 1×1 · **max:** 4
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** medicine: 1
+- **minEra:** 0
+- **requiresBuilding:** `medkit`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `clinic` — Clínica
+- **Categoría:** health
+- **Descripción:** Centro médico completo. Genera medicinas y cura avanzada.
+- **Coste:** metal: 8, wood: 5, medicine: 3, fuel: 1
+- **Tamaño:** 2×1 · **max:** 2
+- **Jobs:** 3 · **Housing:** 0 · **Defense:** 0
+- **Produce:** medicine: 2
+- **minEra:** 1
+- **requiresBuilding:** `infirmary`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `barricade` — Barricada
+- **Categoría:** defense
+- **Descripción:** Obstáculo improvisado que frena asaltos.
+- **Coste:** wood: 3, metal: 1
+- **Tamaño:** 1×1 · **max:** 20
+- **Jobs:** 0 · **Housing:** 0 · **Defense:** 3
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `fence` — Cerca
+- **Categoría:** defense
+- **Descripción:** Perímetro reforzado. Mejor cobertura que una barricada suelta.
+- **Coste:** wood: 5, metal: 3
+- **Tamaño:** 1×1 · **max:** 12
+- **Jobs:** 0 · **Housing:** 0 · **Defense:** 5
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `watchtower` — Atalaya
+- **Categoría:** defense
+- **Descripción:** Vigilancia elevada. Mejora la defensa del asentamiento.
+- **Coste:** wood: 6, metal: 4, ammo: 1
+- **Tamaño:** 1×1 · **max:** 6
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 8
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `armory` — Armería
+- **Categoría:** defense
+- **Descripción:** Almacén y taller de armas. Mejora el uso de munición.
+- **Coste:** wood: 6, metal: 8, ammo: 2
+- **Tamaño:** 1×1 · **max:** 2
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 6
+- **Produce:** ammo: 1
+- **minEra:** 1
+- **requiresBuilding:** `watchtower`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `bunker` — Búnker
+- **Categoría:** defense
+- **Descripción:** Refugio fortificado. Alta defensa y algo de vivienda de emergencia.
+- **Coste:** wood: 10, metal: 16, ammo: 3, fuel: 2
+- **Tamaño:** 2×1 · **max:** 2
+- **Jobs:** 1 · **Housing:** 2 · **Defense:** 18
+- **minEra:** 2
+- **requiresBuilding:** `armory`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `radio` — Radio
+- **Categoría:** logistics
+- **Descripción:** Escucha señales y contacta supervivientes. Apoyo a exploración.
+- **Coste:** metal: 5, wood: 2, fuel: 1
+- **Tamaño:** 1×1 · **max:** 2
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `expedition_center` — Centro de expediciones
+- **Categoría:** logistics
+- **Descripción:** Planifica salidas: más alcance y mejor organización de escuadras.
+- **Coste:** wood: 8, metal: 6, fuel: 2
+- **Tamaño:** 2×1 · **max:** 1
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **minEra:** 1
+- **requiresBuilding:** `radio`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `garage` — Garaje
+- **Categoría:** logistics
+- **Descripción:** Aparcamiento y mantenimiento ligero. Reduce gasto de combustible en rutas.
+- **Coste:** wood: 6, metal: 8, fuel: 2
+- **Tamaño:** 2×1 · **max:** 2
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **fuelSave:** 1
+- **minEra:** 1
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `command` — Puesto de mando
+- **Categoría:** core
+- **Descripción:** Sala de operaciones. Coordina defensa y expediciones.
+- **Coste:** wood: 8, metal: 10, fuel: 1
+- **Tamaño:** 1×1 · **max:** 1
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 4
+- **minEra:** 1
+- **requiresBuilding:** `hq_central_l1`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `generator` — Generador
+- **Categoría:** energy
+- **Descripción:** Energía diésel. Reduce el consumo diario de combustible neto.
+- **Coste:** metal: 8, fuel: 2
+- **Tamaño:** 1×1 · **max:** 3
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **Energía:** 4
+- **fuelSave:** 1
+- **minEra:** 0
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `solar` — Placas solares
+- **Categoría:** energy
+- **Descripción:** Energía limpia. Menos dependencia del diésel.
+- **Coste:** metal: 10, wood: 2
+- **Tamaño:** 1×1 · **max:** 4
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **Energía:** 3
+- **fuelSave:** 1
+- **minEra:** 1
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `tech_bench` — Banco técnico
+- **Categoría:** research
+- **Descripción:** Banco de prototipos. Desbloquea mejoras y prototipos simples.
+- **Coste:** wood: 4, metal: 6
+- **Tamaño:** 1×1 · **max:** 2
+- **Jobs:** 1 · **Housing:** 0 · **Defense:** 0
+- **minEra:** 1
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+### `lab` — Laboratorio
+- **Categoría:** research
+- **Descripción:** Investigación avanzada: medicinas, filtros y prototipos.
+- **Coste:** wood: 6, metal: 10, medicine: 2, fuel: 1
+- **Tamaño:** 2×1 · **max:** 1
+- **Jobs:** 2 · **Housing:** 0 · **Defense:** 0
+- **Produce:** medicine: 1
+- **minEra:** 2
+- **requiresBuilding:** `tech_bench`
+- **Problema que resuelve (diseño):** ver §7 · decidir conservar/fusionar/eliminar según 2.1
+
+## G.2 Decisiones de catálogo 2.1 vs JSON
+
+| ID JSON | Decisión 2.1 |
+|---------|--------------|
+| command | **Fusionar** en HQ L2+ (no edificio separado obligatorio) |
+| wall / power_hub | Referenciados por research legado; **no** en buildings — crear o quitar unlock |
+| insulated_house | **AÑADIR** (no existe aún en JSON) |
+| block_reinforced | Mejora opcional era 3 |
+| pieces/tools | **Eliminar** como inventario |
+
+## G.3 Research actual en código
+
+### Rama: Supervivencia
+
+#### `rationing` — Racionamiento
+- Mejora el aprovechamiento de comida.
+- Coste: food: 4, wood: 2 · Días: 2 · minEra: 0
+- Requires: —
+- Effects JSON: foodProdBonus=0.1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `water_filters` — Filtros de agua
+- Purificación improvisada más eficiente.
+- Coste: metal: 3, water: 2 · Días: 2 · minEra: 0
+- Requires: —
+- Effects JSON: waterProdBonus=0.1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `field_medicine` — Medicina de campo
+- Vendajes y triaje básico.
+- Coste: medicine: 3, wood: 2 · Días: 3 · minEra: 1
+- Requires: rationing
+- Effects JSON: healBonus=0.15
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `greenhouse_tech` — Cultivo protegido
+- Permite construir invernaderos.
+- Coste: wood: 6, metal: 3, water: 4 · Días: 4 · minEra: 1
+- Requires: water_filters
+- Effects JSON: unlockBuilding="greenhouse"; foodProdBonus=0.15
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `preservation` — Conservas
+- Reduce el deterioro de alimentos.
+- Coste: metal: 4, fuel: 2, food: 3 · Días: 4 · minEra: 2
+- Requires: field_medicine, greenhouse_tech
+- Effects JSON: foodProdBonus=0.2; spoilReduction=0.25
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+### Rama: Construcción
+
+#### `basic_carpentry` — Carpintería básica
+- Mejores estructuras de madera.
+- Coste: wood: 5, metal: 1 · Días: 2 · minEra: 0
+- Requires: —
+- Effects JSON: buildCostReduction=0.1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `metalwork` — Metalurgia improvisada
+- Forja y reciclaje de chapa.
+- Coste: metal: 5, fuel: 2 · Días: 3 · minEra: 0
+- Requires: basic_carpentry
+- Effects JSON: metalProdBonus=0.15
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `reinforced_walls` — Muros reforzados
+- Perímetro más resistente.
+- Coste: wood: 6, metal: 6 · Días: 3 · minEra: 1
+- Requires: metalwork
+- Effects JSON: defenseBonus=5; unlockBuilding="wall"
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `advanced_housing` — Alojamiento avanzado
+- Más capacidad por refugio.
+- Coste: wood: 8, metal: 4 · Días: 4 · minEra: 1
+- Requires: basic_carpentry
+- Effects JSON: housingBonus=1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `power_grid` — Red eléctrica
+- Optimiza generadores y talleres.
+- Coste: metal: 8, fuel: 4 · Días: 5 · minEra: 2
+- Requires: metalwork, reinforced_walls
+- Effects JSON: fuelSaveBonus=0.2; unlockBuilding="power_hub"
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+### Rama: Logística
+
+#### `scouting` — Exploración
+- Mejor lectura del mapa y rutas.
+- Coste: food: 2, wood: 2 · Días: 2 · minEra: 0
+- Requires: —
+- Effects JSON: expeditionSlots=1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `pack_mules` — Carga ligera
+- Más botín por expedición a pie.
+- Coste: wood: 3, metal: 2 · Días: 2 · minEra: 0
+- Requires: scouting
+- Effects JSON: cargoBonus=0.15
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `bike_tech` — Taller de bicis
+- Desbloquea bicicletas.
+- Coste: metal: 4, wood: 4 · Días: 3 · minEra: 1
+- Requires: scouting
+- Effects JSON: vehicleUnlock="bike"
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `vehicle_bay` — Bahía de vehículos
+- Coches y furgonetas.
+- Coste: metal: 8, fuel: 3, wood: 4 · Días: 4 · minEra: 2
+- Requires: bike_tech, pack_mules
+- Effects JSON: vehicleUnlock="car"; expeditionSlots=1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `convoy` — Convoy
+- Operaciones con van y más carga.
+- Coste: metal: 10, fuel: 5 · Días: 5 · minEra: 3
+- Requires: vehicle_bay
+- Effects JSON: vehicleUnlock="van"; cargoBonus=0.25
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+### Rama: Defensa
+
+#### `watch_protocols` — Protocolos de guardia
+- Turnos más efectivos.
+- Coste: wood: 3, ammo: 1 · Días: 2 · minEra: 0
+- Requires: —
+- Effects JSON: defenseBonus=3
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `ammo_craft` — Recarga de munición
+- Recuperáis vainas útiles.
+- Coste: metal: 4, ammo: 2 · Días: 3 · minEra: 1
+- Requires: watch_protocols
+- Effects JSON: ammoEfficiency=0.2
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `tower_optics` — Óptica de atalaya
+- Detección temprana de oleadas.
+- Coste: metal: 5, wood: 3 · Días: 3 · minEra: 1
+- Requires: watch_protocols
+- Effects JSON: defenseBonus=5; threatSight=1
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `fortify` — Fortificación
+- Barricadas y trampas perimetrales.
+- Coste: wood: 8, metal: 6, ammo: 2 · Días: 4 · minEra: 2
+- Requires: ammo_craft, tower_optics
+- Effects JSON: defenseBonus=8; unlockBuilding="barricade"
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+#### `armor_vehicle` — Blindaje móvil
+- Desbloquea el vehículo acorazado.
+- Coste: metal: 12, fuel: 4, ammo: 3 · Días: 5 · minEra: 3
+- Requires: fortify
+- Effects JSON: vehicleUnlock="armored"; defenseBonus=5
+- **Estado diseño 2.1:** efectos deben aplicarse en sim (hoy mayormente stub) · ver Apéndice A para árbol objetivo 28 techs
+
+## G.4 Familias de eventos en código
+
+| Familia | Nº eventos |
+|---------|------------|
+| accidentes | 7 |
+| ataques | 7 |
+| calma | 5 |
+| catastrofes | 7 |
+| clima | 7 |
+| comercio | 7 |
+| conflictos | 7 |
+| enfermedad | 7 |
+| expansion | 7 |
+| hallazgos | 7 |
+| hambre_agua | 7 |
+| infectados | 7 |
+| infraestructura | 7 |
+| radio | 7 |
+| rumores | 7 |
+| supervivientes | 7 |
+
+**Total eventos:** 110
+
+## G.5 Vehículos
+
+- `0` **Bicicleta** — fuel/viaje 0 · speed 0.15 · cargo 0 · prot 0 · era 1 · coste metal: 4, wood: 6
+- `1` **Coche** — fuel/viaje 2 · speed 0.35 · cargo 0.25 · prot 1 · era 2 · coste metal: 10, wood: 4, fuel: 3
+- `2` **Furgoneta** — fuel/viaje 3 · speed 0.25 · cargo 0.5 · prot 2 · era 3 · coste metal: 14, wood: 6, fuel: 4
+- `3` **Blindado** — fuel/viaje 4 · speed 0.2 · cargo 0.35 · prot 5 · era 3 · coste metal: 20, wood: 4, fuel: 5, ammo: 2
+
+## G.6 Infectados
+
+- `0` **Común** — HP 20 · speed 1 · dmg 8 · threatWeight 1 · era 0 — Infectado lento y numeroso.
+- `1` **Rápido** — HP 16 · speed 1.8 · dmg 12 · threatWeight 2 · era 1 — Ágil y agresivo; rompe formaciones.
+- `2` **Tanque** — HP 80 · speed 0.6 · dmg 22 · threatWeight 5 · era 2 — Bruto resistente que derriba barreras.
+- `3` **Horda** — HP 12 · speed 1.1 · dmg 6 · threatWeight 3 · era 1 — Oleada densa; el peligro es el número.
+- `4` **Raro** — HP 45 · speed 1.3 · dmg 18 · threatWeight 4 · era 3 — Mutación infrecuente con comportamiento imprevisible.
+
+## G.7 Eras (JSON)
+
+- **Era 0 — Refugio**: unlock={"minPop":0,"minControlled":0,"minResearch":0,"minDay":0} soft={"minDay":1} — Sobrevivir el primer cerco.
+- **Era 1 — Asentamiento**: unlock={"minPop":5,"minControlled":2,"minResearch":2,"minDay":8} soft={"minDay":6} — Organizar producción y rutas.
+- **Era 2 — Colonia**: unlock={"minPop":10,"minControlled":4,"minResearch":5,"minDay":18} soft={"minDay":14} — Expandir perímetro y diplomacia.
+- **Era 3 — Distrito**: unlock={"minPop":18,"minControlled":7,"minResearch":10,"minDay":30} soft={"minDay":24} — Logística pesada y amenazas mayores.
+- **Era 4 — Zona Zero**: unlock={"minPop":28,"minControlled":10,"minResearch":16,"minDay":45} soft={"minDay":36} — Dominio regional bajo presión constante.
+
+## G.8 Tipos de landmark / localización
+
+
+## G.9 Balance clave (números actuales)
+
+```json
+{
+  "saveVersion": 4,
+  "startingPopulation": 3,
+  "maxPopulation": 150,
+  "startingResources": {
+    "food": 36,
+    "water": 32,
+    "wood": 13,
+    "metal": 9,
+    "medicine": 5,
+    "fuel": 8,
+    "ammo": 4
+  },
+  "foodPerPersonPerDay": 0.9,
+  "waterPerPersonPerDay": 0.88,
+  "explorers": {
+    "maxActive": 3,
+    "startSlots": 1,
+    "slot2": {
+      "minPop": 10,
+      "minControlled": 3,
+      "minEra": 1
+    },
+    "slot3": {
+      "minPop": 24,
+      "minControlled": 5,
+      "minEra": 2
+    },
+    "skills": [
+      "explore",
+      "loot",
+      "fight",
+      "resist"
+    ],
+    "skillMax": 5,
+    "xpPerLevel": [
+      0,
+      8,
+      20,
+      40,
+      70
+    ],
+    "startingSkillRange": [
+      1,
+      2
+    ],
+    "recruitCooldownDays": 2,
+    "gearRecoverChanceOnDeath": 0.55
+  },
+  "victory": {
+    "minPop": 40,
+    "minControlled": 8,
+    "minStability": 55,
+    "minEra": 3,
+    "needHospital": true,
+    "needEnergy": true,
+    "needDefense": 40,
+    "finalCrisisSurvived": true
+  },
+  "quietNightChance": 0.32,
+  "foodSoftCapDays": 10,
+  "secondaryResources": [
+    "parts",
+    "tools"
+  ]
+}
+```
+
+## G.10 Facciones plantilla (JSON)
+
+- `0` **Los del Puente** (friendly) hostility=10 tradeMult=0.9
+- `1` **Caravana Gris** (trader) hostility=25 tradeMult=1
+- `2` **Muralla Cerrada** (isolationist) hostility=40 tradeMult=1.4
+- `3` **Chatarra Viva** (opportunist) hostility=55 tradeMult=1.2
+- `4` **Jauría Roja** (hostile) hostility=85 tradeMult=2
+- `5` **Círculo de Niebla** (variable) hostility=45 tradeMult=1.1
+
+---
+
+# APÉNDICE H — CURVA DE SISTEMAS DETALLADA (D1 → ENDGAME)
+
+No es un guion fijo. Es la **curva de sistemas**: qué puede ocurrir, qué suele necesitarse, qué no debe aparecer aún.
+
+## H.1 Día 1 — Entrar en el mundo
+- **Sistemas activos:** mapa mundo, colonia física legible, HQ, recursos HUD (comida/agua/madera/metal…), construir, colocar, staff por edificio, avanzar día.
+- **Contenido típico:** 3 habitantes, reservas iniciales, 1 explorador (aún sin forzar salida).
+- **Objetivo guía:** construir huerto + asignar trabajadores; opcional pozo.
+- **Prohibido introducir:** research UI, vehículos, hordas, facciones, invierno duro, victoria.
+- **Sensación:** “tengo un sitio y un problema inmediato de comida”.
+- **Alertas:** comida para X días.
+- **Feedback:** edificio aparece, staff cambia preview producción, brief al avanzar.
+
+## H.2 Día 2
+- Brief diario ritual (producción − consumo).
+- Posible segundo edificio (pozo/shelter).
+- Todavía tutorial por acción, no cascada.
+- Amenaza muy baja / soft-cap Director.
+
+## H.3 Día 3
+- Primera exploración cercana (campamento/landmark adyacente).
+- Flujo: tocar lugar → riesgo/tiempo → enviar → ruta → retorno informe.
+- Botín pequeño; herida rara.
+- Aún sin clima extremo.
+
+## H.4 Día 5
+- Loop estable: producir, stockear, 1–2 landmarks, 1 shelter extra.
+- Posible primer avistamiento infectado (evento leve).
+- Defensa: barricada opcional, no ataque grave.
+
+## H.5 Día 7–10
+- Soft pressure: comida/agua, capacidad vivienda, storage.
+- Era 1 cerca (indicadores pop/control/research).
+- Radio / primer research desbloqueable si infra lista.
+- Defensa básica (cerca/torre) se vuelve relevante.
+- **NO:** crisis final, vehículos pesados.
+
+## H.6 Día 15–20
+- 2º explorador posible.
+- Research activo con efectos reales.
+- Primer ataque menor posible (preparación avisada).
+- Misiones contextuales (need_food / need_beds).
+- Contactos humanos solo como evento.
+
+## H.7 Día 25–30
+- Estaciones/clima: primer aviso de frío u ola.
+- Enfermería útil.
+- Invernadero / cisterna.
+- Población 10–20 típica si bien gestionado.
+- Territorio: 3–5 zonas controladas.
+
+## H.8 Día 40–50
+- Vehículos (bike→car) si garage+tech.
+- Clínica en camino.
+- Hordas / ataques medios.
+- Pérdida recuperable (ejemplo 28→19→25).
+- Era 2–3.
+
+## H.9 Día 60–75
+- Energía (generador/solar).
+- Búnker / doctrina perímetro.
+- Logística (van), convoy.
+- Catástrofes avisadas.
+- Población 30–50.
+
+## H.10 Día 90–100+
+- Consolidación regional.
+- Cadena victoria multi-condición visible.
+- Crisis final variable por semilla (una de varias).
+- Post-victoria: endless.
+
+## H.11 Matriz “demasiado pronto”
+
+| Sistema | Antes de |
+|---------|----------|
+| Research | D1–D5 tutorial cerrado |
+| Vehículos | garage + era≥1–2 |
+| Invierno duro | aviso + vivienda aislada disponible |
+| Horda | defensa básica construible |
+| Victoria UI | era≥3 + checklist |
+| Facciones UI | playtest eventos OK |
+
+---
+
+# APÉNDICE I — FICHAS COMPLETAS DE EDIFICIOS (DISEÑO 2.1)
+
+Números orientativos (calibración posterior). Protección climática solo vivienda.
+
+## I.1 Núcleo
+
+### Refugio Central I (`hq_central_l1`)
+- **Función:** HQ, vivienda 6, defensa pasiva, único.
+- **Coste:** gratis (inicio).
+- **Tamaño:** 2×2.
+- **Construcción:** ya colocado.
+- **Workers:** 1 (coordinación).
+- **Era:** 0.
+- **Mejoras:** → L2 → L3 in-place.
+- **Clima protección:** 1.
+- **Visual:** edificio ancla reconocible, escala protagonista D1.
+- **Problema:** “¿dónde está mi colonia?”
+
+### Refugio Central II / III
+- Ver costes JSON G.1; aumentan housing/defensa/jobs; L3 camino a mando regional.
+
+## I.2 Vivienda
+
+### Refugio improvisado (`shelter`)
+- Capacidad 2 · protección 0 · wood 5 metal 2 · era 0 · max alto.
+- Resuelve: camas baratas; riesgo clima.
+
+### Casa básica (`house`)
+- Capacidad 4 · protección 1 · wood 10 metal 4 · requiere shelter · era 0–1.
+
+### Vivienda aislada (`insulated_house`) — NUEVO 2.1
+- Capacidad 4 · protección 2 · wood 14 metal 6 fuel 1 · tech `insulation` · era 1–2.
+- Resuelve: olas de frío.
+
+### Bloque (`block`)
+- Capacidad 8 · protección 2 · footprint 2×1 · requiere house · era 1–2.
+
+### Bloque reforzado (`block_reinforced`) — mejora
+- Capacidad 10–12 · protección 3 · era 3 · coste alto.
+
+## I.3 Resto del catálogo activo
+Contrato común para productivos (farm, well, greenhouse, cistern, sawmill, scrapyard, workshop, kitchen, mech_shop, storage, medkit, infirmary, clinic, barricade, fence, watchtower, armory, bunker, radio, expedition_center, garage, generator, solar, tech_bench, lab):
+1. Sin workers → producción 0 (si aplica).
+2. Staff en ficha del edificio (modelo único §10).
+3. Soft-cap stock vía almacenes.
+4. Daño en ataques → HP/eficiencia ↓ hasta reparar (abstracto o rebuild).
+5. Baseline numérico = G.1 hasta calibración.
+
+**Fuera del catálogo activo v1:** `command` (fusionado HQ), `wall`/`power_hub` huérfanos hasta decisión explícita.
+
+---
+
+# APÉNDICE J — DIRECTOR: ESPECIFICACIÓN OPERATIVA
+
+## J.1 Inputs (cada día)
+pop, housingCap, foodDays, waterDays, defenseScore, threat, injured, sick, stability, tension, era, day, recentLosses, explorersAway, controlledZones, season, weather, activeMissions, lastCrisisDay.
+
+## J.2 Índices derivados (0–100)
+- **Fuerza** = f(pop, defense, foodDays, controlled)
+- **Fragilidad** = f(déficits, heridos, overflow vivienda, ammo baja)
+- **Momentum** = f(crecimiento, research, exploración reciente)
+- **Tensión** = suavizado hacia objetivo del Director
+
+## J.3 Presupuesto diario de amenaza
+- Early soft-cap (primeros ~10 días).
+- Quiet night ~30%.
+- Post-desastre: protección N días (menos eventos graves).
+- Cooldown por familia de evento.
+- Antirrepetición: no mismo id en ventana M días.
+- Si Fragilidad alta → más oportunidades/recursos, menos catástrofe.
+- Si Fuerza alta + Momentum alto → más presión (ataques/hordas) para evitar aburrimiento.
+
+## J.4 Ritmo obligatorio
+TENSIÓN → CRISIS → RECUPERACIÓN → CRECIMIENTO → TENSIÓN.
+Nunca crisis infinita; nunca 100 días planos.
+
+---
+
+# APÉNDICE K — MISIONES: ESPECIFICACIÓN POR PATRÓN
+
+1. **guide_farm** — D1 — construir+staff huerto — cierra coach — no fail hard
+2. **guide_well** — post farm — pozo
+3. **guide_explore** — ~D3 — primera expedición
+4. **need_food** — foodDays<3 — asignar/producir/loot — fail → evento hambre
+5. **need_water** — análogo
+6. **need_beds** — pop>cap — construir vivienda
+7. **need_warmth** — freezeWarn — cobertura térmica
+8. **radio_signal** — radio+era≥1 — enviar a landmark — loot / timeout
+9. **trapped_survivors** — explore — rescatar +pop / heridos
+10. **supply_drop** — reclamar zona — recursos / contestado
+11. **clear_nest** — hostile cerca — limpiar — control / bajas
+12. **era1_gate** — checks — subir era
+13. **era2_gate** — territorio+sanidad
+14. **final_chain_*** — variantes semilla victoria
+
+Campos schema: id, pattern, title, desc, status, progress, expiresDay, rewards, failEffects, uiPriority.
+
+---
+
+# APÉNDICE L — LOGROS COMPLETOS (IDS IMPLEMENTABLES)
+
+### Supervivencia
+`ach_dawn`, `ach_week`, `ach_month`, `ach_quarter`, `ach_century`, `ach_first_winter`, `ach_heatwave`, `ach_no_deaths_15`, `ach_food_crisis_recover`, `ach_water_crisis_recover`, `ach_pop_crash_recover`, `ach_endless_50`
+
+### Población
+`ach_pop_10`, `ach_pop_25`, `ach_pop_50`, `ach_pop_100`, `ach_full_housing`, `ach_mass_immigration`, `ach_rescue`, `ach_lose20_recover`, `ach_healthy_20`, `ach_stability_80`
+
+### Exploración
+`ach_first_explore`, `ach_landmarks_5`, `ach_landmarks_15`, `ach_control_3`, `ach_control_8`, `ach_control_12`, `ach_explorer_lvl3`, `ach_explorer_lvl5`, `ach_three_explorers`, `ach_heal_explorer`, `ach_extreme_clear`
+
+### Construcción
+`ach_first_farm`, `ach_first_well`, `ach_buildings_10`, `ach_buildings_25`, `ach_hq2`, `ach_hq3`, `ach_greenhouse`, `ach_storage_3`, `ach_dense_colony`
+
+### Defensa
+`ach_first_barricade`, `ach_repel_1`, `ach_repel_5`, `ach_messy_survive`, `ach_horde`, `ach_bunker`, `ach_zero_ammo_win`, `ach_perimeter_clean`
+
+### Tech / industria
+`ach_first_research`, `ach_branch_complete`, `ach_generator`, `ach_solar`, `ach_first_vehicle`, `ach_van_route`
+
+### Eventos / misiones
+`ach_hard_choice`, `ach_trade`, `ach_radio_mission`, `ach_failed_rescue`, `ach_calm_10`, `ach_prepared_catastrophe`
+
+### Secretos / humor
+`ach_name_zonazero`, `ach_recenter_50`, `ach_only_shelters`, `ach_brief_zero`, `ach_seed_secret`
+
+**Total ids ≥ 63.**
+
+---
+
+# APÉNDICE M — SINCRONIZACIÓN DRIVE ↔ REPO
+
+| Documento | Drive | Repo |
+|-----------|-------|------|
+| Biblia diseño | `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_GAME_MASTER.md` | `GAME_MASTER.md` |
+| Plan técnico | `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md` | `docs/IMPLEMENTATION_PLAN.md` |
+
+**Regla:** toda modificación de diseño actualiza **ambos** con el mismo contenido (hash idéntico).
+
+---
+
+# APÉNDICE N — CHECKLIST “¿DIVERTIDO 30 HORAS?”
+
+- [x] Curva de problemas nuevos (no un solo loop)
+- [x] Pérdida recuperable
+- [x] Exploración con peso
+- [x] Clima como arco (aviso→prep→consecuencia)
+- [x] Techs deseables
+- [x] Eventos no memorizables
+- [x] Misiones no campaña rígida
+- [x] Victoria lejana + endless
+- [x] Sin micro de 100 NPCs
+- [x] Sin craft de picos
+- [x] Modelo labor único
+- [x] Feedback por acción importante
+- [x] Plan técnico por fases con gates humanos
+
+---
+
 # APÉNDICE A — TECNOLOGÍAS (LISTA COMPLETA OBJETIVO)
 
 Cada tech: **id · nombre · rama · req · días · coste · efecto (debe aplicarse en sim)**.
@@ -1229,7 +2096,7 @@ Compat: migrar saves 1.3 → 2.x con defaults seguros.
 
 | Hito | Requiere “sí, continuar” |
 |------|---------------------------|
-| GAME_MASTER 2.0 | Sí (este doc) |
+| GAME_MASTER 2.1 | Sí (este doc) |
 | D1 visual F10–F15 | Sí |
 | D1–D5 loop | Sí |
 | Estaciones+vivienda | Sí |
@@ -1239,4 +2106,4 @@ Compat: migrar saves 1.3 → 2.x con defaults seguros.
 
 ---
 
-*Apéndices incluidos en la biblia 2.0.*
+*Apéndices A–N incluidos en la biblia 2.1 — documento maestro completo.*

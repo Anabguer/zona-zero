@@ -1,6 +1,6 @@
-# Zona Zero — Plan de implementación técnico (Diseño 2.0)
+# Zona Zero — Plan de implementación técnico (Diseño 2.1)
 
-**Estado:** Contrato de ejecución — **no implementar** hasta aprobación humana del `GAME_MASTER.md` 2.0.  
+**Estado:** Contrato de ejecución — **no implementar** hasta aprobación humana del `GAME_MASTER.md` 2.1.  
 **Principio:** bloques de aprobación; nunca capas encima de UX D1 no aprobada.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · contenido en `content/*.json`.
 
@@ -8,7 +8,7 @@
 
 ## 0. Reglas de ejecución
 
-1. Leer `GAME_MASTER.md` 2.0 antes de cada bloque.  
+1. Leer `GAME_MASTER.md` 2.1 antes de cada bloque.  
 2. No hardcodear balance en UI.  
 3. Cada fase: tests + criterio de aceptación; revisión humana cuando se indique.  
 4. Capturas/review solo cuando el bloque cambie experiencia visual jugable.  
@@ -317,3 +317,10 @@ F01 ──► F10–F15 (D1) ──► APROBACIÓN HUMANA
 ---
 
 *Fin del plan técnico 2.0.*
+
+
+---
+
+## Sync Drive
+
+Copia idéntica en: `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_IMPLEMENTATION_PLAN.md`
