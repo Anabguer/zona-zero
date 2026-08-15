@@ -2,6 +2,8 @@
 
 Capturas de la **revisión actual** (se sustituyen en cada entrega).
 
+Galería: [index.html](./index.html)
+
 | Archivo | Contenido |
 |---------|-----------|
 | `mobile.png` | Pantalla principal móvil |
