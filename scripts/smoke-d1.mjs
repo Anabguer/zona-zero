@@ -26,7 +26,7 @@ const content = {
 
 const { createNewState } = await import(pathToFileURL(join(root, 'js', 'state.js')).href);
 const { placeBuilding, adjustBuildingWorkers } = await import(pathToFileURL(join(root, 'js', 'sim.js')).href);
-const { ensureOnboarding, checkOnboardingProgress, onboardingStatus } = await import(
+const { ensureOnboarding, checkOnboardingProgress, onboardingStatus, coachMessage } = await import(
   pathToFileURL(join(root, 'js', 'onboarding.js')).href
 );
 const { recenterCamera, clampCamera, zoomCameraBy, panCameraBy } = await import(
@@ -70,7 +70,10 @@ assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo
 assert(onboardingStatus(state)?.step?.id === 'need_food', 'need_food contextual');
 assert(onboardingStatus(state)?.step?.highlight === 'build', 'highlight construir');
 assert(!onboardingStatus(state)?.step?.cta, 'sin CTA Continuar');
-assert(/Núcleo|huerto/i.test(onboardingStatus(state)?.step?.text || ''), 'tip menciona Núcleo/huerto');
+assert(/superficie|Núcleo|huerto/i.test(onboardingStatus(state)?.step?.text || ''), 'tip 2.8 superficies/Núcleo/huerto');
+state.buildMode = true;
+assert(/fantasma|✓|✕|superficie/i.test(coachMessage(state) || ''), 'coach build: ghost/✓/superficie');
+state.buildMode = false;
 
 function free() {
   const cx = Math.floor(state.base.w / 2);

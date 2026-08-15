@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019 **APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-019A RONDA CAMBIOS · PENDIENTE DE REVISIÓN (REVIEW_STOP)**. · ZZ-012 **CAMBIOS SOLICITADOS** (no iniciar). · No ZZ-013. No deploy.
+**Estado global:** ZZ-016…019 + **ZZ-019A APROBADAS**. · Docs **2.8 APROBADO**. · **ZZ-012 PENDIENTE DE REVISIÓN (HUMAN_GATE)**. · No ZZ-013. No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -220,37 +220,48 @@ OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT · HUMAN_GATE espacial B0 A
 Bloqueo ZZ-012 **levantado temporalmente**; **vuelve a bloquearse** tras reforma **2.8** hasta **ZZ-019A**.
 ---
 
-# FASE ZZ-012 — Tutorial D1 contextual landscape (HUMAN_GATE · retrofit 2.7→2.8)
+# FASE ZZ-012 — Tutorial D1 contextual landscape (HUMAN_GATE · retrofit 2.8)
 
 IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-019 + **ZZ-019A** + ZZ-008
 
 ## ESTADO CURSOR
-COMPLETADA (entrega previa `b86f356`) · **PAUSA** — no reimplementar hasta ZZ-019A · no ZZ-013.
+COMPLETADA (código + evidencias). **PARADO HUMAN_GATE** — no ZZ-013.
 
 ## ESTADO REVISIÓN
-CAMBIOS SOLICITADOS
+PENDIENTE DE REVISIÓN
 
 ## APROBACIÓN FINAL CHATGPT
 NO
 
-## MOTIVO (Neni+ChatGPT 2026-08-16)
-No porque el tutorial actual sea “incorrecto”, sino porque debe **reescribirse** tras cerrar el refinamiento espacial **2.8** (superficies edificables + escenario diseñado). ZZ-019 (ghost/✓) se mantiene APROBADA.
+## RONDA tras ZZ-019A APROBADA (2026-08-16)
+Reescritura tips al mundo 2.8 aprobado:
+- Superficies edificables (áreas, no huecos) en tip comida/agua.
+- Coach en modo Construir: ghost + snap invisible + ✓/✕ + pan fuera del fantasma.
+- Tip final: pan/zoom + avanzar día.
+- Ayuda §21.3: superficies, snap, landscape, recuperar territorio.
+- Ghost/✓/landscape de ZZ-019 **intactos**.
 
-## CAMBIOS (entrega previa, congelada)
-- Tips landscape/Núcleo; coachMessage ghost+✓; ayuda §21.3; review 10 tomas.
-- Commit feat: `b86f356` · docs: `fb2be18`.
+## CAMBIOS
+- `js/onboarding.js` — GUIDE_STEPS + coachMessage 2.8.
+- `js/main.js` — ayuda filtrada actualizada.
+- `scripts/smoke-d1.mjs` — asserts tip/coach 2.8.
+- `scripts/review-shots-zz012.mjs` — 12 tomas (pan, superficies, ghost, help, landscape, desktop).
+- Cache `?v=34`.
 
 ## AUTOCRÍTICA
-Pendiente de nueva ronda tras ZZ-019A.
+1. ¿Una pista / avance por acción / sin Continuar? Sí.
+2. ¿Tips nombran superficies + ghost/✓ + mundo>viewport? Sí (texto + coach + ayuda).
+3. ¿Recuperación territorial? En ayuda (D1 solo Núcleo recuperado; no fuerza expand prematuro).
+4. Arte SVG provisional = deuda 019A no bloqueante; tutorial no embellece blobs.
 
 ## EVIDENCIA
-Histórico en git / Drive sustituido por docs 2.8 (sin review de gameplay nuevo).
+`docs/review/` (12 + contact sheet) · Drive `Review\`
 
 ## COMMIT
-`b86f356` / `fb2be18` (previos). Cierre de esta ronda docs: ver reforma 2.8 abajo.
+_(tras commit)_
 
 ## Sync Drive/GitHub
-OK en entrega previa. Re-sync con reforma 2.8.
+Pendiente push.
 
 ---
 
@@ -263,12 +274,12 @@ Refinar el *dónde* de la colocación semilibre **sin** descartar B0/ZZ-019.
 - Avisos → navegación (cámara + resalte + ficha).
 - Caminos/muros: visual ahora; mecánicas solo si sistémicas (sin inventar).
 - Arte integración edificios = deuda no bloqueante.
-- ZZ-012: CAMBIOS SOLICITADOS · no aprobar · no ZZ-013.
+- ZZ-012: CAMBIOS SOLICITADOS · no aprobar · no ZZ-013 *(histórico; levantado tras ZZ-019A APROBADA)*.
 
 ## RESULTADO CURSOR (solo docs — sin gameplay)
 - GAME_MASTER **2.8**: §1.1, §9.2, §9.4–§9.9, §13, §16.2/16.4, §21.2, §31.4, §37, §38, §41.7.1.
 - IMPLEMENTATION_PLAN **2.8**: ZZ-019A + REVIEW_STOP; ZZ-012 deps; flujo B0.
-- DEVELOPMENT_LOG: esta sección + ZZ-012 CAMBIOS SOLICITADOS.
+- DEVELOPMENT_LOG: esta sección + ZZ-012.
 
 ## YA EXISTÍA EN 2.7 (no duplicado)
 Colonia > viewport · sectores orgánicos · sin macrogrid · sin cupo N · semilibre+snap+✓ · avisos→cámara · landscape · recuperación por componentes · perímetro/defensa §13 · purga arte falsa.
@@ -287,13 +298,13 @@ Colonia > viewport · sectores orgánicos · sin macrogrid · sin cupo N · semi
 3. Caminos/vallas en 019A = **solo visual**.
 
 ## ESTADO
-Docs **2.8 APROBADO**. Implementación → fase ZZ-019A abajo.
+Docs **2.8 APROBADO**. Implementación ZZ-019A **cerrada APROBADA**. ZZ-012 en HUMAN_GATE.
 
 ## APROBACIÓN REFORMA 2.8
 SÍ (Neni+ChatGPT)
 
 ## COMMIT
-`e3af894` / `d8616d0` (docs). Implementación: ver ZZ-019A.
+`e3af894` / `d8616d0` (docs).
 
 ---
 
@@ -302,37 +313,31 @@ SÍ (Neni+ChatGPT)
 IMPLEMENTATION_PLAN 2.8 · B0 · **REVIEW_STOP YES** · deps ZZ-019 APROBADA
 
 ## ESTADO CURSOR
-COMPLETADA (código + evidencias). **PARADO** — no ZZ-012.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN CONTINUACIÓN CHATGPT
-NO
+SÍ
 
-## RONDA CAMBIOS SOLICITADOS (post review visual contact sheet)
-Problemas: (1) mundo aún leído como textura+props; (2) superficies celulares; (3) carretera shape de prueba.
-Correcciones:
-- 3 identidades de entorno en coords mundo: asfalto/oeste · urbano/ruinas · abierto/verde (árboles).
-- Superficies = **blob orgánico continuo** por superficie (no óvalos/celda).
-- Carretera: relleno irregular + grietas + suciedad de borde.
-- Yard art atenuado para dejar leer composición.
-- Review regenerada (16 tomas).
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Modelo espacial validado (mundo>viewport, identidades, carretera, superficies orgánicas, semilibre+ghost/✓).  
+**Deuda visual no bloqueante:** sprites pegados, sombras, blobs finales, identidades provisionales, transiciones naturales.  
+**No** nueva ronda de embellecido SVG. Contrato **2.8** se mantiene.
 
-## AUTOCRÍTICA (ronda)
-1. ¿Pan muestra lugares distintos? Mejorado (clusters mundo + tonos); aún arte SVG provisional.
-2. ¿Superficie = área continua? Sí (hull orgánico); formas aún derivadas del grid interno.
-3. ¿Carretera integrada? Mejor; no arte final.
-4. Ghost/✓/landscape intactos.
+## RONDA CAMBIOS SOLICITADOS (histórica)
+Problemas: (1) mundo textura+props; (2) superficies celulares; (3) carretera shape de prueba.  
+Correcciones `d6568ca`: identidades · blobs continuos · carretera irregular · review 16 tomas.
 
 ## EVIDENCIA
-`docs/review/` · Drive Review\ · `review-contact-sheet.jpg`
+Histórico en git. Drive Review\ sustituido por evidencias ZZ-012 en esta entrega.
 
 ## COMMIT
-`36795fd` (entrega inicial) · ronda CAMBIOS: `d6568ca`
+`36795fd` · `d6568ca` · docs `ec3bfef`
 
 ## Sync Drive/GitHub
-OK · Review/ · **PARADO REVIEW_STOP**. No ZZ-012.
+OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 
 ---
 
@@ -351,7 +356,7 @@ OK · Review/ · **PARADO REVIEW_STOP**. No ZZ-012.
 | ZZ-008 | Nueva partida: confirmación + mini-intro | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-010 | Colonia física D1 sin GIS | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-012 | Tutorial D1 por acciones | YES | PAUSA / CAMBIOS SOLICITADOS | CAMBIOS SOLICITADOS | NO |
+| ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-013 | HUD recursos D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-014 | Desktop 1920 D1 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

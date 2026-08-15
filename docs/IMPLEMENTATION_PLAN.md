@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8** (refino superficies edificables + escenario diseñado). B0 parcial APROBADO (016–019). **ZZ-019A** pendiente · **ZZ-012** bloqueada (CAMBIOS SOLICITADOS).  
+**Estado:** Contrato espacial **2.8**. B0 **APROBADO** (016–019 + **019A**). **ZZ-012** en HUMAN_GATE (PENDIENTE DE REVISIÓN). No ZZ-013.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -30,7 +30,7 @@
 ### REVIEW_STOP (2.8)
 
 - **ZZ-018** · Sectores + recuperar territorio → **cerrado** (autorizado → ZZ-019).  
-- **ZZ-019A** · Escenario diseñado + superficies edificables → evidencia → **PARAR** antes de reescribir/aprobar ZZ-012.
+- **ZZ-019A** · Escenario diseñado + superficies edificables → **APROBADA** (REVIEW_STOP cerrado).
 
 ### HUMAN_GATE (canónica 2.8)
 
@@ -79,7 +79,7 @@
 | Avisos → cámara + ficha | Contrato §9.4/§21 (impl. en fases UI/alertas existentes; no sistema nuevo) |
 | Caminos / muros | Solo visual/estructura ahora; mecánicas futuras si sistémicas (§9.4) — **sin fase inventada** |
 | ZZ-019 | **APROBADA** — no reabrir ghost/✓/semilibre |
-| ZZ-012 | **CAMBIOS SOLICITADOS**; tips tras ZZ-019A; no ZZ-013 |
+| ZZ-012 | **HUMAN_GATE** · tips 2.8 · PENDIENTE DE REVISIÓN · no ZZ-013 |
 | Integración arte edificios | Deuda artística no bloqueante |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
@@ -532,7 +532,7 @@
 
 ### ZZ-012 — Tutorial D1 contextual en el mundo
 
-> **2.8:** **No aprobar** todavía. CAMBIOS SOLICITADOS: reescribir tips **después** de ZZ-019A (superficies + escenario). Depende de ZZ-019 (UX) + ZZ-019A (dónde). No ZZ-013.
+> **2.8:** Tips reescritos tras ZZ-019A APROBADA. HUMAN_GATE activo. No ZZ-013 sin autorización.
 
 | Campo | Valor |
 |-------|-------|
@@ -553,7 +553,6 @@
 **Aceptación:**
 - Una pista a la vez; avance natural; tips 2.8
 - Gate humano
-
 ### ZZ-013 — HUD recursos D1
 
 | Campo | Valor |

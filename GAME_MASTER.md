@@ -1715,7 +1715,7 @@ El tutorial **principal ocurre dentro del mundo**, no en cascadas de modales Con
 
 La mini-intro de nueva partida (§31.6) **no** sustituye este tutorial: la intro da tono; el coach enseña mecánica en D1+.
 
-**2.7/2.8:** el tutorial contextual asume colonia landscape + sectores + **superficies edificables** + ✓ construir (§9). ZZ-012 **no se aprueba** hasta cerrar el refinamiento espacial 2.8 e implementar lo que el PLAN exija (ZZ-019A); tips deben reescribirse en consecuencia.
+**2.7/2.8:** el tutorial contextual asume colonia landscape + sectores + **superficies edificables** + ✓ construir (§9). **ZZ-019A APROBADA** — tips de ZZ-012 reescritos sobre ese modelo; pendiente HUMAN_GATE de ZZ-012.
 
 ## 31.5 Portada / inicio (arranque del juego)
 

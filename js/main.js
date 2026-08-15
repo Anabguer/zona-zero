@@ -1578,10 +1578,10 @@ function bindChrome() {
     const explored = !!state.flags?.guideExplored || day >= 3;
     const staffed = (state.base?.buildings || []).some((b) => (b.workers || 0) > 0);
     const lines = [
-      '<li><strong>Construir</strong> — elegís tipo, movéis el fantasma y confirmáis con ✓ (solo en terreno recuperado).</li>',
+      '<li><strong>Construir</strong> — elegís tipo; aparecen superficies edificables (áreas recuperadas, no solares fijos). Movéis el fantasma, el snap es invisible, confirmáis con ✓ o canceláis con ✕.</li>',
       '<li><strong>Avanzar día</strong> — produce, consume y resuelve el día.</li>',
-      '<li><strong>Pan / zoom / recentrar</strong> — la colonia es mayor que la pantalla.</li>',
-      '<li><strong>Recuperar territorio</strong> — en Más: ampliá sectores colindantes cuando toque.</li>',
+      '<li><strong>Pan / zoom / recentrar</strong> — el mundo es mayor que la pantalla (landscape).</li>',
+      '<li><strong>Recuperar territorio</strong> — en Más: ampliá sectores colindantes cuando toque; luego podréis construir en sus superficies.</li>',
     ];
     if (staffed || state.flags?.onboardingDone) {
       lines.push('<li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>');
