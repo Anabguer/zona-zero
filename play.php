@@ -57,9 +57,12 @@ $base = zz_public_base();
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
-        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población">
+        <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población actual / plazas de vivienda">
           <img src="<?= htmlspecialchars($base) ?>assets/art/ui/pop.webp" alt="" width="18" height="18" />
-          <strong id="zz-pop">0/0</strong>
+          <span class="zz-hud__pop-wrap">
+            <strong id="zz-pop">0/0</strong>
+            <em class="zz-hud__pop-label" id="zz-pop-label">hab.</em>
+          </span>
         </button>
         <ul class="zz-hud__res" id="zz-resources" aria-label="Recursos"></ul>
         <div class="zz-hud__threat" title="Amenaza y defensa" hidden>

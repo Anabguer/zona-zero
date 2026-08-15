@@ -416,9 +416,9 @@ Principio: cada edificio resuelve un problema. Si no, fuera.
 
 | ID | Nombre | Función | Coste orient. | Jobs | Era | Notas |
 |----|--------|---------|---------------|------|-----|-------|
-| hq_central_l1 | Refugio Central I | HQ + vivienda 6 + def | gratis inicio | 1 | 0 | único |
-| hq_central_l2 | Refugio Central II | +vivienda/def/mando | wood/metal (**sin fuel**) | 2 | 1 | upgrade |
-| hq_central_l3 | Refugio Central III | cuartel | wood/metal/ammo alto (**sin fuel**) | 3 | 2 | upgrade |
+| hq_central_l1 | Refugio Central I | HQ + vivienda 6 + def **pasiva** | gratis inicio | **0** | 0 | único · sin staffing |
+| hq_central_l2 | Refugio Central II | +vivienda/def/mando | wood/metal (**sin fuel**) | **0** | 1 | upgrade · sin staffing hasta diseño |
+| hq_central_l3 | Refugio Central III | cuartel | wood/metal/ammo alto (**sin fuel**) | **0** | 2 | upgrade · sin staffing hasta diseño |
 
 ### 7.2 Vivienda
 
@@ -2412,11 +2412,12 @@ Números orientativos (calibración posterior). Protección climática solo vivi
 ## I.1 Núcleo
 
 ### Refugio Central I (`hq_central_l1`)
-- **Función:** HQ, vivienda 6, defensa pasiva, único.
+- **Función:** HQ, vivienda 6, defensa **pasiva**, único.
 - **Coste:** gratis (inicio).
 - **Tamaño:** 2×2.
 - **Construcción:** ya colocado.
-- **Workers:** 1 (coordinación).
+- **Workers:** **0** — no hay puesto asignable en v1.
+- **Por qué 0:** “coordinación” no tenía efecto sistémico documentado (qué cambia con 0 vs 1). Hasta definir un efecto concreto (p. ej. bonus defensa/estabilidad solo con staff), el HQ **no** consume trabajadores. Vivienda y defensa son pasivas.
 - **Era:** 0.
 - **Mejoras:** → L2 → L3 in-place.
 - **Clima protección:** 1.
@@ -2424,7 +2425,7 @@ Números orientativos (calibración posterior). Protección climática solo vivi
 - **Problema:** “¿dónde está mi colonia?”
 
 ### Refugio Central II / III
-- Ver costes JSON G.1; aumentan housing/defensa/jobs; L3 camino a mando regional.
+- Ver costes JSON G.1; aumentan housing/defensa; **jobs = 0** hasta diseñar mando/coordinación jugable.
 
 ## I.2 Vivienda
 

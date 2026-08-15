@@ -50,22 +50,21 @@ async function closeOverlays(page) {
   });
 }
 
-async function cleanComposition(page) {
-  await page.evaluate(() => {
+async function cleanComposition(page, { keepCamera = false } = {}) {
+  await page.evaluate((keep) => {
     document.querySelectorAll('#zz-coach, .zz-coach-card, #zz-sheet, #zz-day-brief').forEach((el) => {
       el.hidden = true;
     });
     const s = window.__zz.getState();
     s.flags = s.flags || {};
-    // Solo para captura de composición: ocultar coach sin alterar save real de smoke
     s.flags.onboardingActive = false;
     s.selectedBuildingId = null;
     s.selectedZoneId = null;
     s.uiMode = null;
     s.buildMode = null;
-    window.__zz.recenter();
-    window.__zz.paint();
-  });
+    if (!keep) window.__zz.recenter();
+    else window.__zz.paint();
+  }, keepCamera);
   await page.waitForTimeout(350);
 }
 
@@ -79,23 +78,17 @@ async function zoomOut(page, times = 3) {
   await page.evaluate((n) => {
     const s = window.__zz.getState();
     for (let i = 0; i < n; i++) s.mapCamera.zoom = (s.mapCamera.zoom || 3) / 1.12;
-    window.__zz.clampCam?.() || window.__zz.paint?.();
+    window.__zz.paint?.();
   }, times);
-  await page.click('#zz-zoom-out', { force: true }).catch(() => {});
-  for (let i = 0; i < times; i++) {
-    await page.click('#zz-zoom-out', { force: true }).catch(() => {});
-    await page.waitForTimeout(80);
-  }
-  await page.evaluate(() => window.__zz.paint?.());
   await page.waitForTimeout(200);
 }
 
 async function zoomIn(page, times = 2) {
-  for (let i = 0; i < times; i++) {
-    await page.click('#zz-zoom-in', { force: true }).catch(() => {});
-    await page.waitForTimeout(80);
-  }
-  await page.evaluate(() => window.__zz.paint?.());
+  await page.evaluate((n) => {
+    const s = window.__zz.getState();
+    for (let i = 0; i < n; i++) s.mapCamera.zoom = Math.min(3.45, (s.mapCamera.zoom || 1) * 1.15);
+    window.__zz.paint?.();
+  }, times);
   await page.waitForTimeout(200);
 }
 
@@ -143,7 +136,7 @@ const browser = await chromium.launch({ headless: true });
   await shot(page, '01-mobile-d1.png', '01 · Móvil D1', 'colonia inicial 390×844');
 
   await zoomIn(page, 2);
-  await cleanComposition(page);
+  await cleanComposition(page, { keepCamera: true });
   await shot(page, '02-mobile-d1-zoom.png', '02 · Móvil zoom', 'acercar colonia');
 
   await panAway(page);
@@ -180,7 +173,7 @@ const browser = await chromium.launch({ headless: true });
   await shot(page, '05-desktop-d1.png', '05 · Desktop D1', 'colonia inicial 1920×1080');
 
   await zoomIn(page, 2);
-  await cleanComposition(page);
+  await cleanComposition(page, { keepCamera: true });
   await shot(page, '06-desktop-d1-zoom.png', '06 · Desktop zoom', 'acercar');
 
   await panAway(page);

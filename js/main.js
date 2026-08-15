@@ -456,7 +456,12 @@ function openBuildingSheet(id) {
              </div>
              <p class="zz-ctx__prod">${escapeHtml(prodLine)}</p>
              ${unstaffed ? '<p class="zz-ctx__warn">⚠ Sin personal — no produce</p>' : ''}`
-          : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>`
+          : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
+             ${
+               def.housing
+                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${def.housing}</strong> plazas</p>`
+                 : ''
+             }`
       }
     </div>
   `);
@@ -802,12 +807,14 @@ function paintHud() {
       });
       res.appendChild(li);
     });
-    const popBtn = $('zz-open-pop');
-    if (popBtn) {
-      popBtn.title = `Población ${pop.total}/${cap}`;
-      popBtn.setAttribute('aria-label', `Población ${pop.total} de ${cap}`);
-    }
   }
+  const popBtn = $('zz-open-pop');
+  if (popBtn) {
+    popBtn.title = `Población ${pop.total} · Capacidad de vivienda ${cap}`;
+    popBtn.setAttribute('aria-label', `Población ${pop.total} de ${cap} plazas de vivienda`);
+  }
+  const popLabel = $('zz-pop-label');
+  if (popLabel) popLabel.textContent = 'hab.';
 }
 
 function paintExplorers() {

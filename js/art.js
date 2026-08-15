@@ -43,6 +43,9 @@ export const ZONE_ART = {
 };
 
 export const FOG_ART = 'terrain/fog.webp';
+export const TERRAIN_ART = 'terrain/city.webp';
+/** Patio de colonia pintado (isométrico) — no foto aérea */
+export const COLONY_YARD_ART = 'terrain/colony-yard.webp';
 
 export const PORTRAIT_ART = {
   m: 'portraits/explorer-m.webp',
@@ -59,8 +62,6 @@ export const RES_ART = {
   ammo: 'ui/ammo.webp',
   pop: 'ui/pop.webp',
 };
-
-export const TERRAIN_ART = 'terrain/city.webp';
 
 export function artUrl(rel) {
   if (!rel) return null;

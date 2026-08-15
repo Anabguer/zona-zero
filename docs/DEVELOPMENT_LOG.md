@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.6** + PLAN **2.6**  
 **Fecha:** 2026-08-15  
-**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6** (enmienda arranque/save/tutorial). · **ZZ-010 COMPLETADA → HUMAN_GATE aún PENDIENTE DE REVISIÓN** (sin cambios visuales en esta enmienda). No ZZ-011+.  
+**Estado global:** Contrato **GAME_MASTER 2.6 + PLAN 2.6**. · **ZZ-010 COMPLETADA → HUMAN_GATE PENDIENTE DE REVISIÓN** (RONDA CAMBIOS SOLICITADOS aplicada; sin APROBACIÓN FINAL). No ZZ-011+ / no deploy.  
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -504,6 +504,61 @@ PENDIENTE DE REVISIÓN
 
 ## APROBACIÓN FINAL CHATGPT
 NO
+
+---
+
+## REVISIÓN CHATGPT — RONDA CAMBIOS SOLICITADOS (ZZ-010)
+**RESULTADO:** CAMBIOS SOLICITADOS · **APROBACIÓN FINAL:** NO  
+Dirección artística del edificio HQ **aprobada como referencia**. Colonia física **NO**.  
+Bloqueos: terreno tipo foto/mapa; óvalo negro; marcadores GIS; desktop vacío; escala; HQ workers sin diseño; HUD 3/6 ambiguo.
+
+## RESPUESTA CURSOR — RONDA CAMBIOS SOLICITADOS (ZZ-010)
+
+### 1) Terreno / dirección artística
+- Eliminado `city.webp` del render del mapa D1.
+- Terreno yermo pintado (SVG + grano) + **placa isométrica** `assets/art/terrain/colony-yard.webp` (mismo lenguaje que el HQ).
+- Escenografía no jugable (farm/well/storage/barricade art) solo como lectura de solar/crecimiento; **save sigue con 1 edificio = HQ**.
+
+### 2) Integración del edificio
+- Sin elipse/sombra negra: base tierra/grava (`zz-settle-foundation`) bajo el sprite.
+
+### 3) Elementos extraños
+- Sin calles GIS D1, sin urban blocks D1, sin rutas Maps, sin pads con stroke hexagonal.
+
+### 4–5) Composición y escala
+- Patio con caminos, solares, huerto, pozo, valla/restos: lectura “aquí construiré una colonia”.
+- Zoom D1 ~2.55–2.65; escala HQ ~1.48 cell; props del mismo set de arte.
+
+### 6) Panel Refugio Central / workers
+- **GAME_MASTER 2.6 / Ap. I.1:** HQ `jobs = 0` — “coordinación” no tenía efecto sistémico documentado.
+- `buildings.json` hq L1–L3 → `jobs: 0`.
+- UI: “Estructura pasiva · +N defensa” + “Vivienda: 6 plazas” — **sin** steppers ni “Sin personal — no produce”.
+- Respuestas de diseño: un trabajador en HQ **no hacía nada** definido; con 0 **tampoco** cambiaba producción/defensa documentada → se eliminó staffing hasta diseño explícito.
+
+### 7) HUD 3/6
+- Label `hab.` + title/aria: “Población X · Capacidad de vivienda Y” (harness + play.php + paintHud).
+
+### Autocrítica visual (obligatoria)
+**¿Parece videojuego de construcción/gestión o imagen sobre mapa?** → **Construcción/gestión**: solar isométrico coherente con HQ, pads/huerto/pozo/valla, sin foto aérea.  
+Gate presentado de nuevo para revisión Neni/ChatGPT.
+
+### Archivos
+`js/render-map.js`, `js/art.js`, `css/game.css`, `css/world.css`, `js/main.js`, `play.php`, `dev/harness.html`, `content/buildings.json`, `GAME_MASTER.md`, `assets/art/terrain/colony-yard.webp`, `scripts/review-shots-zz010.mjs`, `docs/review/*`
+
+### Pruebas
+`smoke-d1.mjs` OK · `smoke.mjs` OK
+
+### Capturas (sustituyen set anterior)
+Repo `docs/review/` + Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` (hash contact sheet idéntico).
+
+### ESTADO CURSOR
+COMPLETADA (correcciones aplicadas)
+
+### ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+### APROBACIÓN FINAL CHATGPT
+NO — a la espera de nueva revisión. **PARADO en ZZ-010.** No ZZ-011+ / no deploy.
 
 ---
 

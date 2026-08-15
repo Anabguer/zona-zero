@@ -384,53 +384,153 @@ body.zz-body {
 .zz-map-bldg--mid { fill: #262a2e; opacity: 0.3; }
 .zz-map-bldg--low { fill: #222628; opacity: 0.26; }
 
-/* Patio de colonia — lugar físico, sin círculo GIS */
-.zz-settle-clearing {
-  fill: #3a3228;
-  opacity: 0.22;
+/* Terreno jugable pintado (no foto aérea) */
+.zz-ground-base {
+  stroke: none;
+}
+.zz-ground-grain {
+  fill: #1a1612;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.zz-ground-camp-halo {
+  fill: #2e281e;
+  opacity: 0.5;
   stroke: none;
   pointer-events: none;
 }
-.zz-settle-clearing-edge {
-  fill: #2a2620;
-  opacity: 0.18;
+.zz-ground-dirt-far {
+  fill: #221e18;
+  opacity: 0.35;
+  stroke: none;
+}
+.zz-ground-ruin-wall {
+  fill: #2e2a26;
+  opacity: 0.48;
+  stroke: none;
+}
+.zz-ground-rubble {
+  fill: #32302c;
+  opacity: 0.4;
+  stroke: none;
+}
+
+/* Patio colonia */
+.zz-settle-terrace {
+  opacity: 0.95;
   stroke: none;
   pointer-events: none;
 }
-.zz-settle-future-plot {
+.zz-settle-terrace-rim {
+  fill: #1e1a14;
+  opacity: 0.45;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-build-pad {
+  fill: #4a4034;
+  opacity: 0.55;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-build-pad-rim {
   display: none !important;
+}
+.zz-settle-gravel-bit {
+  fill: #5a5248;
+  opacity: 0.45;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-path-strip {
+  fill: #5a4c3a;
+  opacity: 0.58;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-garden {
+  fill: #2a281c;
+  opacity: 0.75;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-garden-furrow {
+  stroke: #1a1810;
+  stroke-width: 0.28;
+  opacity: 0.65;
+  pointer-events: none;
+}
+.zz-settle-well-rim,
+.zz-settle-well-stone {
+  fill: #4a4640;
+  opacity: 0.85;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-well-hole {
+  fill: #0e1014;
+  opacity: 0.88;
+  pointer-events: none;
+}
+.zz-settle-stake {
+  fill: #3a3224;
+  opacity: 0.8;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-ruin-wall {
+  fill: #35302a;
+  opacity: 0.72;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-foundation {
+  fill: #3c342c;
+  opacity: 0.92;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-foundation-gravel {
+  fill: #524a40;
+  opacity: 0.65;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-scrub {
+  fill: #243024;
+  opacity: 0.5;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-yard-art,
+.zz-settle-scenery {
+  pointer-events: none;
 }
 .zz-settle-yard-patch {
   display: none !important;
 }
 .zz-settle-rubble {
-  fill: #2a2824;
-  opacity: 0.4;
+  fill: #2c2824;
+  opacity: 0.55;
   stroke: none;
   pointer-events: none;
 }
 .zz-settle-fence-seg {
-  stroke: #4a4034;
-  stroke-width: 0.3;
+  stroke: #5a5040;
+  stroke-width: 0.45;
   stroke-linecap: round;
-  opacity: 0.45;
+  opacity: 0.65;
   pointer-events: none;
 }
-.zz-prop-crate { fill: #3a3228; opacity: 0.7; }
-.zz-prop-barrel { fill: #2e3a40; opacity: 0.65; }
-.zz-prop-fire-glow { fill: #c06020; opacity: 0.35; }
-.zz-prop-fire { fill: #e08030; opacity: 0.7; }
-.zz-settle-path-strip {
-  fill: #3a342c;
-  opacity: 0.28;
-  stroke: none;
-  pointer-events: none;
-}
+.zz-prop-crate { fill: #4a3e30; opacity: 0.9; }
+.zz-prop-barrel { fill: #2e3a42; opacity: 0.85; }
+.zz-prop-fire-glow { fill: #c06020; opacity: 0.45; }
+.zz-prop-fire { fill: #e08030; opacity: 0.8; }
 .zz-settle-path-dirt {
-  stroke: #4a4034;
-  stroke-width: 0.7;
+  stroke: #564838;
+  stroke-width: 0.75;
   stroke-linecap: round;
-  opacity: 0.32;
+  opacity: 0.4;
   pointer-events: none;
 }
 .zz-settle-path-approach {
