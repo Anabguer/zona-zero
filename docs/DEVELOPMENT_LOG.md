@@ -804,7 +804,7 @@ Ver feedback HUMAN_GATE R1 (presentaci√≥n intro, no rehacer portada/ZZ-010/ZZ-01
 Review regenerada + Drive. Smoke boot/d1 OK.
 
 ## COMMIT
-(pendiente en este cierre R2)
+`f18a872` ó fix(ZZ-008) intro R2 arte + ritmo
 
 ## ESTADO CURSOR
 COMPLETADA
