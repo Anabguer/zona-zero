@@ -68,6 +68,7 @@ assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo
 assert(onboardingStatus(state)?.step?.id === 'need_food', 'need_food contextual');
 assert(onboardingStatus(state)?.step?.highlight === 'build', 'highlight construir');
 assert(!onboardingStatus(state)?.step?.cta, 'sin CTA Continuar');
+assert(/Núcleo|huerto/i.test(onboardingStatus(state)?.step?.text || ''), 'tip menciona Núcleo/huerto');
 
 function free() {
   const cx = Math.floor(state.base.w / 2);

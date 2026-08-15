@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.7** + PLAN **2.7**
 **Fecha:** 2026-08-15  
-**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **APROBADA**. · ZZ-019 **COMPLETADA · HUMAN_GATE · PENDIENTE DE REVISIÓN**. · ZZ-012 bloqueada hasta ZZ-019 APROBADA. No deploy.
+**Estado global:** ZZ-016 **APROBADA**. · ZZ-017 **APROBADA**. · ZZ-018 **APROBADA**. · ZZ-019 **APROBADA**. · ZZ-012 **COMPLETADA · PENDIENTE DE REVISIÓN** (HUMAN_GATE). No deploy. No ZZ-013.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -182,13 +182,13 @@ OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT.**
 IMPLEMENTATION_PLAN 2.7 · B0 · **HUMAN_GATE YES** · deps ZZ-018 APROBADA + ZZ-016
 
 ## ESTADO CURSOR
-COMPLETADA. **PARADO** — no ZZ-012 ni fases siguientes.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ## CAMBIOS
 - `js/build-place.js`: snap invisible, ghost cell, validación, freeCells.
@@ -205,17 +205,57 @@ NO
 4. ¿Snap invisible sin GIS? Sí (sin celdas pintadas).
 5. ¿3 huertos distintos? Sí (evidencia 08).
 6. ¿Sin espacio físico demostrable? Sí (smoke).
-7. ¿Fantasía B0 (colonia en mundo)? Parcial-dependiente de ZZ-018; construcción encaja en sectores recuperados.
-8. ¿Deudas? Ghost SVG aún simple; drag en touch real a validar en device; onboarding copy actualizada.
+7. ¿Fantasía B0 (colonia en mundo)? Validada con ZZ-018+019.
+8. **Deudas no bloqueantes (aceptadas):** ghost art sencillo; drag táctil fino en device; props/HUD/dock posteriores.
 
 ## EVIDENCIA
-`docs/review/` + Drive `Review\` + `review-contact-sheet.jpg`
+`docs/review/` (histórico en git) · Drive.
 
 ## COMMIT
 `9e5c0cb` — feat(ZZ-019): construcción semilibre ghost + ✓/✕ (HUMAN_GATE)
+Registro: `b924e2e`.
 
 ## Sync Drive/GitHub
-Masters + Review. **No deploy. PARAR.**
+OK. **Cerrada formalmente 2026-08-16 · Neni+ChatGPT · HUMAN_GATE espacial B0 APROBADO.**
+Bloqueo ZZ-012 **levantado**.
+
+---
+
+# FASE ZZ-012 — Tutorial D1 contextual landscape (HUMAN_GATE · retrofit 2.7)
+
+IMPLEMENTATION_PLAN 2.7 · B · **HUMAN_GATE YES** · deps ZZ-019 APROBADA + ZZ-008
+
+## ESTADO CURSOR
+COMPLETADA (código + evidencias). **PARADO** — no ZZ-013.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN
+
+## APROBACIÓN FINAL CHATGPT
+NO
+
+## CAMBIOS
+- `js/onboarding.js`: tips landscape/Núcleo; `coachMessage()` en modo ghost+✓; sin cascada Continuar.
+- `js/main.js`: coach pulsa Construir / ✓ / Avanzar día; ayuda §21.3 (ghost, pan, recuperar).
+- Cache `?v=31` (play + harness-zz).
+- Tests: `smoke-d1` (flujo need_food→ready + tip Núcleo).
+- Review: 10 tomas + contact sheet → `docs/review/` + Drive.
+
+## AUTOCRÍTICA
+1. ¿Una pista a la vez y avance por acción? Sí (GUIDE_STEPS sin CTA Continuar).
+2. ¿Tips asumen landscape/sectores/✓? Sí (Núcleo + ghost+✓ en buildMode).
+3. ¿Ayuda filtrada §21.3? Sí (solo acciones ya disponibles + ghost/pan).
+4. ¿Legible en 844×390? Evidencia review; tip largo en ghost puede apretar en pantallas bajas.
+5. Deuda: copy aún puede refinarse; no reabre B0 espacial.
+
+## EVIDENCIA
+`docs/review/` · Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` · `review-contact-sheet.jpg`.
+
+## COMMIT
+_(se rellena tras commit)_
+
+## Sync Drive/GitHub
+Pendiente sync masters + push.
 
 ---
 

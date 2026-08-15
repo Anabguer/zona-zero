@@ -1,11 +1,12 @@
 /**
- * ZZ-012 — Tutorial contextual en el mundo (§31.4).
+ * ZZ-012 — Tutorial contextual en el mundo landscape (§31.4 · retrofit 2.7).
  * Una pista a la vez; avanza al completar la acción; sin cascada Continuar.
+ * Asume: landscape + sectores recuperados + ghost + ✓ confirmar.
  */
 export const GUIDE_STEPS = [
   {
     id: 'need_food',
-    text: 'Las reservas no durarán. Necesitamos una fuente estable de comida.',
+    text: 'Las reservas no durarán. Construí un huerto en el terreno que ya controlamos (Núcleo).',
     highlight: 'build',
     suggestBuild: 'farm',
     wait: 'hasFarm',
@@ -17,7 +18,7 @@ export const GUIDE_STEPS = [
   },
   {
     id: 'need_water',
-    text: 'También hace falta agua. Construid un pozo.',
+    text: 'También hace falta agua. Construid un pozo en el Núcleo recuperado.',
     highlight: 'build',
     suggestBuild: 'well',
     wait: 'hasWell',
@@ -147,4 +148,14 @@ export function markGuideExplored(state) {
 export function suggestedBuildType(state) {
   const st = onboardingStatus(state);
   return st?.step?.suggestBuild || null;
+}
+
+/** Texto coach efectivo (landscape / ghost / ✓). */
+export function coachMessage(state) {
+  const st = onboardingStatus(state);
+  if (!st) return null;
+  if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
+    return 'Arrastrá el fantasma por el Núcleo y confirmá con ✓ Construir. Cancelá con ✕ si os arrepentís.';
+  }
+  return st.step.text;
 }

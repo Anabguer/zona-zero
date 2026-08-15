@@ -79,6 +79,7 @@ import {
   markGuideExplored,
   maybeRevealEarlyLandmarks,
   suggestedBuildType,
+  coachMessage,
 } from './onboarding.js';
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
@@ -1224,8 +1225,10 @@ function paintCoach() {
   const cta = $('zz-coach-next');
   const buildBtn = $('zz-open-build');
   const advanceBtn = $('zz-advance');
+  const confirmBtn = $('zz-build-ok');
   if (buildBtn) buildBtn.classList.remove('is-guide-pulse');
   if (advanceBtn) advanceBtn.classList.remove('is-guide-pulse');
+  if (confirmBtn) confirmBtn.classList.remove('is-guide-pulse');
   if (!card || !text) return;
   ensureOnboarding(state);
   checkOnboardingProgress(state);
@@ -1240,13 +1243,12 @@ function paintCoach() {
   }
   card.hidden = false;
   card.classList.add('zz-coach-card--tip');
-  let msg = st.step.text;
-  if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
-    msg = 'Arrastrá el fantasma y confirmá con ✓ Construir.';
-  }
-  text.textContent = msg;
+  text.textContent = coachMessage(state) || st.step.text;
   if (st.step.highlight === 'build' && !state.buildMode) {
     buildBtn?.classList.add('is-guide-pulse');
+  }
+  if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
+    confirmBtn?.classList.add('is-guide-pulse');
   }
   if (st.step.highlight === 'advance') {
     advanceBtn?.classList.add('is-guide-pulse');
@@ -1576,9 +1578,10 @@ function bindChrome() {
     const explored = !!state.flags?.guideExplored || day >= 3;
     const staffed = (state.base?.buildings || []).some((b) => (b.workers || 0) > 0);
     const lines = [
-      '<li><strong>Construir</strong> — coloca edificios en el refugio.</li>',
+      '<li><strong>Construir</strong> — elegís tipo, movéis el fantasma y confirmáis con ✓ (solo en terreno recuperado).</li>',
       '<li><strong>Avanzar día</strong> — produce, consume y resuelve el día.</li>',
-      '<li><strong>Recentrar / zoom</strong> — mirad el refugio de cerca.</li>',
+      '<li><strong>Pan / zoom / recentrar</strong> — la colonia es mayor que la pantalla.</li>',
+      '<li><strong>Recuperar territorio</strong> — en Más: ampliá sectores colindantes cuando toque.</li>',
     ];
     if (staffed || state.flags?.onboardingDone) {
       lines.push('<li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>');
