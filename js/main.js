@@ -12,6 +12,7 @@ import {
   migrateState,
   diaryEntries,
 } from './state.js';
+import { playableBuildingDefs, isV1PlayableBuilding } from './v1-catalog.js';
 import {
   advanceDay,
   startExpedition,
@@ -326,6 +327,10 @@ function handleSheetAction(action, btn) {
   }
   if (action === 'build-pick') {
     const type = btn.getAttribute('data-build');
+    if (!isV1PlayableBuilding(type) || !content.buildings[type]) {
+      toast('Edificio no disponible', 'warn');
+      return;
+    }
     const def = content.buildings[type];
     if (!canAfford(state, def?.cost)) {
       toast('Faltan recursos', 'warn');
@@ -927,7 +932,7 @@ function openZoneSheet(zoneId) {
 
 function openBuildSheet() {
   const suggest = suggestedBuildType(state);
-  const list = Object.values(content.buildings)
+  const list = playableBuildingDefs(content.buildings)
     .filter((b) => (b.minEra || 0) <= state.era)
     .filter((b) => {
       if (b.upgradeFrom) {
@@ -2418,6 +2423,7 @@ export async function bootGame(opts) {
       return r;
     },
     startBuild: (type) => {
+      if (!isV1PlayableBuilding(type) || !content.buildings[type]) return null;
       state.buildMode = type;
       state.uiMode = 'build';
       state.buildGhost = null;

@@ -192,6 +192,7 @@ export function resolveVisualLevel(type) {
     armory: 2,
     command: 2,
     lab: 2,
+    // solar/generator: retirados catálogo v1; keys solo por si llega save pre-migrate
     solar: 2,
     expedition_center: 2,
   };
@@ -286,6 +287,7 @@ export function paintBuildingGlyph(g, type, level = 1) {
     expedition_center: paintExpedition,
     garage: paintGarage,
     command: paintCommand,
+    // JUSTIFICADO legacy: painters por si un frame pre-migrate; no están en catálogo v1
     generator: paintGenerator,
     solar: paintSolar,
     tech_bench: paintTechBench,

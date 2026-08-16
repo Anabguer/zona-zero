@@ -585,44 +585,6 @@
     "requiresBuilding": "hq_central_l1",
     "icon": "command"
   },
-  "generator": {
-    "id": "generator",
-    "name": "Generador",
-    "desc": "Energía diésel. Reduce el consumo diario de combustible neto.",
-    "cost": {
-      "metal": 8,
-      "fuel": 2
-    },
-    "category": "energy",
-    "w": 1,
-    "h": 1,
-    "max": 3,
-    "jobs": 1,
-    "energy": 4,
-    "fuelSave": 1,
-    "minEra": 0,
-    "requires": [],
-    "icon": "generator"
-  },
-  "solar": {
-    "id": "solar",
-    "name": "Placas solares",
-    "desc": "Energía limpia. Menos dependencia del diésel.",
-    "cost": {
-      "metal": 10,
-      "wood": 2
-    },
-    "category": "energy",
-    "w": 1,
-    "h": 1,
-    "max": 4,
-    "jobs": 1,
-    "energy": 3,
-    "fuelSave": 1,
-    "minEra": 1,
-    "requires": [],
-    "icon": "solar"
-  },
   "tech_bench": {
     "id": "tech_bench",
     "name": "Banco técnico",

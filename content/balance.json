@@ -144,7 +144,7 @@
   },
   "deprecatedV1": {
     "electricity": true,
-    "note": "generator/solar/needEnergy/energyDemand fuera de alcance v1 (GM 2.5). Remoción código en fases P0 posteriores."
+    "note": "ZZ-183: generator/solar eliminados del catálogo buildings.json; migrate legacy→storage; needEnergy:false; sin state.energy activo."
   },
   "victory": {
     "minPop": 40,

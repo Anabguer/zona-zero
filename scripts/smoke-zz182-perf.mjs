@@ -22,6 +22,8 @@ assert(bal.ambientLife?.enabled === true, 'ambientLife enabled');
 assert((bal.ambientLife?.maxSprites || 0) <= 16, 'maxSprites ≤16');
 assert(bal.victory?.needEnergy === false, 'needEnergy false');
 assert((bal.saveVersion || 0) >= 7, 'saveVersion ≥7');
+assert(!loadJson('buildings.json').generator, 'CATÁLOGO: generator NO disponible');
+assert(!loadJson('buildings.json').solar, 'CATÁLOGO: solar NO disponible');
 
 const { ambientSpriteBudget, planAmbientFigures } = await import(
   pathToFileURL(join(root, 'js', 'ambient-life.js')).href

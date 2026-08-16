@@ -32,6 +32,7 @@ import {
 } from './explorers.js';
 import { runDirector, applyEventEffects } from './director.js';
 import { tickOutbreak, medicalBeds, healthSemaphore } from './outbreaks.js';
+import { isV1PlayableBuilding } from './v1-catalog.js';
 import {
   resolveBaseAttack,
   schedulePendingAttack,
@@ -134,6 +135,9 @@ export function payCost(state, cost) {
 }
 
 export function placeBuilding(state, content, type, x, y) {
+  if (!isV1PlayableBuilding(type)) {
+    return { ok: false, error: 'Edificio no disponible (fuera de alcance v1)' };
+  }
   const def = content.buildings[type];
   if (!def) return { ok: false, error: 'Tipo desconocido' };
   if (state.flags.defeated) return { ok: false, error: 'Partida terminada' };

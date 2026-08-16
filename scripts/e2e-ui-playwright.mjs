@@ -187,6 +187,13 @@ async function runViewport(browser, port, viewport, label) {
   });
   const buildChoices = await page.locator('#zz-sheet-body button, #zz-sheet-body .zz-build-btn, #zz-sheet-body [data-build]').count();
   assert(sheetOpen || buildChoices >= 1, `ficha construir abierta (sheet=${sheetOpen}, btns=${buildChoices})`);
+  const noElectric = await page.evaluate(() => {
+    const body = document.getElementById('zz-sheet-body');
+    const text = (body?.textContent || '').toLowerCase();
+    const nodes = [...(body?.querySelectorAll('[data-build]') || [])].map((n) => n.getAttribute('data-build'));
+    return !nodes.includes('generator') && !nodes.includes('solar') && !/generador|placas solares/.test(text);
+  });
+  assert(noElectric, 'CATÁLOGO UI: generator/solar NO en ficha construir');
   const closeSheet = page.locator('#zz-sheet-close');
   if ((await closeSheet.count()) && (await closeSheet.isVisible().catch(() => false))) {
     await closeSheet.click().catch(() => {});
