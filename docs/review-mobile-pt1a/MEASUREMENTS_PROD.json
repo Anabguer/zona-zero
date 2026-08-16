@@ -1,0 +1,71 @@
+{
+  "measure": {
+    "inner": {
+      "w": 800,
+      "h": 360
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 800
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 800
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 21.6,
+    "topRowDisplay": "none",
+    "title": "Zona Zero",
+    "standalone": false,
+    "hasManifestLink": true
+  },
+  "standaloneClass": {
+    "chromeOwnPct": 21.5,
+    "hud": {
+      "h": 37.2
+    },
+    "dock": {
+      "h": 40.1
+    }
+  },
+  "manifest": {
+    "status": 200,
+    "href": "https://intocables13.com/juegos/zona-zero/manifest.webmanifest?v=43",
+    "json": {
+      "name": "Zona Zero",
+      "short_name": "Zona Zero",
+      "description": "Supervivencia postapocalíptica. Gestiona el refugio, explora y sobrevive.",
+      "id": "/juegos/zona-zero/",
+      "start_url": "/juegos/zona-zero/?source=pwa",
+      "scope": "/juegos/zona-zero/",
+      "display": "standalone",
+      "orientation": "landscape",
+      "background_color": "#12100c",
+      "theme_color": "#12100c",
+      "lang": "es",
+      "categories": [
+        "games"
+      ],
+      "icons": [
+        {
+          "src": "/juegos/zona-zero/assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        },
+        {
+          "src": "/juegos/zona-zero/assets/icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "any"
+        },
+        {
+          "src": "/juegos/zona-zero/assets/icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "maskable"
+        }
+      ]
+    }
+  }
+}

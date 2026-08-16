@@ -42,10 +42,12 @@ clearImages(drive);
 const shots = [
   { file: '02-before-hud-800x360.png', title: 'BEFORE · 800×360 browser' },
   { file: '01-before-hud-844x390.png', title: 'BEFORE · 844×390' },
-  { file: '10-after-world-800x360.png', title: 'AFTER · 800×360 compact B' },
-  { file: '10-after-world-740x360.png', title: 'AFTER · 740×360' },
-  { file: '11-after-coach-800x360.png', title: 'AFTER · coach compacto' },
-  { file: '12-hub-logo-first.png', title: 'Portada logo-first' },
+  { file: '10-after-world-800x360.png', title: 'AFTER harness · 800×360' },
+  { file: '21-prod-play-800x360.png', title: 'AFTER prod · 800×360' },
+  { file: '23-prod-standalone-class-800x360.png', title: 'AFTER · clase standalone' },
+  { file: '20-prod-hub-800x360.png', title: 'Portada logo-first · prod' },
+  { file: '22-prod-mas-800x360.png', title: 'Más · accesos compactos' },
+  { file: '11-after-coach-800x360.png', title: 'Coach compacto' },
 ];
 
 const gallery = [];
