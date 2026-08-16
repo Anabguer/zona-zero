@@ -37,6 +37,7 @@ export async function loadContent() {
     'factions',
     'eras',
     'locations',
+    'missions',
   ];
   const files = await Promise.all(
     names.map((n) =>
@@ -57,6 +58,7 @@ export async function loadContent() {
     factionsDoc,
     erasDoc,
     locationsDoc,
+    missionsDoc,
   ] = files;
   const zonesDoc = {
     zones: (locationsDoc.seedLayout || []).map((z) => ({
@@ -78,6 +80,7 @@ export async function loadContent() {
     factionsDoc,
     erasDoc,
     locationsDoc,
+    missionsDoc,
     zonesDoc,
   };
 }
@@ -205,6 +208,14 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     lastDayBrief: null,
     equipment: { weapon: 'none', armor: 'none', vehicleId: null },
     vehiclesOwned: [],
+    vehicleMeta: {},
+    radio: { signals: [], contacts: [], lastSignalDay: 0 },
+    missions: {
+      active: [],
+      completed: [],
+      memory: { encounters: [], placeOutcomes: [], lastMissionIds: [] },
+      cooldowns: {},
+    },
     research: { unlocked: [], active: null, progress: 0 },
     factions,
     season: balance.seasons?.startSeason || 'autumn',
@@ -283,6 +294,16 @@ export function migrateState(state, content) {
   if (next.era == null) next.era = 0;
   if (!next.research) next.research = { unlocked: [], active: null, progress: 0 };
   if (!next.vehiclesOwned) next.vehiclesOwned = [];
+  if (!next.vehicleMeta) next.vehicleMeta = {};
+  if (!next.radio) next.radio = { signals: [], contacts: [], lastSignalDay: 0 };
+  if (!next.missions) {
+    next.missions = {
+      active: [],
+      completed: [],
+      memory: { encounters: [], placeOutcomes: [], lastMissionIds: [] },
+      cooldowns: {},
+    };
+  }
   if (!next.equipment) next.equipment = { weapon: 'none', armor: 'none', vehicleId: null };
   if (!next.factions) next.factions = [];
   if (!next.energy) next.energy = { produced: 0, demand: 0 };

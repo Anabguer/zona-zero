@@ -28,10 +28,14 @@ import {
   syncLaborFromColony,
   startRepair,
   repairQuote,
+  repairVehicle,
   buildingStructuralState,
   controlBenefits,
   zoneStateLabel,
 } from './sim.js';
+import { vehicleEffectSummary, ensureVehicleMeta } from './vehicles.js';
+import { hasRadio, hasExpeditionCenter, ensureRadioState } from './radio.js';
+import { ensureMissions } from './missions.js';
 import {
   buildingsNeedingRepair,
   structuralStateLabel,
@@ -424,6 +428,30 @@ function handleSheetAction(action, btn) {
     paint();
     return;
   }
+  if (action === 'repair-vehicle') {
+    const r = repairVehicle(state, content, btn.getAttribute('data-veh'));
+    if (!r.ok) toast(r.error, 'warn');
+    else {
+      toast('Vehículo reparado (−metal/−fuel)', 'good');
+      scheduleSave();
+    }
+    openMoreSheet();
+    paint();
+    return;
+  }
+  if (action === 'pick-vehicle') {
+    const exId = btn.getAttribute('data-ex');
+    const veh = btn.getAttribute('data-veh') || null;
+    const e = state.explorers.find((x) => x.id === exId);
+    if (e) {
+      e.vehicleId = veh === 'none' || !veh ? null : veh;
+      scheduleSave();
+      const zid = state.selectedZoneId;
+      if (zid) openZoneSheet(zid);
+      else openExplorerSheet(exId);
+    }
+    return;
+  }
   if (action === 'equip-weapon') {
     const id = btn.getAttribute('data-id');
     const e = state.explorers.find((x) => x.id === id);
@@ -783,12 +811,27 @@ function openZoneSheet(zoneId) {
                (preview.fuel || 0) > 0
                  ? `Combustible: ${preview.fuel}`
                  : 'A pie · sin combustible'
+             }${preview.vehicleEffects ? ` · ${escapeHtml(preview.vehicleEffects)}` : ''}${
+               preview.centerLabel ? ` · ${escapeHtml(preview.centerLabel)}` : ''
              }${preview.note ? ` · ${escapeHtml(preview.note)}` : ''}</p>
              <div class="zz-ctx__loot">
                <span class="zz-muted">${preview.residual ? 'Botín residual' : 'Botín posible'}</span>
                <div class="zz-loot-row">${lootIcons || '<span>¿?</span>'}</div>
              </div>
              <p class="zz-ctx__explorer">Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · nivel ${ex.level || 1}</p>
+             <p class="zz-muted" style="font-size:0.78rem;margin:0.25rem 0">Vehículo:</p>
+             <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem">
+               <button type="button" class="zz-btn zz-btn--compact ${!ex.vehicleId ? 'zz-btn--primary' : ''}" data-action="pick-vehicle" data-ex="${ex.id}" data-veh="none">A pie</button>
+               ${(state.vehiclesOwned || [])
+                 .map((vid) => {
+                   const v = (content.vehiclesDoc?.vehicles || []).find((x) => x.id === vid);
+                   if (!v) return '';
+                   const meta = ensureVehicleMeta(state, vid);
+                   const broken = meta.needsRepair;
+                   return `<button type="button" class="zz-btn zz-btn--compact ${ex.vehicleId === vid ? 'zz-btn--primary' : ''}" data-action="pick-vehicle" data-ex="${ex.id}" data-veh="${vid}" ${broken ? 'disabled' : ''}>${escapeHtml(v.name)}${broken ? ' (reparar)' : ''}</button>`;
+                 })
+                 .join('')}
+             </div>
              <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
                ex.status !== 'ready' ? 'disabled' : ''
              }>Enviar explorador</button>`
@@ -974,11 +1017,40 @@ function openMoreSheet() {
   const vehs = (content.vehiclesDoc?.vehicles || [])
     .map((v) => {
       const owned = (state.vehiclesOwned || []).includes(v.id);
+      const meta = owned ? ensureVehicleMeta(state, v.id) : null;
+      const needTech = (content.researchDoc
+        ? Object.values(content.researchDoc.branches || {}).flatMap((b) => b.techs || [])
+        : []
+      ).find((t) => t.effects?.vehicleUnlock === v.id);
+      const techOk = !needTech || (state.research.unlocked || []).includes(needTech.id);
+      const garageOk = v.id === 'bike' || state.base.buildings.some((b) => b.type === 'garage' && b.hp > 0);
+      const locked = owned || (v.minEra || 0) > state.era || !techOk || !garageOk;
+      let why = '';
+      if (owned && meta?.needsRepair) {
+        return `<button type="button" class="zz-btn" data-action="repair-vehicle" data-veh="${v.id}">Reparar ${escapeHtml(v.name)} (metal+fuel)</button>`;
+      }
+      if (owned) why = `(ok · ${vehicleEffectSummary(v)})`;
+      else if ((v.minEra || 0) > state.era) why = '(era)';
+      else if (!techOk) why = '(tech)';
+      else if (!garageOk) why = '(garaje)';
       return `<button type="button" class="zz-btn" data-action="buy-vehicle" data-veh="${v.id}" ${
-        owned || (v.minEra || 0) > state.era ? 'disabled' : ''
-      }>${escapeHtml(v.name)} ${owned ? '(ok)' : ''}</button>`;
+        locked && !owned ? 'disabled' : owned ? 'disabled' : ''
+      }>${escapeHtml(v.name)} ${why}</button>`;
     })
     .join(' ');
+
+  ensureMissions(state);
+  ensureRadioState(state);
+  const missionHtml = (state.missions.active || [])
+    .map(
+      (m) =>
+        `<li><strong>${escapeHtml(m.title)}</strong> — ${escapeHtml(m.detail || m.objective)} (${m.progress || 0}/${m.target || 1})</li>`
+    )
+    .join('');
+  const signalHtml = (state.radio.signals || [])
+    .slice(0, 4)
+    .map((s) => `<li>D${s.day}: <strong>${escapeHtml(s.title)}</strong> — ${escapeHtml(s.detail || '')}</li>`)
+    .join('');
 
   openSheet(`
     <h2>Más</h2>
@@ -993,7 +1065,22 @@ function openMoreSheet() {
     <p>Exploradores ${living}/${slots}.
       <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
-    <p class="zz-muted" style="font-size:0.8rem">${slotHint(slots, living)}</p>
+    <p class="zz-muted" style="font-size:0.8rem">${slotHint(slots, living)}${
+      hasExpeditionCenter(state) ? ' · Centro: prep. slots activa' : ''
+    }</p>
+    <h3 style="font-family:var(--zz-display)">Misiones</h3>
+    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.82rem">${
+      missionHtml || '<li class="zz-muted">Sin objetivo activo</li>'
+    }</ul>
+    <h3 style="font-family:var(--zz-display)">Radio</h3>
+    <p class="zz-muted" style="font-size:0.8rem">${
+      hasRadio(state)
+        ? 'Antena activa: señales e historias (no +% invisible).'
+        : 'Construí una radio para señales, SOS y contactos.'
+    }</p>
+    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.82rem">${
+      signalHtml || '<li class="zz-muted">Sin señales recientes</li>'
+    }</ul>
     <h3 style="font-family:var(--zz-display)">Estabilidad</h3>
     <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
       ${Math.round(state.stability)}/100 ·

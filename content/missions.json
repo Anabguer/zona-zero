@@ -1,0 +1,119 @@
+{
+  "missions": [
+    {
+      "id": "guide_discover",
+      "type": "guide",
+      "title": "Mirad alrededor",
+      "objective": "discover_zones",
+      "detail": "Quiero conocer dos lugares cercanos antes de expandirme.",
+      "benefit": "Quiero mapa, no niebla.",
+      "target": 2,
+      "minDay": 1,
+      "once": true,
+      "reward": { "food": 2, "wood": 2 }
+    },
+    {
+      "id": "guide_control",
+      "type": "guide",
+      "title": "Asegurar un hito",
+      "objective": "control_zone",
+      "detail": "Quiero controlar un landmark para loot residual y perímetro.",
+      "benefit": "Quiero un lugar que importe.",
+      "target": 1,
+      "minDay": 3,
+      "once": true,
+      "reward": { "metal": 2, "ammo": 1 }
+    },
+    {
+      "id": "need_food_run",
+      "type": "contextual",
+      "when": "food_low",
+      "title": "Despensa vacía",
+      "objective": "loot_food",
+      "zoneType": "supermarket",
+      "detail": "Quiero comida de un supermercado, no de cualquier sitio.",
+      "benefit": "Quiero llenar la cocina.",
+      "target": 1,
+      "cooldown": 10,
+      "reward": { "food": 3 }
+    },
+    {
+      "id": "need_water_run",
+      "type": "contextual",
+      "when": "water_low",
+      "title": "Sed en la colonia",
+      "objective": "loot_water",
+      "detail": "Quiero agua usable ya.",
+      "benefit": "Quiero pozos y reservas, no sed.",
+      "target": 1,
+      "cooldown": 10,
+      "reward": { "water": 4 }
+    },
+    {
+      "id": "need_med_run",
+      "type": "contextual",
+      "when": "med_low",
+      "title": "Falta botiquín",
+      "objective": "loot_medicine",
+      "zoneType": "pharmacy",
+      "detail": "Quiero medicinas de una farmacia — no es lo mismo que un súper.",
+      "benefit": "Quiero curar sin improvisar.",
+      "target": 1,
+      "cooldown": 12,
+      "reward": { "medicine": 2 }
+    },
+    {
+      "id": "radio_sos_mission",
+      "type": "radio",
+      "requiresRadio": true,
+      "when": "has_radio",
+      "title": "SOS en la banda",
+      "objective": "visit_tagged",
+      "detail": "Una llamada pide ayuda. Puede ser trampa o aliados.",
+      "benefit": "Quiero responder… o no.",
+      "target": 1,
+      "minDay": 6,
+      "cooldown": 14,
+      "reward": { "parts": 1, "food": 2 }
+    },
+    {
+      "id": "historia_map_oral",
+      "type": "historia",
+      "requiresRadio": true,
+      "title": "Mapa oral",
+      "objective": "discover_zones",
+      "detail": "Alguien describe un edificio intacto al oeste.",
+      "benefit": "Quiero ese rumor confirmado en el mapa.",
+      "target": 1,
+      "minDay": 8,
+      "cooldown": 16,
+      "reward": { "tools": 1 }
+    },
+    {
+      "id": "crisis_perimeter",
+      "type": "crisis",
+      "title": "Perímetro flojo",
+      "objective": "control_zone",
+      "detail": "Tras presión hostil, reconsolidar un borde.",
+      "benefit": "Quiero no perder la frontera.",
+      "target": 1,
+      "minDay": 12,
+      "minEra": 1,
+      "cooldown": 18,
+      "reward": { "ammo": 2, "wood": 3 }
+    },
+    {
+      "id": "ambigua_trade",
+      "type": "ambigua",
+      "requiresRadio": true,
+      "title": "Oferta dudosa",
+      "objective": "visit_tagged",
+      "detail": "Intercambio propuesto por radio. Condiciones turbias.",
+      "benefit": "Quiero decidir con los ojos abiertos.",
+      "target": 1,
+      "minDay": 10,
+      "cooldown": 20,
+      "reward": { "fuel": 2, "metal": 1 }
+    }
+  ]
+}

@@ -75,6 +75,23 @@ import {
   allTechs,
 } from './research.js';
 import { isCellBuildable, tickSectorRecovery, ensureSectors } from './sectors.js';
+import {
+  tripFuelCost,
+  vehicleUsable,
+  markVehicleTrip,
+  repairVehicle,
+  hasGarage,
+  vehicleEffectSummary,
+  findVehicle,
+} from './vehicles.js';
+import { expeditionCenterBonus } from './radio.js';
+import {
+  tickMissions,
+  bumpMissionProgress,
+  pickExpeditionEncounter,
+  applyEncounterChoice,
+  ensureMissions,
+} from './missions.js';
 
 export const RES_LABEL = {
   food: 'comida',
@@ -186,12 +203,14 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   if (gear.weapon === 'improved') risk -= 0.1;
   if (gear.armor && gear.armor !== 'none') risk -= 0.04;
   const vehicleId = explorer.vehicleId || state.equipment?.vehicleId;
-  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === vehicleId);
-  if (veh) risk -= (veh.protection || 0) * 0.02;
+  const veh = findVehicle(content, vehicleId);
+  if (veh && vehicleUsable(state, vehicleId)) risk -= (veh.protection || 0) * 0.02;
   if (state.weather === 'storm' || state.weather === 'fog') risk += 0.08;
   if (zone.state === 'hostile') risk += 0.06;
   if (zone.state === 'contested') risk += 0.1;
   if (zone.state === 'controlled') risk = Math.max(0.08, risk - 0.12);
+  const center = expeditionCenterBonus(state);
+  risk += center.riskDelta || 0;
   risk = clamp(risk, 0.05, 0.95);
   const camp = state.zones.find((z) => z.type === 'camp') || state.zones[0];
   const dist = camp
@@ -202,21 +221,34 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   if (dist > 42) days += 1;
   if (zone.state === 'hostile' || zone.state === 'contested') days += 1;
   if (zone.state === 'unknown') days += 1;
-  if (veh?.speedBonus) days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
-  // Trade-off: saqueo vs control (según skills)
+  if (veh?.speedBonus && vehicleUsable(state, vehicleId)) {
+    days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
+  }
+  if (center.daysDelta) days = Math.max(1, days + center.daysDelta);
   const lootBias = lootSk >= fight + 1;
   const controlBias = explore >= lootSk && !lootBias;
   const hints = lootHintKeys(zone, content);
+  const fuel =
+    veh && vehicleUsable(state, vehicleId)
+      ? tripFuelCost(state, content, vehicleId)
+      : content.balance.expeditionFuelCost ?? 0;
   return {
     risk,
     category: riskCategory(risk),
     days,
-    fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost ?? 0,
+    fuel,
     distance: Math.round(dist),
     lootHint: hints.slice(0, 4),
     residual: zone.state === 'controlled',
     explorerName: explorer.name,
     explorerStatus: explorer.status,
+    vehicleId: vehicleUsable(state, vehicleId) ? vehicleId : null,
+    vehicleLabel: veh && vehicleUsable(state, vehicleId) ? veh.name : 'A pie',
+    vehicleEffects: veh && vehicleUsable(state, vehicleId) ? vehicleEffectSummary(veh) : 'A pie',
+    centerLabel: center.label,
+    slotsHint: center.slotsBonus
+      ? `Slots explorador (centro +${center.slotsBonus})`
+      : null,
     focus: lootBias ? 'saqueo' : controlBias ? 'control' : 'equilibrado',
     note:
       zone.state === 'controlled'
@@ -247,9 +279,14 @@ export function startExpedition(state, content, zoneId, explorerId) {
   if (busyZones.includes(zoneId)) return { ok: false, error: 'Ya hay una expedición a esa zona' };
 
   const preview = expeditionPreview(state, content, zoneId, explorerId);
-  const vehicleId = explorer.vehicleId || state.equipment?.vehicleId || null;
-  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === vehicleId);
-  const payFuel = veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost || 0;
+  let vehicleId = explorer.vehicleId || state.equipment?.vehicleId || null;
+  if (vehicleId && !vehicleUsable(state, vehicleId)) {
+    return { ok: false, error: 'Ese vehículo necesita reparación' };
+  }
+  if (vehicleId && !(state.vehiclesOwned || []).includes(vehicleId)) {
+    vehicleId = null;
+  }
+  const payFuel = tripFuelCost(state, content, vehicleId);
   if (payFuel > 0) {
     if ((state.resources.fuel || 0) < payFuel) return { ok: false, error: `Hace falta ${payFuel} combustible` };
     state.resources.fuel -= payFuel;
@@ -275,7 +312,12 @@ export function startExpedition(state, content, zoneId, explorerId) {
   explorer.status = 'away';
   explorer.expeditionId = exId;
   state.stats.expeditions += 1;
-  pushLog(state, `${explorer.name} parte hacia ${zone.name} (riesgo ${preview.category}).`, 'info');
+  const vehNote = preview.vehicleLabel && preview.vehicleLabel !== 'A pie' ? ` · ${preview.vehicleLabel}` : '';
+  pushLog(
+    state,
+    `${explorer.name} parte hacia ${zone.name} (riesgo ${preview.category}${vehNote}).`,
+    'info'
+  );
   return { ok: true, preview, expeditionId: exId };
 }
 
@@ -339,6 +381,24 @@ function resolveOneExpedition(state, content, ex) {
   const lootSk = explorer.skills.loot || 1;
   const resist = explorer.skills.resist || 1;
 
+  // ZZ-104: placeState × encounter × choice (auto según foco del explorador)
+  const encounter = pickExpeditionEncounter(state, zone, rng);
+  const lootBias = lootSk >= fight + 1;
+  const controlBias = explore >= lootSk && !lootBias;
+  const preferred =
+    encounter.choices.find((c) =>
+      lootBias ? c.id === 'loot' || c.id === 'trust' || c.id === 'fight' : false
+    ) ||
+    encounter.choices.find((c) =>
+      controlBias ? c.id === 'secure' || c.id === 'push' || c.id === 'clear' || c.id === 'hold' : false
+    ) ||
+    encounter.choices[0];
+  const encMods = applyEncounterChoice(preferred);
+  report.encounter = encounter;
+  report.choice = preferred;
+  report.lines.push(`${encounter.text} → ${preferred?.label || 'seguir'}`);
+  pushLog(state, `${explorer.name} en ${zone.name}: ${encounter.text}`, 'info');
+
   let teamPower =
     fight * 5 + explore * 2 + resist * 2 + 4 + (state.resources.ammo || 0) * 0.4;
   if (ex.weapon === 'basic') teamPower += 6;
@@ -347,8 +407,9 @@ function resolveOneExpedition(state, content, ex) {
   if (ex.armor === 'heavy') teamPower += 7;
   const support = Math.min(4, Math.floor((state.population?.labor?.idle || 0) * 0.15));
   teamPower += support * 2;
+  teamPower *= 1 + Math.max(-0.2, Math.min(0.25, -(encMods.riskMod || 0)));
 
-  const enemyPower = 4 + zone.infectedLeft * 3 + zone.risk * 20;
+  const enemyPower = 4 + zone.infectedLeft * 3 + zone.risk * 20 * (1 + (encMods.riskMod || 0));
   let outcome = softenEarlyOutcome(state, resolveCombat(rng, teamPower, enemyPower));
   report.outcome = outcome;
 
@@ -438,13 +499,18 @@ function resolveOneExpedition(state, content, ex) {
     lootMap.food = [0, 2];
     lootMap.metal = [0, 2];
   }
-  const veh = content.vehiclesDoc?.vehicles?.find((v) => v.id === ex.vehicleId);
+  const veh = findVehicle(content, ex.vehicleId);
   const lootFocus = lootSk >= fight + 1;
   const controlFocus = explore >= lootSk && !lootFocus;
-  let cargoBonus = (veh?.cargoBonus || 0) + (lootFocus ? 0.35 : 0) + (zone.risk > 0.5 ? 0.2 : 0);
+  let cargoBonus =
+    (veh?.cargoBonus || 0) +
+    (lootFocus ? 0.35 : 0) +
+    (zone.risk > 0.5 ? 0.2 : 0) +
+    (encMods.lootMod || 0);
   if (outcome === 'pyrrhic') cargoBonus += 0.15;
   if (zone.state === 'controlled') cargoBonus *= 0.5;
   if ((state.research?.unlocked || []).includes('pack_mules')) cargoBonus += 0.15;
+  markVehicleTrip(state, ex.vehicleId);
   const loot = rollLoot(rng, lootMap, cargoBonus);
   if (loot.scrap) {
     loot.metal = (loot.metal || 0) + loot.scrap;
@@ -483,6 +549,7 @@ function resolveOneExpedition(state, content, ex) {
     if (lootFocus) ctrlGain -= 0.08;
     if (outcome === 'clean') ctrlGain += 0.06;
     if (zone.state === 'contested') ctrlGain += 0.1;
+    ctrlGain += encMods.controlMod || 0;
     zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + ctrlGain);
     if (zone.state === 'contested') {
       trySecureContested(state, zone, content, report);
@@ -526,6 +593,38 @@ function resolveOneExpedition(state, content, ex) {
       report.lines.push('Rescatáis a alguien. Población +1.');
     }
   }
+
+  // ZZ-100+: progreso de misiones
+  ensureMissions(state);
+  if (report.revealed?.length) {
+    bumpMissionProgress(state, content, (a) => a.objective === 'discover_zones', report.revealed.length);
+  }
+  if (report.controlled) {
+    bumpMissionProgress(state, content, (a) => a.objective === 'control_zone', 1);
+  }
+  if ((loot.food || 0) > 0) {
+    bumpMissionProgress(
+      state,
+      content,
+      (a) => a.objective === 'loot_food' && (!a.zoneType || a.zoneType === zone.type),
+      1
+    );
+  }
+  if ((loot.water || 0) > 0) {
+    bumpMissionProgress(state, content, (a) => a.objective === 'loot_water', 1);
+  }
+  if ((loot.medicine || 0) > 0) {
+    bumpMissionProgress(
+      state,
+      content,
+      (a) => a.objective === 'loot_medicine' && (!a.zoneType || a.zoneType === zone.type),
+      1
+    );
+  }
+  if (zone.radioTagged || encounter.placeState === 'radio_tagged') {
+    bumpMissionProgress(state, content, (a) => a.objective === 'visit_tagged', 1);
+  }
+
   return report;
 }
 
@@ -926,23 +1025,25 @@ export function startResearch(state, content, techId) {
 }
 
 export function buyVehicle(state, content, vehicleId) {
-  const v = content.vehiclesDoc?.vehicles?.find((x) => x.id === vehicleId);
+  const v = findVehicle(content, vehicleId);
   if (!v) return { ok: false, error: 'Vehículo desconocido' };
   if (state.vehiclesOwned.includes(vehicleId)) return { ok: false, error: 'Ya lo tenéis' };
   if ((v.minEra || 0) > state.era) return { ok: false, error: 'Era insuficiente' };
-  // ZZ-082: vehicleUnlock tech gate
   const needTech = allTechs(content).find((t) => t.effects?.vehicleUnlock === vehicleId);
   if (needTech && !(state.research.unlocked || []).includes(needTech.id)) {
     return { ok: false, error: `Requiere investigación: ${needTech.name}` };
   }
-  const hasGarage = state.base.buildings.some((b) => b.type === 'garage' && b.hp > 0);
-  if (vehicleId !== 'bike' && !hasGarage) return { ok: false, error: 'Hace falta un garaje' };
+  if (vehicleId !== 'bike' && !hasGarage(state)) return { ok: false, error: 'Hace falta un garaje' };
   if (!canAfford(state, v.cost)) return { ok: false, error: 'Recursos insuficientes' };
   payCost(state, v.cost);
   state.vehiclesOwned.push(vehicleId);
+  if (!state.vehicleMeta) state.vehicleMeta = {};
+  state.vehicleMeta[vehicleId] = { trips: 0, needsRepair: false, wear: 0 };
   pushLog(state, `Disponible: ${v.name}.`, 'good');
   return { ok: true };
 }
+
+export { repairVehicle };
 
 export function updateEra(state, content) {
   const eras = content.erasDoc?.eras || [];
@@ -1062,6 +1163,7 @@ export function advanceDay(state, content) {
   healPopulationTick(state, content.balance, content);
   tickOutbreak(state, content);
   tickResearch(state, content);
+  tickMissions(state, content);
   tickBuildingRepairs(state, content);
   {
     const wrng = rngOf(state);

@@ -513,7 +513,7 @@
   "radio": {
     "id": "radio",
     "name": "Radio",
-    "desc": "Escucha señales y contacta supervivientes. Apoyo a exploración.",
+    "desc": "Señales, SOS, rumores y contactos. Crea historias — no un +% invisible.",
     "cost": {
       "metal": 5,
       "wood": 2,
@@ -522,7 +522,7 @@
     "category": "logistics",
     "w": 1,
     "h": 1,
-    "max": 2,
+    "max": 1,
     "jobs": 1,
     "minEra": 0,
     "requires": [],
@@ -531,7 +531,7 @@
   "expedition_center": {
     "id": "expedition_center",
     "name": "Centro de expediciones",
-    "desc": "Planifica salidas: más alcance y mejor organización de escuadras.",
+    "desc": "Logística: riesgo/tiempo visibles en la ficha de salida y prep. de más exploradores.",
     "cost": {
       "wood": 8,
       "metal": 6,
@@ -550,7 +550,7 @@
   "garage": {
     "id": "garage",
     "name": "Garaje",
-    "desc": "Aparcamiento y mantenimiento ligero. Reduce gasto de combustible en rutas.",
+    "desc": "Necesario para coches y superiores. Con staff, ahorra 1 fuel por viaje. Repair con metal+fuel.",
     "cost": {
       "wood": 6,
       "metal": 8,
@@ -561,7 +561,6 @@
     "h": 1,
     "max": 2,
     "jobs": 1,
-    "fuelSave": 1,
     "minEra": 1,
     "requires": [],
     "icon": "garage"

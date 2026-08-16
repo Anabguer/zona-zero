@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…082** hechas · **ZZ-083 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…107** hechas · **ZZ-108 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1368,25 +1368,280 @@ IMPLEMENTATION_PLAN 2.8 · I · **HUMAN_GATE YES** · deps ZZ-082
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Beneficio en lenguaje humano. Sin Energía. Farm D1 sin tech. 1 tech activa. Workers→progreso.
 
 ## HECHO
 - UI Más: beneficio legible por tech; nota staff; bloqueo sin banco.
-- Review 10 tomas + contact sheet (`docs/review/` · Drive Review/).
+- Review 10 tomas + contact sheet.
 - Smoke OK. Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-084** hasta APROBADA ZZ-083.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloque I (ZZ-080…083) validado: banco/lab; workers→progreso; 1 tech activa; farm D1 libre; quarantine pasiva; sin Energía; efectos cableados; UI “Quiero…”. Criterios a conservar: investigar por deseo; efectos reales; staffing tension; una activa; sin Energía; desbloqueos iniciales no artificiales. 22 techs = contenido resultante, no cuota. Deuda visual NO BLOQUEANTE.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-083/`.
+
+## COMMIT
+`8d8d16e`
+
+## PARAR
+No — continuar ZZ-084 (cierre bloque I) → J → J2 → K hasta ZZ-108.
+
+---
+
+# FASE ZZ-084 — Tests suite research + cuarentena pasiva
+
+IMPLEMENTATION_PLAN 2.8 · I · HUMAN_GATE NO · deps ZZ-083 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-108)*
+
+## HECHO
+- Smoke `smoke-zz084`: sin Energía; farm D1; quarantine pasiva sin toggle/−prod.
+- Criterios research (deseo, efectos reales, staffing, 1 activa) conservados.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-090 — Garage + compra vehículos
+
+IMPLEMENTATION_PLAN 2.8 · J · HUMAN_GATE NO
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Garaje gate ≥ coche; bike libre; UI compra con tech/garaje legible; `js/vehicles.js`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-091 — Fuel solo viajes/repair vehicular
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `colonyDailyFuelEnabled: false` intacto; repair metal+fuel (garaje/taller); garage staff −1 fuel/viaje (no calor).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-092 — Efectos speed/cargo/prot
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Preview/resolución: speed→días, cargo→loot, prot→riesgo; resumen UI.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-093 — UI elegir vehículo en expedición
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Picker a pie/vehículo en ficha zona; wear→needsRepair bloquea hasta repair.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-094 — Radio: señales/misiones/contactos
+
+IMPLEMENTATION_PLAN 2.8 · J2 · HUMAN_GATE NO
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Radio max=1; eventos familia radio requieren antena; señales/contactos en state; no +% invisible.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-095 — Centro expediciones: info riesgo/tiempo/slots
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Bonus visible en ficha (riesgo↓/tiempo↓/label); slots 2.º/3.º vía centro+staff.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-096 — QA roles distintos radio≠centro
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Smoke Roles A: radio→señales; centro→números ficha/slots; no duplican función.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-100 — Schema missions + state
+
+IMPLEMENTATION_PLAN 2.8 · K · HUMAN_GATE NO
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `content/missions.json` + `state.missions` + `js/missions.js`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-101 — Misiones guía (pocas)
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Guías discover/control (once).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-102 — Misiones contextuales necesidad
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- food/water/med; farmacia ≠ súper (`zoneType`).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-103 — Misiones radio/historia/crisis/ambiguas
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Tipos radio/historia/crisis/ambigua; oferta con antena + señal.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-104 — Motor expedición combinatorio
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- placeState × encounter × choice (auto por foco explorador) → outcome/mods.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-105 — Pesos/cooldown/memoria/antirrepetición/rareza
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Memoria encounters; cooldowns misión; batch rate <0.55.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-106 — UI objetivo único + recompensas
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Panel Misiones en Más; progreso/recompensa al completar.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-107 — Tests batch muchas expediciones
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `smoke-zz090-108` batch 40 encounters + assertions Roles A / fuel / missions.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-108 — QA misiones/expediciones variedad (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · K · **HUMAN_GATE YES** · deps ZZ-107
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+QA variedad misiones/expediciones + gate. Fuel≠calor. Roles A. Supermercado≠farmacia.
+
+## HECHO
+- Review 10 tomas + contact sheet.
+- Smokes 084 + 090-108 OK.
+- Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
+- Sin deploy · no ZZ-110 hasta APROBADA ZZ-108.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-083. Sin deploy. No ZZ-084.
+Sí — HUMAN_GATE ZZ-108. Sin deploy. No ZZ-110.
 
 ---
 
@@ -1536,24 +1791,24 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-080 | Banco técnico + lab con workers +/- | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-081 | Árbol utilitario sin Energía + quarantine_protocol | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-082 | Cablear efectos reales de cada tech | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-083 | UI research legible (deseo claro) | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-084 | Tests suite research + cuarentena pasiva | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-090 | Garage + compra vehículos | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-091 | Fuel solo viajes/repair vehicular | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-092 | Efectos speed/cargo/prot | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-093 | UI elegir vehículo en expedición | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-094 | Radio: señales/misiones/contactos | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-095 | Centro expediciones: info riesgo/tiempo/slots | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-096 | QA roles distintos radio≠centro | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-100 | Schema missions + state | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-101 | Misiones guía (pocas) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-102 | Misiones contextuales necesidad | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-103 | Misiones radio/historia/crisis/ambiguas | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-104 | Motor expedición combinatorio placeState×encounter×choice×outcome×aftermath | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-105 | Pesos/cooldown/memoria/antirrepetición/rareza | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-106 | UI objetivo único + recompensas | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-107 | Tests batch muchas expediciones (detección repetición) | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-108 | QA misiones/expediciones variedad + gate | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-083 | UI research legible (deseo claro) | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-084 | Tests suite research + cuarentena pasiva | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-090 | Garage + compra vehículos | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-091 | Fuel solo viajes/repair vehicular | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-092 | Efectos speed/cargo/prot | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-093 | UI elegir vehículo en expedición | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-094 | Radio: señales/misiones/contactos | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-095 | Centro expediciones: info riesgo/tiempo/slots | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-096 | QA roles distintos radio≠centro | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-100 | Schema missions + state | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-101 | Misiones guía (pocas) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-102 | Misiones contextuales necesidad | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-103 | Misiones radio/historia/crisis/ambiguas | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-104 | Motor expedición combinatorio | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-105 | Pesos/cooldown/memoria/antirrepetición/rareza | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-106 | UI objetivo único + recompensas | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-107 | Tests batch muchas expediciones | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-108 | QA misiones/expediciones variedad + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-110 | Schema achievements | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-111 | Tracking + persistencia | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-112 | Cablear ≥60 logros (sin generator/solar) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

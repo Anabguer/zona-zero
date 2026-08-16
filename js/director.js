@@ -12,6 +12,7 @@ import {
 } from './state.js';
 import { changePopulation, applyCasualties, workforce } from './population.js';
 import { applyBuildingDamage } from './buildings-damage.js';
+import { radioFamilyWeightMult, hasRadio, pushRadioSignal } from './radio.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) ^ (state.day * 7919));
@@ -104,6 +105,8 @@ function conditionsMet(ev, state, balance) {
     const ok = need.some((t) => state.base.buildings.some((b) => b.type === t && b.hp > 0));
     if (!ok) return false;
   }
+  // ZZ-094: eventos radio requieren antena (historias, no ruido sin edificio)
+  if (ev.family === 'radio' && !hasRadio(state)) return false;
   if (state.day < (state.director.cooldowns?.[ev.id] || 0)) return false;
   if (ev.family && state.day < (state.director.familyCooldowns?.[ev.family] || 0)) return false;
   // Recuperación: bloquear solo crisis graves (int≥4)
@@ -142,6 +145,10 @@ function weightFor(ev, state, balance) {
   // Colonia muy débil: algo más de presión media (no wipe garantizado)
   if ((state.director.force || 0) < 28 && (ev.intensity || 0) === 2) {
     w *= 1.12;
+  }
+  // ZZ-094: familia radio = historias vía antena (no +% invisible)
+  if (ev.family === 'radio') {
+    w *= radioFamilyWeightMult(state);
   }
   return Math.max(0, w);
 }
@@ -222,6 +229,13 @@ function resolveChosenEvent(state, content, chosen, rng) {
   const variant = rng.pick(chosen.variants || [{ text: chosen.name, effects: {} }]);
   const kind = (chosen.intensity || 0) >= 4 ? 'bad' : (chosen.intensity || 0) >= 2 ? 'warn' : 'info';
   pushLog(state, `${chosen.name}: ${variant.text}`, kind);
+  if (chosen.family === 'radio') {
+    pushRadioSignal(state, {
+      title: chosen.name,
+      detail: variant.text,
+      kind: /sos|auxilio|llamada/i.test(chosen.name + variant.text) ? 'sos' : 'rumor',
+    });
+  }
   const applied = applyEventEffects(state, content, variant.effects || {}, rng);
   afterEvent(state, content, chosen);
   return { event: chosen, variant, attackIntensity: applied.attackIntensity };

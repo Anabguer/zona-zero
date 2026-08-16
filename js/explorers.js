@@ -49,6 +49,16 @@ export function explorerSlotsUnlocked(state, balance) {
   if ((state.research?.unlocked || []).includes('scouting')) {
     slots = Math.min(cfg.maxActive || 3, Math.max(slots, 2));
   }
+  // ZZ-095: centro de expediciones prepara 2.º explorador (logística visible)
+  const hasCenter = (state.base?.buildings || []).some(
+    (b) => b.type === 'expedition_center' && b.hp > 0
+  );
+  if (hasCenter) {
+    slots = Math.min(cfg.maxActive || 3, Math.max(slots, 2));
+    if ((state.base.buildings.find((b) => b.type === 'expedition_center')?.workers || 0) >= 2) {
+      slots = Math.min(cfg.maxActive || 3, Math.max(slots, 3));
+    }
+  }
   return Math.min(cfg.maxActive || 3, slots);
 }
 
