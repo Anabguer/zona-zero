@@ -2506,7 +2506,7 @@ Release gate funcional: Bloque S + política deploy solo bajo orden.
 `docs/review-archive/zz-183/` · commits `ed9ce86` · `4fa6aef` · `912930c`
 
 ## COMMIT (cierre docs)
-(ver commit de este cierre)
+`08a2763` · fix catálogo `4fa6aef` · Bloque S `ed9ce86`
 
 ## PARAR
 **Sí** — ZZ-183 CERRADA. **Sin deploy. Sin ZZ-184.** Esperar decisión Neni/ChatGPT sobre siguiente trabajo pre-publicación.
