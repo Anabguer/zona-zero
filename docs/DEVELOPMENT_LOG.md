@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019A + **ZZ-012** + **ZZ-013 APROBADAS**. · Docs **2.8**. · **ZZ-014 PENDIENTE DE REVISIÓN (HUMAN_GATE)**. · No ZZ-015. No deploy.
+**Estado global:** ZZ-016…019A + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **DEUDA VISUAL D1 BLOQUEANTE** (arte escenario — ver sección). · **ZZ-015 NO iniciar** hasta fase visual acordada. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -277,35 +277,92 @@ OK. **Cerrada. Siguiente: ZZ-014.**
 IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-013
 
 ## ESTADO CURSOR
-COMPLETADA (código + evidencias). **PARADO HUMAN_GATE** — no ZZ-015.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
-## CAMBIOS
-- Panel lateral desktop (≥1100px): colonia, población, recursos, exploradores, tip.
-- Mundo inset a la izquierda (no full-bleed vacío); dock centrado en columna mundo.
-- Sheet contextual ocupa la misma columna del panel.
-- Móvil landscape sin panel (rail explorador intacto).
-- Cache `?v=36`.
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+**Solo arquitectura desktop:** panel lateral + mundo ≥1100; fichas en columna; móvil sin heredar panel.  
+Evidencias en `docs/review-archive/zz-014/` (si ya archivadas) / git.
 
-## AUTOCRÍTICA
-1. ¿Panel + mundo sin vacío a 1920? Sí.
-2. ¿Móvil intacto? Sí (panel hidden &lt;1100).
-3. ¿Ficha no pelea con panel? Sheet reemplaza columna derecha.
-
-## EVIDENCIA
-`docs/review/` (8 + contact sheet) · Drive Review\  
-Archivo ZZ-013: `docs/review-archive/zz-013/`
+## ACLARACIÓN POST-REVISIÓN (misma fecha)
+ZZ-014 **sigue APROBADA** respecto a UX desktop.  
+La revisión ampliada **no** aprueba el arte del escenario D1 como estado objetivo (ver sección DEUDA VISUAL abajo).  
+**No revertir ZZ-014. No cambiar contrato 2.8. No reabrir ghost/snap/✓.**
 
 ## COMMIT
-`07037ee`
+`07037ee` · docs `a1fd4d8`
 
 ## Sync Drive/GitHub
-OK · Review/ · **PARADO HUMAN_GATE**. No ZZ-015. No deploy.
+OK. **Cerrada (alcance desktop). Arte mundo = deuda bloqueante aparte.**
+
+---
+
+# DEUDA VISUAL D1 — ESCENARIO / INTEGRACIÓN (BLOQUEANTE PARA ARTE D1)
+
+> **Clasificación:** DEUDA VISUAL **BLOQUEANTE** antes de considerar cerrado el aspecto artístico del D1.  
+> **No** bloquea la aprobación de ZZ-014 (panel+mundo).  
+> **No** reabre el modelo espacial 2.8 ni ZZ-019/019A mecánicas.  
+> **Sin implementación** en esta ronda — solo registro + propuesta de fase.
+
+## Qué NO está aprobado visualmente
+
+| # | Problema | Lectura actual | Objetivo |
+|---|----------|----------------|----------|
+| 1 | Grandes polígonos/masas negras | Geometría técnica / error de render | Ruina, obstáculo o escenario creíble (o niebla no-técnica) |
+| 2 | Óvalos / rectángulos / formas sueltas | Placeholders / debug | Props físicos integrados |
+| 3 | Carretera | Capa gris superpuesta | Parte orgánica del arte del suelo |
+| 4 | Superficies en Construir (amarillo/GIS) | Mapa técnico | Señal **discreta y temporal** de “aquí puedes construir” (mecánica OK) |
+| 5 | Integración edificios (HQ/huerto) | Sprite pegado | Contacto suelo · sombra · transición |
+
+## Dónde estaba previsto en el PLAN / biblia (hoy)
+
+| Deuda | Dónde se “metió” hasta ahora | ¿Fase explícita de arte final? |
+|-------|------------------------------|--------------------------------|
+| 1 Masas negras / lectura técnica de límites | Subproducto visual ZZ-018 (sectores/fog) + arte provisional ZZ-019A | **No** — 018/019A cerraron **modelo**, no arte final |
+| 2 Formas geométricas sueltas | Props/SVG + hints de superficie ZZ-019A (ronda CAMBIOS) | **No** — aceptado como provisional en cierre 019A |
+| 3 Carretera | ZZ-019A (“integrar más”; aún shape mejorada, no arte final) | **No** — deuda explícita en autocrítica 019A |
+| 4 Viz superficies build | ZZ-019A (blobs orgánicos vs celdas) — **mecánica APROBADA**; viz sigue técnica | **No** — PLAN trata highlight como tarea 019A, no como acabado artístico |
+| 5 Integración edificios | GAME_MASTER §9: «fase artística posterior; **no bloquea sistemas**» · PLAN 2.8 fila «Integración arte edificios = **no bloqueante**» | **No** hay fase dedicada; Q2 (ZZ-166…) es vida ambiental, **no** esto |
+
+**Conclusión:** no existe hoy una fase canónica **antes** de ZZ-015 / bloque C que cierre el acabado artístico del mundo D1. ZZ-015 (QA D1) **no** debe usarse para “sellar” este arte. Q2 llega demasiado tarde y es otro tema.
+
+## PROPUESTA — nueva fase **ZZ-019B** (REVIEW_STOP)
+
+> Pendiente de autorización Neni/ChatGPT. **No implementada.**
+
+| Campo | Valor propuesto |
+|-------|-----------------|
+| **ID** | **ZZ-019B** |
+| **Nombre** | Integración visual del escenario D1 (anti-GIS) |
+| **Bloque** | B0 / puente a cierre visual D1 (antes de tratar arte D1 como cerrado) |
+| **HUMAN_GATE** | NO |
+| **REVIEW_STOP** | **YES** |
+| **Deps** | ZZ-019A APROBADA · ZZ-014 APROBADA (desktop ya validado) |
+| **Antes de** | ZZ-015 (QA D1 contact sheet) — o, si ZZ-015 ya arrancó, **antes** de APROBAR ZZ-015 como cierre de Experiencia D1 |
+| **Objetivo** | Sin overlays de construcción: solo mundo coherente. Con Construir: señal de superficie **integrada y temporal**, no polígonos GIS. |
+| **Fuera de alcance** | No tocar ghost/snap/✓ · no solares fijos · no macrogrid · no mecánicas nuevas de carretera · no embellecer solo por embellecer UI desktop |
+| **Entregables** | render-map / CSS / assets escenario; smoke de colocación intacto; review 844 + desktop (panel+mundo) + build on/off; contact sheet; PARAR |
+| **Aceptación (fantasía)** | «Veo un escenario postapo, no un mapa técnico» · build mode comunica capacidad sin manchas amarillas dominantes |
+
+### Orden de cola propuesto
+
+```
+… → ZZ-014 APROBADA → [ZZ-019B REVIEW_STOP] → autorización → ZZ-015 HUMAN_GATE → …
+```
+
+### Alternativa descartada (por ahora)
+
+- Meter esto en ZZ-015: mezcla QA de sistemas con redo artístico; ensucia el gate.
+- Esperar a Q2 ZZ-166+: demasiado tarde; consolida placeholders.
+- Reabrir ZZ-019A: incorrecto — el **modelo** espacial ya está APROBADO.
+
+## ESTADO
+**PARADO.** Esperando decisión: ¿autorizar **ZZ-019B** (REVIEW_STOP) antes de ZZ-015?
 
 ---
 
@@ -402,8 +459,8 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-011 | Cámara D1 protagonista | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-013 | HUD recursos D1 | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-014 | Desktop 1920 D1 | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-014 | Desktop 1920 D1 | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA (aplazada) | — | NO |
 | ZZ-020 | Brief diario ritual | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-021 | Staffing por edificio canónico | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-022 | Exploración D3–D5 mínima | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

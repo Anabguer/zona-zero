@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012/013 APROBADAS**. **ZZ-014** HUMAN_GATE PENDIENTE DE REVISIÓN. No ZZ-015.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…014 APROBADAS**. · **PROPUESTA ZZ-019B** (integración visual D1 · REVIEW_STOP) pendiente autorización. · **ZZ-015 no iniciar** hasta decidir.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -81,8 +81,9 @@
 | ZZ-019 | **APROBADA** — no reabrir ghost/✓/semilibre |
 | ZZ-012 | **APROBADA** · tips 2.8 |
 | ZZ-013 | **APROBADA** · HUD comida/agua/madera |
-| ZZ-014 | Desktop panel+mundo · **HUMAN_GATE PENDIENTE** |
-| Integración arte edificios | Deuda artística no bloqueante |
+| ZZ-014 | **APROBADA** · desktop panel+mundo (solo UX) |
+| Integración arte escenario D1 | **Antes:** «no bloqueante». **Ahora (Neni 2026-08-16):** deuda **bloqueante para arte D1** → **PROPUESTA ZZ-019B** REVIEW_STOP (pendiente auth) |
+| ZZ-015 | QA D1 — **aplazar** hasta ZZ-019B o decisión explícita |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
 
@@ -479,6 +480,25 @@
 - No libertad absoluta de píxel; no solares prefijados; no cupo N
 - ZZ-019 UX intacta
 - **PARAR** — no reescribir/aprobar ZZ-012 sin autorización Neni/ChatGPT
+
+### ZZ-019B — Integración visual escenario D1 (PROPUESTA · pendiente auth)
+
+> **PROPUESTA 2026-08-16 (Neni post ZZ-014):** no implementada. REVIEW_STOP propuesto.  
+> No reabre ZZ-019/019A mecánicas. No toca ghost/snap/✓. No solares/macrogrid.
+
+| Campo | Valor |
+|-------|-------|
+| **Bloque** | B0 · acabado visual escenario (puente a cierre arte D1) |
+| **HUMAN_GATE** | NO |
+| **REVIEW_STOP** | **YES** (propuesto) |
+| **Objetivo** | Mundo coherente sin geometría técnica; carretera integrada; props físicos; build-mode con señal de superficie discreta/temporal; mejor contacto edificio/suelo. |
+| **Dependencias** | ZZ-019A, ZZ-014 |
+| **Antes de** | ZZ-015 |
+| **Archivos approx.** | render-map, css world, assets escenario |
+| **Pruebas auto** | smoke-d1, smoke-build-place (regresión mecánica) |
+| **Revisión visual** | Sí + PARAR |
+
+**Aceptación propuesta:** sin Construir = solo escenario; con Construir = capacidad legible sin GIS amarillo dominante.
 
 ---
 
