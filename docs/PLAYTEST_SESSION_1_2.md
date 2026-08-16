@@ -1,11 +1,15 @@
 # PLAYTEST SESSION 1+2 — Guía de ejecución (Neni)
 
 **Fecha:** 2026-08-16  
-**Marco:** PRE_RELEASE_PLAN APROBADO · ZZ-183 APROBADA · **deploy NO autorizado**  
+**Marco:** PRE_RELEASE_PLAN APROBADO · ZZ-183 APROBADA · **deploy playtest interno AUTORIZADO** (no release público)  
 **Dispositivo:** móvil **en horizontal (landscape)**  
 **Regla de oro:** Neni juega como jugadora. **Sin checklist técnica** mientras juega.
 
 > Arte y sonido son **provisionales**. Decírselo **una sola vez** al empezar, y no insistir.
+
+**Frase de arranque (facilitador → Neni):**
+
+> «Sobrevive y haz crecer el refugio. Jugá como te salga. Si no sabés qué hacer, decilo en voz alta.»
 
 **Build playtest producción (2026-08-16):**  
 `https://intocables13.com/juegos/zona-zero/`  
@@ -16,23 +20,19 @@ Cache assets: `?v=40`. Si ves algo antiguo: recarga forzada una vez.
 
 ## 0. Antes de empezar (facilitador · 5 min)
 
-1. Confirmar que el build es el **repo actual** (post ZZ-183), **no** producción antigua.  
-2. Abrir la URL de playtest en el móvil de Neni (ver §1).  
-3. Girar el móvil a **horizontal**. Si aparece «Gira tu dispositivo», es correcto.  
-4. Tener a mano la **hoja de notas** (§4) — la rellena el facilitador u Neni **al final** de cada playtest, no durante el tutorial.  
-5. No explicar: ghost, staffing, Más, eras, victoria, balance.
+1. Abrir la URL de producción de playtest (arriba).  
+2. Girar el móvil a **horizontal**. Si aparece «Gira tu dispositivo», es correcto.  
+3. Tener a mano la **hoja de notas** (§4) — al final de cada playtest, no durante el tutorial.  
+4. No explicar: ghost, staffing, Más, eras, victoria, balance.
 
 ---
 
 ## 1. Cómo ejecutar PLAYTEST 1
 
-### Ruta recomendada (producto completo: portada → intro → juego)
-
-Si tenéis el stack local Intocables (login + PHP) accesible desde el móvil en la misma red:
+### Ruta (producto completo: portada → intro → juego)
 
 1. Abrir en el móvil:  
-   `http://<IP-o-host>/juegos/zona-zero/`  
-   (misma base que en PC: carpeta `zona-zero` bajo juegos).
+   **`https://intocables13.com/juegos/zona-zero/`**
 2. Iniciar sesión Intocables si lo pide.
 3. En la portada: **Nueva partida** (si avisa de borrar partida anterior, aceptar solo si estáis de acuerdo en empezar limpio).
 4. Seguir la **intro** (o saltarla si el juego lo ofrece — anotar si la salta).
