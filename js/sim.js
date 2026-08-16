@@ -514,6 +514,35 @@ function fuelNeed(state, content) {
   return Math.ceil(need);
 }
 
+/** ZZ-020: calefacción madera en frío (hook mínimo; sistema completo ZZ-043+). */
+function applyColdWoodHeating(state, content) {
+  const w = state.weather;
+  if (w !== 'cold' && w !== 'blizzard') {
+    return { active: false, need: 0, consumed: 0, shortfall: 0 };
+  }
+  const wh = content.balance.woodHeating || {};
+  const pop = state.population?.total || 0;
+  if (pop <= 0) return { active: true, need: 0, consumed: 0, shortfall: 0 };
+  const severity = w === 'blizzard' ? 2 : 1;
+  const cap = housingCapacity(state, content.buildings);
+  const protIdx = cap >= pop * 1.25 ? 2 : cap >= pop ? 1 : 0;
+  const mit = (wh.protectionMitigation || [1, 0.65, 0.35, 0.1])[protIdx] ?? 1;
+  const per = wh.woodPerUnprotectedPersonPerSeverity ?? 0.4;
+  const need = Math.max(0, Math.ceil(pop * per * severity * mit));
+  const have = state.resources.wood || 0;
+  const consumed = Math.min(have, need);
+  state.resources.wood = have - consumed;
+  const shortfall = need - consumed;
+  if (consumed > 0) {
+    pushLog(state, `Calefacción: −${consumed} madera.`, 'info');
+  }
+  if (shortfall > 0) {
+    state.stability = Math.max(0, (state.stability || 0) - Math.min(3, shortfall));
+    pushLog(state, 'Falta madera para calentar el refugio.', 'warn');
+  }
+  return { active: true, need, consumed, shortfall, weather: w };
+}
+
 function consumeNeed(state, key, need, label, balance) {
   const have = state.resources[key] || 0;
   if (have >= need) {
@@ -869,6 +898,8 @@ export function advanceDay(state, content) {
   consumeNeed(state, 'food', foodNeed, 'comida', content.balance);
   consumeNeed(state, 'water', waterNeed, 'agua', content.balance);
 
+  const heating = applyColdWoodHeating(state, content);
+
   const fNeed = fuelNeed(state, content);
   if (fNeed > 0) {
     if ((state.resources.fuel || 0) >= fNeed) state.resources.fuel -= fNeed;
@@ -916,6 +947,7 @@ export function advanceDay(state, content) {
   const brief = buildDayBrief(state, content, before, prod, {
     foodNeed,
     waterNeed,
+    heating,
     dir,
     attack,
     recoveredSectors,
@@ -923,13 +955,14 @@ export function advanceDay(state, content) {
   state.lastDayBrief = brief;
 
   state.rngState = (state.rngState || 1) + 17;
-  return { ok: true, director: dir, attack, brief, recoveredSectors };
+  return { ok: true, director: dir, attack, brief, recoveredSectors, heating };
 }
 
 function buildDayBrief(state, content, before, prod, ctx) {
   const produced = prod?.produced || {};
   const foodGain = Math.round((produced.food || 0) * 10) / 10;
   const waterGain = Math.round((produced.water || 0) * 10) / 10;
+  const woodGain = Math.round((produced.wood || 0) * 10) / 10;
   const foodNeed = Math.round((ctx.foodNeed || 0) * 10) / 10;
   const waterNeed = Math.round((ctx.waterNeed || 0) * 10) / 10;
   const foodBal = Math.round((foodGain - foodNeed) * 10) / 10;
@@ -947,11 +980,6 @@ function buildDayBrief(state, content, before, prod, ctx) {
       facts.push({ kind: 'explore', text: `${ex.name} ha regresado de la expedición.` });
     }
   });
-  // Botín reciente en log
-  const lootLine = (state.log || [])
-    .slice()
-    .reverse()
-    .find((L) => L.day === state.day - 1 || L.day === state.day);
   // Expediciones en curso
   (state.expeditions || []).forEach((e) => {
     const left = e.returnDay - state.day;
@@ -989,32 +1017,49 @@ function buildDayBrief(state, content, before, prod, ctx) {
     facts.push({ kind: 'build', text: `Territorio recuperado: ${s.name}.` });
   });
 
-  // Construcciones del día anterior aproximadas por log
   (state.log || [])
-    .filter((L) => L.day === state.day - 1 && /Construís|Mejoráis/.test(L.text || ''))
-    .slice(0, 2)
-    .forEach((L) => facts.push({ kind: 'build', text: L.text }));
+    .filter((L) => L.day === state.day - 1 && /Construís|Mejoráis|Calefacción/.test(L.text || ''))
+    .slice(0, 3)
+    .forEach((L) => facts.push({ kind: L.text?.includes('Calefacción') ? 'heat' : 'build', text: L.text }));
+
+  const heating = ctx.heating || {};
+  const woodConsumed = Math.round((heating.consumed || 0) * 10) / 10;
+  const woodBal = Math.round((woodGain - woodConsumed) * 10) / 10;
+  const showWood = !!heating.active;
 
   const important =
     Math.abs(foodBal) >= 0.1 ||
     Math.abs(waterBal) >= 0.1 ||
+    (showWood && (woodConsumed > 0 || Math.abs(woodBal) >= 0.1)) ||
     facts.length > 0 ||
     foodGain > 0 ||
     waterGain > 0;
 
-  return {
+  const brief = {
     day: state.day,
     food: { produced: foodGain, consumed: foodNeed, balance: foodBal },
     water: { produced: waterGain, consumed: waterNeed, balance: waterBal },
     facts: facts.slice(0, 6),
-    // compat
-    lines: [
-      `Comida ${foodGain >= 0 ? '+' : ''}${foodGain} / −${foodNeed} → ${foodBal >= 0 ? '+' : ''}${foodBal}`,
-      `Agua ${waterGain >= 0 ? '+' : ''}${waterGain} / −${waterNeed} → ${waterBal >= 0 ? '+' : ''}${waterBal}`,
-      ...facts.map((f) => f.text),
-    ].slice(0, 8),
     important: !!important,
   };
+  if (showWood) {
+    brief.wood = {
+      produced: woodGain,
+      consumed: woodConsumed,
+      balance: woodBal,
+      heating: true,
+      shortfall: heating.shortfall || 0,
+    };
+  }
+  brief.lines = [
+    `Comida ${foodGain >= 0 ? '+' : ''}${foodGain} / −${foodNeed} → ${foodBal >= 0 ? '+' : ''}${foodBal}`,
+    `Agua ${waterGain >= 0 ? '+' : ''}${waterGain} / −${waterNeed} → ${waterBal >= 0 ? '+' : ''}${waterBal}`,
+    ...(showWood
+      ? [`Madera ${woodGain >= 0 ? '+' : ''}${woodGain} / −${woodConsumed} calefacción → ${woodBal >= 0 ? '+' : ''}${woodBal}`]
+      : []),
+    ...facts.map((f) => f.text),
+  ].slice(0, 8);
+  return brief;
 }
 
 export function continueEndless(state) {

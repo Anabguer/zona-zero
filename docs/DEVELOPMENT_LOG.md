@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **ZZ-019B APROBADA**. · **ZZ-015 HUMAN_GATE** en curso / PENDIENTE DE REVISIÓN. · Deuda artística D1 **NO BLOQUEANTE**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…015 APROBADAS**. · Docs **2.8**. · **ZZ-020** hecha · **ZZ-021 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística D1 **NO BLOQUEANTE**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -393,10 +393,10 @@ IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-014 (+ ZZ-019B APR
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Smoke + capturas consolidadas del Día 1 (landscape, HUD, tutorial, superficies/ghost, desktop panel+mundo). PARAR.
@@ -404,13 +404,74 @@ Smoke + capturas consolidadas del Día 1 (landscape, HUD, tutorial, superficies/
 ## HECHO
 - `smoke-d1` + `smoke-build-place`
 - Review 12 tomas + contact sheet → `docs/review/` + Drive
-- Sin deploy · sin entrar en ZZ-020
+- Sin deploy · sin entrar en ZZ-020 *(histórico de ejecución)*
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Revisión sobre 12 evidencias reales. Deudas artísticas post ZZ-019B **permanecen NO BLOQUEANTES** — no reabrirlas en este gate.
 
 ## EVIDENCIAS
-`docs/review/` · Drive `Review/`
+Archivadas en `docs/review-archive/zz-015/`.
+
+## COMMIT
+`b496a3f` · docs cierre + ZZ-020/021 (siguiente)
+
+## Sync Drive/GitHub
+OK. **Cerrada formalmente. Siguiente: ZZ-020.**
+
+---
+
+# FASE ZZ-020 — Brief diario ritual
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-015
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(fase sin HUMAN_GATE; cerrada al pasar a ZZ-021)*
+
+## OBJETIVO
+Balance comida/agua (+ madera si frío) en brief tras avanzar día.
+
+## HECHO
+- Brief ya tenía comida/agua; añadida **madera en frío/blizzard** (consumo calefacción mínimo + fila en UI).
+- Hook sin activar sistema completo ZZ-043 (`woodHeating.enabled` sigue false para avisos/exposición).
+- Smoke `smoke-zz020-021`.
+
+## ARCHIVOS
+`js/sim.js`, `js/main.js`, `content/balance.json` (comentario)
 
 ## PARAR
-Sí — HUMAN_GATE. Esperar Neni/ChatGPT.
+No — continuar ZZ-021.
+
+---
+
+# FASE ZZ-021 — Staffing por edificio canónico (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · C · **HUMAN_GATE YES** · deps ZZ-020
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Único modelo +/− en ficha de edificio; panel población = resumen SO.
+
+## HECHO
+- Ficha edificio: +/− workers (ya existía; canónico).
+- Panel población: **sin** steppers por categoría; solo resumen + tip + auto-redistribuir.
+- Review 7 tomas + contact sheet · smoke staffing.
+
+## EVIDENCIAS
+`docs/review/` · Drive Review/
+
+## PARAR
+Sí — HUMAN_GATE. Sin deploy. No ZZ-022.
 
 ---
 

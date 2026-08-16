@@ -72,7 +72,7 @@
   "secondaryResources": ["parts", "tools"],
   "woodHeating": {
     "enabled": false,
-    "comment": "Activar en ZZ-043+. Calefacción = madera automática; no fuel.",
+    "comment": "Sistema completo avisos/exposición = ZZ-043+. ZZ-020 ya consume madera en cold/blizzard para el brief ritual.",
     "woodPerUnprotectedPersonPerSeverity": 0.4,
     "protectionMitigation": [1, 0.65, 0.35, 0.1],
     "exposureThresholds": { "amber": 2, "red": 5 },

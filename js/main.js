@@ -465,24 +465,17 @@ function openPopulationSheet() {
   const pop = state.population;
   const cap = housingCapacity(state, content.buildings);
   const labor = pop.labor || {};
+  // ZZ-021: panel = resumen SO (sin +/- por categoría). Asignación solo en ficha de edificio.
   const rows = ['idle', 'food', 'water', 'build', 'produce', 'defense', 'medicine']
     .map((k) => {
       const impact = categoryDayImpact(k);
-      const steppers =
-        k === 'idle'
-          ? `<span class="zz-labor-val">${labor[k] || 0}</span>`
-          : `<div class="zz-stepper">
-              <button type="button" data-labor="${k}" data-delta="-1" aria-label="Menos">−</button>
-              <span>${labor[k] || 0}</span>
-              <button type="button" data-labor="${k}" data-delta="1" aria-label="Más">+</button>
-            </div>`;
-      return `<div class="zz-labor-row">
+      return `<div class="zz-labor-row zz-labor-row--summary">
         <div>
           <strong>${LABOR_LABEL[k]}</strong>
           <div class="zz-labor-impact">${escapeHtml(impact.text)}</div>
           ${impact.deficit ? `<div class="zz-labor-deficit">${escapeHtml(impact.deficit)}</div>` : ''}
         </div>
-        ${steppers}
+        <span class="zz-labor-val">${labor[k] || 0}</span>
       </div>`;
     })
     .join('');
@@ -490,6 +483,7 @@ function openPopulationSheet() {
     <h2>Colonia ${pop.total} / ${cap}</h2>
     <p>Disponibles <strong>${labor.idle || 0}</strong> · Asignados <strong>${workforce(pop) - (labor.idle || 0)}</strong>
       ${pop.injured || pop.sick ? ` · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}` : ''}</p>
+    <p class="zz-muted" style="margin:0.35rem 0 0.75rem">Asigná gente en cada edificio (+/−). Aquí solo ves el resumen.</p>
     ${rows}
     <p style="margin-top:0.75rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>
   `);
@@ -1328,6 +1322,7 @@ function showDayBrief(brief) {
   if (!el || !brief) return;
   const food = brief.food || {};
   const water = brief.water || {};
+  const wood = brief.wood || null;
   const facts = brief.facts || [];
   const fmt = (n) => {
     const v = Math.round((Number(n) || 0) * 10) / 10;
@@ -1335,6 +1330,14 @@ function showDayBrief(brief) {
   };
   const balClass = (n) => ((n || 0) >= 0 ? 'is-pos' : 'is-neg');
   const factLis = facts.map((f) => `<li class="zz-brief-fact zz-brief-fact--${escapeHtml(f.kind || '')}">${escapeHtml(f.text)}</li>`).join('');
+  const woodRow = wood
+    ? `<div class="zz-brief-row zz-brief-row--wood">
+        <span class="zz-brief-label">Madera</span>
+        <span>+${fmt(wood.produced)}</span>
+        <span>−${fmt(wood.consumed)} calor</span>
+        <strong class="${balClass(wood.balance)}">${(wood.balance || 0) >= 0 ? '+' : ''}${fmt(wood.balance)}</strong>
+      </div>`
+    : '';
   el.innerHTML = `
     <h3>Día ${brief.day || state.day}</h3>
     <div class="zz-brief-balance">
@@ -1350,6 +1353,7 @@ function showDayBrief(brief) {
         <span>−${fmt(water.consumed)}</span>
         <strong class="${balClass(water.balance)}">${(water.balance || 0) >= 0 ? '+' : ''}${fmt(water.balance)}</strong>
       </div>
+      ${woodRow}
     </div>
     ${factLis ? `<ul class="zz-brief-facts">${factLis}</ul>` : '<p class="zz-muted zz-brief-quiet">Un día tranquilo en el refugio.</p>'}
     <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-brief-ok">Continuar</button>
