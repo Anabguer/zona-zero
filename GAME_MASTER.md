@@ -1901,6 +1901,18 @@ La colonia **se ve viva**, pero la población sigue siendo **agregada**. Figuras
 | Explorador | silueta sale por ruta; icono away; vuelve con informe |
 | Calefacción | brief “−N madera”; chimeneas activas si hay consumo |
 
+#### Criterios a conservar (ZZ-172 · Neni+ChatGPT)
+
+- **Vida, no Sims:** población sistémica ≠ población visual. Cap no crece lineal; 100 hab ≠ 100 sprites.
+- Figuras con significado (trabajo, refugio, enfermos, obra/repair) — no NPCs aleatorios de relleno.
+- Semáforo verde/ámbar/rojo: lectura rápida subordinada al mundo; no mapa de semáforos permanentes.
+- Pop grande se siente más viva por edificios+props+actividad+figuras limitadas, no solo muñecos.
+- Construcción/repair: feedback “esto está ocurriendo” sin abrir ficha; ART PASS puede sustituir FX.
+- Clima: haze/aliento válidos; sin saturar lectura/construcción/selección.
+- Ataques: refugio/perímetro como acontecimiento, no solo tirada numérica.
+- Exploradores: ruta/progreso sin GIS permanente.
+- ZZ-172 valida comunicación/vida visual, **no** arte definitivo. Perf móvil > cantidad de FX.
+
 #### Conexiones
 Staffing §10 ↔ brotes §12 ↔ daño §13 ↔ clima §11 ↔ arte §33.
 
@@ -1980,6 +1992,12 @@ Tablas: buildings, research, events, locations, infected, vehicles, eras, missio
 Perfiles: atento, expansivo, conservador, mala gestión, sin explorar, sobreexpansión.  
 Métricas: supervivencia, pop, recursos, muertes, edificios, eras, victoria, crisis, recuperación.  
 Usar para calibrar, no para “aprobar UX”.
+
+### ZZ-175…178 (implementado)
+
+- Harness: `scripts/balance-sim.mjs` · informe `docs/BALANCE_REPORT.md` + `scripts/balance-report.json`.
+- Batches D30/D100 · aceptación: **mala gestión pierde más**.
+- Sin electricity/generator en políticas IA.
 
 ---
 

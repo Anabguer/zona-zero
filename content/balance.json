@@ -56,7 +56,7 @@
   "expeditionFuelCost": 0,
   "expeditionFuelCostComment": "ZZ-022: a pie no gasta fuel. Vehículos siguen con fuelPerTrip.",
   "controlClearThreshold": 0.52,
-  "quietNightChance": 0.32,
+  "quietNightChance": 0.38,
   "birthCheckInterval": 5,
   "birthMinPop": 9,
   "birthChance": 0.1,
@@ -86,7 +86,7 @@
   "woodHeating": {
     "enabled": true,
     "comment": "ZZ-043+: calefacción automática con madera. Aviso→prep→exposición.",
-    "woodPerUnprotectedPersonPerSeverity": 0.4,
+    "woodPerUnprotectedPersonPerSeverity": 0.35,
     "protectionMitigation": [1, 0.65, 0.35, 0.1],
     "exposureThresholds": { "amber": 2, "red": 5 },
     "warnDaysBefore": [1, 2, 3],

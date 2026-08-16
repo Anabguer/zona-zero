@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…171** hechas · **ZZ-172 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…177** hechas · **ZZ-178 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2308,26 +2308,95 @@ IMPLEMENTATION_PLAN 2.8 · Q2 · **HUMAN_GATE YES** · deps ZZ-171
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Validado ZZ-166…172: cap ≤16 · staffing · polvo/repair · semáforo · clima · explorador · ataque→refugio · pop 3/~100. Criterios: vida≠Sims; semáforo subordinado; pop grande vía densidad no muñecos; perf>FX; deuda arte NO BLOQUEANTE. Continuar ZZ-175.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-172/`.
+
+## COMMIT
+`7409586`
+
+## PARAR
+No — continuar ZZ-175 → 178 (HUMAN_GATE).
+
+---
+
+# FASE ZZ-175 — Harness perfiles IA-jugador
+
+IMPLEMENTATION_PLAN 2.8 · R · HUMAN_GATE NO · deps ZZ-172 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- 6 perfiles GM §36 en `scripts/balance-sim.mjs` (atento…sobreexpansión).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-176 — Métricas batch D30/D100
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Batches D30/D100 · supervivencia, pop, wood, brotes, ataques, edificios, era.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-177 — Calibración normal (madera/brotes/ataques)
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `quietNightChance` 0.38 · woodHeating 0.35 · IA place/staff harness · atento D100 jugable · mala gestión muere más.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-178 — Informe balance + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · R · **HUMAN_GATE YES** · deps ZZ-177
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Perf móvil ambient life + gate. Cap render; se ve viva sin 100 NPCs.
+Informe balance + gate. Aceptación: mala gestión pierde más.
 
 ## HECHO
-- Cap verificado 3 vs ~100 · smoke `smoke-zz166-172` · review `review-shots-zz172`.
-- Contrato **2.8** · deuda arte NO BLOQUEANTE · sin solar/generator.
+- `docs/BALANCE_REPORT.md` · `scripts/balance-report.json` · aceptación CUMPLE.
+- Smoke `smoke-zz175-178`.
+- Contrato **2.8** · deuda arte NO BLOQUEANTE · sin deploy.
 
 ## EVIDENCIAS
-`docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
+`docs/BALANCE_REPORT.md` · `docs/review/` · Drive Review/
 
 ## COMMIT
-`7409586`
+*(pendiente)*
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-172. Sin deploy. No ZZ-175.
+Sí — HUMAN_GATE ZZ-178. Sin deploy. No ZZ-180.
 
 ---
 
