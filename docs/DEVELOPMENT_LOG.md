@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…178 APROBADAS**. · **ZZ-180…183 APROBADAS** (release gate funcional; **deploy NO autorizado**). · Deudas arte **NO BLOQUEANTES**. · No ZZ-184 (hotfix post-lanzamiento solo si hace falta). · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…178 APROBADAS**. · **ZZ-180…183 APROBADAS** (release gate funcional; **deploy NO autorizado**). · Etapa **PRE-PUBLICACIÓN**: auditoría documental entregada (sin código). · Deuda arte **reclasificada A/B/C** para release (≠ aprobada). · No ZZ-184. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
