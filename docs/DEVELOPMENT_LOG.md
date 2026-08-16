@@ -2513,6 +2513,28 @@ Release gate funcional: Bloque S + política deploy solo bajo orden.
 
 ---
 
+# ETAPA PRE-PUBLICACIÓN — AUDITORÍA (2026-08-16)
+
+## CONTEXTO
+ZZ-183 APROBADA · release gate funcional · deploy NO autorizado · sin nuevas mecánicas.
+
+## ENTREGABLES (solo docs · sin código)
+- `docs/PRE_RELEASE_AUDIT.md`
+- `docs/ART_DEBT_AUDIT.md`
+- `docs/PLAYTEST_PLAN.md`
+- `docs/PRE_RELEASE_PLAN.md`
+
+## COMMIT
+`92653df`
+
+## NO HECHO
+Código · ART PASS · balance tuning · deploy · ZZ-184.
+
+## PARAR
+Sí — esperar decisión humana (playtests / plan / arte A).
+
+---
+
 # REFORMA DOCUMENTAL 2.8 — SUPERFICIES EDIFICABLES + ESCENARIO DISEÑADO (2026-08-16)
 
 ## DECISIÓN NENI + CHATGPT (dirección)
