@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…015 + ZZ-019B APROBADAS**. · **ZZ-020…022** hechas · **ZZ-021 APROBADA** · **ZZ-023 HUMAN_GATE** PENDIENTE. · Deuda artística post-019B **NO BLOQUEANTE**. · No ZZ-024 hasta APROBADA ZZ-023.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…023 APROBADAS**. · **ZZ-024…031** hechas · **ZZ-032 HUMAN_GATE** PENDIENTE. · Deuda artística post-019B **NO BLOQUEANTE**. · No ZZ-033 hasta APROBADA ZZ-032.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.

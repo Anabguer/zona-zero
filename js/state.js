@@ -377,7 +377,74 @@ export function housingCapacity(state, buildingsContent) {
     const def = buildingsContent[b.type];
     if (def?.housing) cap += def.housing;
   });
+  if ((state.research?.unlocked || []).includes('advanced_housing')) {
+    cap += 1;
+  }
   return Math.max(cap, 0);
+}
+
+/** Protección climática 0–3 por tipo de edificio (GM §4). */
+export function climateProtectionOf(def) {
+  if (!def) return 0;
+  if (def.climateProtection != null) return Number(def.climateProtection) || 0;
+  if (def.housing) return 0;
+  return 0;
+}
+
+/**
+ * Plazas con protección ≥ umbral (cadena climática GM §4).
+ * Asigna camas de mayor a menor protección.
+ */
+export function coveredBeds(state, buildingsContent, minProtection = 0) {
+  const beds = [];
+  (state.base?.buildings || []).forEach((b) => {
+    if (b.hp <= 0) return;
+    const def = buildingsContent[b.type];
+    const housing = def?.housing || 0;
+    if (housing <= 0) return;
+    const prot = climateProtectionOf(def);
+    if (prot >= minProtection) beds.push({ prot, housing });
+  });
+  return beds.reduce((n, x) => n + x.housing, 0);
+}
+
+/** Umbral de protección según clima puntual. */
+export function climateProtectionThreshold(weather) {
+  if (weather === 'blizzard') return 2;
+  if (weather === 'cold' || weather === 'heat') return 1;
+  return 0;
+}
+
+/**
+ * Cobertura térmica: déficit de plazas a cubierto + madera estimada.
+ */
+export function housingClimateCoverage(state, buildingsContent, balance, weather) {
+  const pop = state.population?.total || 0;
+  const threshold = climateProtectionThreshold(weather);
+  const covered = coveredBeds(state, buildingsContent, threshold);
+  const deficit = Math.max(0, pop - covered);
+  const wh = balance?.woodHeating || {};
+  const severity = weather === 'blizzard' ? 2 : weather === 'cold' || weather === 'heat' ? 1 : 0;
+  const per = wh.woodPerUnprotectedPersonPerSeverity ?? 0.4;
+  const mit = wh.protectionMitigation || [1, 0.65, 0.35, 0.1];
+
+  // Personas cubiertas: mitigan según su nivel medio de protección ≥ umbral
+  // Personas en déficit: mit=1 (expuestas)
+  let woodNeed = 0;
+  if (severity > 0) {
+    woodNeed += deficit * per * severity * (mit[0] ?? 1);
+    // Cubiertos: coste residual según umbral alcanzado
+    const coveredMit = mit[Math.min(3, threshold)] ?? 0.35;
+    woodNeed += Math.min(pop, covered) * per * severity * coveredMit;
+  }
+  return {
+    pop,
+    threshold,
+    covered,
+    deficit,
+    woodNeed: Math.max(0, Math.ceil(woodNeed)),
+    weather,
+  };
 }
 
 export function defenseValue(state, buildingsContent, balance) {

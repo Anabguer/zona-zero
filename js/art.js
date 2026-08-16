@@ -12,6 +12,7 @@ export const BUILDING_ART = {
   hq_central_l2: 'buildings/house.webp',
   hq_central_l3: 'buildings/house.webp',
   house: 'buildings/house.webp',
+  insulated_house: 'buildings/house.webp',
   farm: 'buildings/farm.webp',
   greenhouse: 'buildings/farm.webp',
   well: 'buildings/well.webp',

@@ -5,6 +5,7 @@ import {
   loadContent,
   createNewState,
   housingCapacity,
+  climateProtectionOf,
   defenseValue,
   summarizeState,
   migrateState,
@@ -214,6 +215,14 @@ function openSheet(html) {
       if (!r.ok) toast(r.error || 'No', 'warn');
       else {
         sfx.click?.();
+        const b = state.base.buildings.find((x) => x.id === id);
+        const def = b && content.buildings[b.type];
+        toast(
+          delta > 0
+            ? `+1 en ${def?.name || 'edificio'} (${b?.workers || 0})`
+            : `−1 en ${def?.name || 'edificio'} (${b?.workers || 0})`,
+          'info'
+        );
         checkOnboardingProgress(state);
         scheduleSave();
         paint();
@@ -488,6 +497,11 @@ function openPopulationSheet() {
     <h2>Colonia ${pop.total} / ${cap}</h2>
     <p>Disponibles <strong>${labor.idle || 0}</strong> · Asignados <strong>${workforce(pop) - (labor.idle || 0)}</strong>
       ${pop.injured || pop.sick ? ` · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}` : ''}</p>
+    ${
+      pop.total > cap
+        ? `<p class="zz-ctx__warn">Hacinamiento: ${pop.total - cap} sin plaza (estabilidad↓ · riesgo de abandono).</p>`
+        : ''
+    }
     <p class="zz-muted" style="margin:0.35rem 0 0.75rem">Asigná gente en cada edificio (+/−). Aquí solo ves el resumen.</p>
     ${rows}
     <p style="margin-top:0.75rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>
@@ -510,6 +524,17 @@ function openBuildingSheet(id) {
     (def.defense ? `+${def.defense} defensa` : def.housing ? `+${def.housing} capacidad` : '—');
   const art = buildingArtUrl(b.type);
   const unstaffed = key && workers < 1;
+  const climateProt = def.housing != null ? climateProtectionOf(def) : null;
+  const climateLabel =
+    climateProt == null
+      ? ''
+      : climateProt <= 0
+        ? 'Improvisado (0)'
+        : climateProt === 1
+          ? 'Básico (1)'
+          : climateProt === 2
+            ? 'Aislado (2)'
+            : 'Residencial (3)';
 
   openSheet(`
     <div class="zz-ctx">
@@ -535,7 +560,9 @@ function openBuildingSheet(id) {
           : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
              ${
                def.housing
-                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${def.housing}</strong> plazas</p>`
+                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${def.housing}</strong> plazas${
+                     climateLabel ? ` · clima <strong>${escapeHtml(climateLabel)}</strong>` : ''
+                   }</p>`
                  : ''
              }`
       }
@@ -937,15 +964,22 @@ function fillExplorerHost(host) {
   if (!host || !state || !content) return;
   host.innerHTML = '';
   const slots = explorerSlotsUnlocked(state, content.balance);
-  livingExplorers(state).forEach((e) => {
+  const list = (state.explorers || []).slice(0, Math.max(slots, (state.explorers || []).length));
+  list.forEach((e) => {
     const btn = document.createElement('button');
     btn.type = 'button';
+    const stClass =
+      e.status === 'away'
+        ? ' is-away'
+        : e.status === 'ready'
+          ? ' is-ready'
+          : e.status === 'dead'
+            ? ' is-dead'
+            : e.status === 'wounded'
+              ? ' is-wounded'
+              : '';
     btn.className =
-      'zz-ex-card' +
-      (state.selectedExplorerId === e.id ? ' is-selected' : '') +
-      (e.status === 'away' ? ' is-away' : '') +
-      (e.status === 'ready' ? ' is-ready' : '') +
-      (e.status === 'dead' ? ' is-dead' : '');
+      'zz-ex-card' + (state.selectedExplorerId === e.id ? ' is-selected' : '') + stClass;
     const img = document.createElement('img');
     img.className = 'zz-ex-portrait';
     img.src = portraitArtUrl(e);
@@ -953,9 +987,19 @@ function fillExplorerHost(host) {
     img.width = 40;
     img.height = 40;
     btn.appendChild(img);
+    const stTxt =
+      e.status === 'ready'
+        ? 'Listo'
+        : e.status === 'away'
+          ? 'En ruta'
+          : e.status === 'wounded'
+            ? 'Herido'
+            : e.status === 'dead'
+              ? 'Caído'
+              : e.status;
     const meta = document.createElement('div');
     meta.innerHTML = `<div class="zz-ex-card__name">${escapeHtml(e.name)}</div>
-      <div class="zz-ex-card__st">${e.status === 'ready' ? 'Listo' : e.status === 'away' ? 'En ruta' : 'Herido'} · Nv.${e.level || 1}</div>`;
+      <div class="zz-ex-card__st">${stTxt} · Nv.${e.level || 1}</div>`;
     btn.appendChild(meta);
     btn.addEventListener('click', () => {
       sfx.click?.();
@@ -1354,6 +1398,15 @@ function showExpeditionReports(reports) {
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="close-sheet">Continuar</button>
     </div>
   `);
+  const lost = reports.filter((r) => r.dead);
+  if (lost.length) {
+    toast(
+      lost.length === 1
+        ? `${lost[0].explorerName} no ha vuelto`
+        : `${lost.length} exploradores no han vuelto`,
+      'bad'
+    );
+  }
 }
 
 function showDayBrief(brief) {

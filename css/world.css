@@ -364,6 +364,17 @@ body.zz-from-intro #zz-boot {
   background: #7dba6a;
   justify-self: end;
 }
+.zz-ex-card.is-wounded {
+  border-color: rgba(192,112,64,0.55);
+}
+.zz-ex-card.is-dead {
+  opacity: 0.55;
+  border-color: rgba(212,90,74,0.5);
+  filter: grayscale(0.55);
+}
+.zz-ex-card.is-dead .zz-ex-card__st {
+  color: #d45a4a;
+}
 .zz-ex-card__name {
   font-family: var(--zz-display);
   font-size: 0.78rem;

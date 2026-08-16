@@ -8,6 +8,7 @@ import {
   pushLog,
   defenseValue,
   housingCapacity,
+  housingClimateCoverage,
   maxSurvivorsCap,
 } from './state.js';
 import {
@@ -562,15 +563,10 @@ function applyColdWoodHeating(state, content) {
   if (w !== 'cold' && w !== 'blizzard') {
     return { active: false, need: 0, consumed: 0, shortfall: 0 };
   }
-  const wh = content.balance.woodHeating || {};
   const pop = state.population?.total || 0;
   if (pop <= 0) return { active: true, need: 0, consumed: 0, shortfall: 0 };
-  const severity = w === 'blizzard' ? 2 : 1;
-  const cap = housingCapacity(state, content.buildings);
-  const protIdx = cap >= pop * 1.25 ? 2 : cap >= pop ? 1 : 0;
-  const mit = (wh.protectionMitigation || [1, 0.65, 0.35, 0.1])[protIdx] ?? 1;
-  const per = wh.woodPerUnprotectedPersonPerSeverity ?? 0.4;
-  const need = Math.max(0, Math.ceil(pop * per * severity * mit));
+  const cov = housingClimateCoverage(state, content.buildings, content.balance, w);
+  const need = cov.woodNeed;
   const have = state.resources.wood || 0;
   const consumed = Math.min(have, need);
   state.resources.wood = have - consumed;
@@ -582,7 +578,16 @@ function applyColdWoodHeating(state, content) {
     state.stability = Math.max(0, (state.stability || 0) - Math.min(3, shortfall));
     pushLog(state, 'Falta madera para calentar el refugio.', 'warn');
   }
-  return { active: true, need, consumed, shortfall, weather: w };
+  return {
+    active: true,
+    need,
+    consumed,
+    shortfall,
+    weather: w,
+    covered: cov.covered,
+    deficit: cov.deficit,
+    threshold: cov.threshold,
+  };
 }
 
 function consumeNeed(state, key, need, label, balance) {
@@ -800,6 +805,9 @@ export function tickResearch(state, content) {
     state.research.active = null;
     state.research.progress = 0;
     pushLog(state, `Investigación completada: ${tech.name}.`, 'good');
+    if (tech.effects?.unlockBuilding) {
+      pushLog(state, `Desbloqueado: ${tech.effects.unlockBuilding}.`, 'good');
+    }
     if (tech.effects?.vehicleUnlock) {
       state.flags.narrative[`veh_${tech.effects.vehicleUnlock}`] = true;
     }

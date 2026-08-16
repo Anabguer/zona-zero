@@ -145,6 +145,23 @@
           }
         },
         {
+          "id": "insulation",
+          "name": "Aislamiento térmico",
+          "desc": "Desbloquea viviendas aisladas antes del invierno duro.",
+          "cost": {
+            "wood": 6,
+            "metal": 3
+          },
+          "requires": [
+            "basic_carpentry"
+          ],
+          "minEra": 1,
+          "days": 5,
+          "effects": {
+            "unlockBuilding": "insulated_house"
+          }
+        },
+        {
           "id": "advanced_housing",
           "name": "Alojamiento avanzado",
           "desc": "Más capacidad por refugio.",
@@ -153,7 +170,7 @@
             "metal": 4
           },
           "requires": [
-            "basic_carpentry"
+            "insulation"
           ],
           "minEra": 1,
           "days": 4,

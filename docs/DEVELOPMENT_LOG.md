@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…015 APROBADAS**. · Docs **2.8**. · **ZZ-020…022** hechas · **ZZ-021 APROBADA** · **ZZ-023 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística post-019B **NO BLOQUEANTE**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…023 APROBADAS**. · Docs **2.8**. · **ZZ-024…031** hechas · **ZZ-032 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística post-019B **NO BLOQUEANTE**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -514,25 +514,177 @@ IMPLEMENTATION_PLAN 2.8 · C · **HUMAN_GATE YES** · deps ZZ-022
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Loop estable D1→D5; contact sheet; gate.
 
 ## HECHO
 - Smoke d1 + build-place + zz022 + zz020-021.
-- Review 11 tomas + contact sheet → `docs/review/` + Drive.
-- Deuda artística post-019B **NO BLOQUEANTE**.
-- Sin deploy · no ZZ-024.
+- Review 11 tomas + contact sheet.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+11 evidencias. Loop D1→D5 coherente; brief; staffing ZZ-021; exploración ZZ-022. Sin regresión bloqueante. Deuda arte post-019B **NO BLOQUEANTE**.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-023/`.
+
+## PARAR
+No — continuar ZZ-024.
+
+---
+
+# FASE ZZ-024 — Construcción selecciono→coloco
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-023
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-032)*
+
+## OBJETIVO
+Preview solo en build; sin Tetris.
+
+## HECHO
+- Ghost/superficies solo con `uiMode==='build'` + `buildMode`.
+- Confirm ✓ / cancel; toast al construir.
+- Smoke `smoke-zz024-027`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-025 — Crecimiento población abstracto
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-024
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE)*
+
+## HECHO
+- Inmigración/nacimiento gated por housing + comida/agua/estabilidad.
+- Overflow → estabilidad↓ / abandono; aviso en panel población.
+- Rescate en expedición (ya existía).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-026 — Feedback acciones clave
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-025
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE)*
+
+## HECHO
+- Matriz §32 núcleo: construir (toast+log), staff ± (toast+preview ficha), brief, explorar/ruta/informe, muerte (toast+rail Caído), research toast.
+- §32B vida ambiental / brote / era banner = deuda no bloqueante (fases Q2/E).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-027 — Exploradores muerte/recluta
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-026
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE)*
+
+## HECHO
+- Máx 3; muerte permanente; recluta −1 pop + cooldown; rail muestra Caído.
+- Skills lentas 1–5 (sin RPG grind).
+
+## PARAR
+No — bloque C cerrado. Continuar D.
+
+---
+
+# FASE ZZ-030 — Capacidad vivienda + overflow
+
+IMPLEMENTATION_PLAN 2.8 · D · HUMAN_GATE NO · deps ZZ-023
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE)*
+
+## HECHO
+- `housingCapacity` + grace overflow + aviso UI.
+- `advanced_housing` → +1 plaza global.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-031 — Protección climática por tipo
+
+IMPLEMENTATION_PLAN 2.8 · D · HUMAN_GATE NO · deps ZZ-030
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE)*
+
+## HECHO
+- `climateProtection` 0–3 en viviendas/HQ.
+- `coveredBeds` / `housingClimateCoverage` → calefacción madera por déficit/cobertura.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-032 — Vivienda aislada + tech insulation (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · D · **HUMAN_GATE YES** · deps ZZ-031
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+`insulated_house` + research `insulation` (GM §4).
+
+## HECHO
+- Building + tech; unlock vía research; ficha muestra protección climática.
+- Smoke `smoke-zz030-032` · review 9 tomas + contact sheet.
+- Deuda arte post-019B **NO BLOQUEANTE**.
+- Sin deploy · no ZZ-033.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/
 
 ## PARAR
-Sí — HUMAN_GATE. Sin deploy. No ZZ-024.
+Sí — HUMAN_GATE. Sin deploy. No ZZ-033.
+
+
 
 
 
@@ -636,14 +788,14 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-020 | Brief diario ritual | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-021 | Staffing por edificio canónico | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-022 | Exploración D3–D5 mínima | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-023 | QA D1→D5 | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-024 | Construcción selecciono→coloco | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-025 | Crecimiento población abstracto | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-026 | Feedback acciones clave | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-027 | Exploradores muerte/recluta | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-030 | Capacidad vivienda + overflow | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-031 | Protección climática por tipo | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-032 | Vivienda aislada + tech insulation | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-023 | QA D1→D5 | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-024 | Construcción selecciono→coloco | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-025 | Crecimiento población abstracto | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-026 | Feedback acciones clave | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-027 | Exploradores muerte/recluta | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-030 | Capacidad vivienda + overflow | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-031 | Protección climática por tipo | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-032 | Vivienda aislada + tech insulation | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-033 | Alertas cobertura / madera estimada | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-034 | Pozo fuente ≠ cisterna reserva | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-035 | Soft-caps storage + cisterna agua | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
