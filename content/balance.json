@@ -137,8 +137,8 @@
     "weatherDamageMax": 22
   },
   "ambientLife": {
-    "enabled": false,
-    "comment": "Activar en ZZ-166+.",
+    "enabled": true,
+    "comment": "ZZ-166+ vida ambiental agregada §32B. Cap sprites; no Sims.",
     "maxSprites": 16,
     "semaphore": ["green", "amber", "red"]
   },

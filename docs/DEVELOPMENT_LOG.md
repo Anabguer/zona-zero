@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…161 APROBADAS**. · **ZZ-162…164** hechas · **ZZ-165 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…171** hechas · **ZZ-172 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2201,27 +2201,133 @@ IMPLEMENTATION_PLAN 2.8 · Q · **HUMAN_GATE YES** · deps ZZ-164
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Validado ZZ-162…165: landmarks tipados · WebP correctos · props · SFX+mute · eras 0–3 · sin GIS · sin solar/generator. Criterios: progresión visual emergente (no decorados por era); silueta > asset semánticamente incorrecto; props no confeti; beeps ≠ audio artístico definitivo. Deuda arte NO BLOQUEANTE. Continuar ZZ-166.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-165/`.
+
+## COMMIT
+`d6331ab`
+
+## PARAR
+No — continuar ZZ-166 → 172 (HUMAN_GATE).
+
+---
+
+# FASE ZZ-166 — Sistema habitantes ambientales (cap render)
+
+IMPLEMENTATION_PLAN 2.8 · Q2 · HUMAN_GATE NO · deps ZZ-021 / ZZ-165 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `js/ambient-life.js` · `balance.ambientLife.enabled` · cap ≤16 · muestra proporcional · sin fichas.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-167 — Movimiento trabajo por edificio staffed
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Figuras `work` ancladas a edificios con `workers>0` (farm/well/taller…).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-168 — Animaciones construcción + reparación
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Polvo `justBuiltIds` · andamiaje/chispas estáticas si `b.repair`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-169 — Semáforo verde/ámbar/rojo + enfermos
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `ambientSemaphore` + figuras `sick` · clases CSS semáforo.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-170 — Clima visible + explorador ida/vuelta
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Haze frío · aliento · `departDay` + `expeditionProgress` en ruta.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-171 — Actividad/alerta durante hordas
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Bajo amenaza: figuras `shelter` hacia HQ · flash perímetro.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-172 — Perf móvil ambient life + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · Q2 · **HUMAN_GATE YES** · deps ZZ-171
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Review visual por era + gate. Arte lean bloque Q. Sin city.webp. Sin solar/generator.
+Perf móvil ambient life + gate. Cap render; se ve viva sin 100 NPCs.
 
 ## HECHO
-- Contact sheets era 0–3 · landmarks · props · mute · daño mundo.
-- Smoke `smoke-zz162-165` · review `review-shots-zz165`.
-- Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
+- Cap verificado 3 vs ~100 · smoke `smoke-zz166-172` · review `review-shots-zz172`.
+- Contrato **2.8** · deuda arte NO BLOQUEANTE · sin solar/generator.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## COMMIT
-`d6331ab`
+*(pendiente)*
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-165. Sin deploy. No ZZ-166.
+Sí — HUMAN_GATE ZZ-172. Sin deploy. No ZZ-175.
 
 ---
 

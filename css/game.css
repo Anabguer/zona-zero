@@ -1089,6 +1089,90 @@ body.zz-body {
 .zz-prop-vehicle-rust { fill: #8a5a38; opacity: 0.55; }
 .zz-prop-shadow { fill: rgba(0, 0, 0, 0.28); pointer-events: none; }
 .zz-settle-person-body { fill: #8a6a48; }
+
+/* ZZ-166…172 vida ambiental agregada */
+.zz-ambient-life {
+  pointer-events: none;
+}
+.zz-ambient-shadow {
+  fill: rgba(0, 0, 0, 0.28);
+}
+.zz-ambient-head {
+  fill: #c4a078;
+  stroke: #3a2a1c;
+  stroke-width: 0.06;
+}
+.zz-ambient-body {
+  fill: #6a5848;
+  stroke: #2a2018;
+  stroke-width: 0.05;
+}
+.zz-ambient-sem--green .zz-ambient-body {
+  fill: #5a7a48;
+}
+.zz-ambient-sem--amber .zz-ambient-body {
+  fill: #a87838;
+}
+.zz-ambient-sem--red .zz-ambient-body {
+  fill: #8a4040;
+}
+.zz-ambient-fig--sick .zz-ambient-head {
+  fill: #b0a090;
+}
+.zz-ambient-sick-dot {
+  fill: #e07050;
+  opacity: 0.9;
+}
+.zz-ambient-fig--work .zz-ambient-body {
+  fill: #5a6848;
+}
+.zz-ambient-fig--repair .zz-ambient-body {
+  fill: #7a6840;
+}
+.zz-ambient-fig--shelter .zz-ambient-body {
+  fill: #4a4850;
+}
+.zz-ambient-scaffold-pole {
+  stroke: #8a7a60;
+  stroke-width: 0.18;
+  opacity: 0.85;
+}
+.zz-ambient-scaffold-plank {
+  stroke: #a09070;
+  stroke-width: 0.22;
+  opacity: 0.8;
+}
+.zz-ambient-spark {
+  fill: #f0c060;
+  opacity: 0.85;
+}
+.zz-ambient-dust-puff {
+  fill: #8a7a68;
+  opacity: 0.35;
+}
+.zz-ambient-perimeter-flash {
+  stroke: #e07050;
+  stroke-width: 0.45;
+  opacity: 0.55;
+  stroke-dasharray: 1.2 0.8;
+}
+.zz-ambient-breath {
+  fill: #d8e0e8;
+  opacity: 0.45;
+}
+.zz-map-wx-haze {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zz-ambient-perimeter-flash {
+    stroke-dasharray: none;
+    opacity: 0.7;
+  }
+  .zz-ambient-dust-puff {
+    opacity: 0.5;
+  }
+}
 .zz-landmark-park { fill: #2a4030; opacity: 0.7; }
 .zz-landmark-park-tree { fill: #3a5a38; opacity: 0.75; }
 .zz-landmark-ind { fill: #3a3a42; stroke: #6a6a72; stroke-width: 0.15; }

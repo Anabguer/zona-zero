@@ -85,6 +85,7 @@ import {
   buildingWorkerCap,
 } from './colony.js';
 import { medicalBeds, healthSemaphore } from './outbreaks.js';
+import { ambientSemaphore } from './ambient-life.js';
 import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon } from './icons.js';
 import {
   artUrl,
@@ -1455,6 +1456,7 @@ function paintHud() {
     healthEl.textContent = sem === 'red' ? 'Salud ✖' : sem === 'amber' ? 'Salud !' : 'Salud ✓';
   }
   document.body.dataset.health = healthSemaphore(state);
+  document.body.dataset.ambient = ambientSemaphore(state);
   const beds = medicalBeds(state, content.buildings);
   const sickN = state.population?.sick || 0;
   const injN = state.population?.injured || 0;
@@ -1710,6 +1712,7 @@ function paint() {
     bindMapCamera(wrap, () => state, () => scheduleSave());
   }
   renderMap($('zz-map'), state, {
+    content,
     onSelectZone: (id) => {
       if (wrap?.dataset.zzPanned) return;
       if (state.uiMode === 'expand' || state.uiMode === 'build') return;
@@ -1732,6 +1735,10 @@ function paint() {
       handleGhostPointer(ev);
     },
   });
+  // ZZ-168: polvo de construcción solo un paint
+  if (state.flags?.justBuiltIds?.length) {
+    state.flags.justBuiltIds = [];
+  }
   renderChoiceModal();
   const defeat = $('zz-defeat');
   if (defeat) {

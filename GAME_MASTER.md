@@ -1926,11 +1926,20 @@ Conservar dirección: edificios/retratos WebP actuales como base.
 - Aprobar ZZ-161 = lenguaje funcional/legibilidad, **no** arte definitivo (sprites, sombras, grietas, escombros, overlays, carretera, suelo, identidades).
 - Mantener fuera: city.webp, mapas aéreos, overlays GIS, polígonos técnicos permanentes.
 
-### ZZ-162…164 lean
+### Criterios a conservar (ZZ-165 · Neni+ChatGPT)
 
-- Landmarks: set reconocible (WebP donde exista + siluetas tipadas SVG).
-- Props colonia: restos/valla/detalles SVG densos según crecimiento.
-- SFX §34 (beeps) + mute; sin dependencia de assets audio raster.
+- **Progresión visual emergente:** no 4 decorados por era. Evolución = edificios, densidad, defensas, reparaciones, mejoras, props, territorio, desgaste, actividad, infra real. “Ha crecido porque yo lo construí.”
+- Landmarks: identidad semántica correcta; silueta provisional > asset bonito incorrecto (no hospital-por-farmacia).
+- Props: colonia habitada, no confeti; densidad ligada a crecimiento/actividad; sin saturar lectura/construcción.
+- SFX: mute · breves · jerarquía · no beep en cada acción menor; beeps ≠ diseño sonoro artístico definitivo (AUDIO PASS futuro puede sustituir triggers).
+- Eras por indicadores; día = brújula; visual acompaña progreso real.
+- ZZ-165 valida composición/progresión/identidad/triggers — **no** arte definitivo.
+
+### ZZ-166…172 vida ambiental (§32B)
+
+- Cap ≤16–20 figuras; muestra proporcional; sin Sims/fichas.
+- Trabajo en edificios staffed · polvo/andamiaje · semáforo · clima · explorador ruta · ataque→refugio.
+- Reduced-motion: info estática alternativa.
 
 Necesarios a medio plazo:
 - edificios por tipo/nivel  

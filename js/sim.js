@@ -179,6 +179,9 @@ export function placeBuilding(state, content, type, x, y) {
   }
   state.base.buildings.push({ id: uid('b'), type, x, y, hp: 100, workers: 0 });
   state.stats.buildingsBuilt += 1;
+  state.flags = state.flags || {};
+  const newId = state.base.buildings[state.base.buildings.length - 1].id;
+  state.flags.justBuiltIds = [...(state.flags.justBuiltIds || []).filter((id) => id !== newId).slice(-3), newId];
   syncLaborFromColony(state, content);
   pushLog(state, `Construís ${def.name}.`, 'good');
   return { ok: true };
@@ -311,6 +314,7 @@ export function startExpedition(state, content, zoneId, explorerId) {
     id: exId,
     zoneId,
     explorerId: explorer.id,
+    departDay: state.day,
     returnDay: state.day + preview.days,
     risk: preview.risk,
     vehicleId,

@@ -5,6 +5,7 @@ import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
 import { artUrl, buildingArtUrl, zoneArtUrl, FOG_ART, COLONY_YARD_ART } from './art.js';
 import { buildingStructuralState, buildingMaxHp } from './buildings-damage.js';
+import { drawAmbientLife, expeditionProgress } from './ambient-life.js';
 import {
   ensureSectors,
   ptsStr as sectorPtsStr,
@@ -1374,7 +1375,8 @@ function drawBuildableSurfaceHints(layer, state, scale, bw, bh) {
   layer.appendChild(group);
 }
 
-function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPointer } = {}) {
+function drawSettlementCore(g, state, camp, tier, handlers = {}) {
+  const { onSelectBuilding, onGhostPointer } = handlers;
   const buildings = state.base?.buildings || [];
   if (!buildings.length && state.uiMode !== 'build') return;
   const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
@@ -1559,6 +1561,8 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPoi
       });
       layer.appendChild(wrap);
     });
+
+  drawAmbientLife(layer, state, handlers?.content || null, { scale, bw, bh });
 
   g.appendChild(layer);
 }
@@ -1896,7 +1900,7 @@ function drawZone(layer, z, state, tier, handlers) {
   }
 
   if (z.type === 'camp') {
-    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onGhostPointer });
+    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onGhostPointer, content: handlers?.content });
     drawSectorOverlays(g, state, z, { onSelectSector });
   } else if (z.state === 'unknown') {
     drawIrregularFog(g, z, rng, (state.day || 1) <= 2);
@@ -1996,7 +2000,7 @@ function drawExpeditions(svg, state) {
     const my = (camp.y + dest.y) / 2 - (dest.x - camp.x) * bend;
     const d = `M${camp.x} ${camp.y} Q${mx} ${my} ${dest.x} ${dest.y}`;
     g.appendChild(svgEl('path', { d, class: 'zz-map-route', fill: 'none' }));
-    const t = 0.5;
+    const t = expeditionProgress(ex, state.day || 1);
     const px = (1 - t) * (1 - t) * camp.x + 2 * (1 - t) * t * mx + t * t * dest.x;
     const py = (1 - t) * (1 - t) * camp.y + 2 * (1 - t) * t * my + t * t * dest.y;
     const fig = svgEl('g', { transform: `translate(${px},${py})`, class: 'zz-map-explorer-marker' });
@@ -2031,6 +2035,20 @@ function drawWeather(parent, weather, m) {
     g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.22', fill: '#8a8478' }));
   } else if (w === 'heat') {
     g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.12', fill: '#c08040' }));
+  }
+  // ZZ-170: haze/aliento abstracto adicional (legible sin animación)
+  if (w === 'cold' || w === 'blizzard') {
+    g.appendChild(
+      svgEl('rect', {
+        x: 0,
+        y: 0,
+        width: W,
+        height: H,
+        class: 'zz-map-wx-haze',
+        opacity: w === 'blizzard' ? '0.14' : '0.08',
+        fill: '#c8d0d8',
+      })
+    );
   }
   parent.appendChild(g);
 }
@@ -2248,7 +2266,7 @@ export function bindMapCamera(wrap, getState, onChange) {
 
 export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
-  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer } = handlers;
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer, content } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   const m = mapMetrics(svg);
   if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
@@ -2290,7 +2308,7 @@ export function renderMap(svg, state, handlers = {}) {
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
   ordered.forEach((z) =>
-    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onSelectSector, onGhostPointer })
+    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onSelectSector, onGhostPointer, content })
   );
   world.appendChild(layer);
 
