@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019A + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **ZZ-019B** implementada · **PENDIENTE DE REVISIÓN** (REVIEW_STOP). · **ZZ-015 NO INICIADA**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **ZZ-019B APROBADA**. · **ZZ-015 HUMAN_GATE** en curso / PENDIENTE DE REVISIÓN. · Deuda artística D1 **NO BLOQUEANTE**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -302,38 +302,28 @@ OK. **Cerrada (alcance desktop). Arte mundo = deuda bloqueante aparte.**
 
 ---
 
-# DEUDA VISUAL D1 — ESCENARIO / INTEGRACIÓN (BLOQUEANTE PARA ARTE D1)
+# DEUDA ARTÍSTICA D1 — POST ZZ-019B (NO BLOQUEANTE)
 
-> **Clasificación:** DEUDA VISUAL **BLOQUEANTE** antes de considerar cerrado el aspecto artístico del D1.  
-> **No** bloquea la aprobación de ZZ-014 (panel+mundo).  
-> **No** reabre el modelo espacial 2.8 ni ZZ-019/019A mecánicas.  
-> **Sin implementación** en esta ronda — solo registro + propuesta de fase.
+> **Clasificación:** DEUDA ARTÍSTICA **NO BLOQUEANTE**.  
+> ZZ-019B APROBADA = integración visual / anti-debug / anti-GIS — **NO** arte final del escenario.  
+> **No** reabre contrato espacial 2.8 ni mecánicas ghost/snap/superficies.  
+> **No** convertir fases de sistemas (p.ej. ZZ-015) en reconstrucción artística.
 
-## Qué NO está aprobado visualmente
+## Deudas registradas (Neni+ChatGPT · cierre ZZ-019B)
 
-| # | Problema | Lectura actual | Objetivo |
-|---|----------|----------------|----------|
-| 1 | Grandes polígonos/masas negras | Geometría técnica / error de render | Ruina, obstáculo o escenario creíble (o niebla no-técnica) |
-| 2 | Óvalos / rectángulos / formas sueltas | Placeholders / debug | Props físicos integrados |
-| 3 | Carretera | Capa gris superpuesta | Parte orgánica del arte del suelo |
-| 4 | Superficies en Construir (amarillo/GIS) | Mapa técnico | Señal **discreta y temporal** de “aquí puedes construir” (mecánica OK) |
-| 5 | Integración edificios (HQ/huerto) | Sprite pegado | Contacto suelo · sombra · transición |
+| # | Deuda | Estado | Nota |
+|---|-------|--------|------|
+| 1 | **Carretera** — art pass (bordes, continuidad, suciedad, zoom cercano) | Abierta | Sistema/integración básica OK en 019B |
+| 2 | **Props ambientales** — vehículos/pecios/cajas/restos provisionales | Abierta | Art pass mundo |
+| 3 | **Integración edificio–suelo** — sombras/contacto/transiciones finales | Abierta | HQ/huerto mejoraron en 019B; falta art pass |
+| 4 | **Identidades urbana/asfalto/verde** — enriquecer en art pass del mundo | Abierta | No reconstruir ahora |
+| 5 | **Superficies build — pulido artístico** | Abierta | **Lógica/sistema APROBADO**; solo viz futura |
 
-## Dónde estaba previsto en el PLAN / biblia (hoy)
+## Qué ya NO es deuda bloqueante (cerrado en ZZ-019B)
 
-| Deuda | Dónde se “metió” hasta ahora | ¿Fase explícita de arte final? |
-|-------|------------------------------|--------------------------------|
-| 1 Masas negras / lectura técnica de límites | Subproducto visual ZZ-018 (sectores/fog) + arte provisional ZZ-019A | **No** — 018/019A cerraron **modelo**, no arte final |
-| 2 Formas geométricas sueltas | Props/SVG + hints de superficie ZZ-019A (ronda CAMBIOS) | **No** — aceptado como provisional en cierre 019A |
-| 3 Carretera | ZZ-019A (“integrar más”; aún shape mejorada, no arte final) | **No** — deuda explícita en autocrítica 019A |
-| 4 Viz superficies build | ZZ-019A (blobs orgánicos vs celdas) — **mecánica APROBADA**; viz sigue técnica | **No** — PLAN trata highlight como tarea 019A, no como acabado artístico |
-| 5 Integración edificios | GAME_MASTER §9: «fase artística posterior; **no bloquea sistemas**» · PLAN 2.8 fila «Integración arte edificios = **no bloqueante**» | **No** hay fase dedicada; Q2 (ZZ-166…) es vida ambiental, **no** esto |
-
-**Conclusión:** no existe hoy una fase canónica **antes** de ZZ-015 / bloque C que cierre el acabado artístico del mundo D1. ZZ-015 (QA D1) **no** debe usarse para “sellar” este arte. Q2 llega demasiado tarde y es otro tema.
-
-## PROPUESTA — nueva fase **ZZ-019B** (REVIEW_STOP)
-
-> Autorizada e implementada 2026-08-16. Ver sección **# FASE ZZ-019B** abajo.
+- Grandes masas/polígonos negros (causa SVG `fill` + fog D1).
+- Franjas GIS permanentes / superficies amarillas dominantes.
+- Lectura «mapa técnico» del D1 normal.
 
 ---
 
@@ -362,8 +352,7 @@ Eliminar lectura debug/placeholder/GIS del D1: masas negras, formas sueltas, car
 `js/render-map.js`, `css/game.css`, `dev/harness-zz.html`, `scripts/review-shots-zz019b.mjs`, `docs/review/*`, LOG/PLAN.
 
 ## EVIDENCIAS
-`01-d1-844x390` · `02-pan-urbana` · `03-pan-abierta` · `04-carretera` · `05-hq-integrado` · `06-build-mode` · `07-superficie-valida` · `08-superficie-invalida` · `09-huerto-colocado` · `10-d1-740x360` · `11-desktop` · `review-contact-sheet.jpg`  
-Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\`
+Archivadas en `docs/review-archive/zz-019b/` · git `b6d5ecd`.
 
 ## AUTOCRÍTICA
 1. ¿Debug? Residuos posibles: pecios vehículo aún simplificados; cajas como rects (props). No hay fills negros por CSS roto.
@@ -374,17 +363,54 @@ Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\`
 6. ¿HQ/huerto menos pegatina? Sombra + gravel baratos; assets no rehechos.
 7. ¿Contrato 2.8 íntegro? Sí (mecánicas/smokes).
 
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN CONTINUACIÓN CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Aprobación **funcional/visual de esta fase**, **no** arte final.  
+Validado: sin masas negras; mundo continuo; fog D1 limpio; sin GIS permanente; build mode + ghost/snap/✓; superficies temporales; carretera/terreno más integrados; HQ/huerto mejor contacto; contrato 2.8 intacto.  
+Deuda artística → sección **DEUDA ARTÍSTICA D1 — POST ZZ-019B (NO BLOQUEANTE)**.
+
+## COMMIT
+`b6d5ecd` · docs cierre + ZZ-015 (este commit)
+
+## Sync Drive/GitHub
+OK. **Cerrada formalmente. Siguiente: ZZ-015 (HUMAN_GATE).**
+
+---
+
+# FASE ZZ-015 — QA D1 + contact sheet (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · B · **HUMAN_GATE YES** · deps ZZ-014 (+ ZZ-019B APROBADA)
+
+## ESTADO CURSOR
+COMPLETADA
+
 ## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
-## APROBACIÓN CONTINUACIÓN CHATGPT
-**NO**
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
 
-## ZZ-015
-**NO INICIADA**
+## OBJETIVO
+Smoke + capturas consolidadas del Día 1 (landscape, HUD, tutorial, superficies/ghost, desktop panel+mundo). PARAR.
+
+## HECHO
+- `smoke-d1` + `smoke-build-place`
+- Review 12 tomas + contact sheet → `docs/review/` + Drive
+- Sin deploy · sin entrar en ZZ-020
+
+## EVIDENCIAS
+`docs/review/` · Drive `Review/`
 
 ## PARAR
-Sí — REVIEW_STOP. Sin deploy.
+Sí — HUMAN_GATE. Esperar Neni/ChatGPT.
 
 ---
 

@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…014 APROBADAS**. · **ZZ-019B** implementada · **PENDIENTE DE REVISIÓN** (REVIEW_STOP). · **ZZ-015 NO INICIADA**.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…014 + ZZ-019B APROBADAS**. · **ZZ-015 HUMAN_GATE** · PENDIENTE DE REVISIÓN. · Deuda artística D1 **NO BLOQUEANTE**. · No ZZ-020 hasta APROBADA ZZ-015.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -82,8 +82,8 @@
 | ZZ-012 | **APROBADA** · tips 2.8 |
 | ZZ-013 | **APROBADA** · HUD comida/agua/madera |
 | ZZ-014 | **APROBADA** · desktop panel+mundo (solo UX) |
-| Integración arte escenario D1 | **ZZ-019B** implementada · PENDIENTE DE REVISIÓN (REVIEW_STOP) |
-| ZZ-015 | QA D1 — **NO INICIADA** hasta APROBACIÓN ZZ-019B |
+| Integración arte escenario D1 | **ZZ-019B APROBADA** (funcional/visual anti-GIS). Arte final = **DEUDA NO BLOQUEANTE** (carretera, props, edificio–suelo, identidades, pulido superficies) |
+| ZZ-015 | QA D1 — **HUMAN_GATE** · PENDIENTE DE REVISIÓN |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
 
@@ -481,23 +481,24 @@
 - ZZ-019 UX intacta
 - **PARAR** — no reescribir/aprobar ZZ-012 sin autorización Neni/ChatGPT
 
-### ZZ-019B — Integración visual escenario D1 (REVIEW_STOP · PENDIENTE)
+### ZZ-019B — Integración visual escenario D1 (REVIEW_STOP · APROBADA)
 
-> **Implementada 2026-08-16.** No reabre ZZ-019/019A mecánicas. No toca ghost/snap/✓. No solares/macrogrid.
+> **APROBADA 2026-08-16 (Neni+ChatGPT).** No reabre ZZ-019/019A mecánicas. No toca ghost/snap/✓. No solares/macrogrid.  
+> Aprobación **funcional/visual de fase** — **no** arte final. Deuda artística → LOG «POST ZZ-019B (NO BLOQUEANTE)».
 
 | Campo | Valor |
 |-------|-------|
 | **Bloque** | B0 · acabado visual escenario (puente a cierre arte D1) |
 | **HUMAN_GATE** | NO |
-| **REVIEW_STOP** | **YES** |
+| **REVIEW_STOP** | **YES** (cerrado APROBADA) |
 | **Objetivo** | Mundo coherente sin geometría técnica; carretera integrada; props físicos; build-mode con señal de superficie discreta/temporal; mejor contacto edificio/suelo. |
 | **Dependencias** | ZZ-019A, ZZ-014 |
 | **Antes de** | ZZ-015 |
 | **Archivos approx.** | render-map, css world, harness cache-bust |
 | **Pruebas auto** | smoke-d1, smoke-build-place (regresión mecánica) |
-| **Revisión visual** | Sí + PARAR · `docs/review/` + Drive |
+| **Revisión visual** | Sí · archivada `docs/review-archive/zz-019b/` |
 
-**Estado revisión:** PENDIENTE DE REVISIÓN · APROBACIÓN CONTINUACIÓN: NO · ZZ-015: NO INICIADA
+**Estado revisión:** APROBADA · APROBACIÓN CONTINUACIÓN: SÍ
 
 **Aceptación:** sin Construir = solo escenario; con Construir = capacidad legible sin GIS amarillo dominante.
 

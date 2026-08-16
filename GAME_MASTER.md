@@ -788,7 +788,7 @@ Permitido: ruinas, coches, árboles, basura, escombros, vallas rotas, carreteras
 
 Mantener tono apocalíptico, suciedad y edificios legibles. Evolucionar hacia **mapa grande diseñado**, no superficie neutra enorme.
 
-**Integración visual de edificios construidos** (puede ser fase artística posterior; no bloquea sistemas): sombra de contacto · perspectiva coherente · transición con suelo · escala coherente · evitar efecto PNG/pegatina.
+**Integración visual de edificios construidos** (fase artística posterior; **no bloquea sistemas** — post ZZ-019B sigue como deuda artística no bloqueante: sombras/contacto/transiciones finales, props, carretera art pass, identidades del mundo): sombra de contacto · perspectiva coherente · transición con suelo · escala coherente · evitar efecto PNG/pegatina.
 
 ### Arco visual QA (no calendario rígido)
 
@@ -1925,7 +1925,7 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 - Mapa **finito diseñado**; refs composición: TWD Survivors (no copia) + Townsmen (legibilidad).
 - Avisos → cámara + resalte + **abrir ficha** (§9.4 / §21).
 - Caminos/muros: **solo visual en ZZ-019A**; mecánicas futuras vía §13/§9.5 si procede.
-- Arte: integración sombra/perspectiva = fase posterior no bloqueante.
+- Arte: integración sombra/perspectiva = fase posterior no bloqueante. **ZZ-019B APROBADA** (anti-GIS/funcional); art pass carretera/props/edificio–suelo/identidades = **deuda artística NO BLOQUEANTE** (no interpretar 019B como arte final).
 - PLAN 2.8: **ZZ-019A = REVIEW_STOP** (no HUMAN_GATE extra); ZZ-012 CAMBIOS SOLICITADOS hasta 019A APROBADA.
 - **Decisiones cerradas 2026-08-16:** (1) 019A=REVIEW_STOP · (2) varias superficies=SÍ · (3) caminos/vallas 019A=solo visual.
 
