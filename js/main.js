@@ -2522,7 +2522,12 @@ export async function bootHub(opts = {}) {
     const save = data.save && data.save.empty !== true ? data.save : null;
     const hasSave = !!save;
     const actions = $('zz-hub-actions');
-    if (!actions) return;
+    if (!actions) {
+      // Sin acciones no podemos montar el hub, pero NUNCA dejar "Cargando…" eterno.
+      if (boot) boot.hidden = true;
+      if (hub) hub.hidden = false;
+      return;
+    }
     const hubRoot = hub || document.body;
     const playUrl = opts.playUrl || 'play.php';
     const beginNew = () =>

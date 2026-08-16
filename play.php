@@ -20,12 +20,12 @@ $base = zz_public_base();
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#12100c" />
   <title>Jugar · Zona Zero</title>
-  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/logo.png" type="image/png" />
+  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=40" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=40" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=41" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=41" />
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -166,17 +166,22 @@ $base = zz_public_base();
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from './js/main.js?v=40';
-    bootGame({
-      mode: <?= $isNew ? "'new'" : "'load'" ?>,
-      name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
-      clearExisting: <?= $clear ? 'true' : 'false' ?>,
-      fromIntro: <?= $fromIntro ? 'true' : 'false' ?>,
-    }).catch((e) => {
-      const boot = document.getElementById('zz-boot');
-      if (boot) boot.textContent = 'Error: ' + (e?.message || e);
+    const boot = document.getElementById('zz-boot');
+    try {
+      const { bootGame } = await import('./js/main.js?v=41');
+      await bootGame({
+        mode: <?= $isNew ? "'new'" : "'load'" ?>,
+        name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
+        clearExisting: <?= $clear ? 'true' : 'false' ?>,
+        fromIntro: <?= $fromIntro ? 'true' : 'false' ?>,
+      });
+    } catch (e) {
       console.error(e);
-    });
+      if (boot) {
+        boot.hidden = false;
+        boot.textContent = 'Error: ' + (e?.message || e);
+      }
+    }
   </script>
 </body>
 </html>

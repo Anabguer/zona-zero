@@ -17,8 +17,8 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=40" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/hub.css?v=40" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=41" />
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/hub.css?v=41" />
 </head>
 <body class="zz-body zz-body--hub">
   <div id="zz-hub-boot" class="zz-boot">Cargando…</div>
@@ -36,8 +36,21 @@ $base = zz_public_base();
     </main>
   </div>
   <script type="module">
-    import { bootHub } from './js/main.js?v=40';
-    bootHub().catch(() => {});
+    const boot = document.getElementById('zz-hub-boot');
+    try {
+      const { bootHub } = await import('./js/main.js?v=41');
+      await bootHub();
+    } catch (err) {
+      console.error(err);
+      if (boot && !boot.querySelector('button')) {
+        boot.hidden = false;
+        const msg = (err && err.message) ? String(err.message) : String(err);
+        boot.innerHTML =
+          '<p><strong>Error al cargar</strong></p><p></p>' +
+          '<button type="button" class="zz-btn zz-btn--primary" onclick="location.reload()">Reintentar</button>';
+        boot.querySelector('p:nth-child(2)').textContent = msg;
+      }
+    }
   </script>
 </body>
 </html>
