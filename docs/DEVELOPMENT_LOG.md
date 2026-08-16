@@ -2096,6 +2096,9 @@ Accesibilidad básica + gate. Mundo primero; sin pestañas app.
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
+## COMMIT
+`81a7fb2`
+
 ## PARAR
 Sí — HUMAN_GATE ZZ-154. Sin deploy. No ZZ-160.
 
