@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…124** hechas · **ZZ-125 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…132** hechas · **ZZ-133 HUMAN_GATE** PENDIENTE DE REVISIÓN (GO lean). · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1782,10 +1782,10 @@ IMPLEMENTATION_PLAN 2.8 · M · **HUMAN_GATE YES** · deps ZZ-124
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Auditoría familias + gate. Sin cadencia fija. Brotes vía pesos.
@@ -1793,14 +1793,110 @@ Auditoría familias + gate. Sin cadencia fija. Brotes vía pesos.
 ## HECHO
 - Smoke `smoke-zz110-125`: 67 logros · 16 familias · quiet · catástrofe avisada.
 - Review 10 tomas + contact sheet.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloques L+M validados. Criterios a conservar: Director ≠ calendario; quiet nights = gameplay; antirrepetición por familia; secuelas; catástrofes con aviso; pesos no deterministas; logros = contenido no cuota; auditoría variedad percibida. Deuda arte NO BLOQUEANTE.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-125/`.
+
+## COMMIT
+`851bcea`
+
+## PARAR
+No — continuar ZZ-126 → N hasta ZZ-133.
+
+---
+
+# FASE ZZ-126 — Ritmo tensión→crisis→recovery tests
+
+IMPLEMENTATION_PLAN 2.8 · M · HUMAN_GATE NO · deps ZZ-125 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-133)*
+
+## HECHO
+- Smoke `smoke-zz126-rhythm`: crisis → protection → quiet/graves bloqueadas → tensión vuelve (sin day%N).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-130 — Contactos por evento (sin 4X)
+
+IMPLEMENTATION_PLAN 2.8 · N · HUMAN_GATE NO
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `js/factions.js` · discoverFaction · relación hostil/tensa/neutral/amistosa · eventos comercio/rumor cableados.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-131 — Comercio evento
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `tradeWithFaction` lean (tradeMult/offers/wants) · flag `trade_done`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-132 — UI mínima o solo cards
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Panel Contactos en Más (solo descubiertos + trueque) · sin embajada 4X.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-133 — Go/no-go facciones (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · N · **HUMAN_GATE YES** · deps ZZ-132
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Go/no-go tras playtest. Si no aporta → solo flags.
+
+## RECOMENDACIÓN CURSOR
+**GO lean** — contactos por evento + trueque + UI mínima. **NO** diplomacia 4X / mapa / turnos. Si Neni/ChatGPT prefieren flags-only, se puede degradar sin rehacer el Director.
+
+## HECHO
+- Smoke `smoke-zz130-133` OK.
+- Review 10 tomas + contact sheet.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-126** hasta APROBADA ZZ-125.
+- Sin deploy · **no ZZ-140** hasta APROBADA ZZ-133.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-125. Sin deploy. No ZZ-126.
+Sí — HUMAN_GATE ZZ-133. Sin deploy. No ZZ-140.
 
 ---
 
@@ -1977,12 +2073,12 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-122 | Antirrepetición reforzada | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-123 | Quiet nights + post-desastre | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-124 | Catástrofes con aviso | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-125 | Auditoría eventos vs familias + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-126 | Ritmo tensión→crisis→recovery tests | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-130 | Contactos por evento (sin 4X) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-131 | Comercio evento | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-132 | UI mínima o solo cards | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-133 | Go/no-go facciones tras playtest | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-125 | Auditoría eventos vs familias + gate | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-126 | Ritmo tensión→crisis→recovery tests | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-130 | Contactos por evento (sin 4X) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-131 | Comercio evento | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-132 | UI mínima o solo cards | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-133 | Go/no-go facciones tras playtest | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-140 | Unlock eras por indicadores 2.5 | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-141 | Victoria multi-condición SIN needEnergy | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-142 | Crisis final variable | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

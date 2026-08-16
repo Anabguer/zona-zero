@@ -970,7 +970,7 @@
           "id": "acoger",
           "label": "Acoger",
           "effects": {
-            "spawnSurvivorChance": 1.0,
+            "spawnSurvivorChance": 1,
             "stabilityDelta": 1
           }
         },
@@ -1076,7 +1076,7 @@
           "id": "reclutar",
           "label": "Ofrecer plaza fija",
           "effects": {
-            "spawnSurvivorChance": 1.0
+            "spawnSurvivorChance": 1
           }
         },
         {
@@ -1118,7 +1118,7 @@
         {
           "text": "Lo escondéis la primera noche; al día se integra.",
           "effects": {
-            "spawnSurvivorChance": 1.0
+            "spawnSurvivorChance": 1
           }
         },
         {
@@ -3745,7 +3745,9 @@
                 -2,
                 -1
               ]
-            }
+            },
+            "discoverFaction": true,
+            "tradeOffer": "soft"
           }
         },
         {
@@ -3806,7 +3808,9 @@
                 -2,
                 -1
               ]
-            }
+            },
+            "discoverFaction": "trader",
+            "tradeOffer": "soft"
           }
         },
         {
@@ -3846,7 +3850,8 @@
                 -3,
                 -2
               ]
-            }
+            },
+            "discoverFaction": "trader"
           }
         },
         {
@@ -3866,14 +3871,16 @@
                 1,
                 2
               ]
-            }
+            },
+            "discoverFaction": "trader"
           }
         },
         {
           "id": "pasar",
           "label": "Dejar pasar",
           "effects": {
-            "stabilityDelta": 1
+            "stabilityDelta": 1,
+            "discoverFaction": "trader"
           }
         }
       ]
@@ -3959,7 +3966,9 @@
               ]
             },
             "stabilityDelta": 2,
-            "setFlag": "faction_gift"
+            "setFlag": "faction_gift",
+            "discoverFaction": "friendly",
+            "factionRelation": "friendly"
           }
         },
         {
@@ -4345,7 +4354,9 @@
           "text": "Dos grupos se matan entre sí más allá del río.",
           "effects": {
             "threatDelta": 2,
-            "setFlag": "faction_war"
+            "setFlag": "faction_war",
+            "discoverFaction": "hostile",
+            "factionRelation": "hostile"
           }
         },
         {

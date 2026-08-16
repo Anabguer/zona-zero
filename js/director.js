@@ -14,6 +14,7 @@ import { changePopulation, applyCasualties, workforce } from './population.js';
 import { applyBuildingDamage } from './buildings-damage.js';
 import { radioFamilyWeightMult, hasRadio, pushRadioSignal } from './radio.js';
 import { noteCalmNight, noteAchievementFlag } from './achievements.js';
+import { applyFactionContact } from './factions.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) ^ (state.day * 7919));
@@ -224,6 +225,15 @@ export function applyEventEffects(state, content, effects = {}, rng) {
     state.research.progress += effects.researchBonus;
   }
   if (effects.attackIntensity) attackIntensity = effects.attackIntensity;
+  // ZZ-130/131: contactos / comercio lean (sin 4X)
+  if (
+    effects.discoverFaction ||
+    effects.tradeOffer ||
+    effects.factionRelationDelta ||
+    effects.factionRelation
+  ) {
+    applyFactionContact(state, effects, rng);
+  }
   return { attackIntensity };
 }
 

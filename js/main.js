@@ -38,6 +38,7 @@ import { hasRadio, hasExpeditionCenter, ensureRadioState } from './radio.js';
 import { ensureMissions } from './missions.js';
 import { consumePendingBadge, ensureAchievements } from './achievements.js';
 import { prepareForCatastrophe } from './director.js';
+import { tradeWithFaction, relationLabel, discoveredFactions } from './factions.js';
 import {
   buildingsNeedingRepair,
   structuralStateLabel,
@@ -446,6 +447,19 @@ function handleSheetAction(action, btn) {
     if (!r.ok) toast('No hay catástrofe avisada', 'warn');
     else {
       toast('Preparados ante el aviso', 'good');
+      scheduleSave();
+    }
+    openMoreSheet();
+    paint();
+    return;
+  }
+  if (action === 'faction-trade') {
+    const fid = btn.getAttribute('data-id');
+    const f = (state.factions || []).find((x) => x.id === fid);
+    const r = tradeWithFaction(state, f);
+    if (!r.ok) toast(r.error || 'No hay trueque', 'warn');
+    else {
+      toast(`Trueque con ${f.name}`, 'good');
       scheduleSave();
     }
     openMoreSheet();
@@ -1173,15 +1187,29 @@ function openMoreSheet() {
     <div class="zz-tech-list">${techHtml}</div>
     <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
     <p>${vehs || 'Ninguno'}</p>
-    <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Facciones</h3>
-    <ul class="zz-factions">${(state.factions || [])
-      .map(
-        (f) =>
-          `<li><strong>${escapeHtml(f.discovered ? f.name : '???')}</strong> <span class="zz-rel zz-rel--${f.relation}">${
-            f.discovered ? f.relation : 'desconocida'
-          }</span></li>`
-      )
-      .join('')}</ul>
+    <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Contactos</h3>
+    <p class="zz-muted" style="font-size:0.78rem">Sin diplomacia 4X: solo contactos por evento/trueque.</p>
+    <ul class="zz-factions">${(() => {
+      const known = discoveredFactions(state);
+      if (!known.length) {
+        return '<li class="zz-muted">Ningún grupo contactado aún (comercio/radio/rumores).</li>';
+      }
+      return known
+        .map((f) => {
+          const canTrade = f.relation !== 'hostile';
+          return `<li>
+            <strong>${escapeHtml(f.name)}</strong>
+            <span class="zz-rel zz-rel--${f.relation}">${relationLabel(f.relation)}</span>
+            <span class="zz-muted" style="font-size:0.75rem"> · ${escapeHtml((f.desc || '').slice(0, 48))}</span>
+            ${
+              canTrade
+                ? `<br/><button type="button" class="zz-btn zz-btn--compact" data-action="faction-trade" data-id="${f.id}">Trueque</button>`
+                : '<br/><span class="zz-muted" style="font-size:0.75rem">Sin comercio</span>'
+            }
+          </li>`;
+        })
+        .join('');
+    })()}</ul>
     <p style="margin-top:0.75rem;color:var(--zz-muted);font-size:0.85rem">Diario: ${(state.log || [])
       .slice(0, 4)
       .map((e) => `D${e.day} ${escapeHtml(e.text)}`)

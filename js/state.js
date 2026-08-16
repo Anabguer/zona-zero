@@ -170,10 +170,19 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
   const picked = rng.shuffle(templates).slice(0, factionCount);
   const factions = picked.map((t, i) => ({
     id: `f${i}_${t.id || t.trait || i}`,
+    templateId: t.id || t.trait,
     name: t.name || `Grupo ${i + 1}`,
     trait: t.trait || t.id,
-    relation: t.relationStart || t.defaultRelation || 'neutral',
+    relation:
+      t.relationStart ||
+      t.defaultRelation ||
+      (t.hostility >= 70 ? 'hostile' : t.hostility >= 45 ? 'wary' : t.hostility <= 20 ? 'friendly' : 'neutral'),
     discovered: false,
+    hostility: t.hostility ?? 40,
+    tradeMult: t.tradeMult ?? 1,
+    offers: [...(t.offers || [])],
+    wants: [...(t.wants || [])],
+    desc: t.desc || '',
   }));
 
   const state = {
