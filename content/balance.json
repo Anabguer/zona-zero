@@ -69,15 +69,29 @@
   "softCapThreatEarlyDays": 10,
   "directorMinDay": 1,
   "foodSoftCapDays": 10,
+  "waterSoftCapDays": 10,
+  "colonyDailyFuelEnabled": false,
+  "colonyDailyFuelComment": "ZZ-043: fuel no calienta ni es gasto diario de colonia; solo vehículos.",
   "resourceOrder": ["food", "water", "wood", "metal", "medicine", "fuel", "ammo"],
   "secondaryResources": ["parts", "tools"],
+  "seasons": {
+    "order": ["spring", "summer", "autumn", "winter"],
+    "daysPerSeason": 22,
+    "startSeason": "autumn",
+    "startDayInSeason": 8
+  },
+  "weatherDuration": { "min": 1, "max": 3 },
   "woodHeating": {
-    "enabled": false,
-    "comment": "Sistema completo avisos/exposición = ZZ-043+. ZZ-020 ya consume madera en cold/blizzard para el brief ritual.",
+    "enabled": true,
+    "comment": "ZZ-043+: calefacción automática con madera. Aviso→prep→exposición.",
     "woodPerUnprotectedPersonPerSeverity": 0.4,
     "protectionMitigation": [1, 0.65, 0.35, 0.1],
     "exposureThresholds": { "amber": 2, "red": 5 },
-    "warnDaysBefore": [1, 2, 3]
+    "warnDaysBefore": [1, 2, 3],
+    "exposurePerShortfall": 1,
+    "exposureDecay": 1,
+    "sickChanceAmber": 0.12,
+    "sickChanceRed": 0.28
   },
   "outbreaks": {
     "enabled": false,

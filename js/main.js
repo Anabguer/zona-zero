@@ -870,6 +870,24 @@ function openMoreSheet() {
       <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
     <p class="zz-muted" style="font-size:0.8rem">${slotHint(slots, living)}</p>
+    <h3 style="font-family:var(--zz-display)">Estabilidad</h3>
+    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+      ${Math.round(state.stability)}/100 ·
+      ${(() => {
+        const popN = state.population?.total || 0;
+        const capN = housingCapacity(state, content.buildings);
+        const bits = [];
+        if ((state.resources.food || 0) > popN) bits.push('comida ok');
+        else bits.push('comida justa');
+        if ((state.resources.water || 0) > popN) bits.push('agua ok');
+        else bits.push('agua justa');
+        if (popN <= capN) bits.push('vivienda ok');
+        else bits.push('hacinamiento');
+        if ((state.coldExposure || 0) >= 2) bits.push(`exposición frío ${state.coldExposure}`);
+        if ((state.director?.recentLosses || 0) > 0) bits.push('pérdidas recientes');
+        return bits.join(' · ');
+      })()}
+    </p>
     <h3 style="font-family:var(--zz-display)">Investigación</h3>
     <div class="zz-tech-list">${techHtml}</div>
     <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
@@ -1061,10 +1079,22 @@ function paintHud() {
     threatWrap.hidden = (state.day || 1) < 6 && threat < 18;
   }
   document.body.dataset.weather = state.weather || 'clear';
+  document.body.dataset.season = state.season || 'autumn';
   const w = $('zz-weather');
   if (w) {
-    const labels = { clear: 'Despejado', rain: 'Lluvia', storm: 'Tormenta', cold: 'Frío', fog: 'Niebla', heat: 'Calor' };
-    w.textContent = labels[state.weather] || state.weather;
+    const labels = {
+      clear: 'Despejado',
+      rain: 'Lluvia',
+      storm: 'Tormenta',
+      cold: 'Frío',
+      blizzard: 'Ventisca',
+      fog: 'Niebla',
+      heat: 'Calor',
+    };
+    const seasonLbl = { spring: 'Pri', summer: 'Ver', autumn: 'Oto', winter: 'Inv' };
+    const wx = labels[state.weather] || state.weather;
+    const sn = seasonLbl[state.season] || '';
+    w.textContent = sn ? `${sn} · ${wx}` : wx;
     w.dataset.weather = state.weather || 'clear';
   }
   const res = $('zz-resources');

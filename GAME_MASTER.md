@@ -1925,7 +1925,7 @@ Resumen: construcción por **bloques con HUMAN_GATE**; arranque (portada/save) +
 - Mapa **finito diseñado**; refs composición: TWD Survivors (no copia) + Townsmen (legibilidad).
 - Avisos → cámara + resalte + **abrir ficha** (§9.4 / §21).
 - Caminos/muros: **solo visual en ZZ-019A**; mecánicas futuras vía §13/§9.5 si procede.
-- Arte: integración sombra/perspectiva = fase posterior no bloqueante. **ZZ-019B APROBADA** (anti-GIS/funcional); art pass carretera/props/edificio–suelo/identidades = **deuda artística NO BLOQUEANTE** (no interpretar 019B como arte final).
+- Arte: integración sombra/perspectiva = fase posterior no bloqueante. **ZZ-019B APROBADA** (anti-GIS/funcional); art pass carretera/props/edificio–suelo/identidades = **deuda artística NO BLOQUEANTE** (no interpretar 019B como arte final). · **ZZ-032+:** `insulated_house` debe diferenciarse visualmente en mapa (silueta/materiales/cubierta) en ART PASS futuro — **NO BLOQUEANTE**; lógica climática ya APROBADA.
 - PLAN 2.8: **ZZ-019A = REVIEW_STOP** (no HUMAN_GATE extra); ZZ-012 CAMBIOS SOLICITADOS hasta 019A APROBADA.
 - **Decisiones cerradas 2026-08-16:** (1) 019A=REVIEW_STOP · (2) varias superficies=SÍ · (3) caminos/vallas 019A=solo visual.
 

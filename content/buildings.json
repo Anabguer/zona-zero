@@ -206,19 +206,19 @@
   "cistern": {
     "id": "cistern",
     "name": "Cisterna",
-    "desc": "Almacena y filtra agua. Mayor caudal con personal.",
+    "desc": "Reserva de agua: sube el soft-cap y recoge lluvia. No produce como un pozo.",
     "cost": {
       "metal": 8,
       "wood": 3
     },
-    "category": "production",
+    "category": "storage",
     "w": 1,
     "h": 1,
     "max": 4,
-    "jobs": 1,
-    "produces": {
-      "water": 7
-    },
+    "jobs": 0,
+    "produces": {},
+    "waterStorageBonus": 28,
+    "rainCollect": true,
     "minEra": 1,
     "requires": [],
     "requiresBuilding": "well",

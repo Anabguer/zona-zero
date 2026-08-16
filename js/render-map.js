@@ -1620,9 +1620,10 @@ function drawWeather(parent, weather, m) {
       const len = w === 'storm' ? rng.float(2.5, 4.5) : rng.float(1.8, 3.2);
       g.appendChild(svgEl('line', { x1: x, y1: y, x2: x - len * 0.25, y2: y + len, class: 'zz-map-wx-particle' }));
     }
-  } else if (w === 'cold') {
-    for (let i = 0; i < 20; i++) {
-      g.appendChild(svgEl('circle', { cx: rng.float(3, W - 3), cy: rng.float(3, H - 3), r: rng.float(0.2, 0.45), class: 'zz-map-wx-particle' }));
+  } else if (w === 'cold' || w === 'blizzard') {
+    const n = w === 'blizzard' ? 34 : 20;
+    for (let i = 0; i < n; i++) {
+      g.appendChild(svgEl('circle', { cx: rng.float(3, W - 3), cy: rng.float(3, H - 3), r: rng.float(0.2, 0.55), class: 'zz-map-wx-particle' }));
     }
   } else if (w === 'fog') {
     g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.22', fill: '#8a8478' }));
@@ -1630,6 +1631,36 @@ function drawWeather(parent, weather, m) {
     g.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, class: 'zz-map-wx-particle', opacity: '0.12', fill: '#c08040' }));
   }
   parent.appendChild(g);
+}
+
+/** Chimeneas abstractas si hay calefacción activa (ZZ-047). */
+function drawHeatingChimneys(parent, state, m) {
+  if (!state.lastHeating?.active || !(state.lastHeating.consumed > 0)) return;
+  const g = svgEl('g', { class: 'zz-map-chimneys', 'aria-hidden': 'true' });
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  (state.base?.buildings || []).forEach((b) => {
+    if (b.hp <= 0) return;
+    const def = /* content not here */ null;
+    void def;
+  });
+  // Usar edificios con housing en el campamento
+  const houses = (state.base?.buildings || []).filter((b) => {
+    if (b.hp <= 0) return false;
+    const t = String(b.type || '');
+    return t.includes('house') || t.includes('shelter') || t.startsWith('hq_') || t === 'block';
+  });
+  houses.slice(0, 6).forEach((b, i) => {
+    const ox = camp ? (camp.x || 50) - 8 + (b.x || 0) * 1.1 : 40 + i * 3;
+    const oy = camp ? (camp.y || 50) - 6 + (b.y || 0) * 1.1 : 45;
+    g.appendChild(
+      svgEl('path', {
+        d: `M ${ox} ${oy} q 0.6 -2.2 0.2 -4.2`,
+        class: 'zz-map-chimney-smoke',
+        fill: 'none',
+      })
+    );
+  });
+  if (houses.length) parent.appendChild(g);
 }
 
 function drawLegend() {
@@ -1864,5 +1895,6 @@ export function renderMap(svg, state, handlers = {}) {
   drawExpeditions(world, state);
   svg.appendChild(world);
   drawWeather(svg, state.weather, m);
+  drawHeatingChimneys(world, state, m);
   drawLegend();
 }

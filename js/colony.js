@@ -309,7 +309,7 @@ export function currentObjective(state, content) {
   const daysFood = pop > 0 ? food / pop : food;
   const daysWater = pop > 0 ? water / pop : water;
   const hasFarm = (state.base?.buildings || []).some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
-  const hasWell = (state.base?.buildings || []).some((b) => ['well', 'cistern'].includes(b.type) && b.hp > 0);
+  const hasWell = (state.base?.buildings || []).some((b) => ['well', 'pump'].includes(b.type) && b.hp > 0);
   const farmStaff = staffableBuildings(state, content, 'food').reduce((n, b) => n + (b.workers || 0), 0);
   const wellStaff = staffableBuildings(state, content, 'water').reduce((n, b) => n + (b.workers || 0), 0);
   const cap = (state.base?.buildings || []).reduce((n, b) => {
@@ -318,6 +318,43 @@ export function currentObjective(state, content) {
   }, 0);
   const explored = (state.expeditionsDone || 0) + (state.stats?.expeditions || 0);
   const controlled = (state.zones || []).filter((z) => z.state === 'controlled').length;
+
+  // ZZ-033/045: aviso frío / madera
+  const pending = state.pendingWeather;
+  if (pending && (pending.type === 'cold' || pending.type === 'blizzard')) {
+    const days = Math.max(0, (pending.startsOnDay || state.day) - state.day);
+    const need = pending.woodPerDay || 0;
+    const reserve = need > 0 ? Math.floor((state.resources?.wood || 0) / need) : 99;
+    return {
+      id: 'need_warmth',
+      title: 'Frío anunciado',
+      text: `Frío en ${days} día(s) — ~${need} madera/día · reserva ${reserve} días.`,
+    };
+  }
+  if (state.weather === 'cold' || state.weather === 'blizzard') {
+    const heat = state.lastHeating;
+    if (heat?.active && (heat.shortfall > 0 || (heat.reserveDays != null && heat.reserveDays < 3))) {
+      return {
+        id: 'need_warmth',
+        title: 'Calefacción',
+        text: `Cubiertos ${heat.covered}/${pop} · madera ~${heat.need}/día · reserva ${heat.reserveDays === Infinity ? '∞' : heat.reserveDays} d.`,
+      };
+    }
+  }
+  if ((state.coldExposure || 0) >= 2) {
+    return {
+      id: 'cold_exposure',
+      title: 'Exposición al frío',
+      text: `Exposición ${state.coldExposure} — mejora vivienda o acumula madera.`,
+    };
+  }
+  if (pop > cap) {
+    return {
+      id: 'housing_overflow',
+      title: 'Hacinamiento',
+      text: `${pop - cap} sin plaza de vivienda.`,
+    };
+  }
 
   if ((!hasFarm || farmStaff < 1 || !hasWell || wellStaff < 1) && (daysFood < 4 || daysWater < 4 || !hasFarm || !hasWell)) {
     return {
@@ -348,7 +385,7 @@ export function currentObjective(state, content) {
     };
   }
   if (state.day >= 12 && state.flags?.objectivesDismissed !== true) {
-    return null; // ayuda progresiva se apaga
+    return null;
   }
   return null;
 }

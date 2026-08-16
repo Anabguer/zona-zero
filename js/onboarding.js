@@ -79,8 +79,8 @@ function stepWaitMet(state, wait) {
   if (!wait) return true;
   if (wait === 'hasFarm') return hasType(state, ['farm', 'greenhouse']);
   if (wait === 'farmStaffed') return staffed(state, ['farm', 'greenhouse']);
-  if (wait === 'hasWell') return hasType(state, ['well', 'cistern']);
-  if (wait === 'wellStaffed') return staffed(state, ['well', 'cistern']);
+  if (wait === 'hasWell') return hasType(state, ['well']);
+  if (wait === 'wellStaffed') return staffed(state, ['well']);
   return false;
 }
 

@@ -8,6 +8,7 @@ import {
   pushLog,
   defenseValue,
   housingCapacity,
+  scheduleOrApplyWeather,
 } from './state.js';
 import { changePopulation, applyCasualties, workforce } from './population.js';
 
@@ -157,8 +158,7 @@ export function applyEventEffects(state, content, effects = {}, rng) {
   if (effects.stabilityDelta) state.stability = clampNum(state.stability + effects.stabilityDelta, 0, 100);
   if (effects.tensionDelta) state.director.tension = clampNum(state.director.tension + effects.tensionDelta, 0, 100);
   if (effects.weather) {
-    state.weather = effects.weather;
-    state.weatherDaysLeft = rng.int(1, 3);
+    scheduleOrApplyWeather(state, content, effects.weather, rng);
   }
   if (effects.setFlag) state.flags.narrative[effects.setFlag] = true;
   if (effects.clearFlag) delete state.flags.narrative[effects.clearFlag];

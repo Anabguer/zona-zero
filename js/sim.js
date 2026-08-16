@@ -9,6 +9,9 @@ import {
   defenseValue,
   housingCapacity,
   housingClimateCoverage,
+  woodReserveDays,
+  tickSeason,
+  tickPendingWeather,
   maxSurvivorsCap,
 } from './state.js';
 import {
@@ -479,7 +482,15 @@ function applyProduction(state, content) {
   syncLaborFromColony(state, content);
   const stabMod = clamp(0.6 + state.stability / 200, 0.6, 1.15);
   const weatherMod =
-    state.weather === 'heat' || state.weather === 'cold' ? 0.85 : state.weather === 'storm' ? 0.75 : 1;
+    state.weather === 'blizzard'
+      ? 0.65
+      : state.weather === 'storm'
+        ? 0.75
+        : state.weather === 'heat' || state.weather === 'cold'
+          ? 0.85
+          : state.weather === 'rain'
+            ? 0.92
+            : 1;
 
   let energyProd = 0;
   let energyDemand = 1;
@@ -503,7 +514,18 @@ function applyProduction(state, content) {
     const ratio = clamp(staff / jobs, 0.15, 1.15);
     const out = {};
     Object.entries(def.produces).forEach(([k, v]) => {
-      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod));
+      let mult = 1;
+      // Outdoor food hurt more in cold/blizzard; greenhouse resists
+      if (k === 'food' && b.type === 'farm' && (state.weather === 'cold' || state.weather === 'blizzard')) {
+        mult = state.weather === 'blizzard' ? 0.55 : 0.75;
+      }
+      if (k === 'food' && b.type === 'greenhouse' && (state.weather === 'cold' || state.weather === 'blizzard')) {
+        mult = 0.95;
+      }
+      if (k === 'water' && b.type === 'well' && (state.weather === 'storm' || state.weather === 'heat')) {
+        mult = state.weather === 'heat' ? 0.8 : 0.85;
+      }
+      const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * mult));
       if (amt <= 0) return;
       out[k] = amt;
       produced[k] = (produced[k] || 0) + amt;
@@ -513,7 +535,7 @@ function applyProduction(state, content) {
   });
 
   const hasFarm = state.base.buildings.some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
-  const hasWell = state.base.buildings.some((b) => ['well', 'cistern', 'pump'].includes(b.type) && b.hp > 0);
+  const hasWell = state.base.buildings.some((b) => ['well', 'pump'].includes(b.type) && b.hp > 0);
 
   if ((state.research.unlocked || []).includes('surv_crops') && hasFarm) {
     state.resources.food += 1;
@@ -524,12 +546,29 @@ function applyProduction(state, content) {
     produced.water = (produced.water || 0) + 1;
   }
 
-  // Merma por exceso sin almacén (evita stock infinito)
+  // Lluvia → cisternas (recogida pasiva ZZ-034)
+  if (state.weather === 'rain' || state.weather === 'storm') {
+    const rng = rngOf(state);
+    state.base.buildings.forEach((b) => {
+      if (b.hp <= 0) return;
+      const def = content.buildings[b.type];
+      if (!def?.rainCollect) return;
+      const gain = rng.int(1, state.weather === 'storm' ? 4 : 3);
+      state.resources.water = (state.resources.water || 0) + gain;
+      produced.water = (produced.water || 0) + gain;
+    });
+  }
+
+  // Soft-caps: almacén general + cisterna (agua)
   const pop = Math.max(1, state.population?.total || 1);
   const storageN = state.base.buildings.filter((b) => ['storage', 'warehouse'].includes(b.type) && b.hp > 0).length;
-  const softDays = content.balance.foodSoftCapDays || 10;
-  const foodCap = pop * softDays + storageN * 18;
-  const waterCap = pop * softDays + storageN * 16;
+  const cisternBonus = state.base.buildings
+    .filter((b) => b.hp > 0)
+    .reduce((n, b) => n + (content.buildings[b.type]?.waterStorageBonus || 0), 0);
+  const softFood = content.balance.foodSoftCapDays || 10;
+  const softWater = content.balance.waterSoftCapDays || softFood;
+  const foodCap = pop * softFood + storageN * 18;
+  const waterCap = pop * softWater + storageN * 16 + cisternBonus;
   if ((state.resources.food || 0) > foodCap) {
     const excess = state.resources.food - foodCap;
     const lost = Math.max(1, Math.ceil(excess * 0.2));
@@ -537,15 +576,22 @@ function applyProduction(state, content) {
     if (lost >= 3) pushLog(state, `Comida se estropea sin almacenaje (−${lost}).`, 'warn');
   }
   if ((state.resources.water || 0) > waterCap) {
-    state.resources.water -= Math.max(1, Math.ceil((state.resources.water - waterCap) * 0.15));
+    const excess = state.resources.water - waterCap;
+    // Cisterna reduce merma de agua
+    const spoil = cisternBonus > 0 ? 0.08 : 0.15;
+    const lost = Math.max(1, Math.ceil(excess * spoil));
+    state.resources.water -= lost;
+    if (lost >= 3) pushLog(state, `Agua se pierde sin suficiente reserva (−${lost}).`, 'warn');
   }
 
   state.energy.produced = energyProd;
   state.energy.demand = energyDemand;
-  return { produced, byBuilding };
+  return { produced, byBuilding, foodCap, waterCap };
 }
 
 function fuelNeed(state, content) {
+  // ZZ-043: sin gasto diario de fuel de colonia (fuel = vehículos).
+  if (content.balance.colonyDailyFuelEnabled === false) return 0;
   let need = content.balance.fuelPerDayBase || 0.5;
   const pop = state.population?.total || 0;
   need += pop * (content.balance.fuelPerPersonPerDay || content.balance.fuelPerSurvivorPerDay || 0.08);
@@ -557,14 +603,23 @@ function fuelNeed(state, content) {
   return Math.ceil(need);
 }
 
-/** ZZ-020: calefacción madera en frío (hook mínimo; sistema completo ZZ-043+). */
+/** Calefacción madera + exposición acumulativa (ZZ-043/044). */
 function applyColdWoodHeating(state, content) {
   const w = state.weather;
+  const wh = content.balance.woodHeating || {};
   if (w !== 'cold' && w !== 'blizzard') {
-    return { active: false, need: 0, consumed: 0, shortfall: 0 };
+    // Decay exposición al salir del frío
+    if ((state.coldExposure || 0) > 0) {
+      state.coldExposure = Math.max(0, (state.coldExposure || 0) - (wh.exposureDecay || 1));
+    }
+    state.lastHeating = { active: false, need: 0, consumed: 0, shortfall: 0 };
+    return state.lastHeating;
   }
   const pop = state.population?.total || 0;
-  if (pop <= 0) return { active: true, need: 0, consumed: 0, shortfall: 0 };
+  if (pop <= 0) {
+    state.lastHeating = { active: true, need: 0, consumed: 0, shortfall: 0 };
+    return state.lastHeating;
+  }
   const cov = housingClimateCoverage(state, content.buildings, content.balance, w);
   const need = cov.woodNeed;
   const have = state.resources.wood || 0;
@@ -575,10 +630,26 @@ function applyColdWoodHeating(state, content) {
     pushLog(state, `Calefacción: −${consumed} madera.`, 'info');
   }
   if (shortfall > 0) {
-    state.stability = Math.max(0, (state.stability || 0) - Math.min(3, shortfall));
-    pushLog(state, 'Falta madera para calentar el refugio.', 'warn');
+    state.coldExposure = (state.coldExposure || 0) + (wh.exposurePerShortfall || 1) * Math.min(3, shortfall);
+    pushLog(state, 'Falta madera para calentar el refugio. Sube la exposición al frío.', 'warn');
+  } else if ((state.coldExposure || 0) > 0) {
+    state.coldExposure = Math.max(0, (state.coldExposure || 0) - (wh.exposureDecay || 1));
   }
-  return {
+
+  const amber = wh.exposureThresholds?.amber ?? 2;
+  const red = wh.exposureThresholds?.red ?? 5;
+  const exp = state.coldExposure || 0;
+  const rng = rngOf(state);
+  if (exp >= red && rng.chance(wh.sickChanceRed ?? 0.28)) {
+    applyCasualties(state, content.balance, { injured: 0 });
+    state.population.sick = (state.population.sick || 0) + 1;
+    pushLog(state, 'El frío extremo enferma a alguien.', 'bad');
+  } else if (exp >= amber && rng.chance(wh.sickChanceAmber ?? 0.12)) {
+    state.population.sick = (state.population.sick || 0) + 1;
+    pushLog(state, 'El frío empieza a pasar factura. +1 enfermo.', 'warn');
+  }
+
+  state.lastHeating = {
     active: true,
     need,
     consumed,
@@ -587,7 +658,10 @@ function applyColdWoodHeating(state, content) {
     covered: cov.covered,
     deficit: cov.deficit,
     threshold: cov.threshold,
+    reserveDays: woodReserveDays(state, need),
+    exposure: exp,
   };
+  return state.lastHeating;
 }
 
 function consumeNeed(state, key, need, label, balance) {
@@ -603,7 +677,7 @@ function consumeNeed(state, key, need, label, balance) {
   const loss = Math.min(1, Math.max(0, Math.ceil(missing / 3)));
   const softRate = balance.starvationLossPerDay ?? 0.55;
   const hasProd =
-    state.base.buildings.some((b) => ['farm', 'greenhouse', 'well', 'cistern'].includes(b.type) && b.hp > 0);
+    state.base.buildings.some((b) => ['farm', 'greenhouse', 'well'].includes(b.type) && b.hp > 0);
   // Sin producción: hambre duele, pero no ejecuta cada noche (permite recuperarse con botín)
   const softDead =
     missing >= 2 &&
@@ -943,8 +1017,9 @@ export function advanceDay(state, content) {
   if (state.flags) state.flags.lastAttackZoneId = null;
 
   const pop = state.population?.total || 0;
-  const foodNeed = pop * (content.balance.foodPerPersonPerDay || content.balance.foodPerSurvivorPerDay || 1);
-  const waterNeed = pop * (content.balance.waterPerPersonPerDay || content.balance.waterPerSurvivorPerDay || 1);
+  let foodNeed = pop * (content.balance.foodPerPersonPerDay || content.balance.foodPerSurvivorPerDay || 1);
+  let waterNeed = pop * (content.balance.waterPerPersonPerDay || content.balance.waterPerSurvivorPerDay || 1);
+  if (state.weather === 'heat') waterNeed = Math.ceil(waterNeed * 1.25);
   consumeNeed(state, 'food', foodNeed, 'comida', content.balance);
   consumeNeed(state, 'water', waterNeed, 'agua', content.balance);
 
@@ -974,6 +1049,8 @@ export function advanceDay(state, content) {
   }
 
   state.day += 1;
+  tickSeason(state, content.balance);
+  tickPendingWeather(state);
   const recoveredSectors = tickSectorRecovery(state);
   recoveredSectors.forEach((s) => {
     pushLog(state, `Hemos recuperado «${s.name}». La colonia crece — y el perímetro también.`, 'good');
@@ -1076,6 +1153,25 @@ function buildDayBrief(state, content, before, prod, ctx) {
   const woodConsumed = Math.round((heating.consumed || 0) * 10) / 10;
   const woodBal = Math.round((woodGain - woodConsumed) * 10) / 10;
   const showWood = !!heating.active;
+  if (heating.active && heating.covered != null) {
+    facts.push({
+      kind: 'heat',
+      text: `Cobertura climática ${heating.covered}/${state.population?.total || 0} · reserva madera ${
+        heating.reserveDays === Infinity ? '∞' : heating.reserveDays
+      } d.`,
+    });
+  }
+  if ((state.coldExposure || 0) >= 2) {
+    facts.push({ kind: 'heat', text: `Exposición al frío: ${state.coldExposure}.` });
+  }
+  if (state.pendingWeather) {
+    const p = state.pendingWeather;
+    const d = Math.max(0, (p.startsOnDay || 0) - state.day);
+    facts.push({
+      kind: 'event',
+      text: `${p.type === 'heat' ? 'Calor' : 'Frío'} anunciado en ${d} día(s).`,
+    });
+  }
 
   const important =
     Math.abs(foodBal) >= 0.1 ||

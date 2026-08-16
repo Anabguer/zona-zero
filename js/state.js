@@ -207,8 +207,13 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     vehiclesOwned: [],
     research: { unlocked: [], active: null, progress: 0 },
     factions,
+    season: balance.seasons?.startSeason || 'autumn',
+    seasonDay: balance.seasons?.startDayInSeason || 1,
     weather: 'clear',
     weatherDaysLeft: 0,
+    pendingWeather: null,
+    coldExposure: 0,
+    lastHeating: null,
     stability: balance.stabilityStart ?? 55,
     director: {
       threat: 8,
@@ -278,6 +283,12 @@ export function migrateState(state, content) {
   if (!next.factions) next.factions = [];
   if (!next.energy) next.energy = { produced: 0, demand: 0 };
   if (!next.weather) next.weather = 'clear';
+  if (next.weatherDaysLeft == null) next.weatherDaysLeft = 0;
+  if (next.season == null) next.season = balance.seasons?.startSeason || 'autumn';
+  if (next.seasonDay == null) next.seasonDay = balance.seasons?.startDayInSeason || 1;
+  if (next.pendingWeather === undefined) next.pendingWeather = null;
+  if (next.coldExposure == null) next.coldExposure = 0;
+  if (next.lastHeating === undefined) next.lastHeating = null;
   if (!next.flags) next.flags = {};
   if (!next.flags.narrative) next.flags.narrative = {};
   if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };
@@ -445,6 +456,80 @@ export function housingClimateCoverage(state, buildingsContent, balance, weather
     woodNeed: Math.max(0, Math.ceil(woodNeed)),
     weather,
   };
+}
+
+/** Días de reserva de madera al ritmo woodNeed (ZZ-033/045). */
+export function woodReserveDays(state, woodNeed) {
+  const need = Math.max(0, Number(woodNeed) || 0);
+  if (need <= 0) return Infinity;
+  return Math.floor((state.resources?.wood || 0) / need);
+}
+
+export const SEASON_LABEL = {
+  spring: 'Primavera',
+  summer: 'Verano',
+  autumn: 'Otoño',
+  winter: 'Invierno',
+};
+
+export function tickSeason(state, balance) {
+  const cfg = balance?.seasons || {};
+  const order = cfg.order || ['spring', 'summer', 'autumn', 'winter'];
+  const len = Math.max(8, cfg.daysPerSeason || 22);
+  if (!state.season || !order.includes(state.season)) state.season = cfg.startSeason || 'autumn';
+  state.seasonDay = (state.seasonDay || 0) + 1;
+  if (state.seasonDay > len) {
+    state.seasonDay = 1;
+    const i = order.indexOf(state.season);
+    state.season = order[(i + 1) % order.length];
+    pushLog(state, `Empieza ${SEASON_LABEL[state.season] || state.season}.`, 'info');
+  }
+}
+
+/** Programa clima con aviso (ZZ-042) o aplica inmediato. */
+export function scheduleOrApplyWeather(state, content, weather, rng, { forceImmediate = false } = {}) {
+  const balance = content.balance || content;
+  const wh = balance.woodHeating || {};
+  const durCfg = balance.weatherDuration || { min: 1, max: 3 };
+  const duration = rng.int(durCfg.min || 1, durCfg.max || 3);
+  const needsWarn =
+    !forceImmediate &&
+    (weather === 'cold' || weather === 'blizzard' || weather === 'heat') &&
+    Array.isArray(wh.warnDaysBefore) &&
+    wh.warnDaysBefore.length;
+  if (needsWarn) {
+    const warn = rng.pick(wh.warnDaysBefore);
+    const cov = housingClimateCoverage(state, content.buildings || {}, balance, weather);
+    state.pendingWeather = {
+      type: weather,
+      startsOnDay: state.day + warn,
+      duration,
+      woodPerDay: cov.woodNeed,
+      announced: true,
+    };
+    const reserve = woodReserveDays(state, cov.woodNeed);
+    const reserveTxt = Number.isFinite(reserve) ? `${reserve} días` : 'sobra';
+    pushLog(
+      state,
+      `${weather === 'heat' ? 'Calor' : 'Frío'} en ${warn} día(s) — ~${cov.woodNeed} madera/día · reserva ${reserveTxt}.`,
+      'warn'
+    );
+    return { scheduled: true, warn, duration };
+  }
+  state.weather = weather;
+  state.weatherDaysLeft = duration;
+  return { scheduled: false, duration };
+}
+
+export function tickPendingWeather(state) {
+  const p = state.pendingWeather;
+  if (!p) return null;
+  if (state.day < p.startsOnDay) return { waiting: true, pending: p };
+  state.weather = p.type;
+  state.weatherDaysLeft = p.duration || 2;
+  state.pendingWeather = null;
+  pushLog(state, `Llega el clima anunciado: ${p.type}.`, 'warn');
+  return { applied: p };
 }
 
 export function defenseValue(state, buildingsContent, balance) {

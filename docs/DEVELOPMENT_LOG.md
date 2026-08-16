@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…023 APROBADAS**. · Docs **2.8**. · **ZZ-024…031** hechas · **ZZ-032 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística post-019B **NO BLOQUEANTE**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…047** hechas · **ZZ-048 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -664,25 +664,223 @@ IMPLEMENTATION_PLAN 2.8 · D · **HUMAN_GATE YES** · deps ZZ-031
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 `insulated_house` + research `insulation` (GM §4).
 
 ## HECHO
 - Building + tech; unlock vía research; ficha muestra protección climática.
-- Smoke `smoke-zz030-032` · review 9 tomas + contact sheet.
-- Deuda arte post-019B **NO BLOQUEANTE**.
-- Sin deploy · no ZZ-033.
+- Smoke `smoke-zz030-032` · review 9 tomas.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Vivienda aislada ligada a insulation; prot. 1 vs 2 legible; brief frío OK. Sin bloqueo funcional.
+
+## DEUDA VISUAL (NO BLOQUEANTE)
+`insulated_house` debe diferenciarse en mapa sin abrir ficha (silueta/materiales/cubierta/chimenea/integración suelo) en **ART PASS futuro**. Misma lógica aprobada. **No** reabre deuda post-019B.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-032/`.
+
+## PARAR
+No — continuar ZZ-033.
+
+---
+
+# FASE ZZ-033 — Alertas cobertura / madera estimada
+
+IMPLEMENTATION_PLAN 2.8 · D · HUMAN_GATE NO · deps ZZ-032
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-048)*
+
+## HECHO
+- Objetivos/alertas `need_warmth` con madera/día y reserva.
+- Brief con cobertura climática.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-034 — Pozo fuente ≠ cisterna reserva
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Pozo produce; cisterna = soft-cap + rainCollect, sin produces.water.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-035 — Soft-caps storage + cisterna agua
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Soft-cap agua += `waterStorageBonus` cisternas; merma reducida con cisterna.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-036 — Estabilidad factores UI secundaria
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Panel Más: desglose estabilidad (comida/agua/vivienda/exposición/pérdidas).
+
+## PARAR
+No — bloque D cerrado.
+
+---
+
+# FASE ZZ-040 — Ciclo estaciones
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `season` / `seasonDay` + tick al avanzar día.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-041 — Clima puntual + duración
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Duración desde balance; blizzard en FX; fuel no calienta.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-042 — Pipeline aviso→prep→consecuencia
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `pendingWeather` + `scheduleOrApplyWeather` (aviso 1–3 días).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-043 — Calefacción automática MADERA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `woodHeating.enabled: true`; sin fuel diario de colonia.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-044 — Exposición acumulativa frío
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `coldExposure` + umbrales ámbar/rojo → enfermos probabilísticos.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-045 — Aviso previo + estimación reserva
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Aviso con ~madera/día y días de reserva (log + objetivo).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-046 — Impacto clima prod/exploración/salud
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Mods farm/greenhouse/well; calor → agua↑; exposición→salud.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-047 — Feedback visual clima
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- FX blizzard; humo chimenea si calefacción consume madera.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-048 — QA invierno forzado (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · E · **HUMAN_GATE YES** · deps ZZ-047
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Escenario frío; wood heat; exposición; capturas.
+
+## HECHO
+- Smoke `smoke-zz033-048`.
+- Review 10 tomas + contact sheet → `docs/review/` + Drive.
+- Deudas arte **NO BLOQUEANTES** (post-019B + silueta insulated_house).
+- Sin deploy · no ZZ-050.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/
 
 ## PARAR
-Sí — HUMAN_GATE. Sin deploy. No ZZ-033.
+Sí — HUMAN_GATE. Sin deploy. No ZZ-050.
+
+
 
 
 
@@ -795,20 +993,20 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-027 | Exploradores muerte/recluta | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-030 | Capacidad vivienda + overflow | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-031 | Protección climática por tipo | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-032 | Vivienda aislada + tech insulation | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-033 | Alertas cobertura / madera estimada | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-034 | Pozo fuente ≠ cisterna reserva | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-035 | Soft-caps storage + cisterna agua | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-036 | Estabilidad factores UI secundaria | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-040 | Ciclo estaciones en state | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-041 | Clima puntual + duración | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-042 | Pipeline aviso→prep→consecuencia | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-043 | Calefacción automática MADERA | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-044 | Exposición acumulativa frío | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-045 | Aviso previo + estimación reserva madera | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-046 | Impacto clima en prod/exploración/salud | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-047 | Feedback visual clima | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-048 | QA invierno forzado + gate | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-032 | Vivienda aislada + tech insulation | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-033 | Alertas cobertura / madera estimada | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-034 | Pozo fuente ≠ cisterna reserva | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-035 | Soft-caps storage + cisterna agua | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-036 | Estabilidad factores UI secundaria | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-040 | Ciclo estaciones en state | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-041 | Clima puntual + duración | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-042 | Pipeline aviso→prep→consecuencia | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-043 | Calefacción automática MADERA | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-044 | Exposición acumulativa frío | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-045 | Aviso previo + estimación reserva madera | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-046 | Impacto clima en prod/exploración/salud | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-047 | Feedback visual clima | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-048 | QA invierno forzado + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-050 | Camas médicas + curación agregada | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-051 | Cadena botiquín→enfermería→clínica | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-052 | Explorador wounded/sick timings | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
