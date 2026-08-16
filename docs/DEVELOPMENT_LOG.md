@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150 APROBADA**. · **ZZ-151…153** hechas · **ZZ-154 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2008,30 +2008,96 @@ IMPLEMENTATION_PLAN 2.8 · P · **HUMAN_GATE YES** · deps ZZ-023 / ZZ-144 APROB
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Contrato fichas validado: landscape card · desktop panel · shell flex · body scroll · close accesible · sheetPanel/Section · kinds · Escape · aria dialog · mundo presente. No mini-apps con tabs. Deuda arte NO BLOQUEANTE. Continuar ZZ-151.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-150/`.
+
+## COMMIT
+`570f264`
+
+## PARAR
+No — continuar ZZ-151 → 154.
+
+---
+
+# FASE ZZ-151 — Alertas prioritizadas
+
+IMPLEMENTATION_PLAN 2.8 · P · HUMAN_GATE NO · deps ZZ-150 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-154)*
+
+## HECHO
+- `js/alerts.js` · capas critical/high/normal/tip · banner solo crítico · chip vía `missionAlert` · recovery no banner.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-152 — Ayuda consultable (§21.3)
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `js/help.js` · topics gated · `meta.helpSeenTopics` · `?` + Más → Ayuda · sin spoilers.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-153 — Diario no spam
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `pushLog` + `diary`/`routine` · sin amanecer diario · calefacción/quiet routine · lista en Más.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-154 — Accesibilidad básica + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · P · **HUMAN_GATE YES** · deps ZZ-153
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Sheets móvil/desktop consistentes. Mundo primero; sin pestañas app.
+Accesibilidad básica + gate. Mundo primero; sin pestañas app.
 
 ## HECHO
-- Shell común: flex + body scroll + close fijo (móvil landscape card lateral · desktop panel).
-- `sheetPanel` / `sheetSection` · `data-sheet-kind` · Escape cierra · aria dialog.
-- Sin pestañas Mapa|Base|Gente|Más.
-- Smoke `smoke-zz150-sheets` · review shots.
+- Tap targets ≥44 · focus-visible · prefers-reduced-motion · aria-live banner/misión · Escape/dialog conservados.
+- Smoke `smoke-zz151-154` · review shots.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-151** hasta APROBADA ZZ-150.
+- Sin deploy · **no ZZ-160** hasta APROBADA ZZ-154.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
-## COMMIT
-`570f264`
-
 ## PARAR
-Sí — HUMAN_GATE ZZ-150. Sin deploy. No ZZ-151.
+Sí — HUMAN_GATE ZZ-154. Sin deploy. No ZZ-160.
 
 ---
 

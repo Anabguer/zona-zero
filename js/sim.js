@@ -831,7 +831,7 @@ function applyColdWoodHeating(state, content) {
   state.resources.wood = have - consumed;
   const shortfall = need - consumed;
   if (consumed > 0) {
-    pushLog(state, `Calefacción: −${consumed} madera.`, 'info');
+    pushLog(state, `Calefacción: −${consumed} madera.`, 'info', { routine: true });
   }
   if (shortfall > 0) {
     state.coldExposure = (state.coldExposure || 0) + (wh.exposurePerShortfall || 1) * Math.min(3, shortfall);
@@ -1141,7 +1141,10 @@ export function advanceDay(state, content) {
   recoveredSectors.forEach((s) => {
     pushLog(state, `Hemos recuperado «${s.name}». La colonia crece — y el perímetro también.`, 'good');
   });
-  pushLog(state, `Amanece el día ${state.day}.`, 'story');
+  // ZZ-153: no spam diario con «Amanece…» cada día
+  if (state.day === 1 || state.day % 7 === 0) {
+    pushLog(state, `Amanece el día ${state.day}.`, 'story', { routine: state.day !== 1 });
+  }
 
   updateStability(state, content);
   populationTick(state, content);

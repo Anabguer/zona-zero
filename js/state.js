@@ -274,6 +274,9 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       narrative: {},
       coach: { explore: false, labor: false, build: false, dismissed: false },
     },
+    meta: {
+      helpSeenTopics: [],
+    },
     pendingChoice: null,
     pendingAttack: null,
     lastAttackReport: null,
@@ -353,6 +356,8 @@ export function migrateState(state, content) {
   if (!next.flags) next.flags = {};
   if (!next.flags.narrative) next.flags.narrative = {};
   if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };
+  if (!next.meta || typeof next.meta !== 'object') next.meta = {};
+  if (!Array.isArray(next.meta.helpSeenTopics)) next.meta.helpSeenTopics = [];
   if (!next.director) next.director = { threat: 10, tension: 15, cooldowns: {}, familyCooldowns: {}, recentFamilies: [] };
   if (!next.director.aftermath) next.director.aftermath = {};
   if (!next.director.recentEventIds) next.director.recentEventIds = [];
@@ -673,9 +678,17 @@ export function defenseValue(state, buildingsContent, balance) {
   return defenseBreakdown(state, buildingsContent, balance).total;
 }
 
-export function pushLog(state, text, kind = 'info') {
-  state.log.unshift({ day: state.day, text, kind });
+export function pushLog(state, text, kind = 'info', opts = {}) {
+  if (opts.silent) return;
+  const diary = opts.diary != null ? !!opts.diary : !opts.routine;
+  state.log.unshift({ day: state.day, text, kind, diary });
   if (state.log.length > 120) state.log.length = 120;
+}
+
+/** Entradas del diario jugable (sin spam routine). */
+export function diaryEntries(state, limit = 12) {
+  const rows = (state.log || []).filter((e) => e.diary !== false);
+  return rows.slice(0, limit);
 }
 
 export function summarizeState(state) {

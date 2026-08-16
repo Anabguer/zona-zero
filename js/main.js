@@ -10,6 +10,7 @@ import {
   defenseBreakdown,
   summarizeState,
   migrateState,
+  diaryEntries,
 } from './state.js';
 import {
   advanceDay,
@@ -40,6 +41,8 @@ import { ensureMissions } from './missions.js';
 import { consumePendingBadge, ensureAchievements } from './achievements.js';
 import { prepareForCatastrophe } from './director.js';
 import { tradeWithFaction, relationLabel, discoveredFactions } from './factions.js';
+import { criticalBannerAlert, missionAlert } from './alerts.js';
+import { renderHelpHtml } from './help.js';
 import {
   buildingsNeedingRepair,
   structuralStateLabel,
@@ -294,6 +297,12 @@ function handleSheetAction(action, btn) {
   if (action === 'close-sheet') {
     closeSheet();
     paint();
+    return;
+  }
+  if (action === 'open-help') {
+    const { html } = renderHelpHtml(state);
+    openSheet(html, 'help');
+    scheduleSave();
     return;
   }
   if (action === 'send-exp') {
@@ -1118,6 +1127,9 @@ function openMoreSheet() {
       'Más',
       'Mundo primero: recuperar territorio, gente y sistemas — sin pestañas de app.',
       `<p>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" data-action="open-help">Ayuda</button>
+    </p>
+    <p>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="expand-mode">
         ${state.uiMode === 'expand' ? 'Salir de recuperación' : 'Recuperar territorio'}
       </button>
@@ -1260,10 +1272,10 @@ function openMoreSheet() {
         .join('');
     })()}</ul>`
     )}
-    <p class="zz-sheet-panel__lead" style="margin-top:0.35rem">Diario: ${(state.log || [])
-      .slice(0, 4)
-      .map((e) => `D${e.day} ${escapeHtml(e.text)}`)
-      .join(' · ')}</p>`
+    <p class="zz-sheet-panel__lead" style="margin-top:0.35rem">Diario reciente (sin spam de rutina):</p>
+    <ul class="zz-diary">${diaryEntries(state, 10)
+      .map((e) => `<li class="zz-diary__item zz-diary__item--${escapeHtml(e.kind || 'info')}"><span class="zz-diary__day">D${e.day}</span> ${escapeHtml(e.text)}</li>`)
+      .join('') || '<li class="zz-muted">Aún sin hechos destacables.</li>'}</ul>`
     ),
     'more'
   );
@@ -1652,28 +1664,16 @@ function paint() {
   paintBuildDock();
   const banner = $('zz-recover-banner');
   if (banner) {
-    const recovering = state.day < (state.director?.protectionUntil || 0);
-    const pending = state.pendingAttack;
-    const cat = state.pendingCatastrophe;
-    if (cat) {
-      const d = Math.max(0, (cat.dueDay || 0) - state.day);
+    const critical = criticalBannerAlert(state, content);
+    if (critical) {
       banner.hidden = false;
-      banner.textContent = `Catástrofe avisada · ${cat.name} · ${d}d${
-        cat.prepared ? ' · preparados' : ' · preparad stock/defensa'
-      }`;
-    } else if (pending) {
-      const d = Math.max(0, (pending.arrivesOnDay || 0) - state.day);
-      banner.hidden = false;
-      banner.textContent = `Hostiles · ${d}d · int. ~${pending.intensity}${
-        pending.horde?.label ? ` · ${pending.horde.label}` : ''
-      }`;
+      banner.textContent = critical.text;
+      banner.dataset.alertId = critical.id || '';
+      banner.classList.toggle('zz-recover-banner--critical', critical.layer === 'critical');
     } else {
-      banner.hidden = !recovering;
-      if (recovering) {
-        banner.textContent = `Recuperación · hasta día ${state.director.protectionUntil} · amenaza ${Math.round(
-          state.director?.threat || 0
-        )}`;
-      }
+      banner.hidden = true;
+      delete banner.dataset.alertId;
+      banner.classList.remove('zz-recover-banner--critical');
     }
   }
   // ZZ-113: badge no invasivo (una vez por paint cycle)
@@ -1772,7 +1772,7 @@ function paintObjective() {
     btn.hidden = true;
     return;
   }
-  const obj = currentObjective(state, content);
+  const obj = missionAlert(state, content);
   if (!obj || state.flags?.objectivesOff) {
     btn.hidden = true;
     return;
@@ -1780,6 +1780,8 @@ function paintObjective() {
   btn.hidden = false;
   text.textContent = obj.text;
   btn.dataset.objId = obj.id || '';
+  btn.dataset.alertLayer = obj.layer || 'normal';
+  btn.setAttribute('aria-live', obj.layer === 'critical' || obj.layer === 'high' ? 'assertive' : 'polite');
 }
 
 function overlayBlocksGuide() {
@@ -2217,7 +2219,7 @@ function bindChrome() {
     paint();
   });
   $('zz-mission')?.addEventListener('click', () => {
-    const obj = currentObjective(state, content);
+    const obj = missionAlert(state, content);
     if (!obj) return;
     if (obj.id === 'need_repair') {
       const ids = obj.buildingIds || buildingsNeedingRepair(state, content).map((b) => b.id);
@@ -2236,9 +2238,9 @@ function bindChrome() {
     }
     openSheet(`
       <div class="zz-ctx">
-        <h2>${escapeHtml(obj.title || 'Objetivo')}</h2>
+        <h2>${escapeHtml(obj.title || 'Alerta')}</h2>
         <p>${escapeHtml(obj.text)}</p>
-        <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" id="zz-objective-dismiss">Ocultar objetivo</button>
+        <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" id="zz-objective-dismiss">Ocultar alerta</button>
       </div>
     `, 'objective');
     $('zz-objective-dismiss')?.addEventListener('click', () => {
@@ -2261,30 +2263,12 @@ function bindChrome() {
     scheduleSave();
   });
   $('zz-help')?.addEventListener('click', () => {
-    const day = state.day || 1;
-    const explored = !!state.flags?.guideExplored || day >= 3;
-    const staffed = (state.base?.buildings || []).some((b) => (b.workers || 0) > 0);
-    const lines = [
-      '<li><strong>Construir</strong> — elegís tipo; aparecen superficies edificables (áreas recuperadas, no solares fijos). Movéis el fantasma, el snap es invisible, confirmáis con ✓ o canceláis con ✕.</li>',
-      '<li><strong>Avanzar día</strong> — produce, consume y resuelve el día.</li>',
-      '<li><strong>Pan / zoom / recentrar</strong> — el mundo es mayor que la pantalla (landscape).</li>',
-      '<li><strong>Recuperar territorio</strong> — en Más: ampliá sectores colindantes cuando toque; luego podréis construir en sus superficies.</li>',
-    ];
-    if (staffed || state.flags?.onboardingDone) {
-      lines.push('<li><strong>Tocar un edificio</strong> — asigna trabajadores.</li>');
-    }
-    if (explored) {
-      lines.push('<li><strong>Tocar un lugar</strong> — envía exploradores.</li>');
-    }
-    lines.push('<li><strong>Comida / agua / madera</strong> — lo que veis en la barra superior.</li>');
-    openSheet(`
-      <div class="zz-ctx">
-        <h2>Ayuda</h2>
-        <p class="zz-muted" style="font-size:0.82rem">Solo lo que ya podéis usar.</p>
-        <ul class="zz-help-list">${lines.join('')}</ul>
-      </div>
-    `, 'help');
+    const { html } = renderHelpHtml(state);
+    openSheet(html, 'help');
+    scheduleSave();
   });
+  // ZZ-152: acceso también desde Más vía data-action
+  // (handleSheetAction open-help)
   $('zz-map')?.addEventListener('click', (ev) => {
     if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) {
       if (state.uiMode === 'build' || state.uiMode === 'explore') return;

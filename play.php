@@ -42,7 +42,7 @@ $base = zz_public_base();
     <!-- MUNDO: protagonista full-bleed -->
     <main class="zz-world-stage" id="zz-stage">
       <div class="zz-world-map-wrap" id="zz-map-wrap">
-        <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
+        <div id="zz-recover-banner" class="zz-recover-banner" hidden role="status" aria-live="assertive">Recuperación</div>
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
           <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
@@ -80,7 +80,7 @@ $base = zz_public_base();
           <span class="zz-hud__pill zz-hud__pill--def" title="Defensa"><strong id="zz-defense">0</strong></span>
         </div>
       </div>
-      <button type="button" class="zz-mission" id="zz-mission" hidden>
+      <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
         <span class="zz-mission__ico" aria-hidden="true">◎</span>
         <span id="zz-mission-text">—</span>
       </button>

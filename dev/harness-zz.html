@@ -30,7 +30,7 @@
   <div id="zz-app" class="zz-world zz-world--overlay" hidden>
     <main class="zz-world-stage" id="zz-stage">
       <div class="zz-world-map-wrap" id="zz-map-wrap">
-        <div id="zz-recover-banner" class="zz-recover-banner" hidden>Recuperación</div>
+        <div id="zz-recover-banner" class="zz-recover-banner" hidden role="status" aria-live="assertive">Recuperación</div>
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
           <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
@@ -67,8 +67,8 @@
           <span class="zz-hud__pill zz-hud__pill--def" title="Defensa"><strong id="zz-defense">0</strong></span>
         </div>
       </div>
-      <button type="button" class="zz-mission" id="zz-mission" hidden>
-        <span class="zz-mission__ico">◎</span>
+      <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
+        <span class="zz-mission__ico" aria-hidden="true">◎</span>
         <span id="zz-mission-text">—</span>
       </button>
       <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>

@@ -329,7 +329,7 @@ export function runDirector(state, content) {
   if (inProtection(state)) quietChance = Math.min(0.55, quietChance + 0.08);
 
   if (rng.chance(quietChance) && state.director.tension < 52) {
-    pushLog(state, 'Noche tranquila. Nada digno de anotar.', 'story');
+    pushLog(state, 'Noche tranquila. Nada digno de anotar.', 'story', { routine: true });
     state.director.tension = Math.max(0, state.director.tension - 2);
     noteCalmNight(state);
     return { quiet: true };
@@ -337,7 +337,7 @@ export function runDirector(state, content) {
 
   const events = (content.eventsDoc?.events || []).filter((ev) => conditionsMet(ev, state, bal));
   if (!events.length) {
-    pushLog(state, 'El viento arrastra polvo. Sin novedades.', 'story');
+    pushLog(state, 'El viento arrastra polvo. Sin novedades.', 'story', { routine: true });
     noteCalmNight(state);
     return { quiet: true };
   }

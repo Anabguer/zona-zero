@@ -1482,12 +1482,19 @@ Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/r
 ## 21.1 Capas (prioridad)
 
 1. Modal decisión / brief diario  
-2. Alerta crítica (comida 0, ataque inminente)  
-3. Objetivo contextual (1)  
+2. Alerta crítica (comida 0, amenaza inminente) — **banner**  
+3. Objetivo contextual (1) — **chip misión**  
 4. Coach tutorial **en el mundo** (solo mecánicas nuevas; una pista a la vez)  
-5. Tips discreto  
+5. Tips discreto (p. ej. recovery: chip, no banner)
+
+### ZZ-151 (conservar)
+
+- No spamear la misma amenaza en banner + chip.  
+- Recovery / tips no ocupan banner crítico.  
+- Tap alerta → cámara + ficha cuando haya destino (§9.4).  
 
 ## 21.2 Ejemplos de alertas
+
 
 - “Comida para 2 días”  
 - “Frío en 3 días — ~8 madera/día · reserva 4 días”  
@@ -1513,6 +1520,8 @@ Acceso desde el juego (p. ej. `?` / Más → Ayuda). **No** es una enciclopedia 
 **Prohibido:** spoilear sistemas, eras, techs o amenazas que aún no hayan aparecido si eso rompe descubrimiento.
 
 **Relación con coach:** el coach empuja en contexto (§31.4); la ayuda es consulta voluntaria cuando “ya sé, pero olvidé”.
+
+`meta.helpSeenTopics[]` registra temas consultados (no desbloquea spoilers).
 
 ---
 
