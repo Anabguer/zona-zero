@@ -31,6 +31,7 @@ import {
   explorerSlotsUnlocked,
 } from './explorers.js';
 import { runDirector, applyEventEffects } from './director.js';
+import { tickOutbreak, medicalBeds, healthSemaphore } from './outbreaks.js';
 import {
   adjustBuildingWorkers,
   adjustCategoryLabor,
@@ -326,7 +327,7 @@ function resolveOneExpedition(state, content, ex) {
 
   if (outcome === 'retreat') {
     explorer.status = 'wounded';
-    explorer.wounds = (explorer.wounds || 0) + 1;
+    explorer.wounds = (explorer.wounds || 0) + (content.balance?.health?.explorerWoundDaysBase || 2);
     report.wounded = true;
     gainExplorerSkill(explorer, 'resist', 1, content.balance);
     const scraps = rollLoot(rng, { wood: [0, 2], metal: [0, 2], food: [0, 1] }, 0.15);
@@ -345,7 +346,8 @@ function resolveOneExpedition(state, content, ex) {
 
   if (outcome === 'wounded' || outcome === 'pyrrhic') {
     explorer.status = 'wounded';
-    explorer.wounds = (explorer.wounds || 0) + (outcome === 'pyrrhic' ? 2 : 1);
+    const baseW = content.balance?.health?.explorerWoundDaysBase || 2;
+    explorer.wounds = (explorer.wounds || 0) + (outcome === 'pyrrhic' ? baseW + 1 : baseW);
     report.wounded = true;
     const early = (state.day || 1) <= 5 || (state.stats?.expeditions || 0) <= 2;
     if (!early && rng.chance(0.08 - resist * 0.012)) {
@@ -470,7 +472,13 @@ export function resolveExpedition(state, content) {
 
   livingExplorers(state).forEach((e) => {
     if (e.status === 'wounded' && !e.expeditionId) {
-      e.wounds = Math.max(0, (e.wounds || 1) - 1);
+      const cfg = content.balance?.health || {};
+      let step = 1;
+      if ((state.resources.medicine || 0) >= (cfg.explorerMedCost || 1) && (e.wounds || 0) > 0) {
+        state.resources.medicine -= cfg.explorerMedCost || 1;
+        step += cfg.explorerMedsShorten || 1;
+      }
+      e.wounds = Math.max(0, (e.wounds || cfg.explorerWoundDaysBase || 2) - step);
       if (e.wounds <= 0) e.status = 'ready';
     }
   });
@@ -1040,7 +1048,8 @@ export function advanceDay(state, content) {
   }
 
   const prod = applyProduction(state, content) || { produced: {}, byBuilding: [] };
-  healPopulationTick(state, content.balance);
+  healPopulationTick(state, content.balance, content);
+  tickOutbreak(state, content);
   tickResearch(state, content);
 
   if (state.weatherDaysLeft > 0) {
@@ -1216,3 +1225,4 @@ export function continueEndless(state) {
 }
 
 export { applyEventEffects, riskCategory, readyExplorers };
+export { medicalBeds, healthSemaphore, startOutbreak, tickOutbreak } from './outbreaks.js';

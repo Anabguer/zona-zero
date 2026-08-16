@@ -331,6 +331,34 @@ export function currentObjective(state, content) {
       text: `Frío en ${days} día(s) — ~${need} madera/día · reserva ${reserve} días.`,
     };
   }
+  // ZZ-058: brote / camas
+  if (state.outbreak?.active) {
+    const beds = (state.base?.buildings || []).reduce((n, b) => {
+      const d = content.buildings[b.type];
+      return n + (b.hp > 0 && d?.beds ? d.beds : 0);
+    }, 0);
+    const sick = state.population?.sick || 0;
+    const injured = state.population?.injured || 0;
+    return {
+      id: 'outbreak',
+      title: state.outbreak.label || 'Brote',
+      text: `Fase ${state.outbreak.phase} · enfermos ${sick} · camas ${beds} (ocup. ${sick + injured}).`,
+    };
+  }
+  {
+    const beds = (state.base?.buildings || []).reduce((n, b) => {
+      const d = content.buildings[b.type];
+      return n + (b.hp > 0 && d?.beds ? d.beds : 0);
+    }, 0);
+    const needBeds = (state.population?.sick || 0) + (state.population?.injured || 0);
+    if (needBeds > beds) {
+      return {
+        id: 'need_beds',
+        title: 'Camas médicas',
+        text: `Camas ${beds}/${needBeds} — amplía sanidad.`,
+      };
+    }
+  }
   if (state.weather === 'cold' || state.weather === 'blizzard') {
     const heat = state.lastHeating;
     if (heat?.active && (heat.shortfall > 0 || (heat.reserveDays != null && heat.reserveDays < 3))) {

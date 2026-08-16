@@ -214,6 +214,8 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     pendingWeather: null,
     coldExposure: 0,
     lastHeating: null,
+    outbreak: { active: false, type: null, phase: null, days: 0, severity: 0 },
+    outbreakCooldownUntil: 0,
     stability: balance.stabilityStart ?? 55,
     director: {
       threat: 8,
@@ -289,6 +291,8 @@ export function migrateState(state, content) {
   if (next.pendingWeather === undefined) next.pendingWeather = null;
   if (next.coldExposure == null) next.coldExposure = 0;
   if (next.lastHeating === undefined) next.lastHeating = null;
+  if (!next.outbreak) next.outbreak = { active: false, type: null, phase: null, days: 0, severity: 0 };
+  if (next.outbreakCooldownUntil == null) next.outbreakCooldownUntil = 0;
   if (!next.flags) next.flags = {};
   if (!next.flags.narrative) next.flags.narrative = {};
   if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };

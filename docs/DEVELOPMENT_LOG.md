@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…047** hechas · **ZZ-048 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…058** hechas · **ZZ-059 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -860,31 +860,183 @@ IMPLEMENTATION_PLAN 2.8 · E · **HUMAN_GATE YES** · deps ZZ-047
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Escenario frío; wood heat; exposición; capturas.
 
 ## HECHO
 - Smoke `smoke-zz033-048`.
-- Review 10 tomas + contact sheet → `docs/review/` + Drive.
+- Review 10 tomas + contact sheet (invierno).
 - Deudas arte **NO BLOQUEANTES** (post-019B + silueta insulated_house).
-- Sin deploy · no ZZ-050.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+QA invierno valida bloque estacional ZZ-033…047. Flujo aviso→clima→calefacción→madera→cobertura→exposición→impacto→feedback OK. Pozo≠cisterna; prod≠protección; vivienda básica/aislada; alertas accesibles. Sin bloqueo UX/lógica.
+
+## DEUDA ARTÍSTICA (NO BLOQUEANTE)
+Mantener: post-ZZ-019B; silueta `insulated_house`; integración edificio-suelo; carretera/props; pulido. **Sin ART PASS** salvo PLAN.
 
 ## EVIDENCIAS
-`docs/review/` · Drive Review/
+Archivadas en `docs/review-archive/zz-048/`.
 
 ## PARAR
-Sí — HUMAN_GATE. Sin deploy. No ZZ-050.
+No — continuar ZZ-050 (bloque F).
 
+---
 
+# FASE ZZ-050 — Camas médicas + curación agregada
 
+IMPLEMENTATION_PLAN 2.8 · F · HUMAN_GATE NO · deps ZZ-023
 
+## ESTADO CURSOR
+COMPLETADA
 
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-059)*
 
+## HECHO
+- `beds` en medkit(1)/infirmary(4)/clinic(8); curación agregada por camas+staff+meds+tech.
+- Muerte si heridos sin camas (balance `health`).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-051 — Cadena botiquín→enfermería→clínica
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Cadena de camas acumulativas; clinic sin `max` arbitrario.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-052 — Explorador wounded/sick timings
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Heridas explorador; medicine acorta recuperación (sim + balance health).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-053 — Motor brotes probabilístico (sin calendario)
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `js/outbreaks.js` + `outbreaks.enabled`; riesgo sin día fijo; cooldown.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-054 — Fases brote
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Fases seed→spread→peak→resolve→recovery.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-055 — Arquetipos + factores riesgo
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Arquetipos (`fever_wave`, `winter_cough`, …); factores cobertura/camas/staff.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-056 — Staffing sanitario + prod
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Staff en edificios salud; prod↓ solo por sick+reasignación (sin penalización artificial de brote).
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-057 — Protocolo cuarentena pasivo (tech)
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Tech `quarantine_protocol` (pasiva, tras `field_medicine`); reduce spread/duración.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-058 — Feedback semáforo + alertas
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Semáforo salud; alertas `outbreak` / `need_beds`; panel Salud en Más; `dataset.health`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-059 — QA crisis sanitaria (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · F · **HUMAN_GATE YES** · deps ZZ-058
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+QA crisis sanitaria completa + gate (GM §12).
+
+## HECHO
+- Smoke `smoke-zz050-059` OK.
+- Review 10 tomas + contact sheet → `docs/review/` + Drive Review/.
+- Sin calendario fijo; cuarentena pasiva; cadena camas; semáforo/alertas.
+- Deudas arte **NO BLOQUEANTES**. Sin deploy · no ZZ-060.
+
+## EVIDENCIAS
+`docs/review/` · Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` · `review-contact-sheet.jpg`
+
+## PARAR
+Sí — HUMAN_GATE ZZ-059. Sin deploy. No ZZ-060.
 
 ---
 
@@ -1006,17 +1158,17 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-045 | Aviso previo + estimación reserva madera | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-046 | Impacto clima en prod/exploración/salud | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-047 | Feedback visual clima | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-048 | QA invierno forzado + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-050 | Camas médicas + curación agregada | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-051 | Cadena botiquín→enfermería→clínica | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-052 | Explorador wounded/sick timings | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-053 | Motor brotes probabilístico (sin calendario) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-054 | Fases brote germen→propagación→pico→contención/crisis→recuperación | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-055 | Arquetipos brote + factores riesgo/reducción | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-056 | Staffing sanitario + prod solo por sick/reasignación | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-057 | Protocolo cuarentena pasivo (tech) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-058 | Feedback semáforo salud + alertas brote | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-059 | QA crisis sanitaria completa + gate | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-048 | QA invierno forzado + gate | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-050 | Camas médicas + curación agregada | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-051 | Cadena botiquín→enfermería→clínica | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-052 | Explorador wounded/sick timings | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-053 | Motor brotes probabilístico (sin calendario) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-054 | Fases brote germen→propagación→pico→contención/crisis→recuperación | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-055 | Arquetipos brote + factores riesgo/reducción | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-056 | Staffing sanitario + prod solo por sick/reasignación | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-057 | Protocolo cuarentena pasivo (tech) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-058 | Feedback semáforo salud + alertas brote | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-059 | QA crisis sanitaria completa + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-060 | Defensa agregada legible | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-061 | Ataques prep→resolve→informe | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-062 | Infectados tipados afectan combate | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

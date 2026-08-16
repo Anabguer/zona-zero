@@ -51,6 +51,26 @@
           }
         },
         {
+          "id": "quarantine_protocol",
+          "name": "Protocolo de cuarentena",
+          "desc": "Aislamiento pasivo permanente: menos contagio y brotes más cortos.",
+          "cost": {
+            "medicine": 5,
+            "wood": 3,
+            "metal": 2
+          },
+          "requires": [
+            "field_medicine"
+          ],
+          "minEra": 1,
+          "days": 4,
+          "effects": {
+            "quarantinePassive": true,
+            "outbreakSpreadMult": 0.65,
+            "outbreakDurationMult": 0.7
+          }
+        },
+        {
           "id": "greenhouse_tech",
           "name": "Cultivo protegido",
           "desc": "Permite construir invernaderos.",

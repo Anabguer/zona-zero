@@ -94,10 +94,31 @@
     "sickChanceRed": 0.28
   },
   "outbreaks": {
-    "enabled": false,
-    "comment": "Activar en ZZ-053+. Sin calendario fijo. quarantine_protocol pasivo.",
+    "enabled": true,
+    "comment": "ZZ-053+: brotes probabilísticos sin calendario fijo. quarantine_protocol pasivo.",
     "noFixedCalendar": true,
-    "archetypes": ["fever_wave", "gut_bug", "wound_infection", "winter_cough", "mystery_radio"]
+    "baseSeedChance": 0.04,
+    "minDay": 8,
+    "cooldownDays": 12,
+    "archetypes": {
+      "fever_wave": { "label": "Fiebre", "spread": 1, "severity": 1, "durationBias": 1 },
+      "gut_bug": { "label": "Agua contaminada", "spread": 1.15, "severity": 0.9, "durationBias": 1.1, "waterBias": true },
+      "wound_infection": { "label": "Infección de heridas", "spread": 0.9, "severity": 1.2, "durationBias": 0.95, "injuryBias": true },
+      "winter_cough": { "label": "Tos de invierno", "spread": 1.1, "severity": 1, "durationBias": 1.15, "coldBias": true },
+      "mystery_radio": { "label": "Señal enferma", "spread": 1.05, "severity": 1.1, "durationBias": 1.2 }
+    },
+    "phases": ["seed", "spread", "peak", "resolve", "recovery"],
+    "phaseDays": { "seed": [1, 2], "spread": [2, 4], "peak": [2, 3], "resolve": [2, 4], "recovery": [2, 3] }
+  },
+  "health": {
+    "healPerBed": 0.55,
+    "healPerMedStaff": 0.45,
+    "healPerMedicine": 0.35,
+    "minHealWithoutBeds": 0.35,
+    "deathChanceNoBedsPerInjured": 0.08,
+    "explorerWoundDaysBase": 2,
+    "explorerMedsShorten": 1,
+    "explorerMedCost": 1
   },
   "buildingDamage": {
     "enabled": false,

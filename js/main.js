@@ -62,6 +62,7 @@ import {
   productionPreview,
   buildingWorkerCap,
 } from './colony.js';
+import { medicalBeds, healthSemaphore } from './outbreaks.js';
 import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon } from './icons.js';
 import {
   artUrl,
@@ -535,6 +536,12 @@ function openBuildingSheet(id) {
           : climateProt === 2
             ? 'Aislado (2)'
             : 'Residencial (3)';
+  const bedsLine =
+    def.beds != null
+      ? `<p class="zz-ctx__prod">Camas médicas: <strong>${def.beds}</strong>${
+          key ? ` · staff ${workers}/${cap}` : ''
+        }</p>`
+      : '';
 
   openSheet(`
     <div class="zz-ctx">
@@ -556,8 +563,17 @@ function openBuildingSheet(id) {
                </div>
              </div>
              <p class="zz-ctx__prod">${escapeHtml(prodLine)}</p>
+             ${bedsLine}
+             ${
+               state.outbreak?.active && def.beds
+                 ? `<p class="zz-muted">Brote ${escapeHtml(state.outbreak.label || '')} · fase ${escapeHtml(
+                     state.outbreak.phase || ''
+                   )}. Más staff sanitario acelera contención.</p>`
+                 : ''
+             }
              ${unstaffed ? '<p class="zz-ctx__warn">⚠ Sin personal — no produce</p>' : ''}`
           : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
+             ${bedsLine}
              ${
                def.housing
                  ? `<p class="zz-ctx__prod">Vivienda: <strong>${def.housing}</strong> plazas${
@@ -888,6 +904,17 @@ function openMoreSheet() {
         return bits.join(' · ');
       })()}
     </p>
+    <h3 style="font-family:var(--zz-display)">Salud</h3>
+    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+      Semáforo ${healthSemaphore(state)} · camas ${medicalBeds(state, content.buildings)} ·
+      enfermos ${state.population?.sick || 0} · heridos ${state.population?.injured || 0}
+      ${
+        state.outbreak?.active
+          ? ` · brote ${escapeHtml(state.outbreak.label || '')} (${escapeHtml(state.outbreak.phase || '')})`
+          : ''
+      }
+      ${(state.research.unlocked || []).includes('quarantine_protocol') ? ' · cuarentena pasiva' : ''}
+    </p>
     <h3 style="font-family:var(--zz-display)">Investigación</h3>
     <div class="zz-tech-list">${techHtml}</div>
     <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
@@ -1063,6 +1090,20 @@ function paintHud() {
     $('zz-era').textContent = eraName;
   }
   if ($('zz-stability')) $('zz-stability').textContent = String(Math.round(state.stability));
+  const healthEl = $('zz-health-sem') || $('zz-era');
+  if (healthEl && healthEl.id === 'zz-health-sem') {
+    const sem = healthSemaphore(state);
+    healthEl.dataset.sem = sem;
+    healthEl.textContent = sem === 'red' ? 'Salud ✖' : sem === 'amber' ? 'Salud !' : 'Salud ✓';
+  }
+  document.body.dataset.health = healthSemaphore(state);
+  const beds = medicalBeds(state, content.buildings);
+  const sickN = state.population?.sick || 0;
+  const injN = state.population?.injured || 0;
+  if ($('zz-day-label') && (state.outbreak?.active || sickN || injN)) {
+    /* day label stays; mission banner carries detail */
+  }
+  void beds;
   const threat = Math.round(state.director?.threat || 0);
   const def = Math.round(defenseValue(state, content.buildings, content.balance));
   if ($('zz-threat')) {

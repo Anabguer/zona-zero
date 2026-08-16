@@ -347,7 +347,7 @@
   "medkit": {
     "id": "medkit",
     "name": "Botiquín",
-    "desc": "Puesto de primeros auxilios. Poca producción, cura básica.",
+    "desc": "Puesto de primeros auxilios. 1 cama médica y cura básica.",
     "cost": {
       "wood": 2,
       "metal": 2,
@@ -358,6 +358,7 @@
     "h": 1,
     "max": 6,
     "jobs": 1,
+    "beds": 1,
     "produces": {
       "medicine": 1
     },
@@ -379,6 +380,7 @@
     "h": 1,
     "max": 4,
     "jobs": 2,
+    "beds": 4,
     "produces": {
       "medicine": 1
     },
@@ -390,7 +392,7 @@
   "clinic": {
     "id": "clinic",
     "name": "Clínica",
-    "desc": "Centro médico completo. Genera medicinas y cura avanzada.",
+    "desc": "Centro médico completo. Muchas camas y cura avanzada.",
     "cost": {
       "metal": 8,
       "wood": 5,
@@ -400,8 +402,8 @@
     "category": "health",
     "w": 2,
     "h": 1,
-    "max": 2,
     "jobs": 3,
+    "beds": 8,
     "produces": {
       "medicine": 2
     },
