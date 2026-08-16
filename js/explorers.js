@@ -45,6 +45,10 @@ export function explorerSlotsUnlocked(state, balance) {
   if (pop >= (s3.minPop || 28) && controlled >= (s3.minControlled || 6) && era >= (s3.minEra || 2)) {
     slots = Math.max(slots, 3);
   }
+  // ZZ-082: scouting mejora logística de exploradores
+  if ((state.research?.unlocked || []).includes('scouting')) {
+    slots = Math.min(cfg.maxActive || 3, Math.max(slots, 2));
+  }
   return Math.min(cfg.maxActive || 3, slots);
 }
 

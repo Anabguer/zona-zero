@@ -11,6 +11,7 @@ export function laborKeyForBuilding(def) {
   if (def.produces?.food) return 'food';
   if (def.produces?.water) return 'water';
   if (def.produces?.medicine) return 'medicine';
+  if (def.category === 'research') return 'produce'; // banco/lab: cupo produce (acelera research vía workers)
   if (def.produces) return 'produce';
   if ((def.defense || 0) > 0) return 'defense';
   if (def.category === 'medical') return 'medicine';

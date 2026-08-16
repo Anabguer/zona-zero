@@ -929,21 +929,48 @@ function openMoreSheet() {
   const slots = explorerSlotsUnlocked(state, content.balance);
   const living = livingExplorers(state).length;
   const branches = content.researchDoc?.branches || {};
+  const hasBench = (state.base?.buildings || []).some(
+    (b) => (b.type === 'tech_bench' || b.type === 'lab') && b.hp > 0
+  );
   let techHtml = '';
-  Object.entries(branches).forEach(([bid, br]) => {
-    techHtml += `<h3 style="margin:0.75rem 0 0.35rem;font-family:var(--zz-display)">${escapeHtml(br.name || bid)}</h3>`;
-    (br.techs || []).forEach((t) => {
-      const done = (state.research.unlocked || []).includes(t.id);
-      const active = state.research.active === t.id;
-      const locked = (t.minEra || 0) > state.era || (t.requires || []).some((r) => !(state.research.unlocked || []).includes(r));
-      techHtml += `<button type="button" class="zz-tech-card" data-action="research" data-tech="${t.id}" ${
-        done || active || locked || state.research.active ? 'disabled' : ''
-      }>
+  if (!hasBench) {
+    techHtml =
+      '<p class="zz-muted" style="font-size:0.82rem">Construí un <strong>banco técnico</strong> para investigar mejoras. El huerto D1 no necesita tech.</p>';
+  } else {
+    Object.entries(branches).forEach(([bid, br]) => {
+      techHtml += `<h3 style="margin:0.75rem 0 0.35rem;font-family:var(--zz-display)">${escapeHtml(br.name || bid)}</h3>`;
+      (br.techs || []).forEach((t) => {
+        const done = (state.research.unlocked || []).includes(t.id);
+        const active = state.research.active === t.id;
+        const locked =
+          (t.minEra || 0) > state.era ||
+          (t.requires || []).some((r) => !(state.research.unlocked || []).includes(r));
+        const benefit = t.benefit || t.desc || '';
+        const progressLabel = active
+          ? `En curso ${Math.floor(state.research.progress * 10) / 10}/${t.days || 3}`
+          : '';
+        techHtml += `<button type="button" class="zz-tech-card" data-action="research" data-tech="${t.id}" ${
+          done || active || locked || state.research.active ? 'disabled' : ''
+        }>
         <strong>${escapeHtml(t.name)}</strong>
-        <span>${done ? 'Completada' : active ? `En curso ${state.research.progress}/${t.days || 3}` : locked ? 'Bloqueada' : escapeHtml(t.desc || '')}</span>
+        <span>${
+          done
+            ? `Completada · ${escapeHtml(benefit)}`
+            : active
+              ? progressLabel
+              : locked
+                ? 'Bloqueada'
+                : escapeHtml(benefit)
+        }</span>
       </button>`;
+      });
     });
-  });
+    const rw = (state.base?.buildings || []).reduce(
+      (n, b) => n + ((b.type === 'tech_bench' || b.type === 'lab') && b.hp > 0 ? b.workers || 0 : 0),
+      0
+    );
+    techHtml += `<p class="zz-muted" style="font-size:0.78rem;margin-top:0.5rem">Staff research: ${rw} · más trabajadores en banco/lab → investigación más rápida. Solo 1 tech activa.</p>`;
+  }
   const vehs = (content.vehiclesDoc?.vehicles || [])
     .map((v) => {
       const owned = (state.vehiclesOwned || []).includes(v.id);

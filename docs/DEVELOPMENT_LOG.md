@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…072** hechas · **ZZ-073 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…082** hechas · **ZZ-083 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1272,10 +1272,10 @@ IMPLEMENTATION_PLAN 2.8 · H · **HUMAN_GATE YES** · deps ZZ-072
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Fog/discovered polish (no GIS) + gate. Control ≠ pintar verde vacío.
@@ -1284,13 +1284,109 @@ Fog/discovered polish (no GIS) + gate. Control ≠ pintar verde vacío.
 - Smoke `smoke-zz070-073` OK.
 - Fog unknown; discovered edge; owned ring; contested tint; review 10 tomas + contact sheet.
 - Contrato espacial **2.8** intacto. Deudas arte NO BLOQUEANTES.
-- Sin deploy · no ZZ-080.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloque H (ZZ-070…073) validado: discovered/owned/contested distintos; control con beneficios reales; loot residual; contested jugable; reconsolidación; lootTable por landmark; fog sin GIS permanente. Criterios a conservar: expansión con motivo, landmarks distintos, contested decisional, mapa mundo-primero. Deuda artística NO BLOQUEANTE.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-073/`.
+
+## COMMIT
+`18f53d0`
+
+## PARAR
+No — continuar ZZ-080 (bloque I · Investigación).
+
+---
+
+# FASE ZZ-080 — Banco técnico + lab con workers +/-
+
+IMPLEMENTATION_PLAN 2.8 · I · HUMAN_GATE NO · deps ZZ-023 / ZZ-073 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-083)*
+
+## HECHO
+- Research exige banco/lab (`hasResearchBench`); UI oculta/bloqueada sin banco.
+- 1 tech activa; `researchProgressPerDay` = 1 + 0.5×workers en banco/lab.
+- Módulo `js/research.js`; labor `produce` en `tech_bench`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-081 — Árbol utilitario sin Energía + quarantine_protocol
+
+IMPLEMENTATION_PLAN 2.8 · I · HUMAN_GATE NO · deps ZZ-080
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-083)*
+
+## HECHO
+- Sin rama Energía / sin `power_grid`/`generator`/`solar`.
+- `quarantine_protocol` pasiva (no toggle/−prod).
+- Farm D1 sin tech; `greenhouse` requiere `greenhouse_tech`.
+- Campo `benefit` (“Quiero…”) en techs.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-082 — Cablear efectos reales de cada tech
+
+IMPLEMENTATION_PLAN 2.8 · I · HUMAN_GATE NO · deps ZZ-081
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-083)*
+
+## HECHO
+- Efectos cableados: prod food/water/metal/ammo, buildCost, spoil, defense, unlockBuilding, vehicleUnlock, cargo, etc.
+- `reinforced_walls` → fence; stubs viejos retirados.
+- Smoke `smoke-zz080-083` con assertion medible por tech.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-083 — UI research legible (deseo claro) (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · I · **HUMAN_GATE YES** · deps ZZ-082
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Beneficio en lenguaje humano. Sin Energía. Farm D1 sin tech. 1 tech activa. Workers→progreso.
+
+## HECHO
+- UI Más: beneficio legible por tech; nota staff; bloqueo sin banco.
+- Review 10 tomas + contact sheet (`docs/review/` · Drive Review/).
+- Smoke OK. Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
+- Sin deploy · **no ZZ-084** hasta APROBADA ZZ-083.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-073. Sin deploy. No ZZ-080.
+Sí — HUMAN_GATE ZZ-083. Sin deploy. No ZZ-084.
 
 ---
 
@@ -1436,11 +1532,11 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-070 | Beneficios reales de control | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-071 | Contested/pérdida fronteriza | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-072 | Loot tables por landmark type | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-073 | Fog/discovered polish (no GIS) + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-080 | Banco técnico + lab con workers +/- | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-081 | Árbol utilitario sin Energía + quarantine_protocol | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-082 | Cablear efectos reales de cada tech | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-083 | UI research legible (deseo claro) | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-073 | Fog/discovered polish (no GIS) + gate | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-080 | Banco técnico + lab con workers +/- | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-081 | Árbol utilitario sin Energía + quarantine_protocol | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-082 | Cablear efectos reales de cada tech | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-083 | UI research legible (deseo claro) | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-084 | Tests suite research + cuarentena pasiva | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-090 | Garage + compra vehículos | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-091 | Fuel solo viajes/repair vehicular | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

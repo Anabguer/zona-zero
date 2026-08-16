@@ -179,7 +179,7 @@
       "food": 8
     },
     "minEra": 1,
-    "requires": [],
+    "requires": ["greenhouse_tech"],
     "requiresBuilding": "farm",
     "icon": "greenhouse"
   },

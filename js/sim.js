@@ -66,6 +66,14 @@ import {
   syncLaborFromColony,
   laborKeyForBuilding,
 } from './colony.js';
+import {
+  findTech,
+  hasResearchBench,
+  researchProgressPerDay,
+  sumTechEffect,
+  techBenefitText,
+  allTechs,
+} from './research.js';
 import { isCellBuildable, tickSectorRecovery, ensureSectors } from './sectors.js';
 
 export const RES_LABEL = {
@@ -109,7 +117,6 @@ export function placeBuilding(state, content, type, x, y) {
       return { ok: false, error: 'Requiere otro edificio' };
     }
   }
-  if (!canAfford(state, def.cost)) return { ok: false, error: 'Recursos insuficientes' };
   const count = state.base.buildings.filter((b) => b.type === type && b.hp > 0).length;
   if (def.max != null && count >= def.max) return { ok: false, error: 'Límite de este edificio' };
   if (x < 0 || y < 0 || x >= state.base.w || y >= state.base.h) return { ok: false, error: 'Fuera de la base' };
@@ -124,7 +131,13 @@ export function placeBuilding(state, content, type, x, y) {
   const idle = state.population?.labor?.idle || 0;
   if (buildLabor + idle < 1) return { ok: false, error: 'Sin mano de obra para construir' };
 
-  payCost(state, def.cost);
+  const costRed = Math.min(0.35, sumTechEffect(state, content, 'buildCostReduction'));
+  const paid = {};
+  Object.entries(def.cost || {}).forEach(([k, v]) => {
+    paid[k] = Math.max(1, Math.ceil(v * (1 - costRed)));
+  });
+  if (!canAfford(state, paid)) return { ok: false, error: 'Recursos insuficientes' };
+  payCost(state, paid);
   if (def.upgradeFrom) {
     const old = state.base.buildings.find((b) => b.type === def.upgradeFrom && b.hp > 0);
     if (old) {
@@ -431,6 +444,7 @@ function resolveOneExpedition(state, content, ex) {
   let cargoBonus = (veh?.cargoBonus || 0) + (lootFocus ? 0.35 : 0) + (zone.risk > 0.5 ? 0.2 : 0);
   if (outcome === 'pyrrhic') cargoBonus += 0.15;
   if (zone.state === 'controlled') cargoBonus *= 0.5;
+  if ((state.research?.unlocked || []).includes('pack_mules')) cargoBonus += 0.15;
   const loot = rollLoot(rng, lootMap, cargoBonus);
   if (loot.scrap) {
     loot.metal = (loot.metal || 0) + loot.scrap;
@@ -588,9 +602,26 @@ function applyProduction(state, content) {
       if (k === 'water' && b.type === 'well' && (state.weather === 'storm' || state.weather === 'heat')) {
         mult *= state.weather === 'heat' ? 0.8 : 0.85;
       }
-      // ZZ-063: ammo_craft mejora producción de munición en armería
-      if (k === 'ammo' && (state.research?.unlocked || []).includes('ammo_craft')) {
-        mult *= 1.2;
+      // ZZ-063: ammo_craft / ammoEfficiency
+      if (k === 'ammo') {
+        const eff = sumTechEffect(state, content, 'ammoEfficiency');
+        if (eff) mult *= 1 + eff;
+        else if ((state.research?.unlocked || []).includes('ammo_craft')) mult *= 1.2;
+      }
+      if (k === 'food') {
+        let foodB = sumTechEffect(state, content, 'foodProdBonus');
+        if (b.type === 'greenhouse' && (state.research?.unlocked || []).includes('greenhouse_tech')) {
+          foodB += 0.05;
+        }
+        if (foodB) mult *= 1 + foodB;
+      }
+      if (k === 'water') {
+        const wb = sumTechEffect(state, content, 'waterProdBonus');
+        if (wb) mult *= 1 + wb;
+      }
+      if (k === 'metal') {
+        const mb = sumTechEffect(state, content, 'metalProdBonus');
+        if (mb) mult *= 1 + mb;
       }
       const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * mult));
       if (amt <= 0) return;
@@ -603,15 +634,8 @@ function applyProduction(state, content) {
 
   const hasFarm = state.base.buildings.some((b) => ['farm', 'greenhouse', 'kitchen'].includes(b.type) && b.hp > 0);
   const hasWell = state.base.buildings.some((b) => ['well', 'pump'].includes(b.type) && b.hp > 0);
-
-  if ((state.research.unlocked || []).includes('surv_crops') && hasFarm) {
-    state.resources.food += 1;
-    produced.food = (produced.food || 0) + 1;
-  }
-  if ((state.research.unlocked || []).includes('surv_filters') && hasWell) {
-    state.resources.water += 1;
-    produced.water = (produced.water || 0) + 1;
-  }
+  void hasFarm;
+  void hasWell;
 
   // Lluvia → cisternas (recogida pasiva ZZ-034)
   if (state.weather === 'rain' || state.weather === 'storm') {
@@ -638,7 +662,8 @@ function applyProduction(state, content) {
   const waterCap = pop * softWater + storageN * 16 + cisternBonus;
   if ((state.resources.food || 0) > foodCap) {
     const excess = state.resources.food - foodCap;
-    const lost = Math.max(1, Math.ceil(excess * 0.2));
+    const spoilRed = Math.min(0.8, sumTechEffect(state, content, 'spoilReduction'));
+    const lost = Math.max(1, Math.ceil(excess * 0.2 * (1 - spoilRed)));
     state.resources.food -= lost;
     if (lost >= 3) pushLog(state, `Comida se estropea sin almacenaje (−${lost}).`, 'warn');
   }
@@ -847,19 +872,25 @@ export {
   zoneStateLabel,
   loseFrontierZone,
 } from './territory.js';
+export {
+  techBenefitText,
+  hasResearchBench,
+  researchWorkers,
+  researchProgressPerDay,
+  assertNoEnergyBranch,
+  findTech,
+  allTechs,
+} from './research.js';
 
 export function tickResearch(state, content) {
   if (!state.research.active) return;
-  const allTechs = [];
-  Object.values(content.researchDoc?.branches || {}).forEach((br) => {
-    (br.techs || []).forEach((t) => allTechs.push(t));
-  });
-  const tech = allTechs.find((t) => t.id === state.research.active);
+  const tech = findTech(content, state.research.active);
   if (!tech) {
     state.research.active = null;
     return;
   }
-  state.research.progress += 1;
+  const step = researchProgressPerDay(state);
+  state.research.progress += step;
   if (state.research.progress >= (tech.days || 3)) {
     state.research.unlocked.push(tech.id);
     state.research.active = null;
@@ -875,11 +906,7 @@ export function tickResearch(state, content) {
 }
 
 export function startResearch(state, content, techId) {
-  const allTechs = [];
-  Object.values(content.researchDoc?.branches || {}).forEach((br) => {
-    (br.techs || []).forEach((t) => allTechs.push(t));
-  });
-  const tech = allTechs.find((t) => t.id === techId);
+  const tech = findTech(content, techId);
   if (!tech) return { ok: false, error: 'Tecnología desconocida' };
   if ((state.research.unlocked || []).includes(techId)) return { ok: false, error: 'Ya investigada' };
   if (state.research.active) return { ok: false, error: 'Ya hay una investigación en curso' };
@@ -887,9 +914,10 @@ export function startResearch(state, content, techId) {
   if (tech.requires?.some((r) => !(state.research.unlocked || []).includes(r))) {
     return { ok: false, error: 'Faltan requisitos' };
   }
+  if (!hasResearchBench(state)) {
+    return { ok: false, error: 'Necesitás un banco técnico (o laboratorio)' };
+  }
   if (!canAfford(state, tech.cost)) return { ok: false, error: 'Recursos insuficientes' };
-  const hasBench = state.base.buildings.some((b) => ['tech_bench', 'lab'].includes(b.type) && b.hp > 0);
-  if (!hasBench && state.era >= 1) return { ok: false, error: 'Necesitás mesa técnica o laboratorio' };
   payCost(state, tech.cost);
   state.research.active = techId;
   state.research.progress = 0;
@@ -902,6 +930,11 @@ export function buyVehicle(state, content, vehicleId) {
   if (!v) return { ok: false, error: 'Vehículo desconocido' };
   if (state.vehiclesOwned.includes(vehicleId)) return { ok: false, error: 'Ya lo tenéis' };
   if ((v.minEra || 0) > state.era) return { ok: false, error: 'Era insuficiente' };
+  // ZZ-082: vehicleUnlock tech gate
+  const needTech = allTechs(content).find((t) => t.effects?.vehicleUnlock === vehicleId);
+  if (needTech && !(state.research.unlocked || []).includes(needTech.id)) {
+    return { ok: false, error: `Requiere investigación: ${needTech.name}` };
+  }
   const hasGarage = state.base.buildings.some((b) => b.type === 'garage' && b.hp > 0);
   if (vehicleId !== 'bike' && !hasGarage) return { ok: false, error: 'Hace falta un garaje' };
   if (!canAfford(state, v.cost)) return { ok: false, error: 'Recursos insuficientes' };

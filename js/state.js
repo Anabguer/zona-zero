@@ -590,9 +590,12 @@ export function defenseBreakdown(state, buildingsContent, balance) {
   if (state.equipment?.armor === 'light') gear += 2;
   if (state.equipment?.armor === 'heavy') gear += 5;
   let tech = 0;
-  if (unlocked.includes('def_fortify')) tech += 8;
+  if (unlocked.includes('fortify')) tech += 8;
   if (unlocked.includes('watch_protocols')) tech += 3;
   if (unlocked.includes('tower_optics')) tech += 2;
+  if (unlocked.includes('reinforced_walls')) tech += 5;
+  // defenseBonus acumulado de techs con effect numérico (evita doble contar ids ya sumados)
+  // watch/tower/fortify/reinforced ya arriba; ammo_craft vía ammoScore
   const controlled = (state.zones || []).filter((z) => z.state === 'controlled').length;
   const territory = Math.min(12, controlled * (balance.defensePerControlledZone ?? 1.5));
   const total = buildings + patrolScore + staffBonus + ammoScore + explorers + gear + tech + territory;

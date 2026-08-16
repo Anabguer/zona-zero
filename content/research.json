@@ -16,7 +16,8 @@
           "days": 2,
           "effects": {
             "foodProdBonus": 0.1
-          }
+          },
+          "benefit": "Quiero que la comida rinda más en el huerto."
         },
         {
           "id": "water_filters",
@@ -31,7 +32,8 @@
           "days": 2,
           "effects": {
             "waterProdBonus": 0.1
-          }
+          },
+          "benefit": "Quiero más agua limpia del pozo cada día."
         },
         {
           "id": "field_medicine",
@@ -48,7 +50,8 @@
           "days": 3,
           "effects": {
             "healBonus": 0.15
-          }
+          },
+          "benefit": "Quiero curar heridos y enfermos más rápido."
         },
         {
           "id": "quarantine_protocol",
@@ -68,7 +71,8 @@
             "quarantinePassive": true,
             "outbreakSpreadMult": 0.65,
             "outbreakDurationMult": 0.7
-          }
+          },
+          "benefit": "Quiero que los brotes se contengan solos, sin apagar la producción a mano."
         },
         {
           "id": "greenhouse_tech",
@@ -87,7 +91,8 @@
           "effects": {
             "unlockBuilding": "greenhouse",
             "foodProdBonus": 0.15
-          }
+          },
+          "benefit": "Quiero un invernadero que aguante mejor el frío."
         },
         {
           "id": "preservation",
@@ -107,7 +112,8 @@
           "effects": {
             "foodProdBonus": 0.2,
             "spoilReduction": 0.25
-          }
+          },
+          "benefit": "Quiero que la comida se eche a perder menos."
         }
       ]
     },
@@ -127,7 +133,8 @@
           "days": 2,
           "effects": {
             "buildCostReduction": 0.1
-          }
+          },
+          "benefit": "Quiero construir con menos madera y metal."
         },
         {
           "id": "metalwork",
@@ -144,7 +151,8 @@
           "days": 3,
           "effects": {
             "metalProdBonus": 0.15
-          }
+          },
+          "benefit": "Quiero sacar más metal de los talleres."
         },
         {
           "id": "reinforced_walls",
@@ -161,8 +169,9 @@
           "days": 3,
           "effects": {
             "defenseBonus": 5,
-            "unlockBuilding": "wall"
-          }
+            "unlockBuilding": "fence"
+          },
+          "benefit": "Quiero un perímetro más duro ante las hordas."
         },
         {
           "id": "insulation",
@@ -179,7 +188,8 @@
           "days": 5,
           "effects": {
             "unlockBuilding": "insulated_house"
-          }
+          },
+          "benefit": "Quiero casas que protejan del frío extremo."
         },
         {
           "id": "advanced_housing",
@@ -196,26 +206,8 @@
           "days": 4,
           "effects": {
             "housingBonus": 1
-          }
-        },
-        {
-          "id": "power_grid",
-          "name": "Red eléctrica",
-          "desc": "Optimiza generadores y talleres.",
-          "cost": {
-            "metal": 8,
-            "fuel": 4
           },
-          "requires": [
-            "metalwork",
-            "reinforced_walls"
-          ],
-          "minEra": 2,
-          "days": 5,
-          "effects": {
-            "fuelSaveBonus": 0.2,
-            "unlockBuilding": "power_hub"
-          }
+          "benefit": "Quiero una plaza más de vivienda sin nuevo edificio."
         }
       ]
     },
@@ -235,7 +227,8 @@
           "days": 2,
           "effects": {
             "expeditionSlots": 1
-          }
+          },
+          "benefit": "Quiero preparar mejor las rutas de exploración."
         },
         {
           "id": "pack_mules",
@@ -252,7 +245,8 @@
           "days": 2,
           "effects": {
             "cargoBonus": 0.15
-          }
+          },
+          "benefit": "Quiero traer más botín por viaje."
         },
         {
           "id": "bike_tech",
@@ -269,7 +263,8 @@
           "days": 3,
           "effects": {
             "vehicleUnlock": "bike"
-          }
+          },
+          "benefit": "Quiero poder usar bicicletas en expediciones."
         },
         {
           "id": "vehicle_bay",
@@ -289,7 +284,8 @@
           "effects": {
             "vehicleUnlock": "car",
             "expeditionSlots": 1
-          }
+          },
+          "benefit": "Quiero coches/furgonetas cuando toque."
         },
         {
           "id": "convoy",
@@ -307,7 +303,8 @@
           "effects": {
             "vehicleUnlock": "van",
             "cargoBonus": 0.25
-          }
+          },
+          "benefit": "Quiero operaciones con más carga rodada."
         }
       ]
     },
@@ -327,7 +324,8 @@
           "days": 2,
           "effects": {
             "defenseBonus": 3
-          }
+          },
+          "benefit": "Quiero turnos de guardia que sumen defensa real."
         },
         {
           "id": "ammo_craft",
@@ -344,7 +342,8 @@
           "days": 3,
           "effects": {
             "ammoEfficiency": 0.2
-          }
+          },
+          "benefit": "Quiero que la armería rinda más munición."
         },
         {
           "id": "rapid_repair",
@@ -362,7 +361,8 @@
           "effects": {
             "repairCostMult": 0.7,
             "repairDaysBonus": 1
-          }
+          },
+          "benefit": "Quiero reparar edificios más barato y antes del siguiente golpe."
         },
         {
           "id": "tower_optics",
@@ -380,7 +380,8 @@
           "effects": {
             "defenseBonus": 5,
             "threatSight": 1
-          }
+          },
+          "benefit": "Quiero ver venir las oleadas con más aviso."
         },
         {
           "id": "fortify",
@@ -398,9 +399,9 @@
           "minEra": 2,
           "days": 4,
           "effects": {
-            "defenseBonus": 8,
-            "unlockBuilding": "barricade"
-          }
+            "defenseBonus": 8
+          },
+          "benefit": "Quiero más defensa de colonia y barricadas efectivas."
         },
         {
           "id": "armor_vehicle",
@@ -419,7 +420,8 @@
           "effects": {
             "vehicleUnlock": "armored",
             "defenseBonus": 5
-          }
+          },
+          "benefit": "Quiero blindaje móvil cuando haya vehículos."
         }
       ]
     }
