@@ -366,8 +366,8 @@ body.zz-body {
   stroke-linejoin: round;
 }
 .zz-map-ruin-foot {
-  fill: #1a1c1e;
-  opacity: 0.45;
+  fill: #3a3630;
+  opacity: 0.32;
   stroke: none;
 }
 .zz-map-scrub {
@@ -390,23 +390,23 @@ body.zz-body {
 }
 .zz-ground-grain {
   fill: #1a1612;
-  opacity: 0.55;
+  opacity: 0.28;
   pointer-events: none;
 }
 .zz-ground-camp-halo {
-  fill: #2e281e;
-  opacity: 0.5;
+  fill: #3a3428;
+  opacity: 0.35;
   stroke: none;
   pointer-events: none;
 }
 .zz-ground-dirt-far {
-  fill: #221e18;
-  opacity: 0.35;
+  fill: #3a3428;
+  opacity: 0.28;
   stroke: none;
 }
 .zz-ground-ruin-wall {
-  fill: #2e2a26;
-  opacity: 0.48;
+  fill: #4a4438;
+  opacity: 0.4;
   stroke: none;
 }
 .zz-ground-rubble {
@@ -485,14 +485,20 @@ body.zz-body {
   pointer-events: none;
 }
 .zz-settle-foundation {
-  fill: #2e2822;
-  opacity: 0.55;
+  fill: #3a342c;
+  opacity: 0.42;
   stroke: none;
   pointer-events: none;
 }
 .zz-settle-foundation-gravel {
   fill: #524a40;
-  opacity: 0.65;
+  opacity: 0.5;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-contact-shadow {
+  fill: #1a1612;
+  opacity: 0.28;
   stroke: none;
   pointer-events: none;
 }
@@ -541,7 +547,7 @@ body.zz-body {
   pointer-events: none;
 }
 .zz-settle-yard-art--wide {
-  opacity: 0.48;
+  opacity: 0.32;
 }
 .zz-sector-alley {
   stroke: #4a4438;
@@ -636,23 +642,13 @@ body.zz-body {
   pointer-events: none;
 }
 .zz-prop-crate { fill: #4a3e30; opacity: 0.9; }
-.zz-prop-barrel { fill: #2e3a42; opacity: 0.85; }
+.zz-prop-barrel { fill: #4a4038; opacity: 0.88; }
 .zz-prop-fire-glow { fill: #c06020; opacity: 0.45; }
 .zz-prop-fire { fill: #e08030; opacity: 0.8; }
-.zz-settle-road-fill {
-  fill: #35322e;
-  opacity: 0.78;
-  pointer-events: none;
-}
-.zz-settle-road-dirt {
-  fill: #4a4338;
-  opacity: 0.35;
-  pointer-events: none;
-}
 .zz-settle-road-crack {
-  stroke: #1e1c18;
-  stroke-width: 0.12;
-  opacity: 0.55;
+  stroke: #2a2620;
+  stroke-width: 0.14;
+  opacity: 0.4;
   pointer-events: none;
 }
 .zz-settle-road-asphalt {
@@ -667,56 +663,82 @@ body.zz-body {
   opacity: 0.2;
   stroke-linecap: round;
 }
+/* ZZ-019B: señal de superficie temporal — polvo cálido, sin trazo GIS */
 .zz-settle-surface-area {
-  fill: rgba(196, 168, 96, 0.2);
-  stroke: rgba(220, 190, 110, 0.42);
-  stroke-width: 0.14;
+  fill: rgba(130, 115, 75, 0.09);
+  stroke: none;
+  pointer-events: none;
+}
+.zz-settle-surface-area-soft {
+  fill: rgba(110, 95, 65, 0.06);
+  stroke: none;
   pointer-events: none;
 }
 .zz-settle-surface-pad {
   display: none;
 }
 .zz-world-road-fill {
-  fill: #2f2c28;
-  opacity: 0.52;
+  fill: url(#zzPackedPat);
+  opacity: 0.55;
   pointer-events: none;
 }
+.zz-settle-road-fill {
+  fill: url(#zzPackedPat);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.zz-settle-yard-art--wide {
+  opacity: 0.32;
+}
 .zz-world-road-spur {
-  fill: #34312c;
-  opacity: 0.28;
+  fill: #403a32;
+  opacity: 0.18;
   pointer-events: none;
 }
 .zz-world-road-grime {
-  fill: #4a4338;
-  opacity: 0.4;
+  fill: #5a4e3c;
+  opacity: 0.55;
   pointer-events: none;
 }
 .zz-world-road-crack {
-  stroke: #1a1814;
-  stroke-width: 0.18;
-  opacity: 0.45;
+  stroke: #2e2a24;
+  stroke-width: 0.14;
+  opacity: 0.35;
   pointer-events: none;
 }
+.zz-settle-road-dirt {
+  fill: #5a4e3c;
+  opacity: 0.48;
+  pointer-events: none;
+}
+/* ZZ-019B: tonos de entorno — fills explícitos (sin fill SVG → negro debug) */
 .zz-env-tone {
   pointer-events: none;
+  stroke: none;
 }
-.28;
+.zz-env-tone--asphalt {
+  fill: #4a453c;
+  opacity: 0.22;
 }
-.26;
+.zz-env-tone--urban {
+  fill: #3e3a34;
+  opacity: 0.2;
 }
-.24;
+.zz-env-tone--green {
+  fill: #3a4634;
+  opacity: 0.22;
 }
 .zz-env-tone--alley {
-  fill: #322e28;
-  opacity: 0.28;
+  fill: #3a3630;
+  opacity: 0.2;
 }
 .zz-env-tone--industrial {
-  fill: #343230;
-  opacity: 0.3;
+  fill: #3c3a36;
+  opacity: 0.22;
 }
 .zz-env-tone--scrap {
-  fill: #3a3228;
-  opacity: 0.32;
+  fill: #423a30;
+  opacity: 0.24;
 }
 .zz-prop-tree-trunk {
   fill: #3a3024;
@@ -861,11 +883,24 @@ body.zz-body {
   display: none !important;
 }
 .zz-zone-fog-blob {
-  fill: #121418;
+  fill: #2a2824;
   filter: blur(1.2px);
 }
 .zz-zone-fog-tex {
   mix-blend-mode: multiply;
+  pointer-events: none;
+}
+/* ZZ-019B D1: bruma suave en vez de masas negras */
+.zz-zone-haze-soft {
+  fill: #3a362e;
+  opacity: 0.28;
+  stroke: none;
+  pointer-events: none;
+}
+.zz-zone-haze-veil {
+  fill: #2e2a24;
+  opacity: 0.16;
+  stroke: none;
   pointer-events: none;
 }
 .zz-zone-mark-label {
@@ -979,7 +1014,7 @@ body.zz-body {
   stroke-width: 0.15;
 }
 .zz-prop-crate { fill: #6a5038; stroke: #3a2a18; stroke-width: 0.12; }
-.zz-prop-barrel { fill: #4a5058; stroke: #2a3038; stroke-width: 0.12; }
+.zz-prop-barrel { fill: #5a5048; stroke: #2a2420; stroke-width: 0.12; }
 .zz-prop-fire { fill: #f0a040; }
 .zz-prop-fire-glow { fill: #f0a040; opacity: 0.28; filter: blur(0.35px); }
 .zz-prop-lamp { fill: #e8c070; opacity: 0.7; }

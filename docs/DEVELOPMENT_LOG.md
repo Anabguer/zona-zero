@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019A + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **DEUDA VISUAL D1 BLOQUEANTE** (arte escenario — ver sección). · **ZZ-015 NO iniciar** hasta fase visual acordada. · No deploy.
+**Estado global:** ZZ-016…019A + **ZZ-012…014 APROBADAS**. · Docs **2.8**. · **ZZ-019B** implementada · **PENDIENTE DE REVISIÓN** (REVIEW_STOP). · **ZZ-015 NO INICIADA**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -333,36 +333,58 @@ OK. **Cerrada (alcance desktop). Arte mundo = deuda bloqueante aparte.**
 
 ## PROPUESTA — nueva fase **ZZ-019B** (REVIEW_STOP)
 
-> Pendiente de autorización Neni/ChatGPT. **No implementada.**
+> Autorizada e implementada 2026-08-16. Ver sección **# FASE ZZ-019B** abajo.
 
-| Campo | Valor propuesto |
-|-------|-----------------|
-| **ID** | **ZZ-019B** |
-| **Nombre** | Integración visual del escenario D1 (anti-GIS) |
-| **Bloque** | B0 / puente a cierre visual D1 (antes de tratar arte D1 como cerrado) |
-| **HUMAN_GATE** | NO |
-| **REVIEW_STOP** | **YES** |
-| **Deps** | ZZ-019A APROBADA · ZZ-014 APROBADA (desktop ya validado) |
-| **Antes de** | ZZ-015 (QA D1 contact sheet) — o, si ZZ-015 ya arrancó, **antes** de APROBAR ZZ-015 como cierre de Experiencia D1 |
-| **Objetivo** | Sin overlays de construcción: solo mundo coherente. Con Construir: señal de superficie **integrada y temporal**, no polígonos GIS. |
-| **Fuera de alcance** | No tocar ghost/snap/✓ · no solares fijos · no macrogrid · no mecánicas nuevas de carretera · no embellecer solo por embellecer UI desktop |
-| **Entregables** | render-map / CSS / assets escenario; smoke de colocación intacto; review 844 + desktop (panel+mundo) + build on/off; contact sheet; PARAR |
-| **Aceptación (fantasía)** | «Veo un escenario postapo, no un mapa técnico» · build mode comunica capacidad sin manchas amarillas dominantes |
+---
 
-### Orden de cola propuesto
+# FASE ZZ-019B — Integración visual escenario D1 (anti-debug / anti-GIS)
 
-```
-… → ZZ-014 APROBADA → [ZZ-019B REVIEW_STOP] → autorización → ZZ-015 HUMAN_GATE → …
-```
+## CONTRATO
+IMPLEMENTATION_PLAN 2.8 § ZZ-019B · REVIEW_STOP YES · deps ZZ-019A + ZZ-014 · **antes de ZZ-015**.  
+**No reabre** contrato espacial 2.8 (mundo > viewport, pan/zoom/recenter, sectores, superficies, ghost/snap/✓✕, landscape, desktop ZZ-014).
 
-### Alternativa descartada (por ahora)
+## OBJETIVO
+Eliminar lectura debug/placeholder/GIS del D1: masas negras, formas sueltas, carretera superpuesta, superficies amarillas GIS; integración barata HQ/huerto (sombra contacto).
 
-- Meter esto en ZZ-015: mezcla QA de sistemas con redo artístico; ensucia el gate.
-- Esperar a Q2 ZZ-166+: demasiado tarde; consolida placeholders.
-- Reabrir ZZ-019A: incorrecto — el **modelo** espacial ya está APROBADO.
+## HECHO (Cursor)
+- **Bug crítico:** `.zz-env-tone--asphalt/urban/green` sin `fill` → SVG negro por defecto. Fills tierra explícitos.
+- Fog D1 early: sin máscara/FOG_ART negra; solo restos de muro lejanos.
+- Identidades: sin franjas parking GIS; manchas irregulares + props.
+- Carretera: fill `zzPackedPat`, más grime/grietas, opacidades más bajas.
+- Superficies build: polvo cálido suave, **sin** stroke dashed GIS.
+- Edificios: sombra contacto + foundation/gravel.
+- Barriles: tono metálico cálido (antes azul-gris “óvalo debug”).
+- Grain/yard overlays suavizados.
+- Review 11 tomas + contact sheet → `docs/review/` + Drive Review/.
+- Smokes: `smoke-d1`, `smoke-build-place` OK.
 
-## ESTADO
-**PARADO.** Esperando decisión: ¿autorizar **ZZ-019B** (REVIEW_STOP) antes de ZZ-015?
+## ARCHIVOS
+`js/render-map.js`, `css/game.css`, `dev/harness-zz.html`, `scripts/review-shots-zz019b.mjs`, `docs/review/*`, LOG/PLAN.
+
+## EVIDENCIAS
+`01-d1-844x390` · `02-pan-urbana` · `03-pan-abierta` · `04-carretera` · `05-hq-integrado` · `06-build-mode` · `07-superficie-valida` · `08-superficie-invalida` · `09-huerto-colocado` · `10-d1-740x360` · `11-desktop` · `review-contact-sheet.jpg`  
+Drive: `G:\Mi unidad\Juegos\Zona Zero\Review\`
+
+## AUTOCRÍTICA
+1. ¿Debug? Residuos posibles: pecios vehículo aún simplificados; cajas como rects (props). No hay fills negros por CSS roto.
+2. ¿Polígonos negros inexplicables? Causa principal corregida (env-tone). Fog D1 ya no pinta máscaras negras.
+3. ¿Carretera pertenece? Mejor integración (textura packed + grime); aún puede leerse como franja en zoom cercano.
+4. ¿Sin UI = lugar físico? Mejor; no art pass completo.
+5. ¿Build mode sin GIS? Señal polvo suave; ghost ✓/✕ intactos.
+6. ¿HQ/huerto menos pegatina? Sombra + gravel baratos; assets no rehechos.
+7. ¿Contrato 2.8 íntegro? Sí (mecánicas/smokes).
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN CONTINUACIÓN CHATGPT
+**NO**
+
+## ZZ-015
+**NO INICIADA**
+
+## PARAR
+Sí — REVIEW_STOP. Sin deploy.
 
 ---
 
