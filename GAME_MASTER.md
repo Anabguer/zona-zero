@@ -2007,6 +2007,13 @@ Usar para calibrar, no para “aprobar UX”.
 2. Eras D100 bajas — ¿balance vs bot vs métricas? No abaratar eras a ciegas.
 3. Sin explorar D100 ~56% — vigilar coste de oportunidad (no óptimo eterno).
 
+### ZZ-183 — Release gate (APROBADA · deploy NO autorizado)
+
+- Bloque S + catálogo v1 sin generator/solar · migrate legacy→storage.
+- **RELEASE GATE FUNCIONAL → APROBADO** · **DEPLOY → NO AUTORIZADO**.
+- REGRESSION_SUITE_CANDIDATE: placement ghost→✓; Hub→Continuar.
+- ZZ-184 = hotfix post-lanzamiento — no es la siguiente fase normal.
+
 ---
 
 # 37. PLAN DE IMPLEMENTACIÓN

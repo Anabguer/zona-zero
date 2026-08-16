@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…178 APROBADAS**. · **ZZ-180…182** hechas · **ZZ-183 HUMAN_GATE** PENDIENTE DE REVISIÓN (RONDA CAMBIOS: catálogo sin generator/solar). · Deudas arte **NO BLOQUEANTES**. · No deploy sin orden. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…178 APROBADAS**. · **ZZ-180…183 APROBADAS** (release gate funcional; **deploy NO autorizado**). · Deudas arte **NO BLOQUEANTES**. · No ZZ-184 (hotfix post-lanzamiento solo si hace falta). · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2471,52 +2471,45 @@ No.
 IMPLEMENTATION_PLAN 2.8 · S · **HUMAN_GATE YES** · deps ZZ-182
 
 ## ESTADO CURSOR
-COMPLETADA (checklist / sin deploy)
+COMPLETADA · **CERRADA**
 
 ## ESTADO REVISIÓN
-**CAMBIOS SOLICITADOS** → corrección aplicada · devolver a **PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO**
+**SÍ**
 
 ## OBJETIVO
-Confirmar que el deploy a producción solo ocurre bajo orden explícita; gate de release.
+Release gate funcional: Bloque S + política deploy solo bajo orden.  
+**Esta aprobación NO autoriza deploy.**
 
 ## HECHO
-- **NO se ha ejecutado** `winscp_deploy_juegos.ps1` ni ningún deploy.
-- Deploy documentado en `docs/TECH.md` (script externo) — requiere autorización expresa.
-- Bloque S (180–182) listo para revisión conjunta con este gate.
-- Contrato espacial **2.8** intacto · deuda arte NO BLOQUEANTE · sin ART PASS.
+- Bloque S ZZ-180…182 + RONDA CAMBIOS catálogo sin generator/solar (`4fa6aef`).
+- Migración legacy v7 conservada (energy strip; generator/solar → storage).
+- Defensa en profundidad: `v1-catalog.js` + UI + `placeBuilding` / build-pick / startBuild.
+- `AUDIT_ENGINE.md` alineado a contrato 2.8.
+- Regresiones PASS: smoke-save · E2E móvil/desktop · smoke-zz182-perf · aserciones catálogo.
+- **NO se ha ejecutado** deploy (`winscp_deploy_juegos.ps1` ni alternativa).
+- Contrato espacial **2.8** intacto · deuda arte NO BLOQUEANTE (≠ autorización a publicar con arte actual) · WIP hub fuera · sin ART PASS.
+- WATCH ZZ-178 intactos (sobreexpansión / eras / sin explorar).
+- REGRESSION_SUITE_CANDIDATE: placement ghost→✓; Hub→Continuar.
 
-## CHECKLIST HUMAN_GATE (para revisores)
-- [x] ZZ-180: saves legacy cargan; sin energy; generator→storage
-- [x] ZZ-181: E2E móvil landscape + desktop OK
-- [x] ZZ-182: ambient cap ≤16; cámara estable
-- [x] Confirmar: **no deploy** hasta orden explícita post-APROBADA
-- [x] WATCH ZZ-178 registrados (no recalibrar a ciegas)
-- [x] **RONDA CAMBIOS:** generator/solar fuera del catálogo jugable v1
+## CHECKLIST HUMAN_GATE (cerrado)
+- [x] ZZ-180: saves legacy; sin energy; generator→storage
+- [x] ZZ-181: E2E móvil landscape + desktop
+- [x] ZZ-182: ambient ≤16; cámara
+- [x] No deploy sin orden expresa (sigue vigente tras APROBADA)
+- [x] WATCH ZZ-178
+- [x] Catálogo v1 sin generator/solar
 
-## RONDA CAMBIOS (Neni/ChatGPT — CAMBIOS SOLICITADOS)
+## EVIDENCIAS
+`docs/review-archive/zz-183/` · commits `ed9ce86` · `4fa6aef` · `912930c`
 
-### Bloqueante corregido
-- Eliminados `generator` / `solar` de `content/buildings.json`.
-- Nuevo `js/v1-catalog.js` + filtro ficha Construir + rechazo `placeBuilding` / `build-pick` / `startBuild`.
-- Migración legacy v7 **conservada** (→ storage); sin reintroducir energy.
-- `docs/AUDIT_ENGINE.md` actualizado a estado 2.8 real.
-- Aserciones: catálogo sin generator/solar; legacy → storage.
-- REGRESSION_SUITE_CANDIDATE (no bloqueante): placement ghost+✓; Hub→Continuar.
-- WATCH ZZ-178 intactos. WIP hub fuera. **Sin deploy. Sin ZZ-184.**
-
-### Pruebas re-ejecutadas
-- `node scripts/smoke-save.mjs` OK
-- `node scripts/e2e-ui-playwright.mjs` OK (móvil + desktop + aserción UI catálogo)
-- `node scripts/smoke-zz182-perf.mjs` OK
-
-## COMMIT
-`4fa6aef` (RONDA CAMBIOS catálogo) · previo Bloque S `ed9ce86`
+## COMMIT (cierre docs)
+(ver commit de este cierre)
 
 ## PARAR
-**Sí** — ZZ-183 vuelve a PENDIENTE DE REVISIÓN. Sin deploy. No ZZ-184.
+**Sí** — ZZ-183 CERRADA. **Sin deploy. Sin ZZ-184.** Esperar decisión Neni/ChatGPT sobre siguiente trabajo pre-publicación.
 
 ---
 
@@ -8392,16 +8385,16 @@ NO
 Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-183).
 
 ## RESULTADO CURSOR
-RONDA CAMBIOS: catálogo sin generator/solar · AUDIT_ENGINE actualizado · regresiones OK · **deploy NO ejecutado** · PARAR.
+Cerrada formalmente · APROBADA · SÍ · release gate funcional · deploy NO autorizado · sin ZZ-184.
 
 ## ESTADO CURSOR
-COMPLETADA (corrección RONDA · sin deploy)
+COMPLETADA · CERRADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ---
 
