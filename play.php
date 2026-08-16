@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/zz-auth.php';
+require_once __DIR__ . '/includes/zz-assets.php';
 zz_page_require_login();
 
 $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
@@ -24,8 +25,9 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=41" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/world.css?v=41" />
+  <link rel="stylesheet" href="<?= zz_css_href($base, 'game.css') ?>" />
+  <link rel="stylesheet" href="<?= zz_css_href($base, 'world.css') ?>" />
+  <?php zz_print_js_importmap($base); ?>
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
@@ -168,7 +170,7 @@ $base = zz_public_base();
   <script type="module">
     const boot = document.getElementById('zz-boot');
     try {
-      const { bootGame } = await import('./js/main.js?v=41');
+      const { bootGame } = await import('<?= zz_js_entry_href('./js/main.js') ?>');
       await bootGame({
         mode: <?= $isNew ? "'new'" : "'load'" ?>,
         name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,

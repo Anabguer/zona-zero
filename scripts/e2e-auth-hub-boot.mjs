@@ -44,7 +44,12 @@ if (!/await import\(/.test(indexPhp)) {
   console.error('FAIL: index.php debe await import() para capturar fallos de módulo');
   process.exit(1);
 }
-console.log('OK static guards (hub.css + index.php boot)');
+const assetsPhp = readFileSync(join(root, 'includes', 'zz-assets.php'), 'utf8');
+if (!/zz_print_js_importmap/.test(assetsPhp) || !/ZZ_ASSET_V/.test(assetsPhp)) {
+  console.error('FAIL: falta importmap versionado (zz-assets.php)');
+  process.exit(1);
+}
+console.log('OK static guards (hub.css + index.php boot + importmap)');
 
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({

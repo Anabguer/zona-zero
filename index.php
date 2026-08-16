@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/zz-auth.php';
+require_once __DIR__ . '/includes/zz-assets.php';
 zz_page_require_login();
 $user = zz_page_user();
 $base = zz_public_base();
@@ -17,8 +18,9 @@ $base = zz_public_base();
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/game.css?v=41" />
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>css/hub.css?v=41" />
+  <link rel="stylesheet" href="<?= zz_css_href($base, 'game.css') ?>" />
+  <link rel="stylesheet" href="<?= zz_css_href($base, 'hub.css') ?>" />
+  <?php zz_print_js_importmap($base); ?>
 </head>
 <body class="zz-body zz-body--hub">
   <div id="zz-hub-boot" class="zz-boot">Cargando…</div>
@@ -38,7 +40,7 @@ $base = zz_public_base();
   <script type="module">
     const boot = document.getElementById('zz-hub-boot');
     try {
-      const { bootHub } = await import('./js/main.js?v=41');
+      const { bootHub } = await import('<?= zz_js_entry_href('./js/main.js') ?>');
       await bootHub();
     } catch (err) {
       console.error(err);

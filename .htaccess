@@ -4,3 +4,11 @@ DirectoryIndex index.php
     RewriteEngine On
     RewriteBase /juegos/zona-zero/
 </IfModule>
+
+# Evitar caché agresiva de módulos ES sin ?v= (Hostalia/nginx puede sobrescribir).
+# La fuente de verdad del bust es ZZ_ASSET_V + importmap en index.php/play.php.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|mjs|css)$">
+        Header set Cache-Control "public, max-age=300, must-revalidate"
+    </FilesMatch>
+</IfModule>
