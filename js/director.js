@@ -13,6 +13,7 @@ import {
 import { changePopulation, applyCasualties, workforce } from './population.js';
 import { applyBuildingDamage } from './buildings-damage.js';
 import { radioFamilyWeightMult, hasRadio, pushRadioSignal } from './radio.js';
+import { noteCalmNight, noteAchievementFlag } from './achievements.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) ^ (state.day * 7919));
@@ -119,19 +120,21 @@ function weightFor(ev, state, balance) {
   let w = ev.weight || 1;
   const recent = state.director.recentFamilies || [];
   const repeats = recent.filter((f) => f === ev.family).length;
-  if (repeats) w *= Math.max(0.15, 1 - repeats * 0.35);
-  if (ev.id === state.director.lastEventId) w *= 0.18;
+  if (repeats) w *= Math.max(0.12, 1 - repeats * 0.4);
+  if (ev.id === state.director.lastEventId) w *= 0.12;
+  // ZZ-122: antirrepetición reforzada por id reciente
+  const recentIds = state.director.recentEventIds || [];
+  const idHits = recentIds.filter((id) => id === ev.id).length;
+  if (idHits) w *= Math.max(0.05, 1 - idHits * 0.45);
   const budget = 1 + state.director.tension / 24 + state.era * 0.5;
   if (state.day < 18 && (ev.intensity || 0) >= 3) w *= 0.35;
   if (state.day < 10 && (ev.intensity || 0) >= 4) w *= 0.08;
   if ((ev.intensity || 0) > budget + 1.5) w *= 0.08;
   if ((ev.intensity || 0) === 0) w *= 1.1;
-  // Amenazas medias (int 2) más presentes cuando hay tensión
   if ((ev.intensity || 0) === 2 && state.director.tension >= 28) w *= 1.25;
   if ((ev.intensity || 0) === 2 && (ev.family === 'ataques' || ev.family === 'infectados')) {
     w *= 1.15;
   }
-  // Tras crisis: bloquea graves, deja pasar presión media atenuada
   if (inCrisisCooldown(state, balance) && (ev.family === 'ataques' || ev.family === 'catastrofes')) {
     w *= (ev.intensity || 0) >= 3 ? 0.25 : 0.55;
   }
@@ -139,14 +142,39 @@ function weightFor(ev, state, balance) {
     w *= (ev.intensity || 0) >= 3 ? 0.3 : 0.55;
   }
   if (inProtection(state) && (ev.intensity || 0) >= 4) w *= 0.05;
-  if ((state.director.fragility || 0) < 20 && (ev.family === 'calma' || ev.family === 'oportunidad')) {
+  if ((state.director.fragility || 0) < 20 && (ev.family === 'calma' || ev.family === 'hallazgos')) {
     w *= 1.15;
   }
-  // Colonia muy débil: algo más de presión media (no wipe garantizado)
   if ((state.director.force || 0) < 28 && (ev.intensity || 0) === 2) {
     w *= 1.12;
   }
-  // ZZ-094: familia radio = historias vía antena (no +% invisible)
+  // ZZ-120: pesos vs era / estación / estado (sin cadencia fija)
+  const season = state.season || 'autumn';
+  if (season === 'winter') {
+    if (ev.family === 'clima') w *= 1.35;
+    if (ev.family === 'hambre_agua') w *= 1.2;
+    if (ev.family === 'enfermedad') w *= 1.15;
+  } else if (season === 'summer') {
+    if (ev.family === 'clima') w *= 1.2;
+    if (ev.family === 'hambre_agua') w *= 1.15;
+  }
+  if ((state.era || 0) >= 2) {
+    if (ev.family === 'ataques' || ev.family === 'infectados') w *= 1.18;
+    if (ev.family === 'catastrofes') w *= 1.1;
+  } else if ((state.era || 0) === 0) {
+    if ((ev.intensity || 0) >= 3) w *= 0.55;
+    if (ev.family === 'calma' || ev.family === 'hallazgos') w *= 1.2;
+  }
+  if ((state.resources.food || 0) < (state.population?.total || 1)) {
+    if (ev.family === 'hambre_agua') w *= 1.4;
+  }
+  if ((state.population?.sick || 0) > 0 && ev.family === 'enfermedad') w *= 1.25;
+  // ZZ-121: memoria flags secuelas atenúan/suben familias
+  const mem = state.director.aftermath || {};
+  if (mem.recentOutbreak && ev.family === 'enfermedad') w *= 0.55;
+  if (mem.recentAttack && ev.family === 'ataques') w *= 0.5;
+  if (mem.recentCatastrophe && ev.family === 'catastrofes') w *= 0.35;
+  if (mem.needCalm && (ev.family === 'calma' || ev.family === 'hallazgos')) w *= 1.35;
   if (ev.family === 'radio') {
     w *= radioFamilyWeightMult(state);
   }
@@ -202,11 +230,28 @@ export function applyEventEffects(state, content, effects = {}, rng) {
 function afterEvent(state, content, chosen) {
   state.director.lastEventId = chosen.id;
   state.director.cooldowns[chosen.id] = state.day + (chosen.cooldown || 3);
+  if (!state.director.recentEventIds) state.director.recentEventIds = [];
+  state.director.recentEventIds = [chosen.id, ...state.director.recentEventIds].slice(0, 14);
   if (chosen.family) {
     state.director.familyCooldowns[chosen.family] =
       state.day + (content.balance.familyCooldownDays || 3);
     state.director.recentFamilies = [chosen.family, ...(state.director.recentFamilies || [])].slice(0, 8);
   }
+  // ZZ-121: memoria flags secuelas
+  if (!state.director.aftermath) state.director.aftermath = {};
+  const af = state.director.aftermath;
+  if (chosen.family === 'enfermedad') af.recentOutbreak = state.day;
+  if (chosen.family === 'ataques' || chosen.family === 'infectados') af.recentAttack = state.day;
+  if (chosen.family === 'catastrofes') {
+    af.recentCatastrophe = state.day;
+    af.needCalm = true;
+  }
+  if (chosen.family === 'calma') af.needCalm = false;
+  // Caducar secuelas (~8 días)
+  ['recentOutbreak', 'recentAttack', 'recentCatastrophe'].forEach((k) => {
+    if (af[k] != null && state.day - af[k] > 8) delete af[k];
+  });
+
   const intensity = chosen.intensity || 0;
   if (intensity >= 4) {
     state.director.lastCrisisDay = state.day;
@@ -222,6 +267,9 @@ function afterEvent(state, content, chosen) {
     state.director.tension = Math.max(14, state.director.tension - 4);
   } else {
     state.director.tension = clampNum(state.director.tension + Math.max(1, intensity + 0.5), 0, 100);
+  }
+  if ((chosen.intensity || 0) >= 3) {
+    noteAchievementFlag(state, 'hard_choice');
   }
 }
 
@@ -247,6 +295,19 @@ export function runDirector(state, content) {
   const bal = content.balance;
   if (state.day < (bal.directorMinDay || 1)) return { quiet: true };
 
+  // ZZ-124: resolver catástrofe avisada
+  if (state.pendingCatastrophe && state.day >= state.pendingCatastrophe.dueDay) {
+    const pending = state.pendingCatastrophe;
+    state.pendingCatastrophe = null;
+    const ev =
+      (content.eventsDoc?.events || []).find((e) => e.id === pending.eventId) ||
+      (content.eventsDoc?.events || []).find((e) => e.family === 'catastrofes' && (e.intensity || 0) >= 4);
+    if (ev) {
+      if (pending.prepared) noteAchievementFlag(state, 'prepared_catastrophe');
+      return resolveChosenEvent(state, content, ev, rng);
+    }
+  }
+
   let quietChance = bal.quietNightChance || 0.3;
   if (inProtection(state)) quietChance = Math.min(0.48, quietChance + 0.1);
   if (inCrisisCooldown(state, bal)) quietChance = Math.min(0.42, quietChance + 0.05);
@@ -254,16 +315,20 @@ export function runDirector(state, content) {
   if (state.day > 40) quietChance *= 0.9;
   if (state.day > 90) quietChance *= 0.88;
   if (state.era >= 2) quietChance *= 0.92;
+  // ZZ-123: post-desastre → más quiet nights (sin cadencia fija)
+  if (inProtection(state)) quietChance = Math.min(0.55, quietChance + 0.08);
 
   if (rng.chance(quietChance) && state.director.tension < 52) {
     pushLog(state, 'Noche tranquila. Nada digno de anotar.', 'story');
     state.director.tension = Math.max(0, state.director.tension - 2);
+    noteCalmNight(state);
     return { quiet: true };
   }
 
   const events = (content.eventsDoc?.events || []).filter((ev) => conditionsMet(ev, state, bal));
   if (!events.length) {
     pushLog(state, 'El viento arrastra polvo. Sin novedades.', 'story');
+    noteCalmNight(state);
     return { quiet: true };
   }
 
@@ -280,6 +345,27 @@ export function runDirector(state, content) {
   }
   if (!chosen) return { quiet: true };
 
+  // ZZ-124: catástrofes graves con aviso (1 día) salvo ya pendiente
+  if (
+    chosen.family === 'catastrofes' &&
+    (chosen.intensity || 0) >= 4 &&
+    !state.pendingCatastrophe &&
+    !state._autoResolveChoices
+  ) {
+    state.pendingCatastrophe = {
+      eventId: chosen.id,
+      name: chosen.name,
+      dueDay: state.day + 1,
+      prepared: false,
+    };
+    pushLog(
+      state,
+      `Aviso: se avecina «${chosen.name}». Preparad defensas, stock y gente a cubierto.`,
+      'warn'
+    );
+    return { warning: true, catastrophe: state.pendingCatastrophe };
+  }
+
   if (chosen.choices?.length && !state._autoResolveChoices) {
     state.pendingChoice = {
       eventId: chosen.id,
@@ -294,6 +380,15 @@ export function runDirector(state, content) {
   }
 
   return resolveChosenEvent(state, content, chosen, rng);
+}
+
+/** Marca preparación ante catástrofe avisada (stock/defensa). */
+export function prepareForCatastrophe(state) {
+  if (!state.pendingCatastrophe) return { ok: false };
+  state.pendingCatastrophe.prepared = true;
+  noteAchievementFlag(state, 'prepared_catastrophe');
+  pushLog(state, 'Os preparáis ante el aviso de catástrofe.', 'info');
+  return { ok: true };
 }
 
 export function resolvePendingChoice(state, content, choiceId) {

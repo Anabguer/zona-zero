@@ -7,6 +7,7 @@ import { pushLog, defenseBreakdown } from './state.js';
 import { applyCasualties } from './population.js';
 import { applyBuildingDamage, perimeterIntegrity } from './buildings-damage.js';
 import { loseFrontierZone } from './territory.js';
+import { noteAttackRepelled } from './achievements.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) + state.day * 9973 + 17);
@@ -184,6 +185,10 @@ export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
     state.stats.attacksSurvived += 1;
     state.stability += 2;
     dropThreat(6);
+    noteAttackRepelled(state, {
+      zeroAmmo: (state.resources.ammo || 0) <= 0,
+      horde: !!horde.hasHorde,
+    });
     pushLog(
       state,
       `Ataque repelido (int. ${inten}). ${horde.label}. Munición −${ammoSpent}.`,

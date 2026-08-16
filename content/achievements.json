@@ -1,0 +1,945 @@
+{
+  "achievements": [
+    {
+      "id": "ach_dawn",
+      "name": "Alba",
+      "category": "survival",
+      "desc": "Sobrevivir el primer amanecer.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "day_ge",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_week",
+      "name": "Primera semana",
+      "category": "survival",
+      "desc": "Sobrevivir 7 días.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "day_ge",
+        "arg": 7
+      }
+    },
+    {
+      "id": "ach_month",
+      "name": "Un mes",
+      "category": "survival",
+      "desc": "Sobrevivir 30 días.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "day_ge",
+        "arg": 30
+      }
+    },
+    {
+      "id": "ach_quarter",
+      "name": "Trimestre",
+      "category": "survival",
+      "desc": "Sobrevivir 90 días.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "day_ge",
+        "arg": 90
+      }
+    },
+    {
+      "id": "ach_century",
+      "name": "Centenario",
+      "category": "survival",
+      "desc": "Sobrevivir 100 días.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "day_ge",
+        "arg": 100
+      }
+    },
+    {
+      "id": "ach_first_winter",
+      "name": "Primer invierno",
+      "category": "survival",
+      "desc": "Entrar en invierno.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "season",
+        "arg": "winter"
+      }
+    },
+    {
+      "id": "ach_heatwave",
+      "name": "Ola de calor",
+      "category": "survival",
+      "desc": "Agostar un calor extremo.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "weather",
+        "arg": "heat"
+      }
+    },
+    {
+      "id": "ach_no_deaths_15",
+      "name": "Sin bajas",
+      "category": "survival",
+      "desc": "15 días sin muertes.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "no_deaths_streak",
+        "arg": 15
+      }
+    },
+    {
+      "id": "ach_food_crisis_recover",
+      "name": "Despensa salvada",
+      "category": "survival",
+      "desc": "Recuperar tras crisis de comida.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "food_crisis_recovered"
+      }
+    },
+    {
+      "id": "ach_water_crisis_recover",
+      "name": "Sed vencida",
+      "category": "survival",
+      "desc": "Recuperar tras crisis de agua.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "water_crisis_recovered"
+      }
+    },
+    {
+      "id": "ach_pop_crash_recover",
+      "name": "Rehacer el refugio",
+      "category": "survival",
+      "desc": "Recuperar tras desplome de población.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "pop_crash_recovered"
+      }
+    },
+    {
+      "id": "ach_endless_50",
+      "name": "Endless 50",
+      "category": "survival",
+      "desc": "50 días en modo endless.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "endless_days",
+        "arg": 50
+      }
+    },
+    {
+      "id": "ach_pop_10",
+      "name": "Diez bocas",
+      "category": "population",
+      "desc": "Alcanzar 10 habitantes.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "pop_ge",
+        "arg": 10
+      }
+    },
+    {
+      "id": "ach_pop_25",
+      "name": "Veinticinco",
+      "category": "population",
+      "desc": "Alcanzar 25 habitantes.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "pop_ge",
+        "arg": 25
+      }
+    },
+    {
+      "id": "ach_pop_50",
+      "name": "Cincuenta",
+      "category": "population",
+      "desc": "Alcanzar 50 habitantes.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "pop_ge",
+        "arg": 50
+      }
+    },
+    {
+      "id": "ach_pop_100",
+      "name": "Cien",
+      "category": "population",
+      "desc": "Alcanzar 100 habitantes.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "pop_ge",
+        "arg": 100
+      }
+    },
+    {
+      "id": "ach_full_housing",
+      "name": "Techo para todos",
+      "category": "population",
+      "desc": "Población ≤ capacidad de vivienda.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "full_housing",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_mass_immigration",
+      "name": "Oleada humana",
+      "category": "population",
+      "desc": "+5 inmigrantes en un día.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "mass_immigration"
+      }
+    },
+    {
+      "id": "ach_rescue",
+      "name": "Rescate",
+      "category": "population",
+      "desc": "Rescatar a alguien en expedición.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "rescued_someone"
+      }
+    },
+    {
+      "id": "ach_lose20_recover",
+      "name": "Tras la pérdida",
+      "category": "population",
+      "desc": "Recuperar tras perder ≥20% pop.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "lose20_recovered"
+      }
+    },
+    {
+      "id": "ach_healthy_20",
+      "name": "Colonia sana",
+      "category": "population",
+      "desc": "20 habitantes sin enfermos ni heridos.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "healthy_pop",
+        "arg": 20
+      }
+    },
+    {
+      "id": "ach_stability_80",
+      "name": "Ánimo alto",
+      "category": "population",
+      "desc": "Estabilidad ≥ 80.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "stability_ge",
+        "arg": 80
+      }
+    },
+    {
+      "id": "ach_first_explore",
+      "name": "Primera salida",
+      "category": "exploration",
+      "desc": "Completar la primera expedición.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "expeditions_ge",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_landmarks_5",
+      "name": "Cinco hitos",
+      "category": "exploration",
+      "desc": "Descubrir 5 landmarks.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "discovered_ge",
+        "arg": 5
+      }
+    },
+    {
+      "id": "ach_landmarks_15",
+      "name": "Quince hitos",
+      "category": "exploration",
+      "desc": "Descubrir 15 landmarks.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "discovered_ge",
+        "arg": 15
+      }
+    },
+    {
+      "id": "ach_control_3",
+      "name": "Tres zonas",
+      "category": "exploration",
+      "desc": "Controlar 3 zonas.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "controlled_ge",
+        "arg": 3
+      }
+    },
+    {
+      "id": "ach_control_8",
+      "name": "Ocho zonas",
+      "category": "exploration",
+      "desc": "Controlar 8 zonas.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "controlled_ge",
+        "arg": 8
+      }
+    },
+    {
+      "id": "ach_control_12",
+      "name": "Doce zonas",
+      "category": "exploration",
+      "desc": "Controlar 12 zonas.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "controlled_ge",
+        "arg": 12
+      }
+    },
+    {
+      "id": "ach_explorer_lvl3",
+      "name": "Explorador veterano",
+      "category": "exploration",
+      "desc": "Explorador nivel 3.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "explorer_level",
+        "arg": 3
+      }
+    },
+    {
+      "id": "ach_explorer_lvl5",
+      "name": "Explorador élite",
+      "category": "exploration",
+      "desc": "Explorador nivel 5.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "explorer_level",
+        "arg": 5
+      }
+    },
+    {
+      "id": "ach_three_explorers",
+      "name": "Tres en ruta",
+      "category": "exploration",
+      "desc": "Tener 3 exploradores vivos.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "explorers_alive",
+        "arg": 3
+      }
+    },
+    {
+      "id": "ach_heal_explorer",
+      "name": "Vuelta a casa",
+      "category": "exploration",
+      "desc": "Curar un explorador herido.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "healed_explorer"
+      }
+    },
+    {
+      "id": "ach_extreme_clear",
+      "name": "Riesgo extremo",
+      "category": "exploration",
+      "desc": "Limpiar zona de riesgo extremo.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "extreme_cleared"
+      }
+    },
+    {
+      "id": "ach_first_farm",
+      "name": "Primer huerto",
+      "category": "build",
+      "desc": "Construir un huerto.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "farm"
+      }
+    },
+    {
+      "id": "ach_first_well",
+      "name": "Primer pozo",
+      "category": "build",
+      "desc": "Construir un pozo.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "well"
+      }
+    },
+    {
+      "id": "ach_buildings_10",
+      "name": "Diez edificios",
+      "category": "build",
+      "desc": "Tener 10 edificios.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "buildings_ge",
+        "arg": 10
+      }
+    },
+    {
+      "id": "ach_buildings_25",
+      "name": "Veinticinco edificios",
+      "category": "build",
+      "desc": "Tener 25 edificios.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "buildings_ge",
+        "arg": 25
+      }
+    },
+    {
+      "id": "ach_hq2",
+      "name": "Refugio II",
+      "category": "build",
+      "desc": "Mejorar HQ a nivel 2.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "hq_central_l2"
+      }
+    },
+    {
+      "id": "ach_hq3",
+      "name": "Refugio III",
+      "category": "build",
+      "desc": "Mejorar HQ a nivel 3.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "hq_central_l3"
+      }
+    },
+    {
+      "id": "ach_greenhouse",
+      "name": "Invernadero",
+      "category": "build",
+      "desc": "Construir invernadero.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "greenhouse"
+      }
+    },
+    {
+      "id": "ach_storage_3",
+      "name": "Tres almacenes",
+      "category": "build",
+      "desc": "Tener 3 almacenes.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "building_count",
+        "arg": [
+          "storage",
+          3
+        ]
+      }
+    },
+    {
+      "id": "ach_dense_colony",
+      "name": "Colonia densa",
+      "category": "build",
+      "desc": "≥12 edificios en el campamento.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "buildings_ge",
+        "arg": 12
+      }
+    },
+    {
+      "id": "ach_first_barricade",
+      "name": "Primera barricada",
+      "category": "defense",
+      "desc": "Construir una barricada.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "barricade"
+      }
+    },
+    {
+      "id": "ach_repel_1",
+      "name": "Primer rechazo",
+      "category": "defense",
+      "desc": "Repeler un ataque.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "attacks_repelled",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_repel_5",
+      "name": "Cinco rechazos",
+      "category": "defense",
+      "desc": "Repeler 5 ataques.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "attacks_repelled",
+        "arg": 5
+      }
+    },
+    {
+      "id": "ach_messy_survive",
+      "name": "Sobrevivir al caos",
+      "category": "defense",
+      "desc": "Sobrevivir ataque con daños.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "messy_survive"
+      }
+    },
+    {
+      "id": "ach_horde",
+      "name": "Horda",
+      "category": "defense",
+      "desc": "Enfrentar una horda intensa.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "horde_faced"
+      }
+    },
+    {
+      "id": "ach_bunker",
+      "name": "Búnker",
+      "category": "defense",
+      "desc": "Construir un búnker.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "building",
+        "arg": "bunker"
+      }
+    },
+    {
+      "id": "ach_zero_ammo_win",
+      "name": "Sin munición",
+      "category": "defense",
+      "desc": "Repeler ataque con 0 ammo.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "zero_ammo_win"
+      }
+    },
+    {
+      "id": "ach_perimeter_clean",
+      "name": "Perímetro limpio",
+      "category": "defense",
+      "desc": "Integridad de perímetro alta.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "perimeter_clean"
+      }
+    },
+    {
+      "id": "ach_first_research",
+      "name": "Primera tech",
+      "category": "tech",
+      "desc": "Completar una investigación.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "research_ge",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_branch_complete",
+      "name": "Rama completa",
+      "category": "tech",
+      "desc": "Completar una rama del árbol.",
+      "reward": {
+        "stability": 3,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "branch_complete"
+      }
+    },
+    {
+      "id": "ach_first_vehicle",
+      "name": "Primer vehículo",
+      "category": "tech",
+      "desc": "Poseer un vehículo.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "vehicles_ge",
+        "arg": 1
+      }
+    },
+    {
+      "id": "ach_van_route",
+      "name": "Ruta con furgoneta",
+      "category": "tech",
+      "desc": "Expedición con furgoneta.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "van_route"
+      }
+    },
+    {
+      "id": "ach_winter_wood",
+      "name": "Madera de invierno",
+      "category": "tech",
+      "desc": "Superar frío con calefacción madera.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "winter_wood_ok"
+      }
+    },
+    {
+      "id": "ach_outbreak_contained",
+      "name": "Brote contenido",
+      "category": "tech",
+      "desc": "Contener un brote.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "outbreak_contained"
+      }
+    },
+    {
+      "id": "ach_hard_choice",
+      "name": "Decisión dura",
+      "category": "events",
+      "desc": "Resolver una elección difícil.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "hard_choice"
+      }
+    },
+    {
+      "id": "ach_trade",
+      "name": "Trueque",
+      "category": "events",
+      "desc": "Completar un comercio.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "trade_done"
+      }
+    },
+    {
+      "id": "ach_radio_mission",
+      "name": "Misión de radio",
+      "category": "events",
+      "desc": "Completar misión de radio.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "radio_mission_done"
+      }
+    },
+    {
+      "id": "ach_failed_rescue",
+      "name": "Rescate fallido",
+      "category": "events",
+      "desc": "Fallar un rescate (logro amargo).",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "failed_rescue"
+      }
+    },
+    {
+      "id": "ach_calm_10",
+      "name": "Diez noches calmas",
+      "category": "events",
+      "desc": "10 noches tranquilas acumuladas.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "calm_nights",
+        "arg": 10
+      }
+    },
+    {
+      "id": "ach_prepared_catastrophe",
+      "name": "Aviso heeded",
+      "category": "events",
+      "desc": "Prepararse ante catástrofe avisada.",
+      "reward": {
+        "stability": 2,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "prepared_catastrophe"
+      }
+    },
+    {
+      "id": "ach_name_zonazero",
+      "name": "Nombre propio",
+      "category": "secret",
+      "desc": "Nombrar la colonia Zona Zero.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "colony_name",
+        "arg": "zona zero"
+      }
+    },
+    {
+      "id": "ach_recenter_50",
+      "name": "Cámara inquieta",
+      "category": "secret",
+      "desc": "Recentralizar la cámara 50 veces.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "recenter_50"
+      }
+    },
+    {
+      "id": "ach_only_shelters",
+      "name": "Solo refugios",
+      "category": "secret",
+      "desc": "Tener solo shelters como vivienda.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "only_shelters"
+      }
+    },
+    {
+      "id": "ach_brief_zero",
+      "name": "Brief cero",
+      "category": "secret",
+      "desc": "Cerrar el brief sin leer (humor).",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "brief_zero"
+      }
+    },
+    {
+      "id": "ach_seed_secret",
+      "name": "Semilla secreta",
+      "category": "secret",
+      "desc": "Usar una semilla especial.",
+      "reward": {
+        "stability": 1,
+        "badge": true
+      },
+      "when": {
+        "kind": "flag",
+        "arg": "seed_secret"
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…107** hechas · **ZZ-108 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…124** hechas · **ZZ-125 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1623,10 +1623,10 @@ IMPLEMENTATION_PLAN 2.8 · K · **HUMAN_GATE YES** · deps ZZ-107
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 QA variedad misiones/expediciones + gate. Fuel≠calor. Roles A. Supermercado≠farmacia.
@@ -1635,13 +1635,172 @@ QA variedad misiones/expediciones + gate. Fuel≠calor. Roles A. Supermercado≠
 - Review 10 tomas + contact sheet.
 - Smokes 084 + 090-108 OK.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · no ZZ-110 hasta APROBADA ZZ-108.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Validado ZZ-084…108: quarantine pasiva; vehículos/fuel≠calor; Radio≠Centro; misiones; encounters; antirrepetición; variedad. Criterios a conservar: variedad combinatoria (no misma misión con otro título); encounters con decisiones reales; Radio=historias / Centro=logística; misiones no solo checklist. Deuda artística NO BLOQUEANTE.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-108/`.
+
+## COMMIT
+`c18ebb3`
+
+## PARAR
+No — continuar ZZ-110 (bloque L → M hasta ZZ-125).
+
+---
+
+# FASE ZZ-110 — Schema achievements
+
+IMPLEMENTATION_PLAN 2.8 · L · HUMAN_GATE NO · deps ZZ-108 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-125)*
+
+## HECHO
+- `content/achievements.json` · 67 ids Apéndice L · sin electricidad.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-111 — Tracking + persistencia
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `achievementsUnlocked[]` + `achievementMeta` en state/save/migrate.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-112 — Cablear ≥60 logros
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `js/achievements.js` cablea checks · badge + estabilidad · sin power creep.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-113 — Feedback badge no invasivo
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Toast ✦ + lista reciente en Más.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-120 — Pesos Director vs era/estación/estado
+
+IMPLEMENTATION_PLAN 2.8 · M · HUMAN_GATE NO
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Pesos contextuales temporada/era/reservas/salud · sin cadencia fija.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-121 — Memoria flags secuelas
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `director.aftermath` atenúa familias tras crisis.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-122 — Antirrepetición reforzada
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `recentEventIds` + penalización por repetición de id/familia.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-123 — Quiet nights + post-desastre
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Quiet nights ~30%+ post-protección; `noteCalmNight`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-124 — Catástrofes con aviso
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `pendingCatastrophe` + banner + preparar → `ach_prepared_catastrophe`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-125 — Auditoría eventos vs familias (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · M · **HUMAN_GATE YES** · deps ZZ-124
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Auditoría familias + gate. Sin cadencia fija. Brotes vía pesos.
+
+## HECHO
+- Smoke `smoke-zz110-125`: 67 logros · 16 familias · quiet · catástrofe avisada.
+- Review 10 tomas + contact sheet.
+- Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
+- Sin deploy · **no ZZ-126** hasta APROBADA ZZ-125.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-108. Sin deploy. No ZZ-110.
+Sí — HUMAN_GATE ZZ-125. Sin deploy. No ZZ-126.
 
 ---
 
@@ -1808,17 +1967,17 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-105 | Pesos/cooldown/memoria/antirrepetición/rareza | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-106 | UI objetivo único + recompensas | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-107 | Tests batch muchas expediciones | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-108 | QA misiones/expediciones variedad + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-110 | Schema achievements | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-111 | Tracking + persistencia | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-112 | Cablear ≥60 logros (sin generator/solar) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-113 | Feedback badge no invasivo | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-120 | Pesos Director vs era/estación/estado | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-121 | Memoria flags secuelas | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-122 | Antirrepetición reforzada | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-123 | Quiet nights + post-desastre | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-124 | Catástrofes con aviso | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-125 | Auditoría eventos vs familias + gate | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-108 | QA misiones/expediciones variedad + gate | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-110 | Schema achievements | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-111 | Tracking + persistencia | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-112 | Cablear ≥60 logros (sin generator/solar) | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-113 | Feedback badge no invasivo | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-120 | Pesos Director vs era/estación/estado | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-121 | Memoria flags secuelas | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-122 | Antirrepetición reforzada | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-123 | Quiet nights + post-desastre | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-124 | Catástrofes con aviso | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-125 | Auditoría eventos vs familias + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-126 | Ritmo tensión→crisis→recovery tests | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-130 | Contactos por evento (sin 4X) | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-131 | Comercio evento | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

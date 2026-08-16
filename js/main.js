@@ -36,6 +36,8 @@ import {
 import { vehicleEffectSummary, ensureVehicleMeta } from './vehicles.js';
 import { hasRadio, hasExpeditionCenter, ensureRadioState } from './radio.js';
 import { ensureMissions } from './missions.js';
+import { consumePendingBadge, ensureAchievements } from './achievements.js';
+import { prepareForCatastrophe } from './director.js';
 import {
   buildingsNeedingRepair,
   structuralStateLabel,
@@ -433,6 +435,17 @@ function handleSheetAction(action, btn) {
     if (!r.ok) toast(r.error, 'warn');
     else {
       toast('Vehículo reparado (−metal/−fuel)', 'good');
+      scheduleSave();
+    }
+    openMoreSheet();
+    paint();
+    return;
+  }
+  if (action === 'prep-catastrophe') {
+    const r = prepareForCatastrophe(state);
+    if (!r.ok) toast('No hay catástrofe avisada', 'warn');
+    else {
+      toast('Preparados ante el aviso', 'good');
       scheduleSave();
     }
     openMoreSheet();
@@ -1081,6 +1094,21 @@ function openMoreSheet() {
     <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.82rem">${
       signalHtml || '<li class="zz-muted">Sin señales recientes</li>'
     }</ul>
+    ${
+      state.pendingCatastrophe
+        ? `<p><button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="prep-catastrophe">Preparar ante catástrofe avisada</button></p>`
+        : ''
+    }
+    <h3 style="font-family:var(--zz-display)">Logros</h3>
+    <p class="zz-muted" style="font-size:0.8rem">${
+      (state.achievementsUnlocked || []).length
+    } / ${(content.achievementsDoc?.achievements || []).length} · badge + estabilidad, sin power creep</p>
+    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.78rem">${
+      (ensureAchievements(state).recentBadges || [])
+        .slice(0, 5)
+        .map((b) => `<li>✦ ${escapeHtml(b.name)}</li>`)
+        .join('') || '<li class="zz-muted">Aún sin badges recientes</li>'
+    }</ul>
     <h3 style="font-family:var(--zz-display)">Estabilidad</h3>
     <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
       ${Math.round(state.stability)}/100 ·
@@ -1546,7 +1574,14 @@ function paint() {
   if (banner) {
     const recovering = state.day < (state.director?.protectionUntil || 0);
     const pending = state.pendingAttack;
-    if (pending) {
+    const cat = state.pendingCatastrophe;
+    if (cat) {
+      const d = Math.max(0, (cat.dueDay || 0) - state.day);
+      banner.hidden = false;
+      banner.textContent = `Catástrofe avisada · ${cat.name} · ${d}d${
+        cat.prepared ? ' · preparados' : ' · preparad stock/defensa'
+      }`;
+    } else if (pending) {
       const d = Math.max(0, (pending.arrivesOnDay || 0) - state.day);
       banner.hidden = false;
       banner.textContent = `Hostiles · ${d}d · int. ~${pending.intensity}${
@@ -1559,6 +1594,17 @@ function paint() {
           state.director?.threat || 0
         )}`;
       }
+    }
+  }
+  // ZZ-113: badge no invasivo (una vez por paint cycle)
+  if (!paint._badgeLock) {
+    const badge = consumePendingBadge(state);
+    if (badge) {
+      paint._badgeLock = true;
+      toast(`✦ ${badge.name}`, 'good');
+      setTimeout(() => {
+        paint._badgeLock = false;
+      }, 50);
     }
   }
   const wrap = document.querySelector('.zz-world-map-wrap');

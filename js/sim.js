@@ -92,6 +92,7 @@ import {
   applyEncounterChoice,
   ensureMissions,
 } from './missions.js';
+import { tickAchievements, noteAchievementFlag, noteAttackRepelled } from './achievements.js';
 
 export const RES_LABEL = {
   food: 'comida',
@@ -1164,6 +1165,7 @@ export function advanceDay(state, content) {
   tickOutbreak(state, content);
   tickResearch(state, content);
   tickMissions(state, content);
+  tickAchievements(state, content);
   tickBuildingRepairs(state, content);
   {
     const wrng = rngOf(state);

@@ -38,6 +38,7 @@ export async function loadContent() {
     'eras',
     'locations',
     'missions',
+    'achievements',
   ];
   const files = await Promise.all(
     names.map((n) =>
@@ -59,6 +60,7 @@ export async function loadContent() {
     erasDoc,
     locationsDoc,
     missionsDoc,
+    achievementsDoc,
   ] = files;
   const zonesDoc = {
     zones: (locationsDoc.seedLayout || []).map((z) => ({
@@ -81,6 +83,7 @@ export async function loadContent() {
     erasDoc,
     locationsDoc,
     missionsDoc,
+    achievementsDoc,
     zonesDoc,
   };
 }
@@ -216,6 +219,15 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       memory: { encounters: [], placeOutcomes: [], lastMissionIds: [] },
       cooldowns: {},
     },
+    achievementsUnlocked: [],
+    achievementMeta: {
+      noDeathStreak: 0,
+      calmNights: 0,
+      attacksRepelled: 0,
+      pendingBadge: null,
+      recentBadges: [],
+    },
+    pendingCatastrophe: null,
     research: { unlocked: [], active: null, progress: 0 },
     factions,
     season: balance.seasons?.startSeason || 'autumn',
@@ -304,6 +316,17 @@ export function migrateState(state, content) {
       cooldowns: {},
     };
   }
+  if (!Array.isArray(next.achievementsUnlocked)) next.achievementsUnlocked = [];
+  if (!next.achievementMeta) {
+    next.achievementMeta = {
+      noDeathStreak: 0,
+      calmNights: 0,
+      attacksRepelled: 0,
+      pendingBadge: null,
+      recentBadges: [],
+    };
+  }
+  if (next.pendingCatastrophe === undefined) next.pendingCatastrophe = null;
   if (!next.equipment) next.equipment = { weapon: 'none', armor: 'none', vehicleId: null };
   if (!next.factions) next.factions = [];
   if (!next.energy) next.energy = { produced: 0, demand: 0 };
@@ -322,6 +345,8 @@ export function migrateState(state, content) {
   if (!next.flags.narrative) next.flags.narrative = {};
   if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };
   if (!next.director) next.director = { threat: 10, tension: 15, cooldowns: {}, familyCooldowns: {}, recentFamilies: [] };
+  if (!next.director.aftermath) next.director.aftermath = {};
+  if (!next.director.recentEventIds) next.director.recentEventIds = [];
   if (!next.expeditions) next.expeditions = [];
 
   // Migrar supervivientes individuales → población + 1 explorador
