@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…032 APROBADAS**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…143** hechas · **ZZ-144 HUMAN_GATE** PENDIENTE. · Deudas arte **NO BLOQUEANTES**. · No ZZ-150 hasta APROBADA ZZ-144.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…032 APROBADAS**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150 HUMAN_GATE** PENDIENTE. · Deudas arte **NO BLOQUEANTES**. · No ZZ-151 hasta APROBADA ZZ-150.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.

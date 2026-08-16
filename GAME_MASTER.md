@@ -1557,6 +1557,16 @@ Nombrar explorador de cierta forma; día tranquilo 10 seguidos; etc.
 
 Unlock por indicadores (pop, control, research, infra), no solo día.
 
+### Criterios a conservar (ZZ-144 · Neni+ChatGPT)
+
+- **Eras ≠ calendario:** el día es brújula suave, no candado rígido (no “día 20 → era 2”).
+- Progreso real = estabilizar, construir, investigar, explorar / indicadores.
+- Victoria multi-condición (sistemas usados en partida), no barra abstracta 100 %.
+- Crisis final variable por semilla; contenido, no cuota; pone a prueba la colonia, no la invalida.
+- `needEnergy: false` — no reintroducir electricidad como requisito oculto.
+- Endless registra la victoria como hito real; no la borra.
+- Derrota + stats cuentan la historia de la colonia.
+
 ---
 
 # 24. CURVA DE EXPERIENCIA (SISTEMAS)
@@ -1692,6 +1702,7 @@ Filosofía: se puede perder; se aprende; no death spiral injusta tras crisis (pr
 
 Dock landscape: Construir · Avanzar día · Más (alcance pulgar).  
 Móvil landscape: sheets / paneles adaptados a horizontal. Desktop: panel lateral.  
+**ZZ-150:** mismo contrato de ficha en ambos (shell + body scroll + close); contenido compartido; sin pestañas Mapa|Base|Gente|Más.  
 Prohibido: pestañas Mapa|Base|Gente|Más.
 
 ## 31.2 Interacción

@@ -196,14 +196,18 @@ function startAutosaveLoop() {
   });
 }
 
-function openSheet(html) {
+function openSheet(html, kind = 'context') {
   const sheet = $('zz-sheet');
   const body = $('zz-sheet-body');
   if (!sheet || !body) return;
   body.innerHTML = html;
   sheet.hidden = false;
+  sheet.dataset.sheetKind = kind;
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
   document.body.classList.add('zz-sheet-open');
   syncDeskLayout();
+  body.scrollTop = 0;
   body.querySelectorAll('[data-thumb]').forEach((el) => {
     const type = el.getAttribute('data-thumb');
     try {
@@ -252,13 +256,38 @@ function openSheet(html) {
   body.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', () => handleSheetAction(btn.getAttribute('data-action'), btn));
   });
+  queueMicrotask(() => {
+    const focusable = body.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    (focusable || $('zz-sheet-close'))?.focus?.();
+  });
 }
 
 function closeSheet() {
   const sheet = $('zz-sheet');
-  if (sheet) sheet.hidden = true;
+  if (sheet) {
+    sheet.hidden = true;
+    delete sheet.dataset.sheetKind;
+    sheet.removeAttribute('role');
+    sheet.removeAttribute('aria-modal');
+  }
   document.body.classList.remove('zz-sheet-open');
   syncDeskLayout();
+}
+
+/** Envoltorio de ficha con título/lead consistente (móvil = desktop). */
+function sheetPanel(title, lead, inner) {
+  return `<div class="zz-sheet-panel">
+    <h2 class="zz-sheet-panel__title">${title}</h2>
+    ${lead ? `<p class="zz-sheet-panel__lead">${lead}</p>` : ''}
+    ${inner}
+  </div>`;
+}
+
+function sheetSection(title, inner) {
+  return `<section class="zz-sheet-section">
+    <h3 class="zz-sheet-section__h">${title}</h3>
+    ${inner}
+  </section>`;
 }
 
 function handleSheetAction(action, btn) {
@@ -573,19 +602,23 @@ function openPopulationSheet() {
       </div>`;
     })
     .join('');
-  openSheet(`
-    <h2>Colonia ${pop.total} / ${cap}</h2>
-    <p>Disponibles <strong>${labor.idle || 0}</strong> · Asignados <strong>${workforce(pop) - (labor.idle || 0)}</strong>
-      ${pop.injured || pop.sick ? ` · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}` : ''}</p>
-    ${
-      pop.total > cap
-        ? `<p class="zz-ctx__warn">Hacinamiento: ${pop.total - cap} sin plaza (estabilidad↓ · riesgo de abandono).</p>`
-        : ''
-    }
-    <p class="zz-muted" style="margin:0.35rem 0 0.75rem">Asigná gente en cada edificio (+/−). Aquí solo ves el resumen.</p>
+  openSheet(
+    sheetPanel(
+      `Colonia ${pop.total} / ${cap}`,
+      `Disponibles <strong>${labor.idle || 0}</strong> · Asignados <strong>${workforce(pop) - (labor.idle || 0)}</strong>${
+        pop.injured || pop.sick ? ` · Heridos ${pop.injured || 0} · Enfermos ${pop.sick || 0}` : ''
+      }`,
+      `${
+        pop.total > cap
+          ? `<p class="zz-ctx__warn">Hacinamiento: ${pop.total - cap} sin plaza (estabilidad↓ · riesgo de abandono).</p>`
+          : ''
+      }
+    <p class="zz-sheet-panel__lead">Asigná gente en cada edificio (+/−). Aquí solo ves el resumen.</p>
     ${rows}
-    <p style="margin-top:0.75rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>
-  `);
+    <p style="margin-top:0.35rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>`
+    ),
+    'population'
+  );
 }
 
 function openBuildingSheet(id) {
@@ -700,7 +733,7 @@ function openBuildingSheet(id) {
              }`
       }
     </div>
-  `);
+  `, 'building');
   checkOnboardingProgress(state);
 }
 
@@ -741,7 +774,7 @@ function openExplorerSheet(id) {
       }
       <p><button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button></p>
     </div>
-  `);
+  `, 'explorer');
   paint();
 }
 
@@ -765,7 +798,7 @@ function openZoneSheet(zoneId) {
         </div>
         <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
       </div>
-    `);
+    `, 'camp');
     paint();
     return;
   }
@@ -866,7 +899,7 @@ function openZoneSheet(zoneId) {
           : '<p>No hay explorador disponible.</p>'
       }
     </div>
-  `);
+  `, 'zone');
   paint();
 }
 
@@ -926,10 +959,10 @@ function openBuildSheet() {
     })
     .join('');
   openSheet(`
-    <h2>Construir</h2>
-    <p class="zz-muted" style="font-size:0.82rem">Elegí un edificio → tocá dónde colocarlo en el refugio.</p>
+    <h2 class="zz-sheet-panel__title">Construir</h2>
+    <p class="zz-sheet-panel__lead">Elegí un edificio → tocá dónde colocarlo en el refugio.</p>
     <div class="zz-build-grid">${list}</div>
-  `);
+  `, 'build');
 }
 
 function openSectorSheet(id) {
@@ -993,7 +1026,7 @@ function openSectorSheet(id) {
       }
       ${actionBtn}
     </div>
-  `);
+  `, 'sector');
 }
 
 function openMoreSheet() {
@@ -1080,52 +1113,61 @@ function openMoreSheet() {
     .map((s) => `<li>D${s.day}: <strong>${escapeHtml(s.title)}</strong> — ${escapeHtml(s.detail || '')}</li>`)
     .join('');
 
-  openSheet(`
-    <h2>Más</h2>
-    <p>
+  openSheet(
+    sheetPanel(
+      'Más',
+      'Mundo primero: recuperar territorio, gente y sistemas — sin pestañas de app.',
+      `<p>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="expand-mode">
         ${state.uiMode === 'expand' ? 'Salir de recuperación' : 'Recuperar territorio'}
       </button>
     </p>
-    <p class="zz-muted" style="font-size:0.8rem;margin-top:0.35rem">
+    <p class="zz-sheet-panel__lead">
       Amplía la colonia sector a sector. Cada zona tiene su propia situación.
     </p>
     <p>Exploradores ${living}/${slots}.
       <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
-    <p class="zz-muted" style="font-size:0.8rem">${slotHint(slots, living)}${
+    <p class="zz-sheet-panel__lead">${slotHint(slots, living)}${
       hasExpeditionCenter(state) ? ' · Centro: prep. slots activa' : ''
     }</p>
-    <h3 style="font-family:var(--zz-display)">Misiones</h3>
-    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.82rem">${
-      missionHtml || '<li class="zz-muted">Sin objetivo activo</li>'
-    }</ul>
-    <h3 style="font-family:var(--zz-display)">Radio</h3>
-    <p class="zz-muted" style="font-size:0.8rem">${
-      hasRadio(state)
-        ? 'Antena activa: señales e historias (no +% invisible).'
-        : 'Construí una radio para señales, SOS y contactos.'
-    }</p>
-    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.82rem">${
+    ${sheetSection(
+      'Misiones',
+      `<ul style="margin:0;padding-left:1.1rem;font-size:0.82rem">${
+        missionHtml || '<li class="zz-muted">Sin objetivo activo</li>'
+      }</ul>`
+    )}
+    ${sheetSection(
+      'Radio',
+      `<p class="zz-sheet-panel__lead">${
+        hasRadio(state)
+          ? 'Antena activa: señales e historias (no +% invisible).'
+          : 'Construí una radio para señales, SOS y contactos.'
+      }</p>
+    <ul style="margin:0;padding-left:1.1rem;font-size:0.82rem">${
       signalHtml || '<li class="zz-muted">Sin señales recientes</li>'
     }</ul>
     ${
       state.pendingCatastrophe
         ? `<p><button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="prep-catastrophe">Preparar ante catástrofe avisada</button></p>`
         : ''
-    }
-    <h3 style="font-family:var(--zz-display)">Logros</h3>
-    <p class="zz-muted" style="font-size:0.8rem">${
-      (state.achievementsUnlocked || []).length
-    } / ${(content.achievementsDoc?.achievements || []).length} · badge + estabilidad, sin power creep</p>
-    <ul style="margin:0.25rem 0 0.5rem;padding-left:1.1rem;font-size:0.78rem">${
+    }`
+    )}
+    ${sheetSection(
+      'Logros',
+      `<p class="zz-sheet-panel__lead">${
+        (state.achievementsUnlocked || []).length
+      } / ${(content.achievementsDoc?.achievements || []).length} · badge + estabilidad, sin power creep</p>
+    <ul style="margin:0;padding-left:1.1rem;font-size:0.78rem">${
       (ensureAchievements(state).recentBadges || [])
         .slice(0, 5)
         .map((b) => `<li>✦ ${escapeHtml(b.name)}</li>`)
         .join('') || '<li class="zz-muted">Aún sin badges recientes</li>'
-    }</ul>
-    <h3 style="font-family:var(--zz-display)">Estabilidad</h3>
-    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+    }</ul>`
+    )}
+    ${sheetSection(
+      'Estabilidad',
+      `<p class="zz-sheet-panel__lead">
       ${Math.round(state.stability)}/100 ·
       ${(() => {
         const popN = state.population?.total || 0;
@@ -1141,9 +1183,11 @@ function openMoreSheet() {
         if ((state.director?.recentLosses || 0) > 0) bits.push('pérdidas recientes');
         return bits.join(' · ');
       })()}
-    </p>
-    <h3 style="font-family:var(--zz-display)">Salud</h3>
-    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+    </p>`
+    )}
+    ${sheetSection(
+      'Salud',
+      `<p class="zz-sheet-panel__lead">
       Semáforo ${healthSemaphore(state)} · camas ${medicalBeds(state, content.buildings)} ·
       enfermos ${state.population?.sick || 0} · heridos ${state.population?.injured || 0}
       ${
@@ -1152,9 +1196,11 @@ function openMoreSheet() {
           : ''
       }
       ${(state.research.unlocked || []).includes('quarantine_protocol') ? ' · cuarentena pasiva' : ''}
-    </p>
-    <h3 style="font-family:var(--zz-display)">Defensa</h3>
-    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+    </p>`
+    )}
+    ${sheetSection(
+      'Defensa',
+      `<p class="zz-sheet-panel__lead">
       ${(() => {
         const bd = defenseBreakdown(state, content.buildings, content.balance);
         const bits = [
@@ -1176,20 +1222,22 @@ function openMoreSheet() {
         if ((state.research.unlocked || []).includes('watch_protocols')) bits.push('guardia');
         return bits.join(' · ');
       })()}
-    </p>
-    <h3 style="font-family:var(--zz-display)">Territorio</h3>
-    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+    </p>`
+    )}
+    ${sheetSection(
+      'Territorio',
+      `<p class="zz-sheet-panel__lead">
       ${(() => {
         const b = controlBenefits(state, content);
         return `${b.label}${b.contested ? ` · ${b.contested} en disputa` : ''} · loot residual en controladas`;
       })()}
-    </p>
-    <h3 style="font-family:var(--zz-display)">Investigación</h3>
-    <div class="zz-tech-list">${techHtml}</div>
-    <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
-    <p>${vehs || 'Ninguno'}</p>
-    <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Contactos</h3>
-    <p class="zz-muted" style="font-size:0.78rem">Sin diplomacia 4X: solo contactos por evento/trueque.</p>
+    </p>`
+    )}
+    ${sheetSection('Investigación', `<div class="zz-tech-list">${techHtml}</div>`)}
+    ${sheetSection('Vehículos', `<p>${vehs || 'Ninguno'}</p>`)}
+    ${sheetSection(
+      'Contactos',
+      `<p class="zz-sheet-panel__lead">Sin diplomacia 4X: solo contactos por evento/trueque.</p>
     <ul class="zz-factions">${(() => {
       const known = discoveredFactions(state);
       if (!known.length) {
@@ -1210,12 +1258,15 @@ function openMoreSheet() {
           </li>`;
         })
         .join('');
-    })()}</ul>
-    <p style="margin-top:0.75rem;color:var(--zz-muted);font-size:0.85rem">Diario: ${(state.log || [])
+    })()}</ul>`
+    )}
+    <p class="zz-sheet-panel__lead" style="margin-top:0.35rem">Diario: ${(state.log || [])
       .slice(0, 4)
       .map((e) => `D${e.day} ${escapeHtml(e.text)}`)
-      .join(' · ')}</p>
-  `);
+      .join(' · ')}</p>`
+    ),
+    'more'
+  );
 }
 
 function slotHint(slots, living) {
@@ -1816,7 +1867,7 @@ function showExpeditionReports(reports) {
       ${blocks}
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="close-sheet">Continuar</button>
     </div>
-  `);
+  `, 'report');
   const lost = reports.filter((r) => r.dead);
   if (lost.length) {
     toast(
@@ -2158,6 +2209,13 @@ function bindChrome() {
     openMoreSheet();
   });
   $('zz-sheet-close')?.addEventListener('click', closeSheet);
+  window.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    const sheet = $('zz-sheet');
+    if (!sheet || sheet.hidden) return;
+    closeSheet();
+    paint();
+  });
   $('zz-mission')?.addEventListener('click', () => {
     const obj = currentObjective(state, content);
     if (!obj) return;
@@ -2182,7 +2240,7 @@ function bindChrome() {
         <p>${escapeHtml(obj.text)}</p>
         <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" id="zz-objective-dismiss">Ocultar objetivo</button>
       </div>
-    `);
+    `, 'objective');
     $('zz-objective-dismiss')?.addEventListener('click', () => {
       state.flags.objectivesOff = true;
       closeSheet();
@@ -2225,7 +2283,7 @@ function bindChrome() {
         <p class="zz-muted" style="font-size:0.82rem">Solo lo que ya podéis usar.</p>
         <ul class="zz-help-list">${lines.join('')}</ul>
       </div>
-    `);
+    `, 'help');
   });
   $('zz-map')?.addEventListener('click', (ev) => {
     if (ev.target === $('zz-map') || ev.target.classList?.contains('zz-map-bg')) {

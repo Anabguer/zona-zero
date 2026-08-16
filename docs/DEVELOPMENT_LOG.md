@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…143** hechas · **ZZ-144 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1971,30 +1971,64 @@ IMPLEMENTATION_PLAN 2.8 · O · **HUMAN_GATE YES** · deps ZZ-143
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## OBJETIVO
+Pantallas victoria/derrota + gate. Sin electricidad en victoria. Culminación no checkbox pop.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloque O validado. Criterios a conservar: eras ≠ calendario · victoria multi-condición · crisis variable (contenido no cuota) · needEnergy false · endless no borra victoria · derrota+stats cuentan historia. Deuda arte NO BLOQUEANTE. Continuar desde ZZ-150.
+
+## HECHO
+- `js/victory.js` cableado en `sim.js`.
+- Pantallas con stats (días, max pop, territorio, semilla, causa/crisis).
+- Smoke `smoke-zz140-144`.
+- Review 10 tomas + contact sheet.
+- Contrato **2.8** intacto.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-144/`.
+
+## COMMIT
+`f125e21`
+
+## PARAR
+No — continuar ZZ-150 (HUMAN_GATE).
+
+---
+
+# FASE ZZ-150 — Sheets móvil/desktop consistentes (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · P · **HUMAN_GATE YES** · deps ZZ-023 / ZZ-144 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Pantallas victoria/derrota + gate. Sin electricidad en victoria. Culminación no checkbox pop.
+Sheets móvil/desktop consistentes. Mundo primero; sin pestañas app.
 
 ## HECHO
-- `js/victory.js` cableado en `sim.js`.
-- Pantallas con stats (días, max pop, territorio, semilla, causa/crisis).
-- Smoke `smoke-zz140-144`.
-- Review shots + contact sheet.
+- Shell común: flex + body scroll + close fijo (móvil landscape card lateral · desktop panel).
+- `sheetPanel` / `sheetSection` · `data-sheet-kind` · Escape cierra · aria dialog.
+- Sin pestañas Mapa|Base|Gente|Más.
+- Smoke `smoke-zz150-sheets` · review shots.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-150** hasta APROBADA ZZ-144.
+- Sin deploy · **no ZZ-151** hasta APROBADA ZZ-150.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
-## COMMIT
-`f125e21`
-
 ## PARAR
-Sí — HUMAN_GATE ZZ-144. Sin deploy. No ZZ-150.
+Sí — HUMAN_GATE ZZ-150. Sin deploy. No ZZ-151.
 
 ---
 

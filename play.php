@@ -113,10 +113,10 @@ $base = zz_public_base();
     </aside>
 
     <!-- Sheet contextual (edificio / zona / construir) -->
-    <aside id="zz-sheet" class="zz-sheet" hidden>
+    <aside id="zz-sheet" class="zz-sheet" hidden aria-label="Ficha">
       <div class="zz-sheet__handle" aria-hidden="true"></div>
       <button type="button" class="zz-sheet__close" id="zz-sheet-close" aria-label="Cerrar">×</button>
-      <div id="zz-sheet-body" class="zz-sheet__body"></div>
+      <div id="zz-sheet-body" class="zz-sheet__body" tabindex="-1"></div>
     </aside>
 
     <div id="zz-pulse-layer" class="zz-pulse-layer" aria-hidden="true"></div>

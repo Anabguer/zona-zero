@@ -417,32 +417,36 @@ body.zz-from-intro #zz-boot {
   font-size: 1rem;
 }
 
-/* Sheet: bottom sheet móvil */
+/* Sheet: shell común (móvil bottom / landscape+desktop lateral) — ZZ-150 */
 .zz-world--overlay .zz-sheet {
   position: absolute;
   left: 0; right: 0;
   bottom: 0;
   z-index: 30;
+  display: flex;
+  flex-direction: column;
   max-height: min(58dvh, 520px);
   margin: 0;
   border-radius: 16px 16px 0 0;
-  padding: 0.35rem 0.85rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  padding: 0;
   background: rgba(14,12,10,0.97);
   border: 1px solid rgba(255,255,255,0.08);
   border-bottom: 0;
   box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
-  overflow: auto;
+  overflow: hidden;
 }
 .zz-sheet[hidden] { display: none !important; }
 .zz-sheet__handle {
+  flex: 0 0 auto;
   width: 40px; height: 4px;
   border-radius: 99px;
   background: rgba(255,255,255,0.18);
-  margin: 0.25rem auto 0.5rem;
+  margin: 0.35rem auto 0.15rem;
 }
 .zz-sheet__close {
   position: absolute;
-  top: 0.45rem; right: 0.55rem;
+  top: 0.4rem; right: 0.45rem;
+  z-index: 2;
   width: 36px; height: 36px;
   border: 0;
   border-radius: 8px;
@@ -450,6 +454,48 @@ body.zz-from-intro #zz-boot {
   color: var(--zz-text);
   font-size: 1.25rem;
   cursor: pointer;
+}
+.zz-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.45rem 0.85rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  overscroll-behavior: contain;
+}
+.zz-sheet__body > h2:first-child,
+.zz-sheet__body .zz-ctx__head h2,
+.zz-sheet-panel__title {
+  padding-right: 2rem;
+}
+.zz-sheet-panel {
+  display: grid;
+  gap: 0.55rem;
+}
+.zz-sheet-panel__title {
+  margin: 0;
+  font-family: var(--zz-display);
+  font-size: 1.15rem;
+}
+.zz-sheet-panel__lead {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--zz-muted);
+}
+.zz-sheet-section {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.zz-sheet-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.zz-sheet-section__h {
+  margin: 0;
+  font-family: var(--zz-display);
+  font-size: 0.95rem;
 }
 
 /* Ficha edificio / zona compacta */
@@ -806,12 +852,19 @@ body.zz-from-intro #zz-boot {
     border-radius: 0;
     border: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 1.05rem 1.2rem;
+    padding: 0;
     box-shadow: -18px 0 40px rgba(0, 0, 0, 0.4);
     background: rgba(16, 13, 10, 0.98);
   }
   body.zz-desk-layout .zz-sheet__handle {
     display: none;
+  }
+  body.zz-desk-layout .zz-sheet__body {
+    padding: 1rem 1.05rem 1.2rem;
+  }
+  body.zz-desk-layout .zz-sheet__close {
+    top: 0.65rem;
+    right: 0.65rem;
   }
   body.zz-desk-layout.zz-sheet-open .zz-desk-panel {
     visibility: hidden;
@@ -1166,22 +1219,31 @@ body.zz-need-landscape #zz-toast {
     height: 12px;
   }
 
-  /* Compact side card — keep world visible (not a tall bottom sheet). */
+  /* Side card landscape — mismo contrato que desktop (ficha lateral, mundo visible) */
   .zz-world--overlay .zz-sheet {
     left: auto;
     right: max(0.35rem, env(safe-area-inset-right, 0px));
     top: calc(3.6rem + env(safe-area-inset-top, 0px));
     bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
-    width: min(42vw, 280px);
+    width: min(44vw, 320px);
     max-height: none;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.55rem 0.65rem 0.7rem;
+    padding: 0;
     box-shadow: -10px 0 28px rgba(0, 0, 0, 0.4);
   }
   .zz-sheet__handle {
     display: none;
+  }
+  .zz-sheet__body {
+    padding: 0.55rem 0.7rem 0.75rem;
+  }
+  .zz-sheet__close {
+    top: 0.35rem;
+    right: 0.35rem;
+    width: 34px;
+    height: 34px;
   }
   .zz-ctx__head {
     grid-template-columns: 48px 1fr;
@@ -1191,7 +1253,8 @@ body.zz-need-landscape #zz-toast {
     width: 48px;
     height: 48px;
   }
-  .zz-ctx__head h2 {
+  .zz-ctx__head h2,
+  .zz-sheet-panel__title {
     font-size: 1rem;
   }
   .zz-ctx__head p {
