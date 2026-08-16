@@ -20,8 +20,8 @@ $v = zz_asset_v();
   <meta name="apple-mobile-web-app-title" content="Zona Zero" />
   <title>Zona Zero</title>
   <link rel="manifest" href="<?= htmlspecialchars($base) ?>manifest.webmanifest?v=<?= rawurlencode($v) ?>" />
-  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" type="image/png" />
-  <link rel="apple-touch-icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" />
+  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="<?= htmlspecialchars($base) ?>assets/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />

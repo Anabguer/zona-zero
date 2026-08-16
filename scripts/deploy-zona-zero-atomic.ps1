@@ -38,8 +38,9 @@ $htaccess = Join-Path $Root '.htaccess'
 $metaJson = Join-Path $Root 'meta.json'
 $manifest = Join-Path $Root 'manifest.webmanifest'
 $swJs = Join-Path $Root 'sw.js'
-$assetsPwa = (Join-Path $Root 'assets\pwa').Replace('\', '/')
 $assetsLogo = Join-Path $Root 'assets\logo.svg'
+$icon192 = Join-Path $Root 'assets\icon-192.png'
+$icon512 = Join-Path $Root 'assets\icon-512.png'
 
 $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine('option batch abort')
@@ -58,7 +59,8 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("put `"$manifest`" /juegos/zona-zero/manifest.webmanifest")
 [void]$sb.AppendLine("put `"$swJs`" /juegos/zona-zero/sw.js")
 [void]$sb.AppendLine("put `"$assetsLogo`" /juegos/zona-zero/assets/logo.svg")
-[void]$sb.AppendLine("synchronize remote -mirror `"$assetsPwa`" /juegos/zona-zero/assets/pwa")
+[void]$sb.AppendLine("put `"$icon192`" /juegos/zona-zero/assets/icon-192.png")
+[void]$sb.AppendLine("put `"$icon512`" /juegos/zona-zero/assets/icon-512.png")
 [void]$sb.AppendLine('exit')
 
 [System.IO.File]::WriteAllText($scriptPath, $sb.ToString())
