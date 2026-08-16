@@ -2495,6 +2495,9 @@ Confirmar que el deploy a producción solo ocurre bajo orden explícita; gate de
 - [ ] Confirmar: **no deploy** hasta orden explícita post-APROBADA
 - [ ] WATCH ZZ-178 registrados (no recalibrar a ciegas)
 
+## COMMIT
+`ed9ce86` (Bloque S ZZ-180…183 + cierre ZZ-178)
+
 ## PARAR
 **Sí** — HUMAN_GATE ZZ-183. Sin deploy. No ZZ-184 hasta APROBADA + SÍ + orden de deploy si aplica.
 
