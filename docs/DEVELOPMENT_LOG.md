@@ -2027,6 +2027,9 @@ Sheets móvil/desktop consistentes. Mundo primero; sin pestañas app.
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
+## COMMIT
+`570f264`
+
 ## PARAR
 Sí — HUMAN_GATE ZZ-150. Sin deploy. No ZZ-151.
 
