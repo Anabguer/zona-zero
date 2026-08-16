@@ -1917,6 +1917,21 @@ Conservar dirección: edificios/retratos WebP actuales como base.
 - **Close-up terreno:** LOD por zoom (≥~2.55 densifica carretera/grietas/restos cerca del camp) — **sin** pintar `city.webp` como fondo GIS.
 - Sin assets solar/generator obligatorios. Deuda artística global sigue **NO BLOQUEANTE**; ART PASS solo en fase expresa del PLAN.
 
+### Criterios a conservar (ZZ-161 · Neni+ChatGPT)
+
+- **El mundo cuenta su estado:** deteriorado / crítico / destruido / mejora visual relevante deben detectarse mirando la colonia; la ficha confirma, no es la única pista.
+- Diferencias visuales perceptibles entre estados (critical y destroyed inequívocos). No “mismo sprite + numerito”.
+- LOD: lejos = lectura limpia; normal = edificios/estados; cerca = detalle sin lluvia de iconos.
+- Insulated reconocible; ART PASS futuro prioriza integración física frente a “pegatina UI”.
+- Aprobar ZZ-161 = lenguaje funcional/legibilidad, **no** arte definitivo (sprites, sombras, grietas, escombros, overlays, carretera, suelo, identidades).
+- Mantener fuera: city.webp, mapas aéreos, overlays GIS, polígonos técnicos permanentes.
+
+### ZZ-162…164 lean
+
+- Landmarks: set reconocible (WebP donde exista + siluetas tipadas SVG).
+- Props colonia: restos/valla/detalles SVG densos según crecimiento.
+- SFX §34 (beeps) + mute; sin dependencia de assets audio raster.
+
 Necesarios a medio plazo:
 - edificios por tipo/nivel  
 - landmarks  
@@ -1936,6 +1951,10 @@ No producir en esta fase documental.
 # 34. SONIDO
 
 Mínimo: click, construir, alerta, expedición, retorno, ataque, logro, tech, victoria. Mute ON/OFF.
+
+### ZZ-164 (implementado lean)
+
+Tonos Web Audio (`js/sound.js`) — sin ogg/mp3 obligatorios. Mute `#zz-sound` + `localStorage['zz-sound']`. Set §34 cableado a UI/sim.
 
 ---
 
@@ -2627,6 +2646,10 @@ Ver resumen ejecutivo al final de `docs/IMPLEMENTATION_PLAN.md` y §38.
 
 ## G.8 Tipos de landmark / localización
 
+Semilla canónica (`content/locations.json` · 17 + camp):  
+supermarket · apartments · pharmacy · station · hospital · park · warehouse · gas_station · hardware · workshop · police · school · offices · mall · industrial · water_plant · substation.
+
+**ZZ-162 lean:** WebP para supermarket/hospital/station (+ alias mall/market); resto siluetas tipadas SVG. ART PASS futuro puede sustituir WebP sin cambiar tipos/estados.
 
 ## G.9 Balance clave (números actuales)
 

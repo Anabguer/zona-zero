@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160** hecha · **ZZ-161 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…161 APROBADAS**. · **ZZ-162…164** hechas · **ZZ-165 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2127,28 +2127,101 @@ IMPLEMENTATION_PLAN 2.8 · Q · **HUMAN_GATE YES** · deps ZZ-160
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Validado: insulated overlay/glifo · daño en mundo · filtros/grietas/escombros/HP · ficha confirma · LOD close-up · sin city.webp · sin solar/generator · 2.8 intacto. Criterios: mundo cuenta estado; critical/destroyed inequívocos; LOD sin lluvia de iconos; ART PASS futuro ≠ aprobación arte definitivo. Deuda arte NO BLOQUEANTE. Continuar ZZ-162.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-161/`.
+
+## COMMIT
+`ccd99e1`
+
+## PARAR
+No — continuar ZZ-162 → 165 (HUMAN_GATE).
+
+---
+
+# FASE ZZ-162 — Landmarks set
+
+IMPLEMENTATION_PLAN 2.8 · Q · HUMAN_GATE NO · deps ZZ-161 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-165)*
+
+## HECHO
+- Siluetas tipadas SVG por tipo (apartments, pharmacy, police, school, gas_station, water_plant…).
+- WebP solo supermarket/hospital/station (+ alias mall); pharmacy/gas ya no reusan WebP ajenos.
+- G.8 documentado. Sin GIS.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-163 — Props colonia
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Props nuevos: sandbag, tarp, scrap, sign, fence_post · densidad según nº edificios en patio.
+- Lean SVG; sin ART PASS.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-164 — SFX mínimo + mute
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Set §34 en `sound.js` (beeps) · mute existente · cableado alert/return/achievement/tech/victory/discover/era.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-165 — Review visual por era + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · Q · **HUMAN_GATE YES** · deps ZZ-164
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Terreno ciudad close-up + gate. Arte lean. Sin city.webp GIS. Sin solar/generator.
+Review visual por era + gate. Arte lean bloque Q. Sin city.webp. Sin solar/generator.
 
 ## HECHO
-- LOD `drawPlayableTerrain(..., zoom)`: close-up ≥2.55 densifica carretera/grietas/restos cerca del camp.
-- Anti-GIS: terreno pintado, no fotografía `city.webp`.
-- Smoke `smoke-zz160-161` · review `review-shots-zz161`.
+- Contact sheets era 0–3 · landmarks · props · mute · daño mundo.
+- Smoke `smoke-zz162-165` · review `review-shots-zz165`.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## COMMIT
-`ccd99e1`
+*(pendiente)*
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-161. Sin deploy. No ZZ-162.
+Sí — HUMAN_GATE ZZ-165. Sin deploy. No ZZ-166.
 
 ---
 

@@ -662,6 +662,64 @@ function drawProp(layer, kind, x, y, s = 1) {
         transform: `rotate(-12 ${x} ${y})`,
       })
     );
+  } else if (kind === 'sandbag') {
+    layer.appendChild(
+      svgEl('ellipse', {
+        cx: x,
+        cy: y,
+        rx: 0.7 * s,
+        ry: 0.32 * s,
+        class: 'zz-prop-sandbag',
+      })
+    );
+  } else if (kind === 'tarp') {
+    layer.appendChild(
+      svgEl('path', {
+        d: `M${x - 0.9 * s} ${y + 0.15 * s} L${x - 0.5 * s} ${y - 0.45 * s} L${x + 0.85 * s} ${y - 0.25 * s} L${x + 0.55 * s} ${y + 0.35 * s} Z`,
+        class: 'zz-prop-tarp',
+      })
+    );
+  } else if (kind === 'scrap') {
+    layer.appendChild(
+      svgEl('path', {
+        d: `M${x - 0.7 * s} ${y + 0.2 * s} L${x - 0.2 * s} ${y - 0.35 * s} L${x + 0.55 * s} ${y - 0.1 * s} L${x + 0.4 * s} ${y + 0.35 * s} Z`,
+        class: 'zz-prop-scrap',
+      })
+    );
+    layer.appendChild(
+      svgEl('rect', {
+        x: x - 0.15 * s,
+        y: y - 0.05 * s,
+        width: 0.55 * s,
+        height: 0.18 * s,
+        rx: 0.03,
+        class: 'zz-prop-scrap-bar',
+        transform: `rotate(${12 * s} ${x} ${y})`,
+      })
+    );
+  } else if (kind === 'sign') {
+    layer.appendChild(svgEl('rect', { x: x - 0.06 * s, y: y - 0.35 * s, width: 0.12 * s, height: 0.7 * s, class: 'zz-prop-sign-post' }));
+    layer.appendChild(
+      svgEl('rect', {
+        x: x - 0.45 * s,
+        y: y - 0.7 * s,
+        width: 0.9 * s,
+        height: 0.4 * s,
+        rx: 0.04,
+        class: 'zz-prop-sign',
+      })
+    );
+  } else if (kind === 'fence_post') {
+    layer.appendChild(svgEl('rect', { x: x - 0.08 * s, y: y - 0.55 * s, width: 0.16 * s, height: 0.9 * s, class: 'zz-prop-fence-post' }));
+    layer.appendChild(
+      svgEl('line', {
+        x1: x,
+        y1: y - 0.2 * s,
+        x2: x + 0.85 * s,
+        y2: y - 0.05 * s,
+        class: 'zz-prop-fence-wire',
+      })
+    );
   }
 }
 
@@ -1184,6 +1242,18 @@ function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX,
     layer.appendChild(svgEl('polygon', { points: ptsStr(scrub), class: 'zz-settle-scrub' }));
   }
 
+  // ZZ-163: props de colonia — densidad según edificios (lean SVG, sin lluvia de iconos)
+  const propN = Math.min(14, 4 + Math.floor(buildings.length * 0.9));
+  const propKinds = ['crate', 'barrel', 'sandbag', 'tarp', 'scrap', 'sign', 'fence_post', 'lamp'];
+  for (let i = 0; i < propN; i++) {
+    const a = (i / propN) * Math.PI * 2 + rng.float(-0.2, 0.2);
+    const dist = scale * rng.float(1.1, 2.6);
+    const px = Math.cos(a) * dist * 1.15;
+    const py = Math.sin(a) * dist * 0.85 + rng.float(-0.4, 0.4);
+    const kind = propKinds[i % propKinds.length];
+    drawProp(layer, kind, px, py, rng.float(0.75, 1.15));
+  }
+
   if (buildings.length >= 2) {
     const pts = buildings.map((b) => [(b.x - bw / 2 + 0.5) * scale, (b.y - bh / 2 + 0.5) * scale]);
     for (let i = 0; i < pts.length - 1; i++) {
@@ -1578,20 +1648,127 @@ function drawIrregularFog(g, z, rng, early = false) {
   g.appendChild(fogG);
 }
 
-function drawLandmarkSilhouette(g, z, kind) {
-  // Siluetas SVG si no hay asset (bloques, parque, etc.)
+/** ZZ-162: siluetas por tipo — reconocibles sin ART PASS / sin GIS. */
+function drawLandmarkSilhouette(g, z, type) {
   const s = Math.min(6.5, z.r * 0.85);
   const x = z.x - s / 2;
   const y = z.y - s / 2;
-  if (kind === 'park') {
-    g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: s * 0.45, ry: s * 0.35, class: 'zz-landmark-park' }));
-  } else if (kind === 'industrial') {
-    g.appendChild(svgEl('rect', { x, y: y + s * 0.2, width: s * 0.55, height: s * 0.55, class: 'zz-landmark-ind', rx: 0.2 }));
-    g.appendChild(svgEl('rect', { x: x + s * 0.5, y, width: s * 0.35, height: s * 0.75, class: 'zz-landmark-ind', rx: 0.15 }));
-  } else {
-    g.appendChild(svgEl('rect', { x: x + s * 0.1, y: y + s * 0.25, width: s * 0.8, height: s * 0.55, class: 'zz-landmark-bldg', rx: 0.2 }));
-    g.appendChild(svgEl('rect', { x: x + s * 0.35, y: y + s * 0.05, width: s * 0.3, height: s * 0.25, class: 'zz-landmark-bldg' }));
+  const t = String(type || 'blocks');
+  const shadow = () =>
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x,
+        cy: z.y + s * 0.32,
+        rx: s * 0.36,
+        ry: s * 0.1,
+        class: 'zz-settle-contact-shadow',
+        opacity: '0.28',
+      })
+    );
+
+  if (t === 'park') {
+    shadow();
+    g.appendChild(svgEl('ellipse', { cx: z.x, cy: z.y, rx: s * 0.48, ry: s * 0.36, class: 'zz-landmark-park' }));
+    g.appendChild(svgEl('circle', { cx: z.x - s * 0.18, cy: z.y - s * 0.05, r: s * 0.14, class: 'zz-landmark-park-tree' }));
+    g.appendChild(svgEl('circle', { cx: z.x + s * 0.2, cy: z.y + s * 0.02, r: s * 0.12, class: 'zz-landmark-park-tree' }));
+    return;
   }
+  if (t === 'industrial' || t === 'warehouse') {
+    shadow();
+    g.appendChild(svgEl('rect', { x, y: y + s * 0.22, width: s * 0.55, height: s * 0.5, class: 'zz-landmark-ind', rx: 0.15 }));
+    g.appendChild(svgEl('rect', { x: x + s * 0.48, y: y + s * 0.05, width: s * 0.38, height: s * 0.68, class: 'zz-landmark-ind', rx: 0.12 }));
+    g.appendChild(svgEl('rect', { x: x + s * 0.58, y: y - s * 0.08, width: s * 0.12, height: s * 0.22, class: 'zz-landmark-chimney' }));
+    return;
+  }
+  if (t === 'water_plant') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.08, y: y + s * 0.28, width: s * 0.55, height: s * 0.4, class: 'zz-landmark-util', rx: 0.15 }));
+    g.appendChild(svgEl('circle', { cx: z.x + s * 0.22, cy: z.y - s * 0.05, r: s * 0.22, class: 'zz-landmark-tank' }));
+    g.appendChild(svgEl('circle', { cx: z.x + s * 0.22, cy: z.y - s * 0.05, r: s * 0.12, class: 'zz-landmark-tank-rim' }));
+    return;
+  }
+  if (t === 'substation') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.15, y: y + s * 0.3, width: s * 0.7, height: s * 0.35, class: 'zz-landmark-util', rx: 0.1 }));
+    g.appendChild(svgEl('line', { x1: z.x - s * 0.2, y1: y + s * 0.15, x2: z.x + s * 0.25, y2: y + s * 0.15, class: 'zz-landmark-wire' }));
+    g.appendChild(svgEl('rect', { x: z.x - s * 0.08, y: y + s * 0.05, width: s * 0.1, height: s * 0.28, class: 'zz-landmark-pole' }));
+    return;
+  }
+  if (t === 'apartments') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.12, y: y + s * 0.05, width: s * 0.76, height: s * 0.72, class: 'zz-landmark-apt', rx: 0.12 }));
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        g.appendChild(
+          svgEl('rect', {
+            x: x + s * (0.22 + col * 0.22),
+            y: y + s * (0.18 + row * 0.18),
+            width: s * 0.12,
+            height: s * 0.1,
+            class: 'zz-landmark-window',
+          })
+        );
+      }
+    }
+    return;
+  }
+  if (t === 'school') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.05, y: y + s * 0.28, width: s * 0.9, height: s * 0.42, class: 'zz-landmark-civic', rx: 0.12 }));
+    g.appendChild(svgEl('rect', { x: z.x - s * 0.04, y: y + s * 0.02, width: s * 0.08, height: s * 0.3, class: 'zz-landmark-pole' }));
+    g.appendChild(svgEl('path', { d: `M${z.x} ${y + s * 0.04} L${z.x + s * 0.22} ${y + s * 0.12} L${z.x} ${y + s * 0.2} Z`, class: 'zz-landmark-flag' }));
+    return;
+  }
+  if (t === 'police') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.1, y: y + s * 0.22, width: s * 0.8, height: s * 0.5, class: 'zz-landmark-civic', rx: 0.12 }));
+    g.appendChild(svgEl('rect', { x: z.x - s * 0.12, y: y + s * 0.08, width: s * 0.24, height: s * 0.18, class: 'zz-landmark-badge' }));
+    g.appendChild(svgEl('circle', { cx: z.x + s * 0.28, cy: y + s * 0.12, r: s * 0.06, class: 'zz-landmark-antenna' }));
+    return;
+  }
+  if (t === 'pharmacy') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.15, y: y + s * 0.2, width: s * 0.7, height: s * 0.55, class: 'zz-landmark-shop', rx: 0.12 }));
+    g.appendChild(svgEl('path', { d: `M${z.x - s * 0.08} ${z.y} h${s * 0.16} M${z.x} ${z.y - s * 0.08} v${s * 0.16}`, class: 'zz-landmark-cross', fill: 'none' }));
+    return;
+  }
+  if (t === 'hardware' || t === 'workshop') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.08, y: y + s * 0.32, width: s * 0.84, height: s * 0.4, class: 'zz-landmark-shed', rx: 0.1 }));
+    g.appendChild(svgEl('path', { d: `M${x + s * 0.05} ${y + s * 0.34} L${z.x} ${y + s * 0.12} L${x + s * 0.95} ${y + s * 0.34} Z`, class: 'zz-landmark-shed-roof' }));
+    if (t === 'workshop') {
+      g.appendChild(svgEl('rect', { x: x + s * 0.7, y: y + s * 0.1, width: s * 0.12, height: s * 0.25, class: 'zz-landmark-chimney' }));
+    }
+    return;
+  }
+  if (t === 'offices') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.18, y: y + s * 0.08, width: s * 0.64, height: s * 0.7, class: 'zz-landmark-office', rx: 0.08 }));
+    for (let row = 0; row < 4; row++) {
+      g.appendChild(
+        svgEl('rect', {
+          x: x + s * 0.28,
+          y: y + s * (0.18 + row * 0.14),
+          width: s * 0.44,
+          height: s * 0.06,
+          class: 'zz-landmark-window-row',
+        })
+      );
+    }
+    return;
+  }
+  if (t === 'gas_station') {
+    shadow();
+    g.appendChild(svgEl('rect', { x: x + s * 0.1, y: y + s * 0.35, width: s * 0.8, height: s * 0.28, class: 'zz-landmark-shed', rx: 0.08 }));
+    g.appendChild(svgEl('rect', { x: x + s * 0.2, y: y + s * 0.18, width: s * 0.6, height: s * 0.2, class: 'zz-landmark-canopy' }));
+    g.appendChild(svgEl('rect', { x: z.x - s * 0.22, y: y + s * 0.42, width: s * 0.12, height: s * 0.18, class: 'zz-landmark-pump' }));
+    g.appendChild(svgEl('rect', { x: z.x + s * 0.1, y: y + s * 0.42, width: s * 0.12, height: s * 0.18, class: 'zz-landmark-pump' }));
+    return;
+  }
+  // Bloques genéricos / fallback
+  shadow();
+  g.appendChild(svgEl('rect', { x: x + s * 0.1, y: y + s * 0.25, width: s * 0.8, height: s * 0.55, class: 'zz-landmark-bldg', rx: 0.2 }));
+  g.appendChild(svgEl('rect', { x: x + s * 0.35, y: y + s * 0.05, width: s * 0.3, height: s * 0.25, class: 'zz-landmark-bldg' }));
 }
 
 function drawInfectedMarkers(g, z, rng) {
@@ -1750,9 +1927,7 @@ function drawZone(layer, z, state, tier, handlers) {
         })
       );
     } else {
-      const kind =
-        z.type === 'park' ? 'park' : z.type === 'industrial' || z.type === 'warehouse' ? 'industrial' : 'blocks';
-      drawLandmarkSilhouette(g, z, kind);
+      drawLandmarkSilhouette(g, z, z.type);
       if (selected) {
         g.appendChild(
           svgEl('ellipse', {

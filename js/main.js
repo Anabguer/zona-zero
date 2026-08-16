@@ -1682,10 +1682,15 @@ function paint() {
       banner.textContent = critical.text;
       banner.dataset.alertId = critical.id || '';
       banner.classList.toggle('zz-recover-banner--critical', critical.layer === 'critical');
+      if (paint._lastCriticalId !== critical.id) {
+        paint._lastCriticalId = critical.id;
+        sfx.alert?.();
+      }
     } else {
       banner.hidden = true;
       delete banner.dataset.alertId;
       banner.classList.remove('zz-recover-banner--critical');
+      paint._lastCriticalId = null;
     }
   }
   // ZZ-113: badge no invasivo (una vez por paint cycle)
@@ -1694,6 +1699,7 @@ function paint() {
     if (badge) {
       paint._badgeLock = true;
       toast(`✦ ${badge.name}`, 'good');
+      sfx.achievement?.();
       setTimeout(() => {
         paint._badgeLock = false;
       }, 50);
@@ -1746,7 +1752,9 @@ function paint() {
   }
   const victory = $('zz-victory');
   if (victory) {
-    victory.hidden = !(state.flags.victory && !state.flags.endless);
+    const showV = !!(state.flags.victory && !state.flags.endless);
+    if (showV && victory.hidden) sfx.victory?.();
+    victory.hidden = !showV;
     if (state.flags.victory && !state.flags.endless) {
       const st = endScreenStats(state);
       const crisisEl = $('zz-victory-crisis');
@@ -2104,15 +2112,20 @@ function handleAdvanceDay() {
     state.uiMode = null;
     state.buildMode = null;
   }
+  const nTech = (state.research?.unlocked || []).length;
+  const eraBefore = state.era || 0;
   const r = advanceDay(state, content);
   if (!r.ok) {
     toast(r.error || 'No', 'warn');
     return;
   }
+  if ((state.research?.unlocked || []).length > nTech) sfx.tech?.();
+  if ((state.era || 0) > eraBefore) sfx.era?.();
   markGuideDayAdvanced(state);
   const revealed = maybeRevealEarlyLandmarks(state);
   if (revealed) {
     toast('Un punto cercano aparece en el mapa. Tocá para explorar.', 'info');
+    sfx.discover?.();
   }
   checkOnboardingProgress(state);
   // Durante guía temprana, no apilar eventos encima del brief
@@ -2139,6 +2152,7 @@ function handleAdvanceDay() {
   } else if (r.expeditionReports?.length) {
     showExpeditionReports(r.expeditionReports);
   }
+  if (r.expeditionReports?.length) sfx.return?.();
   // Tip D3: landmark revelado
   const market = state.zones.find((z) => z.id === 'market');
   if (market?.state === 'discovered' && !state.flags?.exploreTipShown && (state.day || 1) >= 3) {

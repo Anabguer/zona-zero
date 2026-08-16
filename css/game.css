@@ -1090,8 +1090,37 @@ body.zz-body {
 .zz-prop-shadow { fill: rgba(0, 0, 0, 0.28); pointer-events: none; }
 .zz-settle-person-body { fill: #8a6a48; }
 .zz-landmark-park { fill: #2a4030; opacity: 0.7; }
+.zz-landmark-park-tree { fill: #3a5a38; opacity: 0.75; }
 .zz-landmark-ind { fill: #3a3a42; stroke: #6a6a72; stroke-width: 0.15; }
 .zz-landmark-bldg { fill: #3a3834; stroke: #6a6050; stroke-width: 0.15; }
+.zz-landmark-chimney { fill: #4a4038; stroke: #7a6a58; stroke-width: 0.08; }
+.zz-landmark-util { fill: #3a4850; stroke: #6a8088; stroke-width: 0.12; }
+.zz-landmark-tank { fill: #4a6878; stroke: #8ab0c0; stroke-width: 0.12; opacity: 0.9; }
+.zz-landmark-tank-rim { fill: none; stroke: #c0d8e0; stroke-width: 0.1; opacity: 0.7; }
+.zz-landmark-wire { stroke: #8a8070; stroke-width: 0.12; opacity: 0.75; }
+.zz-landmark-pole { fill: #4a4034; }
+.zz-landmark-apt { fill: #3e3a38; stroke: #7a7068; stroke-width: 0.12; }
+.zz-landmark-window { fill: #d4a060; opacity: 0.55; }
+.zz-landmark-window-row { fill: #c8b090; opacity: 0.4; }
+.zz-landmark-civic { fill: #3a4048; stroke: #708090; stroke-width: 0.12; }
+.zz-landmark-flag { fill: #a84840; opacity: 0.85; }
+.zz-landmark-badge { fill: #3a5080; stroke: #90b0e0; stroke-width: 0.08; }
+.zz-landmark-antenna { fill: #e0c060; opacity: 0.8; }
+.zz-landmark-shop { fill: #403830; stroke: #8a7060; stroke-width: 0.12; }
+.zz-landmark-cross { stroke: #70c080; stroke-width: 0.22; stroke-linecap: round; }
+.zz-landmark-shed { fill: #4a4034; stroke: #8a7860; stroke-width: 0.1; }
+.zz-landmark-shed-roof { fill: #5a4838; stroke: #a09070; stroke-width: 0.08; }
+.zz-landmark-office { fill: #3a4248; stroke: #788898; stroke-width: 0.1; }
+.zz-landmark-canopy { fill: #5a5040; stroke: #9a8a70; stroke-width: 0.08; opacity: 0.9; }
+.zz-landmark-pump { fill: #4a4840; stroke: #8a8070; stroke-width: 0.06; }
+.zz-prop-sandbag { fill: #6a5a40; stroke: #3a3020; stroke-width: 0.08; opacity: 0.88; }
+.zz-prop-tarp { fill: #3a5048; stroke: #1a2824; stroke-width: 0.08; opacity: 0.75; }
+.zz-prop-scrap { fill: #5a5048; stroke: #2a2420; stroke-width: 0.07; opacity: 0.85; }
+.zz-prop-scrap-bar { fill: #8a6a48; opacity: 0.55; }
+.zz-prop-sign { fill: #5a4838; stroke: #2a2018; stroke-width: 0.07; }
+.zz-prop-sign-post { fill: #3a3228; }
+.zz-prop-fence-post { fill: #4a4034; stroke: #2a241c; stroke-width: 0.05; }
+.zz-prop-fence-wire { stroke: #6a6050; stroke-width: 0.1; opacity: 0.7; }
 .zz-zone-landmark.is-owned { filter: brightness(1.08); }
 .zz-map-life-tree { fill: #3a6a38; opacity: 0.4; }
 .zz-zone.is-explore-target .zz-zone-explore-ring {

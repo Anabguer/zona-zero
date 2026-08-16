@@ -37,11 +37,11 @@ export const ZONE_ART = {
   store: 'zones/supermarket.webp',
   mall: 'zones/supermarket.webp',
   hospital: 'zones/hospital.webp',
-  pharmacy: 'zones/hospital.webp',
-  clinic_zone: 'zones/hospital.webp',
   station: 'zones/station.webp',
-  gas_station: 'zones/station.webp',
 };
+
+/** Tipos con WebP propio (o alias comercial cercano). El resto → silueta ZZ-162. */
+const ZONE_ART_TYPES = new Set(['supermarket', 'market', 'store', 'mall', 'hospital', 'station']);
 
 export const FOG_ART = 'terrain/fog.webp';
 export const TERRAIN_ART = 'terrain/city.webp';
@@ -75,12 +75,11 @@ export function buildingArtUrl(type) {
 
 export function zoneArtUrl(zone) {
   const key = zone?.type || zone?.id || '';
-  if (ZONE_ART[key]) return artUrl(ZONE_ART[key]);
+  if (ZONE_ART_TYPES.has(key) && ZONE_ART[key]) return artUrl(ZONE_ART[key]);
   const name = String(zone?.name || '').toLowerCase();
   if (name.includes('super') || name.includes('mercado') || name.includes('mall')) return artUrl(ZONE_ART.supermarket);
-  if (name.includes('hospital') || name.includes('farmac')) return artUrl(ZONE_ART.hospital);
-  if (name.includes('estación') || name.includes('estacion') || name.includes('andén') || name.includes('sur'))
-    return artUrl(ZONE_ART.station);
+  if (name.includes('hospital') && !name.includes('farmac')) return artUrl(ZONE_ART.hospital);
+  if (name.includes('estación') || name.includes('estacion') || name.includes('andén')) return artUrl(ZONE_ART.station);
   return null;
 }
 
