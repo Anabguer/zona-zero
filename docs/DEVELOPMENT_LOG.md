@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…058** hechas · **ZZ-059 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…064** hechas · **ZZ-065 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1018,25 +1018,130 @@ IMPLEMENTATION_PLAN 2.8 · F · **HUMAN_GATE YES** · deps ZZ-058
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 QA crisis sanitaria completa + gate (GM §12).
 
 ## HECHO
 - Smoke `smoke-zz050-059` OK.
-- Review 10 tomas + contact sheet → `docs/review/` + Drive Review/.
+- Review 10 tomas + contact sheet.
 - Sin calendario fijo; cuarentena pasiva; cadena camas; semáforo/alertas.
-- Deudas arte **NO BLOQUEANTES**. Sin deploy · no ZZ-060.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+QA visual valida bloque sanitario ZZ-050…059. Flujo problema→alerta→capacidad/personal→tratamiento→recuperación OK. Criterio: brotes **no** eventos de calendario aprendibles.
+
+## DEUDA VISUAL (NO BLOQUEANTE)
+post-019B; insulated_house; integración suelo; carretera/props; ART PASS general. **Sin ART PASS** ahora.
 
 ## EVIDENCIAS
-`docs/review/` · Drive `G:\Mi unidad\Juegos\Zona Zero\Review\` · `review-contact-sheet.jpg`
+Archivadas en `docs/review-archive/zz-059/`.
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-059. Sin deploy. No ZZ-060.
+No — continuar ZZ-060 (bloque G).
+
+---
+
+# FASE ZZ-060 — Defensa agregada legible
+
+IMPLEMENTATION_PLAN 2.8 · G · HUMAN_GATE NO · deps ZZ-023
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-065)*
+
+## HECHO
+- `defenseBreakdown` (edificios/patrulla/ammo/territorio/tech); HUD title + panel Más.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-061 — Ataques prep→resolve→informe
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `pendingAttack` aviso→resolve; informe bajas/ammo/daño/composición; brief.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-062 — Infectados tipados afectan combate
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `composeHorde` desde `infected.json`; tipología afecta daño/heridos/ammo; label en informe.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-063 — Munición y armería
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Armería produce ammo; `ammo_craft` +eficiencia; `watch_protocols` en defensa; alerta `need_ammo`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-064 — Recuperación post-ataque Director
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `protectionUntil` + objetivo `recovery`; amenaza baja tras ataque; banner recuperación.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-065 — QA ataque + recuperación (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · G · **HUMAN_GATE YES** · deps ZZ-064
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+QA ataque + recuperación visual.
+
+## HECHO
+- Smoke `smoke-zz060-065` OK.
+- Review 10 tomas + contact sheet → `docs/review/` + Drive.
+- Sin combate manual; informe bajas/daños; deudas arte **NO BLOQUEANTES**.
+- Sin deploy · no ZZ-066.
+
+## EVIDENCIAS
+`docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
+
+## PARAR
+Sí — HUMAN_GATE ZZ-065. Sin deploy. No ZZ-066.
 
 ---
 
@@ -1168,13 +1273,13 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-056 | Staffing sanitario + prod solo por sick/reasignación | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-057 | Protocolo cuarentena pasivo (tech) | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-058 | Feedback semáforo salud + alertas brote | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-059 | QA crisis sanitaria completa + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-060 | Defensa agregada legible | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-061 | Ataques prep→resolve→informe | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-062 | Infectados tipados afectan combate | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-063 | Munición y armería | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-064 | Recuperación post-ataque Director | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-065 | QA ataque + recuperación visual | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-059 | QA crisis sanitaria completa + gate | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-060 | Defensa agregada legible | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-061 | Ataques prep→resolve→informe | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-062 | Infectados tipados afectan combate | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-063 | Munición y armería | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-064 | Recuperación post-ataque Director | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-065 | QA ataque + recuperación visual | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-066 | HP/estados estructurales edificios | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-067 | Daño por hordas/eventos/tormentas + perímetro | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-068 | Acción Reparar (coste/tiempo/workers) + alerta localizar | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

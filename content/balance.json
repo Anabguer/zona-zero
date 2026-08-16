@@ -65,6 +65,8 @@
   "crisisCooldownDays": 4,
   "familyCooldownDays": 2,
   "postDisasterProtectionDays": 4,
+  "attackWarnDays": 1,
+  "defensePerControlledZone": 1.5,
   "tensionStart": 16,
   "softCapThreatEarlyDays": 10,
   "directorMinDay": 1,

@@ -376,6 +376,26 @@ export function currentObjective(state, content) {
       text: `Exposición ${state.coldExposure} — mejora vivienda o acumula madera.`,
     };
   }
+  // ZZ-061/064: hostiles / recuperación (prioridad alta)
+  if (state.pendingAttack) {
+    const p = state.pendingAttack;
+    const d = Math.max(0, (p.arrivesOnDay || state.day) - state.day);
+    return {
+      id: 'pending_attack',
+      title: 'Hostiles en camino',
+      text: `Ataque en ${d} día(s) · int. ~${p.intensity} · munición ${state.resources?.ammo || 0}${
+        p.horde?.label ? ` · ${p.horde.label}` : ''
+      }.`,
+    };
+  }
+  if (state.day < (state.director?.protectionUntil || 0)) {
+    const left = (state.director.protectionUntil || 0) - state.day;
+    return {
+      id: 'recovery',
+      title: 'Recuperación',
+      text: `${left} día(s) de respiro · priorizad comida, agua y defensa. Amenaza ${Math.round(state.director?.threat || 0)}.`,
+    };
+  }
   if (pop > cap) {
     return {
       id: 'housing_overflow',
@@ -403,6 +423,14 @@ export function currentObjective(state, content) {
       id: 'explore',
       title: 'Exploración',
       text: 'Explora los alrededores con tu explorador.',
+    };
+  }
+  // ZZ-063: munición baja con amenaza
+  if ((state.resources?.ammo || 0) < 3 && (state.director?.threat || 0) >= 22) {
+    return {
+      id: 'need_ammo',
+      title: 'Munición baja',
+      text: `Munición ${state.resources?.ammo || 0} · amenaza ${Math.round(state.director.threat)} — armería o loot.`,
     };
   }
   if ((state.population?.labor?.defense || 0) < 1 && (state.director?.threat || 0) >= 18) {

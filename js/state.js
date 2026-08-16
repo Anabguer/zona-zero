@@ -243,6 +243,8 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       coach: { explore: false, labor: false, build: false, dismissed: false },
     },
     pendingChoice: null,
+    pendingAttack: null,
+    lastAttackReport: null,
     log: [
       {
         day: 1,
@@ -293,6 +295,8 @@ export function migrateState(state, content) {
   if (next.lastHeating === undefined) next.lastHeating = null;
   if (!next.outbreak) next.outbreak = { active: false, type: null, phase: null, days: 0, severity: 0 };
   if (next.outbreakCooldownUntil == null) next.outbreakCooldownUntil = 0;
+  if (next.pendingAttack === undefined) next.pendingAttack = null;
+  if (next.lastAttackReport === undefined) next.lastAttackReport = null;
   if (!next.flags) next.flags = {};
   if (!next.flags.narrative) next.flags.narrative = {};
   if (!next.flags.coach) next.flags.coach = { explore: false, labor: false, build: false, dismissed: false };
@@ -536,44 +540,69 @@ export function tickPendingWeather(state) {
   return { applied: p };
 }
 
-export function defenseValue(state, buildingsContent, balance) {
-  let def = 0;
+/** Desglose defensa agregada (ZZ-060). */
+export function defenseBreakdown(state, buildingsContent, balance) {
+  let buildings = 0;
   state.base.buildings.forEach((b) => {
     if (b.hp <= 0) return;
     const d = buildingsContent[b.type];
     if (!d?.defense) return;
     const jobs = d.jobs || 0;
     if (jobs <= 0) {
-      def += d.defense; // pasivo (barricadas, vallas)
+      buildings += d.defense;
     } else {
       const staff = Math.max(0, b.workers || 0);
-      def += d.defense * clamp(staff / jobs, 0, 1.15);
+      buildings += d.defense * clamp(staff / jobs, 0, 1.15);
     }
   });
   const assigned = state.population?.labor?.defense || 0;
-  // Solo el cupo "extra" de patrulla (no doble-contar edificios)
   const bldDefWorkers = (state.base?.buildings || []).reduce((n, b) => {
     const d = buildingsContent[b.type];
     if (b.hp <= 0 || !d || !(d.jobs > 0) || !(d.defense > 0)) return n;
     return n + (b.workers || 0);
   }, 0);
   const patrol = Math.max(0, assigned - bldDefWorkers);
-  def += patrol * (balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5);
-  // Torres/armory staffed ya aportan defense del edificio; bonus ligero por estar asignados
-  def += bldDefWorkers * ((balance.defensePerAssigned || 2.5) * 0.35);
+  const per = balance.defensePerAssigned || balance.compat?.defensePerArmedSurvivor || 2.5;
+  const patrolScore = patrol * per;
+  const staffBonus = bldDefWorkers * (per * 0.35);
   const ammoFactor = balance.ammoDefenseFactor ?? 1.2;
   const ammoCap = balance.ammoDefenseCap ?? 12;
-  def += Math.min(ammoCap, Math.floor((state.resources.ammo || 0) * ammoFactor));
-  // Bonus exploradores en casa
+  let ammoScore = Math.min(ammoCap, Math.floor((state.resources.ammo || 0) * ammoFactor));
+  const unlocked = state.research?.unlocked || [];
+  if (unlocked.includes('ammo_craft')) ammoScore = Math.min(ammoCap + 2, Math.round(ammoScore * 1.15));
+  let explorers = 0;
   livingExplorers(state).forEach((e) => {
-    if (e.status === 'ready') def += (e.skills.fight || 1) * 0.8;
+    if (e.status === 'ready') explorers += (e.skills.fight || 1) * 0.8;
   });
-  if (state.equipment?.weapon === 'basic') def += 3;
-  if (state.equipment?.weapon === 'improved') def += 7;
-  if (state.equipment?.armor === 'light') def += 2;
-  if (state.equipment?.armor === 'heavy') def += 5;
-  const techDef = (state.research?.unlocked || []).includes('def_fortify') ? 8 : 0;
-  return def + techDef;
+  let gear = 0;
+  if (state.equipment?.weapon === 'basic') gear += 3;
+  if (state.equipment?.weapon === 'improved') gear += 7;
+  if (state.equipment?.armor === 'light') gear += 2;
+  if (state.equipment?.armor === 'heavy') gear += 5;
+  let tech = 0;
+  if (unlocked.includes('def_fortify')) tech += 8;
+  if (unlocked.includes('watch_protocols')) tech += 3;
+  if (unlocked.includes('tower_optics')) tech += 2;
+  const controlled = (state.zones || []).filter((z) => z.state === 'controlled').length;
+  const territory = Math.min(12, controlled * (balance.defensePerControlledZone ?? 1.5));
+  const total = buildings + patrolScore + staffBonus + ammoScore + explorers + gear + tech + territory;
+  return {
+    total,
+    buildings: Math.round(buildings * 10) / 10,
+    patrol: Math.round(patrolScore * 10) / 10,
+    staffBonus: Math.round(staffBonus * 10) / 10,
+    ammo: Math.round(ammoScore * 10) / 10,
+    explorers: Math.round(explorers * 10) / 10,
+    gear: Math.round(gear * 10) / 10,
+    tech: Math.round(tech * 10) / 10,
+    territory: Math.round(territory * 10) / 10,
+    controlled,
+    ammoStock: state.resources.ammo || 0,
+  };
+}
+
+export function defenseValue(state, buildingsContent, balance) {
+  return defenseBreakdown(state, buildingsContent, balance).total;
 }
 
 export function pushLog(state, text, kind = 'info') {

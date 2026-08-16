@@ -7,6 +7,7 @@ import {
   housingCapacity,
   climateProtectionOf,
   defenseValue,
+  defenseBreakdown,
   summarizeState,
   migrateState,
 } from './state.js';
@@ -915,6 +916,30 @@ function openMoreSheet() {
       }
       ${(state.research.unlocked || []).includes('quarantine_protocol') ? ' · cuarentena pasiva' : ''}
     </p>
+    <h3 style="font-family:var(--zz-display)">Defensa</h3>
+    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+      ${(() => {
+        const bd = defenseBreakdown(state, content.buildings, content.balance);
+        const bits = [
+          `total ${Math.round(bd.total)}`,
+          `edificios ${bd.buildings}`,
+          `patrulla ${bd.patrol}`,
+          `munición ${bd.ammoStock} (bonus ${bd.ammo})`,
+          `territorio ${bd.territory} (${bd.controlled} zonas)`,
+        ];
+        if (bd.tech) bits.push(`tech ${bd.tech}`);
+        if (state.pendingAttack) {
+          const d = Math.max(0, state.pendingAttack.arrivesOnDay - state.day);
+          bits.push(`hostiles en ${d}d`);
+        }
+        if (state.day < (state.director?.protectionUntil || 0)) {
+          bits.push(`recuperación→D${state.director.protectionUntil}`);
+        }
+        if ((state.research.unlocked || []).includes('ammo_craft')) bits.push('recarga ammo');
+        if ((state.research.unlocked || []).includes('watch_protocols')) bits.push('guardia');
+        return bits.join(' · ');
+      })()}
+    </p>
     <h3 style="font-family:var(--zz-display)">Investigación</h3>
     <div class="zz-tech-list">${techHtml}</div>
     <h3 style="margin-top:0.75rem;font-family:var(--zz-display)">Vehículos</h3>
@@ -1105,14 +1130,15 @@ function paintHud() {
   }
   void beds;
   const threat = Math.round(state.director?.threat || 0);
-  const def = Math.round(defenseValue(state, content.buildings, content.balance));
+  const bd = defenseBreakdown(state, content.buildings, content.balance);
+  const def = Math.round(bd.total);
   if ($('zz-threat')) {
     $('zz-threat').textContent = String(threat);
     $('zz-threat').title = `Amenaza: ${threat}`;
   }
   if ($('zz-defense')) {
     $('zz-defense').textContent = String(def);
-    $('zz-defense').title = `Defensa: ${def}`;
+    $('zz-defense').title = `Defensa ${def}: edificios ${bd.buildings} · patrulla ${bd.patrol} · munición ${bd.ammo} · territorio ${bd.territory} · tech ${bd.tech}`;
   }
   const threatWrap = document.querySelector('.zz-hud__threat');
   if (threatWrap) {
@@ -1318,9 +1344,20 @@ function paint() {
   const banner = $('zz-recover-banner');
   if (banner) {
     const recovering = state.day < (state.director?.protectionUntil || 0);
-    banner.hidden = !recovering;
-    if (recovering) {
-      banner.textContent = `Recuperación · hasta día ${state.director.protectionUntil}`;
+    const pending = state.pendingAttack;
+    if (pending) {
+      const d = Math.max(0, (pending.arrivesOnDay || 0) - state.day);
+      banner.hidden = false;
+      banner.textContent = `Hostiles · ${d}d · int. ~${pending.intensity}${
+        pending.horde?.label ? ` · ${pending.horde.label}` : ''
+      }`;
+    } else {
+      banner.hidden = !recovering;
+      if (recovering) {
+        banner.textContent = `Recuperación · hasta día ${state.director.protectionUntil} · amenaza ${Math.round(
+          state.director?.threat || 0
+        )}`;
+      }
     }
   }
   const wrap = document.querySelector('.zz-world-map-wrap');
@@ -1579,9 +1616,22 @@ function showAttackCard(atk) {
     messy: 'Ataque contenido',
     lose: 'El perímetro cede',
   };
+  const dmg =
+    atk.damaged?.length > 0
+      ? `<p>Daño: ${atk.damaged.map((d) => escapeHtml(d.name)).join(', ')}</p>`
+      : '';
+  const zone =
+    atk.zoneLost != null
+      ? `<p class="zz-event-fx">Zona fronteriza perdida.</p>`
+      : '';
   card.className = `zz-attack-card zz-attack-card--${result}`;
   card.innerHTML = `<strong>${labels[result] || 'Ataque'}</strong>
-    <p>Intensidad ${atk.intensity ?? '—'} · Muertos ${atk.dead ?? 0} · Heridos ${atk.injured ?? 0}</p>
+    <p>Intensidad ${atk.intensity ?? '—'} · Muertos ${atk.dead ?? 0} · Heridos ${atk.injured ?? 0} · Munición −${
+      atk.ammoSpent ?? 0
+    }</p>
+    <p class="zz-muted" style="font-size:0.82rem">${escapeHtml(atk.hordeLabel || '')}</p>
+    ${dmg}
+    ${zone}
     <p class="zz-event-fx">${
       result === 'lose'
         ? 'Periodo de recuperación activo. Priorizad comida y defensa.'
@@ -1593,7 +1643,7 @@ function showAttackCard(atk) {
   clearTimeout(showAttackCard._t);
   showAttackCard._t = setTimeout(() => {
     card.hidden = true;
-  }, 4800);
+  }, 5600);
 }
 
 function showEventCard(ev) {

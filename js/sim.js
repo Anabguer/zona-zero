@@ -33,6 +33,13 @@ import {
 import { runDirector, applyEventEffects } from './director.js';
 import { tickOutbreak, medicalBeds, healthSemaphore } from './outbreaks.js';
 import {
+  resolveBaseAttack,
+  schedulePendingAttack,
+  tickPendingAttack,
+  composeHorde,
+  formatHordeLabel,
+} from './combat.js';
+import {
   adjustBuildingWorkers,
   adjustCategoryLabor,
   autoStaffColony,
@@ -533,6 +540,10 @@ function applyProduction(state, content) {
       if (k === 'water' && b.type === 'well' && (state.weather === 'storm' || state.weather === 'heat')) {
         mult = state.weather === 'heat' ? 0.8 : 0.85;
       }
+      // ZZ-063: ammo_craft mejora producción de munición en armería
+      if (k === 'ammo' && (state.research?.unlocked || []).includes('ammo_craft')) {
+        mult *= 1.2;
+      }
       const amt = Math.max(0, Math.round(v * ratio * stabMod * weatherMod * mult));
       if (amt <= 0) return;
       out[k] = amt;
@@ -772,103 +783,7 @@ function populationTick(state, content) {
   syncLaborFromColony(state, content);
 }
 
-export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
-  const rng = rngOf(state);
-  let inten = Math.max(1, Math.floor(intensity));
-  const underProtection =
-    opts.wasProtected != null
-      ? !!opts.wasProtected
-      : state.day < (state.director.protectionUntil || 0);
-  if (underProtection) inten = Math.max(1, inten - 1);
-
-  const def = defenseValue(state, content.buildings, content.balance);
-  const atk = 12 + inten * 12 + state.director.threat * 0.3;
-  const ratio = def / Math.max(1, atk);
-  const roll = rng.float(0.75, 1.15) * ratio;
-  const ammoSpend = Math.max(1, Math.ceil(inten / 2));
-  state.resources.ammo = Math.max(0, (state.resources.ammo || 0) - ammoSpend);
-
-  const camp = state.zones.find((z) => z.type === 'camp');
-  if (camp) {
-    camp._attackFlash = true;
-    state.flags.lastAttackZoneId = camp.id;
-  }
-
-  const pop = state.population?.total || 1;
-  const towers = state.base.buildings.filter(
-    (b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0
-  ).length;
-
-  let floorPop = 1;
-  if (pop <= 4) floorPop = underProtection ? 1 : rng.chance(0.22) ? 0 : 1;
-  else if (pop <= 8) floorPop = underProtection ? 2 : Math.max(1, pop - 2);
-  else floorPop = underProtection ? Math.max(3, Math.floor(pop * 0.65)) : Math.max(2, Math.floor(pop * 0.45));
-
-  if (roll >= 1.15) {
-    state.stats.attacksSurvived += 1;
-    state.stability += 2;
-    pushLog(state, `Ataque repelido (intensidad ${inten}). Munición −${ammoSpend}.`, 'good');
-    return { result: 'win', intensity: inten, dead: 0, injured: 0 };
-  }
-
-  if (roll >= 0.7) {
-    let dead = ratio > 0.95 && rng.chance(0.18) ? 1 : rng.chance(0.28) ? 1 : 0;
-    if (pop >= 20 && rng.chance(0.2)) dead = Math.min(2, dead + 1);
-    dead = Math.min(dead, Math.max(0, pop - floorPop));
-    const injured = Math.min(3, Math.max(1, Math.floor(inten * 0.7)));
-    applyCasualties(state, content.balance, { injured, dead });
-    const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
-    if (b && rng.chance(0.35)) {
-      b.hp -= rng.int(15, 45);
-      if (b.hp <= 0) pushLog(state, `${content.buildings[b.type]?.name || b.type} queda destruido.`, 'bad');
-    }
-    state.stability -= 5;
-    if (dead) state.director.recentLosses += dead;
-    if (dead > 0 && pop - dead <= 4) {
-      state.director.protectionUntil = Math.max(
-        state.director.protectionUntil || 0,
-        state.day + 2
-      );
-      state.director.lastCrisisDay = state.day;
-    }
-    pushLog(state, `Ataque contenido con pérdidas (${dead} muertos, ${injured} heridos).`, 'warn');
-    return { result: 'messy', intensity: inten, dead, injured };
-  }
-
-  let maxDead = towers ? 2 : Math.min(4, 1 + Math.floor(inten * 0.85));
-  if (pop >= 25) maxDead = Math.min(maxDead + 2, Math.floor(pop * 0.4));
-  if (pop <= 4) maxDead = underProtection ? 1 : Math.min(3, maxDead);
-  else if (pop <= 8) maxDead = underProtection ? 1 : Math.min(2, maxDead);
-
-  let dead = Math.min(Math.max(1, pop - floorPop), maxDead);
-  dead = Math.min(dead, Math.max(0, pop - floorPop));
-  const hasFarmOrDef =
-    state.base.buildings.some(
-      (b) =>
-        ['farm', 'greenhouse', 'watchtower', 'bunker', 'fence', 'barricade'].includes(b.type) && b.hp > 0
-    );
-  // Últimos supervivientes: más letal sin infraestructura; con base, suele quedar alguien
-  if (pop === 1 && !underProtection && rng.chance(hasFarmOrDef ? 0.28 : 0.5)) dead = 1;
-  if (pop === 2 && !underProtection && inten >= 2 && rng.chance(hasFarmOrDef ? 0.18 : 0.35)) dead = 2;
-
-  const injured = Math.min(4, inten + 1);
-  applyCasualties(state, content.balance, { dead, injured });
-  state.stability -= 10;
-  state.director.recentLosses += dead;
-
-  const hasTower = state.base.buildings.some(
-    (b) => ['watchtower', 'bunker', 'armory'].includes(b.type) && b.hp > 0
-  );
-  const recoverDays = !hasTower
-    ? Math.max(4, (content.balance.postDisasterProtectionDays || 4) + 1)
-    : pop - dead <= 2
-      ? Math.max(2, (content.balance.postDisasterProtectionDays || 4) - 1)
-      : Math.max(3, content.balance.postDisasterProtectionDays || 4);
-  state.director.protectionUntil = Math.max(state.director.protectionUntil || 0, state.day + recoverDays);
-  state.director.lastCrisisDay = state.day;
-  pushLog(state, `El perímetro cede (${dead} muertos). Días de recuperación forzosa.`, 'bad');
-  return { result: 'lose', intensity: inten, dead, injured };
-}
+export { resolveBaseAttack, schedulePendingAttack, composeHorde, formatHordeLabel } from './combat.js';
 
 export function tickResearch(state, content) {
   if (!state.research.active) return;
@@ -1073,8 +988,30 @@ export function advanceDay(state, content) {
   const wasProtected = state.day < (state.director.protectionUntil || 0);
   const dir = runDirector(state, content);
   let attack = null;
-  if (dir?.attackIntensity) {
-    attack = resolveBaseAttack(state, content, dir.attackIntensity, { wasProtected });
+
+  // ZZ-061: prep → resolve. Aviso previo salvo ataque inmediato ya programado.
+  const pendingTick = tickPendingAttack(state);
+  if (pendingTick?.due) {
+    const p = pendingTick.pending;
+    attack = resolveBaseAttack(state, content, p.intensity, {
+      wasProtected,
+      horde: p.horde,
+    });
+  } else if (dir?.attackIntensity && !state.pendingAttack) {
+    const warnDays = content.balance?.attackWarnDays ?? 1;
+    const optics = (state.research?.unlocked || []).includes('tower_optics');
+    const canWarn = warnDays > 0 || optics;
+    if (canWarn && dir.attackIntensity >= 1) {
+      schedulePendingAttack(state, dir.attackIntensity, content, { source: 'director' });
+    } else {
+      attack = resolveBaseAttack(state, content, dir.attackIntensity, { wasProtected });
+    }
+  } else if (dir?.attackIntensity && state.pendingAttack) {
+    // Ya hay aviso: subir intensidad al máximo anunciado
+    state.pendingAttack.intensity = Math.max(
+      state.pendingAttack.intensity || 1,
+      Math.floor(dir.attackIntensity)
+    );
   }
 
   checkVictory(state, content);
@@ -1136,14 +1073,29 @@ function buildDayBrief(state, content, before, prod, ctx) {
   if (dPop) facts.push({ kind: 'pop', text: `Población ${dPop > 0 ? '+' : ''}${dPop}.` });
 
   if (ctx.attack) {
+    const a = ctx.attack;
+    const dmg =
+      a.damaged?.length > 0
+        ? ` · daño: ${a.damaged.map((d) => d.name).join(', ')}`
+        : '';
     facts.push({
       kind: 'attack',
       text:
-        ctx.attack.result === 'win'
+        (a.result === 'win'
           ? 'Ataque repelido.'
-          : ctx.attack.result === 'messy'
+          : a.result === 'messy'
             ? 'Ataque contenido con pérdidas.'
-            : 'El perímetro ha cedido.',
+            : 'El perímetro ha cedido.') +
+        (a.hordeLabel ? ` ${a.hordeLabel}.` : '') +
+        ` −${a.ammoSpent ?? 0} munición` +
+        dmg,
+    });
+  } else if (state.pendingAttack) {
+    const p = state.pendingAttack;
+    const d = Math.max(0, (p.arrivesOnDay || 0) - state.day);
+    facts.push({
+      kind: 'attack',
+      text: `Hostiles en ${d} día(s) · int. ~${p.intensity}${p.horde?.label ? ` · ${p.horde.label}` : ''}.`,
     });
   } else if (ctx.dir?.event && !ctx.dir?.choice) {
     facts.push({ kind: 'event', text: ctx.dir.event.name || 'Algo ha ocurrido en la colonia.' });
