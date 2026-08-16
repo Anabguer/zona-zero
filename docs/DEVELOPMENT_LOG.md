@@ -2393,7 +2393,7 @@ Informe balance + gate. Aceptación: mala gestión pierde más.
 `docs/BALANCE_REPORT.md` · `docs/review/` · Drive Review/
 
 ## COMMIT
-*(pendiente)*
+`f12d6e6`
 
 ## PARAR
 Sí — HUMAN_GATE ZZ-178. Sin deploy. No ZZ-180.
