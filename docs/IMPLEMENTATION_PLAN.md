@@ -3,7 +3,7 @@
 > **SYNC VERIFY IMPLEMENTATION_PLAN** · stamp=2026-08-16 · source=repo
 
 **Versión plan:** 2.8  
-**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…015 + ZZ-019B APROBADAS**. · **ZZ-020** hecha · **ZZ-021 HUMAN_GATE** PENDIENTE. · Deuda artística D1 **NO BLOQUEANTE**. · No ZZ-022 hasta APROBADA ZZ-021.  
+**Estado:** Contrato espacial **2.8**. B0 + **ZZ-012…015 + ZZ-019B APROBADAS**. · **ZZ-020…022** hechas · **ZZ-021 APROBADA** · **ZZ-023 HUMAN_GATE** PENDIENTE. · Deuda artística post-019B **NO BLOQUEANTE**. · No ZZ-024 hasta APROBADA ZZ-023.  
 **Biblia:** GAME_MASTER **2.8**.  
 **Protocolo:** DEVELOPMENT_LOG · §41 biblia.  
 **Stack:** HTML/CSS/JS + PHP + MySQL · `content/*.json`.
@@ -84,7 +84,7 @@
 | ZZ-014 | **APROBADA** · desktop panel+mundo (solo UX) |
 | Integración arte escenario D1 | **ZZ-019B APROBADA** (funcional/visual anti-GIS). Arte final = **DEUDA NO BLOQUEANTE** (carretera, props, edificio–suelo, identidades, pulido superficies) |
 | ZZ-015 | QA D1 — **APROBADA** |
-| ZZ-020 / ZZ-021 | Brief ritual hecha · Staffing **HUMAN_GATE** PENDIENTE |
+| ZZ-020 / ZZ-021 / ZZ-022 | Brief + staffing APROBADA · exploración D3 hecha |
 
 ## 0.1b Enmienda 2.7 — qué cambió respecto a 2.6 (histórico)
 

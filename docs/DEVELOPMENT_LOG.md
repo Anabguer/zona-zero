@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…015 APROBADAS**. · Docs **2.8**. · **ZZ-020** hecha · **ZZ-021 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística D1 **NO BLOQUEANTE**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…015 APROBADAS**. · Docs **2.8**. · **ZZ-020…022** hechas · **ZZ-021 APROBADA** · **ZZ-023 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deuda artística post-019B **NO BLOQUEANTE**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -454,24 +454,87 @@ IMPLEMENTATION_PLAN 2.8 · C · **HUMAN_GATE YES** · deps ZZ-020
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## OBJETIVO
+Único modelo +/− en ficha de edificio; panel población = resumen SO.
+
+## HECHO
+- Ficha edificio: +/− workers (canónico).
+- Panel población: resumen SO (sin steppers).
+- Contrato UX aprobado: no duplicar +/− en HUD/población.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+7 evidencias reales. Población = resumen SO; asignación solo desde ficha edificio.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-021/`.
+
+## PARAR
+No — continuar ZZ-022.
+
+---
+
+# FASE ZZ-022 — Exploración D3–D5 mínima
+
+IMPLEMENTATION_PLAN 2.8 · C · HUMAN_GATE NO · deps ZZ-021
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(fase sin HUMAN_GATE; cerrada al pasar a ZZ-023)*
+
+## OBJETIVO
+Reveal → enviar → ruta → retorno (+ informe).
+
+## HECHO
+- Reveal market D3 (`maybeRevealEarlyLandmarks`) + toast.
+- A pie: `expeditionFuelCost: 0` (preview/UI «A pie · sin combustible»).
+- Soft early: fail→retreat / pyrrhic→wounded (D≤5 o ≤2 expediciones).
+- Informe UI tras brief (`showExpeditionReports` / `lastExpeditionReports`).
+- Smoke `smoke-zz022`.
+
+## ARCHIVOS
+`js/sim.js`, `js/main.js`, `content/balance.json`, `scripts/smoke-zz022.mjs`
+
+## PARAR
+No — continuar ZZ-023.
+
+---
+
+# FASE ZZ-023 — QA D1→D5 (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · C · **HUMAN_GATE YES** · deps ZZ-022
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Único modelo +/− en ficha de edificio; panel población = resumen SO.
+Loop estable D1→D5; contact sheet; gate.
 
 ## HECHO
-- Ficha edificio: +/− workers (ya existía; canónico).
-- Panel población: **sin** steppers por categoría; solo resumen + tip + auto-redistribuir.
-- Review 7 tomas + contact sheet · smoke staffing.
+- Smoke d1 + build-place + zz022 + zz020-021.
+- Review 11 tomas + contact sheet → `docs/review/` + Drive.
+- Deuda artística post-019B **NO BLOQUEANTE**.
+- Sin deploy · no ZZ-024.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/
 
 ## PARAR
-Sí — HUMAN_GATE. Sin deploy. No ZZ-022.
+Sí — HUMAN_GATE. Sin deploy. No ZZ-024.
+
+
 
 ---
 
@@ -569,11 +632,11 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-012 | Tutorial D1 por acciones | YES | COMPLETADA | APROBADA | SÍ |
 | ZZ-013 | HUD recursos D1 | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-014 | Desktop 1920 D1 | YES | COMPLETADA | APROBADA | SÍ |
-| ZZ-015 | QA D1 + contact sheet | YES | NO INICIADA (aplazada) | — | NO |
-| ZZ-020 | Brief diario ritual | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-021 | Staffing por edificio canónico | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-022 | Exploración D3–D5 mínima | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-023 | QA D1→D5 | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-015 | QA D1 + contact sheet | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-020 | Brief diario ritual | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-021 | Staffing por edificio canónico | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-022 | Exploración D3–D5 mínima | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-023 | QA D1→D5 | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-024 | Construcción selecciono→coloco | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-025 | Crecimiento población abstracto | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-026 | Feedback acciones clave | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

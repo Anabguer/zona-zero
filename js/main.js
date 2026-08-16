@@ -234,6 +234,11 @@ function closeSheet() {
 }
 
 function handleSheetAction(action, btn) {
+  if (action === 'close-sheet') {
+    closeSheet();
+    paint();
+    return;
+  }
   if (action === 'send-exp') {
     const zoneId = btn.getAttribute('data-zone');
     const exId = state.selectedExplorerId || readyExplorers(state)[0]?.id;
@@ -645,11 +650,16 @@ function openZoneSheet(zoneId) {
       </div>
       ${
         preview
-          ? `<div class="zz-ctx__stats">
+          ? `             <div class="zz-ctx__stats">
                <div class="zz-ctx__stat"><span>Distancia</span><strong>${preview.distance} tramos</strong></div>
                <div class="zz-ctx__stat"><span>Tiempo</span><strong>${preview.days} día${preview.days === 1 ? '' : 's'}</strong></div>
                <div class="zz-ctx__stat"><span>Riesgo</span><strong>${escapeHtml(preview.category || 'medio')}</strong></div>
              </div>
+             <p class="zz-muted" style="margin:0.35rem 0">${
+               (preview.fuel || 0) > 0
+                 ? `Combustible: ${preview.fuel}`
+                 : 'A pie · sin combustible'
+             }</p>
              <div class="zz-ctx__loot">
                <span class="zz-muted">Botín posible</span>
                <div class="zz-loot-row">${lootIcons || '<span>¿?</span>'}</div>
@@ -1317,6 +1327,35 @@ function paintCoach() {
   }
 }
 
+function showExpeditionReports(reports) {
+  if (!reports?.length) return;
+  const blocks = reports
+    .map((r) => {
+      const lootTxt = Object.entries(r.loot || {})
+        .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
+        .join(', ');
+      const extras = [];
+      if (r.controlled) extras.push('Zona bajo control');
+      if (r.revealed?.length) extras.push(`Revela: ${r.revealed.join(', ')}`);
+      if (r.dead) extras.push('No ha vuelto');
+      else if (r.wounded) extras.push('Herido');
+      return `<div class="zz-exp-report">
+        <h3>${escapeHtml(r.explorerName)} · ${escapeHtml(r.zoneName)}</h3>
+        ${(r.lines || []).map((l) => `<p>${escapeHtml(l)}</p>`).join('')}
+        ${lootTxt ? `<p><strong>Botín:</strong> ${escapeHtml(lootTxt)}</p>` : ''}
+        ${extras.length ? `<p class="zz-muted">${escapeHtml(extras.join(' · '))}</p>` : ''}
+      </div>`;
+    })
+    .join('');
+  openSheet(`
+    <div class="zz-ctx">
+      <h2>Informe de expedición</h2>
+      ${blocks}
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="close-sheet">Continuar</button>
+    </div>
+  `);
+}
+
 function showDayBrief(brief) {
   const el = $('zz-day-brief');
   if (!el || !brief) return;
@@ -1359,15 +1398,16 @@ function showDayBrief(brief) {
     <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-brief-ok">Continuar</button>
   `;
   el.hidden = false;
-  // Ocultar guía mientras el brief está abierto
   const coach = $('zz-coach');
   if (coach) coach.hidden = true;
+  const pendingReports = showDayBrief._pendingReports || null;
+  showDayBrief._pendingReports = null;
   $('zz-brief-ok')?.addEventListener('click', () => {
     el.hidden = true;
     paint();
+    if (pendingReports?.length) showExpeditionReports(pendingReports);
   });
   clearTimeout(showDayBrief._t);
-  // No auto-cerrar demasiado rápido: el brief es ritual
   showDayBrief._t = setTimeout(() => {
     if (!el.hidden) {
       /* dejar al jugador; no forzar */
@@ -1520,7 +1560,10 @@ function handleAdvanceDay() {
     return;
   }
   markGuideDayAdvanced(state);
-  maybeRevealEarlyLandmarks(state);
+  const revealed = maybeRevealEarlyLandmarks(state);
+  if (revealed) {
+    toast('Un punto cercano aparece en el mapa. Tocá para explorar.', 'info');
+  }
   checkOnboardingProgress(state);
   // Durante guía temprana, no apilar eventos encima del brief
   const guideOn = state.flags?.onboardingActive && !state.flags?.onboardingDone;
@@ -1540,7 +1583,18 @@ function handleAdvanceDay() {
       sfx.attack?.();
     }
   }
-  if (r.brief) showDayBrief(r.brief);
+  if (r.brief) {
+    showDayBrief._pendingReports = r.expeditionReports?.length ? r.expeditionReports : null;
+    showDayBrief(r.brief);
+  } else if (r.expeditionReports?.length) {
+    showExpeditionReports(r.expeditionReports);
+  }
+  // Tip D3: landmark revelado
+  const market = state.zones.find((z) => z.id === 'market');
+  if (market?.state === 'discovered' && !state.flags?.exploreTipShown && (state.day || 1) >= 3) {
+    state.flags.exploreTipShown = true;
+    toast('Un lugar cercano es visible. Tocadlo para enviár a alguien.', 'info');
+  }
   sfx.click?.();
   scheduleSave();
   paint();
@@ -1823,6 +1877,10 @@ export async function bootGame(opts) {
         paint();
       }
       return r;
+    },
+    selectZone: (zoneId) => {
+      openZoneSheet(zoneId);
+      paint();
     },
     sendExpedition: (zoneId, explorerId) => {
       const r = startExpedition(state, content, zoneId, explorerId);

@@ -53,7 +53,8 @@
     "gearRecoverChanceOnDeath": 0.55
   },
   "expeditionBaseDurationDays": 1,
-  "expeditionFuelCost": 1,
+  "expeditionFuelCost": 0,
+  "expeditionFuelCostComment": "ZZ-022: a pie no gasta fuel. Vehículos siguen con fuelPerTrip.",
   "controlClearThreshold": 0.52,
   "quietNightChance": 0.32,
   "birthCheckInterval": 5,

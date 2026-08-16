@@ -164,7 +164,7 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
     risk,
     category: riskCategory(risk),
     days,
-    fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost || 1,
+    fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost ?? 0,
     distance: Math.round(dist),
     lootHint: Object.keys(zone.loot || content.locationsDoc?.locationTypes?.[zone.type]?.lootBias || {}).slice(0, 3),
     explorerName: explorer.name,
@@ -248,13 +248,37 @@ function resolveCombat(rng, teamPower, enemyPower) {
   return 'fail';
 }
 
+/** ZZ-022: primeras salidas (D≤5 o ≤2 expediciones) — sin muerte automática por fail. */
+function softenEarlyOutcome(state, outcome) {
+  const early = (state.day || 1) <= 5 || (state.stats?.expeditions || 0) <= 2;
+  if (!early) return outcome;
+  if (outcome === 'fail') return 'retreat';
+  if (outcome === 'pyrrhic') return 'wounded';
+  return outcome;
+}
+
 function resolveOneExpedition(state, content, ex) {
   const rng = rngOf(state);
   const zone = state.zones.find((z) => z.id === ex.zoneId);
   const explorer = (state.explorers || []).find((e) => e.id === ex.explorerId);
+  const report = {
+    zoneId: ex.zoneId,
+    zoneName: zone?.name || 'zona',
+    explorerId: ex.explorerId,
+    explorerName: explorer?.name || 'Explorador',
+    outcome: 'lost',
+    loot: {},
+    wounded: false,
+    dead: false,
+    controlled: false,
+    revealed: [],
+    lines: [],
+  };
   if (!zone || !explorer || explorer.status === 'dead') {
     pushLog(state, 'Una expedición se pierde en el silencio.', 'bad');
-    return;
+    report.lines.push('La expedición se pierde en el silencio.');
+    report.dead = true;
+    return report;
   }
 
   const explore = explorer.skills.explore || 1;
@@ -268,12 +292,12 @@ function resolveOneExpedition(state, content, ex) {
   if (ex.weapon === 'improved') teamPower += 12;
   if (ex.armor === 'light') teamPower += 3;
   if (ex.armor === 'heavy') teamPower += 7;
-  // Apoyo humano interno (no micromanagement)
   const support = Math.min(4, Math.floor((state.population?.labor?.idle || 0) * 0.15));
   teamPower += support * 2;
 
   const enemyPower = 4 + zone.infectedLeft * 3 + zone.risk * 20;
-  const outcome = resolveCombat(rng, teamPower, enemyPower);
+  let outcome = softenEarlyOutcome(state, resolveCombat(rng, teamPower, enemyPower));
+  report.outcome = outcome;
 
   gainExplorerSkill(explorer, 'explore', 1, content.balance);
   if (outcome !== 'fail') gainExplorerSkill(explorer, 'loot', 1, content.balance);
@@ -291,37 +315,43 @@ function resolveOneExpedition(state, content, ex) {
     state.director.recentLosses += 1;
     state.stability -= 8;
     pushLog(state, `Fracaso en ${zone.name}. ${explorer.name} no vuelve.`, 'bad');
-    return;
+    report.dead = true;
+    report.lines.push(`${explorer.name} no vuelve de ${zone.name}.`);
+    return report;
   }
 
   if (outcome === 'retreat') {
     explorer.status = 'wounded';
     explorer.wounds = (explorer.wounds || 0) + 1;
+    report.wounded = true;
     gainExplorerSkill(explorer, 'resist', 1, content.balance);
     const scraps = rollLoot(rng, { wood: [0, 2], metal: [0, 2], food: [0, 1] }, 0.15);
     Object.entries(scraps).forEach(([k, v]) => {
       state.resources[k] = (state.resources[k] || 0) + v;
     });
+    report.loot = scraps;
     const scrapTxt = Object.entries(scraps)
       .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
       .join(', ');
-    pushLog(
-      state,
-      `${explorer.name} se retira de ${zone.name}. Herido${scrapTxt ? `; trae ${scrapTxt}` : ''}.`,
-      'warn'
-    );
-    return;
+    const line = `${explorer.name} se retira de ${zone.name}. Herido${scrapTxt ? `; trae ${scrapTxt}` : ''}.`;
+    pushLog(state, line, 'warn');
+    report.lines.push(line);
+    return report;
   }
 
   if (outcome === 'wounded' || outcome === 'pyrrhic') {
     explorer.status = 'wounded';
     explorer.wounds = (explorer.wounds || 0) + (outcome === 'pyrrhic' ? 2 : 1);
-    if (rng.chance(0.08 - resist * 0.012)) {
+    report.wounded = true;
+    const early = (state.day || 1) <= 5 || (state.stats?.expeditions || 0) <= 2;
+    if (!early && rng.chance(0.08 - resist * 0.012)) {
       killExplorer(state, explorer, content.balance);
       state.stats.explorersLost = (state.stats.explorersLost || 0) + 1;
       state.stats.deaths += 1;
       pushLog(state, `${explorer.name} cae limpiando ${zone.name}.`, 'bad');
-      return;
+      report.dead = true;
+      report.lines.push(`${explorer.name} cae limpiando ${zone.name}.`);
+      return report;
     }
     pushLog(
       state,
@@ -355,7 +385,6 @@ function resolveOneExpedition(state, content, ex) {
     loot.metal = (loot.metal || 0) + loot.scrap;
     delete loot.scrap;
   }
-  // Sorpresa: hallazgo raro
   if (rng.chance(0.12 + explore * 0.02)) {
     const rare = rng.pick(['medicine', 'ammo', 'parts', 'tools', 'fuel']);
     loot[rare] = (loot[rare] || 0) + rng.int(1, 2);
@@ -364,10 +393,18 @@ function resolveOneExpedition(state, content, ex) {
   Object.entries(loot).forEach(([k, v]) => {
     state.resources[k] = (state.resources[k] || 0) + v;
   });
+  report.loot = loot;
   const lootTxt = Object.entries(loot)
     .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
     .join(', ');
-  pushLog(state, `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}.`, 'good');
+  const lootLine = `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}.`;
+  pushLog(state, lootLine, 'good');
+  report.lines.push(lootLine);
+  if (report.wounded) {
+    report.lines.push(
+      outcome === 'pyrrhic' ? 'Vuelve muy herido, pero con botín.' : 'Vuelve herido.'
+    );
+  }
 
   if (zone.state === 'discovered' || zone.state === 'hostile') {
     let ctrlGain = 0.28 + explore * 0.035;
@@ -378,14 +415,17 @@ function resolveOneExpedition(state, content, ex) {
     if (zone.infectedLeft <= 0 && zone.controlProgress >= (content.balance.controlClearThreshold || 0.55)) {
       zone.state = 'controlled';
       zone.controlProgress = 1;
+      report.controlled = true;
       state.stats.zonesControlled = state.zones.filter((z) => z.state === 'controlled').length;
       state.stats.maxControlled = Math.max(state.stats.maxControlled, state.stats.zonesControlled);
       state.stability += 4;
       pushLog(state, `¡${zone.name} pasa a control de Zona Zero!`, 'good');
+      report.lines.push(`${zone.name} pasa a control de Zona Zero.`);
       (zone.neighbors || []).forEach((nid) => {
         const n = state.zones.find((z) => z.id === nid);
         if (n && n.state === 'unknown') {
           n.state = 'discovered';
+          report.revealed.push(n.name);
           pushLog(state, `Rutas revelan ${n.name}.`, 'info');
         }
       });
@@ -394,11 +434,11 @@ function resolveOneExpedition(state, content, ex) {
     }
   }
 
-  // Descubrimiento colateral
   if (rng.chance(0.14 + explore * 0.03)) {
     const unk = state.zones.find((x) => x.state === 'unknown');
     if (unk) {
       unk.state = 'discovered';
+      report.revealed.push(unk.name);
       pushLog(state, `${explorer.name} cartografía ${unk.name} de camino.`, 'info');
     }
   }
@@ -408,28 +448,30 @@ function resolveOneExpedition(state, content, ex) {
     if ((state.population?.total || 0) < cap && (state.population?.total || 0) < maxSurvivorsCap(content.balance)) {
       changePopulation(state, 1, content.balance, 'immigrant');
       pushLog(state, `Rescatáis a alguien en ${zone.name}. Población +1.`, 'good');
+      report.lines.push('Rescatáis a alguien. Población +1.');
     }
   }
+  return report;
 }
 
 export function resolveExpedition(state, content) {
   if (!state.expeditions) state.expeditions = [];
-  // Migrar singular
   if (state.expedition && !state.expeditions.find((x) => x.id === state.expedition.id)) {
     state.expeditions.push(state.expedition);
   }
   const due = state.expeditions.filter((ex) => state.day >= ex.returnDay);
-  due.forEach((ex) => resolveOneExpedition(state, content, ex));
+  const reports = due.map((ex) => resolveOneExpedition(state, content, ex)).filter(Boolean);
   state.expeditions = state.expeditions.filter((ex) => state.day < ex.returnDay);
   state.expedition = state.expeditions[0] || null;
 
-  // Curar exploradores heridos en casa
   livingExplorers(state).forEach((e) => {
     if (e.status === 'wounded' && !e.expeditionId) {
       e.wounds = Math.max(0, (e.wounds || 1) - 1);
       if (e.wounds <= 0) e.status = 'ready';
     }
   });
+  state.lastExpeditionReports = reports;
+  return reports;
 }
 
 function applyProduction(state, content) {
@@ -885,7 +927,7 @@ export function advanceDay(state, content) {
   };
 
   syncLaborFromColony(state, content);
-  resolveExpedition(state, content);
+  const expeditionReports = resolveExpedition(state, content) || [];
   // Limpiar flash de ataque del día anterior
   (state.zones || []).forEach((z) => {
     z._attackFlash = false;
@@ -955,7 +997,7 @@ export function advanceDay(state, content) {
   state.lastDayBrief = brief;
 
   state.rngState = (state.rngState || 1) + 17;
-  return { ok: true, director: dir, attack, brief, recoveredSectors, heating };
+  return { ok: true, director: dir, attack, brief, recoveredSectors, heating, expeditionReports };
 }
 
 function buildDayBrief(state, content, before, prod, ctx) {
