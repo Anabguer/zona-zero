@@ -7,9 +7,10 @@
 
 > Arte y sonido son **provisionales**. Decírselo **una sola vez** al empezar, y no insistir.
 
-**Frase de arranque (facilitador → Neni):**
-
-> «Sobrevive y haz crecer el refugio. Jugá como te salga. Si no sabés qué hacer, decilo en voz alta.»
+**Build playtest producción (2026-08-16):**  
+`https://intocables13.com/juegos/zona-zero/`  
+Requiere login Intocables. Móvil en **horizontal**.  
+Cache assets: `?v=40`. Si ves algo antiguo: recarga forzada una vez.
 
 ---
 
