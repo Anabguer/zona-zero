@@ -11,6 +11,7 @@ import {
   scheduleOrApplyWeather,
 } from './state.js';
 import { changePopulation, applyCasualties, workforce } from './population.js';
+import { applyBuildingDamage } from './buildings-damage.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) ^ (state.day * 7919));
@@ -171,11 +172,7 @@ export function applyEventEffects(state, content, effects = {}, rng) {
     pushLog(state, 'Alguien no sobrevive al incidente.', 'bad');
   }
   if (effects.damageBuildingChance && rng.chance(effects.damageBuildingChance)) {
-    const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
-    if (b) {
-      b.hp -= rng.int(25, 60);
-      pushLog(state, `Daños en ${content.buildings[b.type]?.name || b.type}.`, 'warn');
-    }
+    applyBuildingDamage(state, content, rng.int(25, 60), { rng, forcePerimeter: true });
   }
   if (effects.spawnSurvivorChance && rng.chance(effects.spawnSurvivorChance)) {
     changePopulation(state, 1, content.balance, 'immigrant');

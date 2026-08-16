@@ -394,12 +394,15 @@ export function housingCapacity(state, buildingsContent) {
   state.base.buildings.forEach((b) => {
     if (b.hp <= 0) return;
     const def = buildingsContent[b.type];
-    if (def?.housing) cap += def.housing;
+    if (!def?.housing) return;
+    const pct = (b.hp ?? 100) / 100;
+    const struct = pct < 0.35 ? 0.3 : pct < 0.7 ? 0.65 : 1;
+    cap += def.housing * struct;
   });
   if ((state.research?.unlocked || []).includes('advanced_housing')) {
     cap += 1;
   }
-  return Math.max(cap, 0);
+  return Math.max(Math.floor(cap), 0);
 }
 
 /** Protección climática 0–3 por tipo de edificio (GM §4). */
@@ -422,9 +425,11 @@ export function coveredBeds(state, buildingsContent, minProtection = 0) {
     const housing = def?.housing || 0;
     if (housing <= 0) return;
     const prot = climateProtectionOf(def);
-    if (prot >= minProtection) beds.push({ prot, housing });
+    const pct = (b.hp ?? 100) / 100;
+    const struct = pct < 0.35 ? 0.3 : pct < 0.7 ? 0.65 : 1;
+    if (prot >= minProtection) beds.push({ prot, housing: housing * struct });
   });
-  return beds.reduce((n, x) => n + x.housing, 0);
+  return Math.floor(beds.reduce((n, x) => n + x.housing, 0));
 }
 
 /** Umbral de protección según clima puntual. */
@@ -548,12 +553,17 @@ export function defenseBreakdown(state, buildingsContent, balance) {
     const d = buildingsContent[b.type];
     if (!d?.defense) return;
     const jobs = d.jobs || 0;
+    let raw = 0;
     if (jobs <= 0) {
-      buildings += d.defense;
+      raw = d.defense;
     } else {
       const staff = Math.max(0, b.workers || 0);
-      buildings += d.defense * clamp(staff / jobs, 0, 1.15);
+      raw = d.defense * clamp(staff / jobs, 0, 1.15);
     }
+    // ZZ-066: daño estructural reduce defensa aportada
+    const pct = (b.hp ?? 100) / 100;
+    const struct = pct < 0.35 ? 0.3 : pct < 0.7 ? 0.65 : 1;
+    buildings += raw * struct;
   });
   const assigned = state.population?.labor?.defense || 0;
   const bldDefWorkers = (state.base?.buildings || []).reduce((n, b) => {

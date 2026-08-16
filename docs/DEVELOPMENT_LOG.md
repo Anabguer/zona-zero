@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…064** hechas · **ZZ-065 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…068** hechas · **ZZ-069 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte (post-019B + insulated_house silueta) **NO BLOQUEANTES**. · No deploy.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1123,25 +1123,100 @@ IMPLEMENTATION_PLAN 2.8 · G · **HUMAN_GATE YES** · deps ZZ-064
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## OBJETIVO
+QA ataque + recuperación visual.
+
+## HECHO
+- Smoke `smoke-zz060-065` · review 10 tomas.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloque defensa/ataques ZZ-060…065 validado. Cadena amenaza→prep→defensa→resolución→daños→recuperación legible. Infectados tipados con diferencias; recovery aprobado sin eliminar riesgo. Deuda visual **NO BLOQUEANTE**.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-065/`.
+
+## PARAR
+No — continuar ZZ-066 (bloque G2).
+
+---
+
+# FASE ZZ-066 — HP/estados estructurales
+
+IMPLEMENTATION_PLAN 2.8 · G2 · HUMAN_GATE NO · deps ZZ-061
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-069)*
+
+## HECHO
+- Estados ok→damaged→critical→destroyed; `outputMult` en prod/def/housing/camas.
+- `js/buildings-damage.js` + `buildingDamage.enabled`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-067 — Daño hordas/eventos/tormentas + perímetro
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Perímetro holding → daño exterior; roto → interiores; clima storm/blizzard; eventos vía `applyBuildingDamage`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-068 — Acción Reparar + alerta localizar
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- Ficha Reparar (madera/metal + días + worker); tech `rapid_repair`; objetivo `need_repair` → resalte mapa.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-069 — QA daño→reparación (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · G2 · **HUMAN_GATE YES** · deps ZZ-068
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-QA ataque + recuperación visual.
+Capturas estados + flujo repair.
 
 ## HECHO
-- Smoke `smoke-zz060-065` OK.
-- Review 10 tomas + contact sheet → `docs/review/` + Drive.
-- Sin combate manual; informe bajas/daños; deudas arte **NO BLOQUEANTES**.
-- Sin deploy · no ZZ-066.
+- Smoke `smoke-zz066-069` OK.
+- Review 11 tomas + contact sheet → `docs/review/` + Drive.
+- Sin craft piezas; repair compite con expansión (madera/metal/workers).
+- Deudas arte **NO BLOQUEANTES**. Sin deploy · no ZZ-070.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-065. Sin deploy. No ZZ-066.
+Sí — HUMAN_GATE ZZ-069. Sin deploy. No ZZ-070.
 
 ---
 
@@ -1279,11 +1354,11 @@ OK. **Cerrada formalmente. Autorizado retomar ZZ-012.**
 | ZZ-062 | Infectados tipados afectan combate | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-063 | Munición y armería | NO | COMPLETADA | APROBADA | SÍ |
 | ZZ-064 | Recuperación post-ataque Director | NO | COMPLETADA | APROBADA | SÍ |
-| ZZ-065 | QA ataque + recuperación visual | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-066 | HP/estados estructurales edificios | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-067 | Daño por hordas/eventos/tormentas + perímetro | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-068 | Acción Reparar (coste/tiempo/workers) + alerta localizar | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
-| ZZ-069 | QA visual daño→reparación→recuperación + gate | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
+| ZZ-065 | QA ataque + recuperación visual | YES | COMPLETADA | APROBADA | SÍ |
+| ZZ-066 | HP/estados estructurales edificios | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-067 | Daño por hordas/eventos/tormentas + perímetro | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-068 | Acción Reparar (coste/tiempo/workers) + alerta localizar | NO | COMPLETADA | APROBADA | SÍ |
+| ZZ-069 | QA visual daño→reparación→recuperación + gate | YES | COMPLETADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-070 | Beneficios reales de control | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-071 | Contested/pérdida fronteriza | NO | NO INICIADA | PENDIENTE DE REVISIÓN | NO |
 | ZZ-072 | Loot tables por landmark type | YES | NO INICIADA | PENDIENTE DE REVISIÓN | NO |

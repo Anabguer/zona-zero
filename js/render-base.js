@@ -290,11 +290,34 @@ export function renderBase(svg, state, { onCellClick } = {}) {
   // Edificios
   const bldgLayer = svgEl('g', { class: 'zz-base-buildings' });
   (state.base.buildings || []).forEach((b) => {
-    if (b.hp <= 0) return;
     const rx = pad + b.x * cell;
     const ry = pad + b.y * cell;
     const level = resolveVisualLevel(b.type);
-    bldgLayer.appendChild(drawBuildingOnCell(ns, b.type, rx, ry, cell, level));
+    const hp = b.hp ?? 100;
+    const st = hp <= 0 ? 'destroyed' : hp < 35 ? 'critical' : hp < 70 ? 'damaged' : 'ok';
+    if (st === 'destroyed') {
+      const rubble = svgEl('g', { class: 'zz-base-rubble', opacity: 0.5 });
+      rubble.appendChild(
+        svgEl('rect', {
+          x: rx + 6,
+          y: ry + 10,
+          width: cell - 12,
+          height: cell - 16,
+          fill: '#3a342c',
+          stroke: '#6a5a48',
+          'stroke-width': 1,
+          rx: 2,
+        })
+      );
+      bldgLayer.appendChild(rubble);
+      return;
+    }
+    const g = drawBuildingOnCell(ns, b.type, rx, ry, cell, level);
+    if (st !== 'ok' && g?.setAttribute) {
+      g.setAttribute('opacity', st === 'critical' ? '0.75' : '0.9');
+      g.setAttribute('class', `${g.getAttribute('class') || ''} zz-bldg--${st}`);
+    }
+    bldgLayer.appendChild(g);
   });
   svg.appendChild(bldgLayer);
 

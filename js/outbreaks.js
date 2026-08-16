@@ -11,9 +11,12 @@ export function medicalBeds(state, buildingsContent) {
   (state.base?.buildings || []).forEach((b) => {
     if (b.hp <= 0) return;
     const def = buildingsContent[b.type];
-    if (def?.beds) beds += def.beds;
+    if (!def?.beds) return;
+    const pct = (b.hp ?? 100) / 100;
+    const struct = pct < 0.35 ? 0.3 : pct < 0.7 ? 0.65 : 1;
+    beds += def.beds * struct;
   });
-  return beds;
+  return Math.floor(beds);
 }
 
 export function medicalStaff(state) {

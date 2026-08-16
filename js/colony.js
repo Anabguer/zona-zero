@@ -388,6 +388,21 @@ export function currentObjective(state, content) {
       }.`,
     };
   }
+  // ZZ-068: edificios dañados
+  {
+    const needRepair = (state.base?.buildings || []).filter((b) => {
+      const hp = b.hp ?? 100;
+      return hp < 70;
+    });
+    if (needRepair.length > 0) {
+      return {
+        id: 'need_repair',
+        title: needRepair.length === 1 ? 'Edificio dañado' : `${needRepair.length} edificios dañados`,
+        text: 'Tocá la alerta o el edificio → Reparar (madera/metal + días).',
+        buildingIds: needRepair.map((b) => b.id),
+      };
+    }
+  }
   if (state.day < (state.director?.protectionUntil || 0)) {
     const left = (state.director.protectionUntil || 0) - state.day;
     return {

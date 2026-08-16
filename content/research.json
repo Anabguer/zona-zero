@@ -347,6 +347,24 @@
           }
         },
         {
+          "id": "rapid_repair",
+          "name": "Reparación rápida",
+          "desc": "Equipos y métodos para reconstruir antes del siguiente golpe.",
+          "cost": {
+            "wood": 5,
+            "metal": 4
+          },
+          "requires": [
+            "watch_protocols"
+          ],
+          "minEra": 1,
+          "days": 3,
+          "effects": {
+            "repairCostMult": 0.7,
+            "repairDaysBonus": 1
+          }
+        },
+        {
           "id": "tower_optics",
           "name": "Óptica de atalaya",
           "desc": "Detección temprana de oleadas.",

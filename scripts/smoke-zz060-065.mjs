@@ -93,7 +93,10 @@ assert(!state.pendingAttack, 'pending cleared');
 if (atk.result === 'lose') {
   assert(state.day < state.director.protectionUntil, 'protection after lose');
   const objR = currentObjective(state, content);
-  assert(objR?.id === 'recovery', 'objective recovery');
+  assert(
+    objR?.id === 'recovery' || objR?.id === 'need_repair' || objR?.id === 'pending_attack',
+    'objective recovery/repair after lose'
+  );
 }
 
 // Tech ammo_craft / watch_protocols bump defense

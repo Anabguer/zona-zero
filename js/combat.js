@@ -5,6 +5,7 @@
 import { createRng } from './rng.js';
 import { pushLog, defenseBreakdown } from './state.js';
 import { applyCasualties } from './population.js';
+import { applyBuildingDamage, perimeterIntegrity } from './buildings-damage.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) + state.day * 9973 + 17);
@@ -211,20 +212,16 @@ export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
     if (horde.hasHorde) injured = Math.min(5, injured + 1);
     applyCasualties(state, content.balance, { injured, dead });
 
-    const b = rng.pick(state.base.buildings.filter((x) => x.hp > 0));
+    const peri = perimeterIntegrity(state, content);
     const dmgChance = 0.35 + (horde.hasTank ? 0.25 : 0);
-    if (b && rng.chance(dmgChance)) {
+    if (rng.chance(dmgChance)) {
       const dmg = rng.int(15, 45) + (horde.hasTank ? rng.int(10, 25) : 0);
-      b.hp -= dmg;
-      damaged.push({
-        id: b.id,
-        type: b.type,
-        name: content.buildings[b.type]?.name || b.type,
-        hp: b.hp,
+      const hit = applyBuildingDamage(state, content, dmg, {
+        rng,
+        forcePerimeter: peri.holding,
+        breach: !peri.holding,
       });
-      if (b.hp <= 0) {
-        pushLog(state, `${content.buildings[b.type]?.name || b.type} queda destruido.`, 'bad');
-      }
+      if (hit) damaged.push(hit);
     }
     state.stability -= 5;
     if (dead) state.director.recentLosses += dead;
@@ -261,23 +258,21 @@ export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
   state.stability -= 10;
   state.director.recentLosses += dead;
 
-  // Daño a varios edificios si hay tanques / perímetro roto
-  const targets = state.base.buildings.filter((x) => x.hp > 0);
-  const hits = Math.min(targets.length, 1 + (horde.hasTank ? 1 : 0) + (inten >= 3 ? 1 : 0));
+  // Daño a varios edificios: perímetro aguanta → exteriores; roto → interiores
+  const peri = perimeterIntegrity(state, content);
+  const hits = Math.min(
+    (state.base.buildings || []).filter((x) => x.hp > 0).length,
+    1 + (horde.hasTank ? 1 : 0) + (inten >= 3 ? 1 : 0) + (!peri.holding ? 1 : 0)
+  );
   for (let i = 0; i < hits; i++) {
-    const b = rng.pick(targets);
-    if (!b || damaged.some((d) => d.id === b.id)) continue;
     const dmg = rng.int(20, 55) + (horde.hasTank ? 20 : 0);
-    b.hp -= dmg;
-    damaged.push({
-      id: b.id,
-      type: b.type,
-      name: content.buildings[b.type]?.name || b.type,
-      hp: b.hp,
+    const hit = applyBuildingDamage(state, content, dmg, {
+      rng,
+      forcePerimeter: peri.holding && i === 0,
+      forceInterior: !peri.holding && i > 0,
+      breach: !peri.holding,
     });
-    if (b.hp <= 0) {
-      pushLog(state, `${content.buildings[b.type]?.name || b.type} queda destruido.`, 'bad');
-    }
+    if (hit && !damaged.some((d) => d.id === hit.id)) damaged.push(hit);
   }
 
   const zoneLost = inten >= 2 && controlled > 1 && rng.chance(0.55) ? loseFrontierZone(state, rng) : null;

@@ -123,10 +123,18 @@
     "explorerMedCost": 1
   },
   "buildingDamage": {
-    "enabled": false,
-    "comment": "Activar en ZZ-066+.",
+    "enabled": true,
+    "comment": "ZZ-066+: ok→damaged→critical→destroyed. Repair wood/metal+días. Perímetro protege interiores.",
+    "maxHp": 100,
     "states": ["ok", "damaged", "critical", "destroyed"],
-    "outputMult": { "ok": 1, "damaged": 0.65, "critical": 0.3, "destroyed": 0 }
+    "damagedBelow": 0.7,
+    "criticalBelow": 0.35,
+    "outputMult": { "ok": 1, "damaged": 0.65, "critical": 0.3, "destroyed": 0 },
+    "perimeterHoldStrength": 8,
+    "stormDamageChance": 0.22,
+    "blizzardDamageChance": 0.18,
+    "weatherDamageMin": 8,
+    "weatherDamageMax": 22
   },
   "ambientLife": {
     "enabled": false,

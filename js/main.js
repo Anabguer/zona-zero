@@ -26,7 +26,14 @@ import {
   autoAssignWorkers,
   resolveBaseAttack,
   syncLaborFromColony,
+  startRepair,
+  repairQuote,
+  buildingStructuralState,
 } from './sim.js';
+import {
+  buildingsNeedingRepair,
+  structuralStateLabel,
+} from './buildings-damage.js';
 import { resolvePendingChoice } from './director.js';
 import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox } from './render-map.js';
 import {
@@ -327,6 +334,19 @@ function handleSheetAction(action, btn) {
     paint();
     return;
   }
+  if (action === 'repair-building') {
+    const id = btn.getAttribute('data-id');
+    const r = startRepair(state, content, id);
+    if (!r.ok) {
+      toast(r.error || 'No se puede reparar', 'warn');
+      return;
+    }
+    toast(`Reparación en marcha · ${r.quote.days} día(s)`, 'good');
+    scheduleSave();
+    openBuildingSheet(id);
+    paint();
+    return;
+  }
   if (action === 'confirm-build') {
     confirmBuildPlacement();
     return;
@@ -511,7 +531,7 @@ function openPopulationSheet() {
 }
 
 function openBuildingSheet(id) {
-  const b = state.base.buildings.find((x) => x.id === id && x.hp > 0);
+  const b = state.base.buildings.find((x) => x.id === id);
   if (!b) return;
   state.selectedBuildingId = id;
   focusBuildingCamera(b.id);
@@ -520,12 +540,22 @@ function openBuildingSheet(id) {
   const key = laborKeyForBuilding(def);
   const cap = buildingWorkerCap(def);
   const workers = b.workers || 0;
-  const prev = productionPreview(def, workers);
+  const struct = buildingStructuralState(b, content);
+  const structMult =
+    struct === 'destroyed' ? 0 : struct === 'critical' ? 0.3 : struct === 'damaged' ? 0.65 : 1;
+  const prev = productionPreview(def, workers).map((p) => ({
+    ...p,
+    amount: Math.round(p.amount * structMult),
+  }));
   const prodLine =
     prev.map((p) => `+${p.amount} ${RES_LABEL_UI[p.key] || p.key}/día`).join(' · ') ||
-    (def.defense ? `+${def.defense} defensa` : def.housing ? `+${def.housing} capacidad` : '—');
+    (def.defense
+      ? `+${Math.round(def.defense * structMult)} defensa`
+      : def.housing
+        ? `+${Math.floor(def.housing * structMult)} capacidad`
+        : '—');
   const art = buildingArtUrl(b.type);
-  const unstaffed = key && workers < 1;
+  const unstaffed = key && workers < 1 && struct !== 'destroyed';
   const climateProt = def.housing != null ? climateProtectionOf(def) : null;
   const climateLabel =
     climateProt == null
@@ -539,23 +569,49 @@ function openBuildingSheet(id) {
             : 'Residencial (3)';
   const bedsLine =
     def.beds != null
-      ? `<p class="zz-ctx__prod">Camas médicas: <strong>${def.beds}</strong>${
+      ? `<p class="zz-ctx__prod">Camas médicas: <strong>${Math.floor(def.beds * structMult)}</strong>${
           key ? ` · staff ${workers}/${cap}` : ''
         }</p>`
       : '';
+  const hpMax = 100;
+  const hp = Math.max(0, b.hp ?? hpMax);
+  const quote = struct !== 'ok' ? repairQuote(state, content, b) : null;
+  const repairing = b.repair?.daysLeft > 0;
+  const repairBlock =
+    struct === 'ok'
+      ? ''
+      : repairing
+        ? `<p class="zz-ctx__prod">En reparación · ${b.repair.daysLeft} día(s) restante(s).</p>`
+        : `<p class="zz-ctx__warn">${structuralStateLabel(struct)} · HP ${Math.round(hp)}/${hpMax}</p>
+           <p class="zz-muted" style="font-size:0.8rem">Reparar: ${quote.wood} madera${
+             quote.metal ? ` · ${quote.metal} metal` : ''
+           } · ${quote.days} día(s)${
+             (state.research.unlocked || []).includes('rapid_repair') ? ' · reparación rápida' : ''
+           }</p>
+           <p><button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="repair-building" data-id="${
+             b.id
+           }">Reparar</button></p>`;
 
   openSheet(`
     <div class="zz-ctx">
       <div class="zz-ctx__head">
-        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" />
+        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" style="${
+          struct === 'critical' || struct === 'destroyed' ? 'filter:grayscale(0.55) brightness(0.85)' : ''
+        }" />
         <div>
           <h2>${escapeHtml(def.name)}</h2>
           <p>${escapeHtml((def.desc || '').slice(0, 90))}</p>
+          <p class="zz-muted" style="font-size:0.78rem;margin:0.2rem 0 0">${structuralStateLabel(
+            struct
+          )} · HP ${Math.round(hp)}/${hpMax}</p>
         </div>
       </div>
+      ${repairBlock}
       ${
-        key
-          ? `<div class="zz-ctx__stat">
+        struct === 'destroyed'
+          ? `<p class="zz-muted">Sin producción hasta reconstruir.</p>`
+          : key
+            ? `<div class="zz-ctx__stat">
                <span>Trabajadores</span>
                <div class="zz-stepper">
                  <button type="button" data-bworkers="${b.id}" data-delta="-1" aria-label="Menos">−</button>
@@ -573,11 +629,13 @@ function openBuildingSheet(id) {
                  : ''
              }
              ${unstaffed ? '<p class="zz-ctx__warn">⚠ Sin personal — no produce</p>' : ''}`
-          : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
+            : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
              ${bedsLine}
              ${
                def.housing
-                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${def.housing}</strong> plazas${
+                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${Math.floor(
+                     def.housing * structMult
+                   )}</strong> plazas${
                      climateLabel ? ` · clima <strong>${escapeHtml(climateLabel)}</strong>` : ''
                    }</p>`
                  : ''
@@ -1850,6 +1908,16 @@ function bindChrome() {
   $('zz-mission')?.addEventListener('click', () => {
     const obj = currentObjective(state, content);
     if (!obj) return;
+    if (obj.id === 'need_repair') {
+      const ids = obj.buildingIds || buildingsNeedingRepair(state, content).map((b) => b.id);
+      const first = ids[0];
+      if (first) {
+        state.flags.highlightRepairIds = ids;
+        openBuildingSheet(first);
+        paint();
+        return;
+      }
+    }
     openSheet(`
       <div class="zz-ctx">
         <h2>${escapeHtml(obj.title || 'Objetivo')}</h2>

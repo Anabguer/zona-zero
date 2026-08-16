@@ -40,6 +40,17 @@ import {
   formatHordeLabel,
 } from './combat.js';
 import {
+  tickBuildingRepairs,
+  tickWeatherStructureDamage,
+  buildingOutputMult,
+  buildingsNeedingRepair,
+  startRepair,
+  repairQuote,
+  buildingStructuralState,
+  applyBuildingDamage,
+  perimeterIntegrity,
+} from './buildings-damage.js';
+import {
   adjustBuildingWorkers,
   adjustCategoryLabor,
   autoStaffColony,
@@ -529,16 +540,16 @@ function applyProduction(state, content) {
     const ratio = clamp(staff / jobs, 0.15, 1.15);
     const out = {};
     Object.entries(def.produces).forEach(([k, v]) => {
-      let mult = 1;
+      let mult = buildingOutputMult(b, content);
       // Outdoor food hurt more in cold/blizzard; greenhouse resists
       if (k === 'food' && b.type === 'farm' && (state.weather === 'cold' || state.weather === 'blizzard')) {
-        mult = state.weather === 'blizzard' ? 0.55 : 0.75;
+        mult *= state.weather === 'blizzard' ? 0.55 : 0.75;
       }
       if (k === 'food' && b.type === 'greenhouse' && (state.weather === 'cold' || state.weather === 'blizzard')) {
-        mult = 0.95;
+        mult *= 0.95;
       }
       if (k === 'water' && b.type === 'well' && (state.weather === 'storm' || state.weather === 'heat')) {
-        mult = state.weather === 'heat' ? 0.8 : 0.85;
+        mult *= state.weather === 'heat' ? 0.8 : 0.85;
       }
       // ZZ-063: ammo_craft mejora producción de munición en armería
       if (k === 'ammo' && (state.research?.unlocked || []).includes('ammo_craft')) {
@@ -784,6 +795,15 @@ function populationTick(state, content) {
 }
 
 export { resolveBaseAttack, schedulePendingAttack, composeHorde, formatHordeLabel } from './combat.js';
+export {
+  startRepair,
+  repairQuote,
+  buildingsNeedingRepair,
+  buildingStructuralState,
+  buildingOutputMult,
+  perimeterIntegrity,
+  applyBuildingDamage,
+} from './buildings-damage.js';
 
 export function tickResearch(state, content) {
   if (!state.research.active) return;
@@ -966,6 +986,11 @@ export function advanceDay(state, content) {
   healPopulationTick(state, content.balance, content);
   tickOutbreak(state, content);
   tickResearch(state, content);
+  tickBuildingRepairs(state, content);
+  {
+    const wrng = rngOf(state);
+    tickWeatherStructureDamage(state, content, wrng);
+  }
 
   if (state.weatherDaysLeft > 0) {
     state.weatherDaysLeft -= 1;

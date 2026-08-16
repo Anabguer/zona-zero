@@ -1189,7 +1189,7 @@ function drawBuildableSurfaceHints(layer, state, scale, bw, bh) {
 }
 
 function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPointer } = {}) {
-  const buildings = (state.base?.buildings || []).filter((b) => b.hp > 0);
+  const buildings = state.base?.buildings || [];
   if (!buildings.length && state.uiMode !== 'build') return;
   const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
   const life = Math.min(3, tier + Math.floor(buildings.length / 5));
@@ -1293,11 +1293,17 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPoi
       const isHq = String(b.type).startsWith('hq_');
       const cell = scale * (isHq ? 1.48 : 1.28);
       const selected = state.selectedBuildingId === b.id;
+      const hp = b.hp ?? 100;
+      const st = hp <= 0 ? 'destroyed' : hp < 35 ? 'critical' : hp < 70 ? 'damaged' : 'ok';
+      const highlight = (state.flags?.highlightRepairIds || []).includes(b.id);
       const wrap = svgEl('g', {
-        class: `zz-settle-bldg${selected ? ' is-selected' : ''}${isHq ? ' zz-settle-bldg--hq' : ''}`,
+        class: `zz-settle-bldg zz-settle-bldg--${st}${selected ? ' is-selected' : ''}${
+          highlight ? ' is-repair-focus' : ''
+        }${isHq ? ' zz-settle-bldg--hq' : ''}`,
         transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
         'data-type': b.type,
         'data-id': b.id,
+        opacity: st === 'destroyed' ? '0.55' : st === 'critical' ? '0.82' : '1',
       });
       drawBuildingFoundation(wrap, cell, createRng(hashSeed(`found:${b.id}`)));
       wrap.appendChild(
@@ -1309,8 +1315,52 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPoi
           height: cell,
           preserveAspectRatio: 'xMidYMid meet',
           class: 'zz-settle-bldg-img',
+          style:
+            st === 'damaged' || st === 'critical' || st === 'destroyed'
+              ? 'filter:grayscale(0.35) brightness(0.9)'
+              : '',
         })
       );
+      if (st === 'damaged' || st === 'critical') {
+        wrap.appendChild(
+          svgEl('rect', {
+            x: cell * 0.12,
+            y: cell * 0.72,
+            width: cell * 0.76,
+            height: cell * 0.1,
+            rx: 2,
+            fill: st === 'critical' ? '#a33' : '#c80',
+            opacity: 0.85,
+            class: 'zz-settle-bldg-hpbar',
+          })
+        );
+        wrap.appendChild(
+          svgEl('rect', {
+            x: cell * 0.12,
+            y: cell * 0.72,
+            width: cell * 0.76 * Math.max(0.05, hp / 100),
+            height: cell * 0.1,
+            rx: 2,
+            fill: st === 'critical' ? '#f66' : '#fc6',
+            class: 'zz-settle-bldg-hpfill',
+          })
+        );
+      }
+      if (highlight) {
+        wrap.appendChild(
+          svgEl('rect', {
+            x: -2,
+            y: -2,
+            width: cell + 4,
+            height: cell + 4,
+            fill: 'none',
+            stroke: '#e8c060',
+            'stroke-width': 2,
+            rx: 4,
+            class: 'zz-settle-bldg-repair-ring',
+          })
+        );
+      }
       wrap.style.cursor = 'pointer';
       wrap.addEventListener('click', (ev) => {
         ev.preventDefault();
