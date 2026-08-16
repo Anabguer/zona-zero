@@ -2324,7 +2324,7 @@ Perf móvil ambient life + gate. Cap render; se ve viva sin 100 NPCs.
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## COMMIT
-*(pendiente)*
+`7409586`
 
 ## PARAR
 Sí — HUMAN_GATE ZZ-172. Sin deploy. No ZZ-175.
