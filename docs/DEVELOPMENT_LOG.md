@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…177** hechas · **ZZ-178 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160…165 APROBADAS**. · **ZZ-166…172 APROBADAS**. · **ZZ-175…178 APROBADAS**. · **ZZ-180…182** hechas · **ZZ-183 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy sin orden. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2376,10 +2376,10 @@ IMPLEMENTATION_PLAN 2.8 · R · **HUMAN_GATE YES** · deps ZZ-177
 COMPLETADA
 
 ## ESTADO REVISIÓN
-**PENDIENTE DE REVISIÓN**
+**APROBADA**
 
 ## APROBACIÓN FINAL CHATGPT
-**NO** (esperando)
+**SÍ**
 
 ## OBJETIVO
 Informe balance + gate. Aceptación: mala gestión pierde más.
@@ -2388,15 +2388,115 @@ Informe balance + gate. Aceptación: mala gestión pierde más.
 - `docs/BALANCE_REPORT.md` · `scripts/balance-report.json` · aceptación CUMPLE.
 - Smoke `smoke-zz175-178`.
 - Contrato **2.8** · deuda arte NO BLOQUEANTE · sin deploy.
+- Cierre Neni/ChatGPT: valida harness/perfiles/detección/calibración inicial — **no** balance final.
+- WATCH (no bugs): sobreexpansión D100, eras D100 bajas, sin explorar D100.
+- Archivo: `docs/review-archive/zz-178/`.
 
 ## EVIDENCIAS
-`docs/BALANCE_REPORT.md` · `docs/review/` · Drive Review/
+`docs/BALANCE_REPORT.md` · `docs/review-archive/zz-178/`
 
 ## COMMIT
-`f12d6e6`
+`f12d6e6` (+ docs cierre en commit Bloque S)
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-178. Sin deploy. No ZZ-180.
+No — autorización a continuar ZZ-180.
+
+---
+
+# FASE ZZ-180 — Migraciones save (main+backup, sin energy)
+
+IMPLEMENTATION_PLAN 2.8 · S · HUMAN_GATE NO · deps ZZ-178 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN (bloque S hasta ZZ-183)
+
+## HECHO
+- `SAVE_VERSION = 7` · `createNewState` sin `energy`.
+- `migrateState`: strip energy + flag `_migratedEnergy`; generator/solar/power_plant → storage.
+- `sim.js`: sin acumular/persistir energy; fuelNeed sin bonus eléctrico.
+- `balance.json` saveVersion 7.
+- Smoke `scripts/smoke-save.mjs` ampliado (legacy + migración).
+
+## PRUEBAS
+`node scripts/smoke-save.mjs` OK
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-181 — Smoke E2E móvil+desktop
+
+IMPLEMENTATION_PLAN 2.8 · S · HUMAN_GATE NO · deps ZZ-180
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `scripts/e2e-ui-playwright.mjs` apunta a `dev/harness-zz.html`.
+- Viewports: móvil landscape 844×390 + desktop 1280×800.
+- Flujo: boot, HUD, mapa, avanzar días, ficha construir, save.
+
+## PRUEBAS
+`node scripts/e2e-ui-playwright.mjs` OK
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-182 — Perf mapa + ambient
+
+IMPLEMENTATION_PLAN 2.8 · S · HUMAN_GATE NO · deps ZZ-181
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `scripts/smoke-zz182-perf.mjs`: cap ambient ≤16 con pop alta; planAmbient rápido; pan/zoom + clampCamera sin throw; migrate strip coherente.
+
+## PRUEBAS
+`node scripts/smoke-zz182-perf.mjs` OK
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-183 — Deploy solo bajo orden + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · S · **HUMAN_GATE YES** · deps ZZ-182
+
+## ESTADO CURSOR
+COMPLETADA (checklist / sin deploy)
+
+## ESTADO REVISIÓN
+**PENDIENTE DE REVISIÓN**
+
+## APROBACIÓN FINAL CHATGPT
+**NO** (esperando)
+
+## OBJETIVO
+Confirmar que el deploy a producción solo ocurre bajo orden explícita; gate de release.
+
+## HECHO
+- **NO se ha ejecutado** `winscp_deploy_juegos.ps1` ni ningún deploy.
+- Deploy documentado en `docs/TECH.md` (script externo) — requiere autorización expresa.
+- Bloque S (180–182) listo para revisión conjunta con este gate.
+- Contrato espacial **2.8** intacto · deuda arte NO BLOQUEANTE · sin ART PASS.
+
+## CHECKLIST HUMAN_GATE (para revisores)
+- [ ] ZZ-180: saves legacy cargan; sin energy; generator→storage
+- [ ] ZZ-181: E2E móvil landscape + desktop OK
+- [ ] ZZ-182: ambient cap ≤16; cámara estable
+- [ ] Confirmar: **no deploy** hasta orden explícita post-APROBADA
+- [ ] WATCH ZZ-178 registrados (no recalibrar a ciegas)
+
+## PARAR
+**Sí** — HUMAN_GATE ZZ-183. Sin deploy. No ZZ-184 hasta APROBADA + SÍ + orden de deploy si aplica.
 
 ---
 
@@ -8193,83 +8293,35 @@ NO
 # FASE ZZ-178 — Informe balance + gate
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-178).
+Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-178).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
-
-## ARCHIVOS MODIFICADOS
-—
-
-## PRUEBAS
-—
-
-## CAPTURAS
-—
-
-## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+Cerrada formalmente · APROBADA · SÍ · archivo zz-178 · WATCH registrados.
 
 ## ESTADO CURSOR
-NO INICIADA
-
-## REVISIÓN CHATGPT
-Pendiente inicialmente.
+COMPLETADA
 
 ## ESTADO REVISIÓN
-PENDIENTE DE REVISIÓN
-
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
+APROBADA
 
 ## APROBACIÓN FINAL CHATGPT
-NO
+SÍ
 
 ---
 
 # FASE ZZ-180 — Migraciones save (sin energy fields)
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-180).
+Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-180).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
-
-## ARCHIVOS MODIFICADOS
-—
-
-## PRUEBAS
-—
-
-## CAPTURAS
-—
-
-## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+SAVE_VERSION 7 · migrate strip energy · generator→storage · smoke-save OK.
 
 ## ESTADO CURSOR
-NO INICIADA
-
-## REVISIÓN CHATGPT
-Pendiente inicialmente.
+COMPLETADA
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
-
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
 
 ## APROBACIÓN FINAL CHATGPT
 NO
@@ -8279,40 +8331,16 @@ NO
 # FASE ZZ-181 — Smoke E2E móvil+desktop
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-181).
+Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-181).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
-
-## ARCHIVOS MODIFICADOS
-—
-
-## PRUEBAS
-—
-
-## CAPTURAS
-—
-
-## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+e2e-ui-playwright → harness-zz · móvil landscape + desktop OK.
 
 ## ESTADO CURSOR
-NO INICIADA
-
-## REVISIÓN CHATGPT
-Pendiente inicialmente.
+COMPLETADA
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
-
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
 
 ## APROBACIÓN FINAL CHATGPT
 NO
@@ -8322,40 +8350,16 @@ NO
 # FASE ZZ-182 — Perf mapa + ambient
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-182).
+Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-182).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
-
-## ARCHIVOS MODIFICADOS
-—
-
-## PRUEBAS
-—
-
-## CAPTURAS
-—
-
-## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+smoke-zz182-perf · cap ≤16 · pan/zoom OK.
 
 ## ESTADO CURSOR
-NO INICIADA
-
-## REVISIÓN CHATGPT
-Pendiente inicialmente.
+COMPLETADA
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
-
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
 
 ## APROBACIÓN FINAL CHATGPT
 NO
@@ -8365,40 +8369,16 @@ NO
 # FASE ZZ-183 — Deploy solo bajo orden + gate
 
 ## PLAN
-Ver IMPLEMENTATION_PLAN 2.5 (§ ZZ-183).
+Ver IMPLEMENTATION_PLAN 2.8 (§ ZZ-183).
 
 ## RESULTADO CURSOR
-Pendiente de ejecución (fase no iniciada).
-
-## ARCHIVOS MODIFICADOS
-—
-
-## PRUEBAS
-—
-
-## CAPTURAS
-—
-
-## PROBLEMAS / LIMITACIONES
-—
-
-## COMMIT
-—
+Checklist HUMAN_GATE · **deploy NO ejecutado** · PARAR.
 
 ## ESTADO CURSOR
-NO INICIADA
-
-## REVISIÓN CHATGPT
-Pendiente inicialmente.
+COMPLETADA (sin deploy)
 
 ## ESTADO REVISIÓN
 PENDIENTE DE REVISIÓN
-
-## CORRECCIONES SOLICITADAS
-—
-
-## RESPUESTA CURSOR A LA REVISIÓN
-—
 
 ## APROBACIÓN FINAL CHATGPT
 NO

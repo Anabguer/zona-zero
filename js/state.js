@@ -8,7 +8,7 @@ import { makeExplorer, livingExplorers } from './explorers.js';
 import { syncLaborFromColony } from './colony.js';
 import { createColonySectors, ensureSectors } from './sectors.js';
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 /** @deprecated legacy individual skills — solo migración */
 export const SKILL_KEYS = ['scout', 'gather', 'build', 'produce', 'fight'];
 
@@ -193,7 +193,6 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     day: 1,
     era: 0,
     resources: normalizeResources(balance.startingResources),
-    energy: { produced: 0, demand: 0 },
     population,
     explorers: [explorer],
     explorerRecruitReadyDay: 0,
@@ -341,7 +340,12 @@ export function migrateState(state, content) {
   if (next.pendingCatastrophe === undefined) next.pendingCatastrophe = null;
   if (!next.equipment) next.equipment = { weapon: 'none', armor: 'none', vehicleId: null };
   if (!next.factions) next.factions = [];
-  if (!next.energy) next.energy = { produced: 0, demand: 0 };
+  // ZZ-180: sin sistema eléctrico — strip energy (legacy)
+  if (next.energy) {
+    next.flags = next.flags || {};
+    next.flags._migratedEnergy = true;
+    delete next.energy;
+  }
   if (!next.weather) next.weather = 'clear';
   if (next.weatherDaysLeft == null) next.weatherDaysLeft = 0;
   if (next.season == null) next.season = balance.seasons?.startSeason || 'autumn';
@@ -404,11 +408,19 @@ export function migrateState(state, content) {
       buildings: next.base?.buildings || [],
     };
   }
-  next.base.buildings = (next.base.buildings || []).map((b) => ({
-    ...b,
-    hp: b.hp != null ? b.hp : 100,
-    workers: b.workers != null ? Math.max(0, b.workers) : 0,
-  }));
+  next.base.buildings = (next.base.buildings || []).map((b) => {
+    let type = b.type;
+    // ZZ-180: generator/solar fuera de alcance v1 → almacén neutro
+    if (type === 'generator' || type === 'solar' || type === 'power_plant') {
+      type = 'storage';
+    }
+    return {
+      ...b,
+      type,
+      hp: b.hp != null ? b.hp : 100,
+      workers: b.workers != null ? Math.max(0, b.workers) : 0,
+    };
+  });
   if (!next.mapCamera) next.mapCamera = { x: 50, y: 48, zoom: 1.15 };
   ensureSectors(next);
   if (next.uiMode == null) next.uiMode = null;

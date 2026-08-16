@@ -685,8 +685,6 @@ function applyProduction(state, content) {
             ? 0.92
             : 1;
 
-  let energyProd = 0;
-  let energyDemand = 1;
   const produced = {};
   const byBuilding = [];
 
@@ -694,8 +692,7 @@ function applyProduction(state, content) {
     if (b.hp <= 0) return;
     const def = content.buildings[b.type];
     if (!def) return;
-    if (def.energy > 0) energyProd += def.energy;
-    if (def.energy < 0) energyDemand += Math.abs(def.energy);
+    // Energía eléctrica fuera de alcance v1 (needEnergy:false)
     if (!def.produces) return;
     const jobs = Math.max(1, def.jobs || 1);
     const staff = Math.max(0, b.workers || 0);
@@ -792,8 +789,8 @@ function applyProduction(state, content) {
     if (lost >= 3) pushLog(state, `Agua se pierde sin suficiente reserva (−${lost}).`, 'warn');
   }
 
-  state.energy.produced = energyProd;
-  state.energy.demand = energyDemand;
+  // ZZ-180: no persistir energy (fuera de alcance v1)
+  if (state.energy) delete state.energy;
   return { produced, byBuilding, foodCap, waterCap };
 }
 
@@ -807,7 +804,6 @@ function fuelNeed(state, content) {
     const def = content.buildings[b.type];
     if (def?.fuelSave) need = Math.max(0, need - def.fuelSave);
   });
-  if (state.energy.produced >= state.energy.demand) need *= 0.5;
   return Math.ceil(need);
 }
 

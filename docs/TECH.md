@@ -21,5 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "W:\juegos\deploy\winscp_dep
 ```
 Usa credenciales de `W:\anabel\deploy\hostalia.publish.local.json`.
 
+**ZZ-183:** ejecutar **solo** bajo orden explícita post-HUMAN_GATE APROBADA. No deploy automático tras ZZ-180…182.
+
 ## Contenido / balance
 Editar JSON en `content/` sin tocar el motor.

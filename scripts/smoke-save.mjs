@@ -1,5 +1,5 @@
 /**
- * Smoke ZZ-009 — save main+backup (mock in-memory).
+ * Smoke ZZ-009 + ZZ-180 — save main+backup + migración sin energy.
  * node scripts/smoke-save.mjs
  */
 import { pathToFileURL } from 'url';
@@ -24,7 +24,9 @@ const content = {
   zonesDoc: { zones: locationsDoc.seedLayout || [] },
 };
 
-const { createNewState } = await import(pathToFileURL(join(root, 'js', 'state.js')).href);
+const { createNewState, migrateState, SAVE_VERSION } = await import(
+  pathToFileURL(join(root, 'js', 'state.js')).href
+);
 const api = await import(pathToFileURL(join(root, 'dev', 'api-mock.js')).href);
 
 let fails = 0;
@@ -35,12 +37,15 @@ function assert(c, m) {
   } else console.log('OK', m);
 }
 
+assert(SAVE_VERSION >= 7, `SAVE_VERSION ${SAVE_VERSION} ≥ 7`);
+
 await api.clearGame();
 let st = await api.fetchSaveStatus();
 assert(!st.save, 'sin partida al inicio');
 
 const s1 = createNewState(content, 'Alpha', 'smoke-save-1');
 s1.day = 1;
+assert(!s1.energy, 'createNewState sin energy');
 let r = await api.saveGame(s1, 'Alpha', 'Día 1');
 assert(r.ok, 'primer save main');
 
@@ -53,7 +58,6 @@ const dump = api.__mockDump();
 assert(dump.main?.state?.day === 3, 'main = día 3');
 assert(dump.backup?.state?.day === 1, 'backup = día 1');
 
-// Corromper main
 dump.main.state = { broken: true };
 r = await api.loadGame();
 assert(r.ok && r.recoveredFromBackup, 'load recupera backup');
@@ -65,6 +69,27 @@ assert(!r.ok, 'rechaza payload inválido');
 await api.clearGame();
 st = await api.fetchSaveStatus();
 assert(!st.save, 'clear elimina main+backup');
+
+const legacy = createNewState(content, 'Legacy', 'legacy-180');
+legacy.v = 4;
+legacy.energy = { produced: 8, demand: 2 };
+legacy.base.buildings.push({ id: 'gen1', type: 'generator', x: 2, y: 2, hp: 100, workers: 0 });
+legacy.base.buildings.push({ id: 'sol1', type: 'solar', x: 3, y: 2, hp: 80, workers: 0 });
+const mig = migrateState(legacy, content);
+assert(mig.v === SAVE_VERSION, 'migrate bump version');
+assert(!mig.energy, 'migrate strip energy');
+assert(mig.flags?._migratedEnergy === true, 'flag migrated energy');
+const gen = mig.base.buildings.find((b) => b.id === 'gen1');
+const sol = mig.base.buildings.find((b) => b.id === 'sol1');
+assert(gen?.type === 'storage', 'generator → storage');
+assert(sol?.type === 'storage', 'solar → storage');
+
+r = await api.saveGame(mig, 'Legacy', 'migrated');
+assert(r.ok, 'save migrado');
+r = await api.loadGame();
+assert(r.ok && !r.state.energy, 'load sin energy');
+
+await api.clearGame();
 
 if (fails) {
   console.error('Smoke save FAIL', fails);

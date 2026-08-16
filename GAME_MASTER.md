@@ -1993,11 +1993,19 @@ Perfiles: atento, expansivo, conservador, mala gestión, sin explorar, sobreexpa
 Métricas: supervivencia, pop, recursos, muertes, edificios, eras, victoria, crisis, recuperación.  
 Usar para calibrar, no para “aprobar UX”.
 
-### ZZ-175…178 (implementado)
+### ZZ-175…178 (implementado · APROBADA)
 
 - Harness: `scripts/balance-sim.mjs` · informe `docs/BALANCE_REPORT.md` + `scripts/balance-report.json`.
-- Batches D30/D100 · aceptación: **mala gestión pierde más**.
+- Batches D30/D100 · aceptación: **mala gestión pierde más** · **CUMPLE**.
 - Sin electricity/generator en políticas IA.
+- Aprobación valida harness/perfiles/detección de diferencias/calibración inicial — **no** balance final de estilos.
+- Simulación ≠ playtesting humano (bots detectan economía/tendencias).
+
+### WATCH post ZZ-178 (no bugs — no recalibrar a ciegas)
+
+1. Sobreexpansión D100 alta vs atento/conservador — ¿IA vs ventaja real?
+2. Eras D100 bajas — ¿balance vs bot vs métricas? No abaratar eras a ciegas.
+3. Sin explorar D100 ~56% — vigilar coste de oportunidad (no óptimo eterno).
 
 ---
 
