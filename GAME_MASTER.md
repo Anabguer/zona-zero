@@ -1619,15 +1619,32 @@ Sin parejas.
 
 # 27. OTROS HUMANOS (FACCIONES LIGERAS)
 
-## Decisión 2.0
+## Decisión canónica ZZ-133 — GO LEAN (Neni+ChatGPT · 2026-08-16)
 
-**No diplomacia 4X.** Mantener **contactos procedurales** vía eventos/comercio:
+**DECISIÓN: GO LEAN.** APROBADA · APROBACIÓN FINAL CHATGPT: SÍ.
+
+Modelo aprobado:
+evento del mundo → descubrimiento de contacto → contacto persistente → acceso desde Contactos → trueque posible → consecuencia/recurso útil para la colonia.
+
+Validado: `discoverFaction` por eventos · solo contactos descubiertos en UI · `tradeWithFaction` lean · Contactos en Más · conexión Director/eventos · **sin** diplomacia 4X.
+
+**NO** degradar a flags-only como modelo de juego (flags internos OK para estados/decisiones).
+
+**NO** introducir por defecto: reputación numérica global · tratados · alianzas/guerras 4X · embajadores · árboles diplomáticos · gestión política paralela · múltiples monedas/reputaciones · menús diplomáticos complejos.
+
+Criterio: un contacto debe sentirse como *alguien fuera de la colonia*, no como tienda desbloqueada. Distinción futura vía necesidades/ofertas/contexto/historias — con sistemas existentes.
+
+Trueque lean: tensión entre sistemas (p. ej. med vs madera en invierno). Evitar tasa óptima universal que elimine escasez.
+
+Director: contactos como pieza narrativa cuando corresponda · sin calendario fijo · no todo encuentro = comercio · antirrepetición.
+
+## Decisión 2.0 (base)
+
+**No diplomacia 4X.** Contactos procedurales vía eventos/comercio:
 
 - 3–6 grupos por semilla (traits)  
 - Relación simple: hostil / tensa / neutral / amistosa  
 - Acciones: comercio evento, pedir paso, conflicto abstracto  
-
-Si en playtests no aportan, reducir a flags de evento sin UI dedicada.
 
 ---
 
@@ -1635,18 +1652,18 @@ Si en playtests no aportan, reducir a flags de evento sin UI dedicada.
 
 **Estabilizar Zona Zero** — culminación, no checkbox pop.
 
-Requisitos conceptuales (todos):
+Requisitos conceptuales (todos · `needEnergy: false`):
 - territorio significativo controlado  
 - población estable elevada  
-- food/water sostenibles (producción + reservas)  
+- food/water sostenibles (días de reserva + producción)  
 - clínica / hospital menor operativo  
-- defensa avanzada (perímetro + ammo path)  
-- infraestructura de recuperación (capacidad de reparación / HQ alto)  
-- sobrevivir **crisis final adaptativa** (variantes por semilla)  
+- defensa avanzada  
+- infraestructura de recuperación (HQ L2+)  
+- sobrevivir **crisis final variable** (variantes por semilla)  
 
 **Sin requisito de electricidad.**  
 
-Luego: **Continuar endless** o nueva partida.
+Pantalla victoria: días, pop/máx, territorio, semilla, variante de crisis · **Continuar endless** o volver.
 
 ---
 

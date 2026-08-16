@@ -21,6 +21,7 @@ import {
   startResearch,
   buyVehicle,
   continueEndless,
+  endScreenStats,
   adjustCategoryLabor,
   adjustBuildingWorkers,
   autoAssignWorkers,
@@ -1666,10 +1667,45 @@ function paint() {
   const defeat = $('zz-defeat');
   if (defeat) {
     defeat.hidden = !state.flags.defeated;
-    if (state.flags.defeated && $('zz-defeat-msg')) $('zz-defeat-msg').textContent = state.flags.defeatReason || '';
+    if (state.flags.defeated) {
+      const st = endScreenStats(state);
+      if ($('zz-defeat-msg')) $('zz-defeat-msg').textContent = st.reason || state.flags.defeatReason || '';
+      const list = $('zz-defeat-stats');
+      if (list) {
+        list.innerHTML = [
+          `<li>Días: <strong>${st.day}</strong></li>`,
+          `<li>Población máx.: <strong>${st.maxPop}</strong></li>`,
+          `<li>Territorio: <strong>${st.controlled}</strong> zonas</li>`,
+          `<li>Semilla: <strong>${st.seed}</strong></li>`,
+        ].join('');
+      }
+    }
   }
   const victory = $('zz-victory');
-  if (victory) victory.hidden = !(state.flags.victory && !state.flags.endless);
+  if (victory) {
+    victory.hidden = !(state.flags.victory && !state.flags.endless);
+    if (state.flags.victory && !state.flags.endless) {
+      const st = endScreenStats(state);
+      const crisisEl = $('zz-victory-crisis');
+      if (crisisEl) {
+        if (st.crisis) {
+          crisisEl.hidden = false;
+          crisisEl.textContent = `Crisis final: ${st.crisisLabel || st.crisis}`;
+        } else {
+          crisisEl.hidden = true;
+        }
+      }
+      const list = $('zz-victory-stats');
+      if (list) {
+        list.innerHTML = [
+          `<li>Día victoria: <strong>${st.victoryDay}</strong></li>`,
+          `<li>Población: <strong>${st.pop}</strong> (máx. ${st.maxPop})</li>`,
+          `<li>Territorio: <strong>${st.controlled}</strong> zonas</li>`,
+          `<li>Semilla: <strong>${st.seed}</strong></li>`,
+        ].join('');
+      }
+    }
+  }
 }
 
 function paintObjective() {

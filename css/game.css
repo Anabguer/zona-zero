@@ -1194,6 +1194,25 @@ body.zz-body {
 .zz-victory__card {
   border-color: rgba(90, 138, 98, 0.45);
 }
+.zz-end-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+  font-size: 0.92rem;
+  color: rgba(232, 224, 208, 0.88);
+}
+.zz-end-stats strong {
+  color: #f0e6d4;
+  font-weight: 600;
+}
+.zz-end-crisis {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(212, 165, 116, 0.95);
+}
 .zz-choice__actions {
   display: grid;
   gap: 0.45rem;

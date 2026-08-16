@@ -92,7 +92,19 @@ import {
   applyEncounterChoice,
   ensureMissions,
 } from './missions.js';
-import { tickAchievements, noteAchievementFlag, noteAttackRepelled } from './achievements.js';
+import {
+  tickAchievements,
+  noteAchievementFlag,
+  noteAttackRepelled,
+} from './achievements.js';
+import {
+  updateEraByIndicators,
+  checkVictoryMulti,
+  checkDefeatState,
+  continueEndlessMode,
+  victoryConditions,
+  endScreenStats,
+} from './victory.js';
 
 export const RES_LABEL = {
   food: 'comida',
@@ -1047,70 +1059,15 @@ export function buyVehicle(state, content, vehicleId) {
 export { repairVehicle };
 
 export function updateEra(state, content) {
-  const eras = content.erasDoc?.eras || [];
-  let era = 0;
-  const pop = state.population?.total || 0;
-  const controlled = state.zones.filter((z) => z.state === 'controlled').length;
-  const tech = (state.research.unlocked || []).length;
-  eras.forEach((e, idx) => {
-    const u = e.unlock || {};
-    const okPop = pop >= (u.minPop || 0);
-    const okCtrl = controlled >= (u.minControlled || 0);
-    const okTech = tech >= (u.minResearch || 0);
-    const okDay = state.day >= (u.minDay || 0);
-    const checks = [okPop, okCtrl, okTech, okDay || !u.minDay];
-    if (checks.filter(Boolean).length >= 2 && okPop) era = Math.max(era, idx);
-  });
-  if (era > state.era) {
-    state.era = era;
-    pushLog(state, `Nueva era: ${eras[era]?.name || era}.`, 'good');
-  }
+  updateEraByIndicators(state, content);
 }
 
 export function checkVictory(state, content) {
-  if (state.flags.victory && state.flags.endless) return;
-  if (state.flags.defeated) return;
-  const v = content.balance.victory || {};
-  const pop = state.population?.total || 0;
-  const controlled = state.zones.filter((z) => z.state === 'controlled').length;
-  const hasHospital = state.base.buildings.some((b) => ['clinic', 'infirmary'].includes(b.type) && b.hp > 0);
-  const energyOk = state.energy.produced >= state.energy.demand && state.energy.produced > 0;
-  const def = defenseValue(state, content.buildings, content.balance);
-  const ready =
-    pop >= (v.minPop || 40) &&
-    controlled >= (v.minControlled || 8) &&
-    state.stability >= (v.minStability || 55) &&
-    state.era >= (v.minEra || 3) &&
-    (!v.needHospital || hasHospital) &&
-    (!v.needEnergy || energyOk) &&
-    def >= (v.needDefense || 40);
-
-  if (ready && !state.flags.finalCrisisDone && !state.flags.finalCrisisActive) {
-    state.flags.finalCrisisActive = true;
-    pushLog(state, 'CRISIS FINAL: la región entera se agita. Preparad la defensa.', 'warn');
-    resolveBaseAttack(state, content, 5);
-    state.flags.finalCrisisActive = false;
-    state.flags.finalCrisisDone = true;
-    if (!state.flags.defeated && (state.population?.total || 0) > 0) {
-      state.flags.victory = true;
-      pushLog(state, 'ZONA ZERO ESTÁ ESTABILIZADA.', 'good');
-    }
-  }
+  checkVictoryMulti(state, content);
 }
 
 function checkDefeat(state) {
-  if ((state.population?.total || 0) <= 0) {
-    state.flags.defeated = true;
-    state.flags.defeatReason = 'No queda población.';
-    pushLog(state, 'DERROTA: el refugio queda vacío.', 'bad');
-    return;
-  }
-  const hq = state.base.buildings.find((b) => String(b.type).startsWith('hq_central') && b.hp > 0);
-  if (!hq && (state.population?.total || 0) < 2) {
-    state.flags.defeated = true;
-    state.flags.defeatReason = 'El Refugio Central se ha perdido.';
-    pushLog(state, 'DERROTA: sin centro ni esperanza.', 'bad');
-  }
+  checkDefeatState(state);
 }
 
 export function advanceDay(state, content) {
@@ -1375,11 +1332,9 @@ function buildDayBrief(state, content, before, prod, ctx) {
 }
 
 export function continueEndless(state) {
-  if (!state.flags.victory) return { ok: false, error: 'Sin victoria' };
-  state.flags.endless = true;
-  pushLog(state, 'Continuáis en modo endless. La zona nunca duerme del todo.', 'story');
-  return { ok: true };
+  return continueEndlessMode(state);
 }
 
+export { victoryConditions, endScreenStats };
 export { applyEventEffects, riskCategory, readyExplorers };
 export { medicalBeds, healthSemaphore, startOutbreak, tickOutbreak } from './outbreaks.js';

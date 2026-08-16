@@ -2,72 +2,59 @@
   "eras": [
     {
       "id": 0,
-      "name": "Refugio",
-      "desc": "Sobrevivir el primer cerco.",
+      "name": "Sobrevivir",
+      "desc": "Comida, agua y techo. El primer cerco.",
       "unlock": {
         "minPop": 0,
         "minControlled": 0,
-        "minResearch": 0,
-        "minDay": 0
-      },
-      "soft": {
-        "minDay": 1
+        "minResearch": 0
       }
     },
     {
       "id": 1,
-      "name": "Asentamiento",
-      "desc": "Organizar producción y rutas.",
+      "name": "Estabilizar",
+      "desc": "Defensa, stock y vivienda. Primeras techs.",
       "unlock": {
-        "minPop": 5,
+        "minPop": 6,
         "minControlled": 2,
         "minResearch": 2,
+        "minBuildings": 4,
         "minDay": 8
-      },
-      "soft": {
-        "minDay": 6
       }
     },
     {
       "id": 2,
-      "name": "Colonia",
-      "desc": "Expandir perímetro y diplomacia.",
+      "name": "Expandir",
+      "desc": "Territorio, sanidad y rutas. Radio y vehículos.",
       "unlock": {
-        "minPop": 10,
+        "minPop": 12,
         "minControlled": 4,
         "minResearch": 5,
-        "minDay": 18
-      },
-      "soft": {
-        "minDay": 14
+        "needRadio": false,
+        "minDay": 16
       }
     },
     {
       "id": 3,
-      "name": "Distrito",
-      "desc": "Logística pesada y amenazas mayores.",
+      "name": "Consolidar",
+      "desc": "Hordas, logística y reparación. Infra avanzada.",
       "unlock": {
-        "minPop": 18,
+        "minPop": 20,
         "minControlled": 7,
-        "minResearch": 10,
-        "minDay": 30
-      },
-      "soft": {
-        "minDay": 24
+        "minResearch": 9,
+        "minDay": 28
       }
     },
     {
       "id": 4,
-      "name": "Zona Zero",
-      "desc": "Dominio regional bajo presión constante.",
+      "name": "Recuperar",
+      "desc": "Estabilización regional bajo presión constante.",
       "unlock": {
-        "minPop": 28,
+        "minPop": 32,
         "minControlled": 10,
-        "minResearch": 16,
-        "minDay": 45
-      },
-      "soft": {
-        "minDay": 36
+        "minResearch": 14,
+        "needClinic": true,
+        "minDay": 40
       }
     }
   ]

@@ -108,9 +108,21 @@
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
       <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more">Más</button>
     </footer>
-    <div id="zz-defeat" class="zz-defeat" hidden><div class="zz-defeat__card"><h2>Derrota</h2><p id="zz-defeat-msg"></p></div></div>
+    <div id="zz-defeat" class="zz-defeat" hidden>
+      <div class="zz-defeat__card">
+        <h2>Derrota</h2>
+        <p id="zz-defeat-msg"></p>
+        <ul id="zz-defeat-stats" class="zz-end-stats"></ul>
+      </div>
+    </div>
     <div id="zz-victory" class="zz-victory" hidden>
-      <div class="zz-victory__card"><h2>Victoria</h2><button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Endless</button></div>
+      <div class="zz-victory__card">
+        <h2>Victoria</h2>
+        <p>Zona Zero está estabilizada.</p>
+        <p id="zz-victory-crisis" class="zz-end-crisis" hidden></p>
+        <ul id="zz-victory-stats" class="zz-end-stats"></ul>
+        <button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Continuar endless</button>
+      </div>
     </div>
     <div id="zz-choice-modal" class="zz-choice" hidden>
       <div class="zz-choice__card">

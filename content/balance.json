@@ -154,7 +154,11 @@
     "needHospital": true,
     "needEnergy": false,
     "needDefense": 40,
-    "finalCrisisSurvived": true
+    "needHqUpgrade": true,
+    "minFoodDays": 5,
+    "minWaterDays": 5,
+    "finalCrisisSurvived": true,
+    "note": "Sin electricidad. Culminación multi-condición + crisis final variable por semilla."
   },
   "compat": {
     "foodPerSurvivorPerDay": 1,

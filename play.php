@@ -20,7 +20,7 @@ $base = zz_public_base();
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#12100c" />
   <title>Jugar · Zona Zero</title>
-  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
+  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -133,13 +133,21 @@ $base = zz_public_base();
     </footer>
 
     <div id="zz-defeat" class="zz-defeat" hidden>
-      <div class="zz-defeat__card"><h2>Derrota</h2><p id="zz-defeat-msg"></p><a class="zz-btn zz-btn--primary" data-zz-back href="<?= htmlspecialchars($base) ?>">Volver</a></div>
+      <div class="zz-defeat__card">
+        <h2>Derrota</h2>
+        <p id="zz-defeat-msg"></p>
+        <ul id="zz-defeat-stats" class="zz-end-stats"></ul>
+        <a class="zz-btn zz-btn--primary" data-zz-back href="<?= htmlspecialchars($base) ?>">Volver</a>
+      </div>
     </div>
     <div id="zz-victory" class="zz-victory" hidden>
       <div class="zz-victory__card">
         <h2>Victoria</h2>
         <p>Zona Zero está estabilizada.</p>
+        <p id="zz-victory-crisis" class="zz-end-crisis" hidden></p>
+        <ul id="zz-victory-stats" class="zz-end-stats"></ul>
         <button type="button" class="zz-btn zz-btn--primary" id="zz-endless">Continuar endless</button>
+        <a class="zz-btn zz-btn--ghost" data-zz-back href="<?= htmlspecialchars($base) ?>">Volver</a>
       </div>
     </div>
     <div id="zz-choice-modal" class="zz-choice" hidden>

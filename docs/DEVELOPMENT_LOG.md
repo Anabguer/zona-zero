@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…132** hechas · **ZZ-133 HUMAN_GATE** PENDIENTE DE REVISIÓN (GO lean). · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…143** hechas · **ZZ-144 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -1875,28 +1875,123 @@ IMPLEMENTATION_PLAN 2.8 · N · **HUMAN_GATE YES** · deps ZZ-132
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## DECISIÓN
+**GO LEAN**
+
+## OBJETIVO
+Go/no-go tras playtest. Si no aporta → solo flags.
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Modelo lean aprobado: evento → descubrimiento → contacto persistente → Contactos → trueque → consecuencia útil. **NO** flags-only como modelo de juego. **NO** diplomacia 4X / reputación global / tratados / alianzas / embajadores. Trueque lean con tensión de sistemas. Director puede usar contactos sin calendario fijo ni forzar comercio. Deuda arte NO BLOQUEANTE. Continuar desde ZZ-140.
+
+## HECHO
+- Smoke `smoke-zz130-133` OK.
+- Review 10 tomas + contact sheet.
+- Contrato **2.8** intacto.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-133/`.
+
+## COMMIT
+`9d20995` (+ cierre formal en commit del bloque O)
+
+## PARAR
+No — continuar ZZ-140 → O hasta ZZ-144.
+
+---
+
+# FASE ZZ-140 — Unlock eras por indicadores 2.5
+
+IMPLEMENTATION_PLAN 2.8 · O · HUMAN_GATE NO · deps ZZ-133 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-144)*
+
+## HECHO
+- `updateEraByIndicators` · día = brújula suave · pop + ≥2 de (ctrl/tech/infra/softDay).
+- `content/eras.json` alineado Sobrevivir→Recuperar.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-141 — Victoria multi-condición SIN needEnergy
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `victoryConditions` · `needEnergy: false` · food/water days · HQ L2+ · clínica · defensa · sin checkbox solo-pop.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-142 — Crisis final variable
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- 4 variantes por semilla: `horde_surge` · `plague_and_push` · `frontier_collapse` · `siege_scarcity`.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-143 — Endless post-victoria
+
+## ESTADO CURSOR
+COMPLETADA
+
+## HECHO
+- `continueEndlessMode` · flag `endless` · UI Continuar endless.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-144 — Pantallas victoria/derrota + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · O · **HUMAN_GATE YES** · deps ZZ-143
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Go/no-go tras playtest. Si no aporta → solo flags.
-
-## RECOMENDACIÓN CURSOR
-**GO lean** — contactos por evento + trueque + UI mínima. **NO** diplomacia 4X / mapa / turnos. Si Neni/ChatGPT prefieren flags-only, se puede degradar sin rehacer el Director.
+Pantallas victoria/derrota + gate. Sin electricidad en victoria. Culminación no checkbox pop.
 
 ## HECHO
-- Smoke `smoke-zz130-133` OK.
-- Review 10 tomas + contact sheet.
+- `js/victory.js` cableado en `sim.js`.
+- Pantallas con stats (días, max pop, territorio, semilla, causa/crisis).
+- Smoke `smoke-zz140-144`.
+- Review shots + contact sheet.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-140** hasta APROBADA ZZ-133.
+- Sin deploy · **no ZZ-150** hasta APROBADA ZZ-144.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-133. Sin deploy. No ZZ-140.
+Sí — HUMAN_GATE ZZ-144. Sin deploy. No ZZ-150.
 
 ---
 
