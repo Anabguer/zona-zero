@@ -1,0 +1,332 @@
+{
+  "session": "PT1-A-AFTER",
+  "before_reference": {
+    "note": "Medidas BEFORE (producción previa Compact B)",
+    "800x360": {
+      "hud_h": 77.5,
+      "dock_h": 53.3,
+      "chromeOwnPct": 36.3
+    },
+    "844x390": {
+      "hud_h": 77.5,
+      "dock_h": 53.3,
+      "chromeOwnPct": 33.5
+    }
+  },
+  "after_844x390": {
+    "inner": {
+      "w": 844,
+      "h": 390
+    },
+    "visualViewport": {
+      "w": 844,
+      "h": 390,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 844,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 844,
+      "top": 349.9,
+      "bottom": 390
+    },
+    "mapWrap": {
+      "h": 390,
+      "w": 844,
+      "top": 0,
+      "bottom": 390
+    },
+    "coach": {
+      "h": 78,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 112.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 19.9,
+    "worldFreePx": 312.4,
+    "worldUsableEstimate": 80.1,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "after_coach_844x390": {
+    "inner": {
+      "w": 844,
+      "h": 390
+    },
+    "visualViewport": {
+      "w": 844,
+      "h": 390,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 844,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 844,
+      "top": 349.9,
+      "bottom": 390
+    },
+    "mapWrap": {
+      "h": 390,
+      "w": 844,
+      "top": 0,
+      "bottom": 390
+    },
+    "coach": {
+      "h": 78,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 112.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 19.9,
+    "worldFreePx": 312.4,
+    "worldUsableEstimate": 80.1,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "after_800x360": {
+    "inner": {
+      "w": 800,
+      "h": 360
+    },
+    "visualViewport": {
+      "w": 800,
+      "h": 360,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 800,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 800,
+      "top": 319.9,
+      "bottom": 360
+    },
+    "mapWrap": {
+      "h": 360,
+      "w": 800,
+      "top": 0,
+      "bottom": 360
+    },
+    "coach": {
+      "h": 72,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 106.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 21.6,
+    "worldFreePx": 282.4,
+    "worldUsableEstimate": 78.4,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "after_coach_800x360": {
+    "inner": {
+      "w": 800,
+      "h": 360
+    },
+    "visualViewport": {
+      "w": 800,
+      "h": 360,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 800,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 800,
+      "top": 319.9,
+      "bottom": 360
+    },
+    "mapWrap": {
+      "h": 360,
+      "w": 800,
+      "top": 0,
+      "bottom": 360
+    },
+    "coach": {
+      "h": 72,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 106.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 21.6,
+    "worldFreePx": 282.4,
+    "worldUsableEstimate": 78.4,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "after_740x360": {
+    "inner": {
+      "w": 740,
+      "h": 360
+    },
+    "visualViewport": {
+      "w": 740,
+      "h": 360,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 740,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 740,
+      "top": 319.9,
+      "bottom": 360
+    },
+    "mapWrap": {
+      "h": 360,
+      "w": 740,
+      "top": 0,
+      "bottom": 360
+    },
+    "coach": {
+      "h": 72,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 106.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 21.6,
+    "worldFreePx": 282.4,
+    "worldUsableEstimate": 78.4,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "after_coach_740x360": {
+    "inner": {
+      "w": 740,
+      "h": 360
+    },
+    "visualViewport": {
+      "w": 740,
+      "h": 360,
+      "offsetTop": 0
+    },
+    "hud": {
+      "h": 37.5,
+      "w": 740,
+      "top": 0,
+      "bottom": 37.5
+    },
+    "dock": {
+      "h": 40.1,
+      "w": 740,
+      "top": 319.9,
+      "bottom": 360
+    },
+    "mapWrap": {
+      "h": 360,
+      "w": 740,
+      "top": 0,
+      "bottom": 360
+    },
+    "coach": {
+      "h": 72,
+      "w": 200,
+      "top": 34.4,
+      "bottom": 106.4
+    },
+    "chromeOwnPx": 77.6,
+    "chromeOwnPct": 21.6,
+    "worldFreePx": 282.4,
+    "worldUsableEstimate": 78.4,
+    "topRowHidden": true,
+    "dayChipVisible": true,
+    "title": "Zona Zero · harness bloque 1",
+    "dockLabels": [
+      "Construir",
+      "Avanzar día",
+      "Más"
+    ]
+  },
+  "hub_logo_first": {
+    "inner": {
+      "w": 844,
+      "h": 390
+    },
+    "visualViewport": {
+      "w": 844,
+      "h": 390,
+      "offsetTop": 0
+    },
+    "hud": null,
+    "dock": null,
+    "mapWrap": null,
+    "coach": null,
+    "chromeOwnPx": 0,
+    "chromeOwnPct": 0,
+    "worldFreePx": 390,
+    "worldUsableEstimate": 100,
+    "topRowHidden": true,
+    "dayChipVisible": false,
+    "title": "Zona Zero · hub empty",
+    "dockLabels": []
+  },
+  "manifest": {
+    "display": "standalone",
+    "orientation": "landscape",
+    "start_url": "/juegos/zona-zero/?source=pwa",
+    "scope": "/juegos/zona-zero/",
+    "icons": [
+      "192x192",
+      "512x512",
+      "512x512"
+    ]
+  }
+}

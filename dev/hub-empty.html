@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Zona Zero · hub empty</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=23" />
-  <link rel="stylesheet" href="../css/hub.css?v=23" />
+  <link rel="stylesheet" href="../css/game.css?v=43" />
+  <link rel="stylesheet" href="../css/hub.css?v=43" />
   <script type="importmap">
   {
     "imports": {
@@ -26,21 +26,30 @@
       <p class="zz-user">Hola, <strong id="zz-user">Tester</strong></p>
     </header>
     <main class="zz-hub__hero">
-      <p class="zz-hub__kicker">Intocables · Supervivencia</p>
-      <h1 class="zz-hub__brand">Zona Zero</h1>
-      <p class="zz-hub__tag">El silencio después del colapso. Gestiona, explora, sobrevive.</p>
+      <h1 class="zz-hub__brand">
+        <img
+          class="zz-hub__logo"
+          src="../assets/logo.svg"
+          width="200"
+          height="200"
+          alt="Zona Zero"
+          onerror="this.onerror=null;this.src='../assets/cover.svg'"
+        />
+      </h1>
       <div class="zz-hub__actions" id="zz-hub-actions" aria-label="Empezar"></div>
     </main>
   </div>
   <script type="module">
-    import { bootHub } from '../js/main.js?v=23';
+    import { bootHub } from '../js/main.js?v=43';
     bootHub({
       demoEmpty: true,
-      playUrl: '/dev/harness.html',
-      assetBase: '../assets/art/intro/',
-    })
-      .then(() => { window.__hubOk = true; })
-      .catch((e) => { window.__hubErr = String(e && e.message ? e.message : e); });
+      playUrl: './harness-zz.html',
+    }).then(() => {
+      window.__zzHubOk = true;
+    }).catch((e) => {
+      window.__zzHubErr = String(e?.message || e);
+      console.error(e);
+    });
   </script>
 </body>
 </html>

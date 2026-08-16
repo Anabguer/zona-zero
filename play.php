@@ -20,8 +20,14 @@ $base = zz_public_base();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#12100c" />
-  <title>Jugar · Zona Zero</title>
-  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Zona Zero" />
+  <title>Zona Zero</title>
+  <link rel="manifest" href="<?= htmlspecialchars($base) ?>manifest.webmanifest?v=<?= rawurlencode(zz_asset_v()) ?>" />
+  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -30,6 +36,11 @@ $base = zz_public_base();
   <?php zz_print_js_importmap($base); ?>
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13">
+  <script>
+    if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+      document.body.classList.add('zz-standalone');
+    }
+  </script>
   <div id="zz-boot" class="zz-boot">Preparando partida…</div>
   <div id="zz-rotate-gate" class="zz-rotate-gate" hidden aria-hidden="true" role="dialog" aria-labelledby="zz-rotate-title" aria-describedby="zz-rotate-desc">
     <div class="zz-rotate-gate__panel">
@@ -69,6 +80,7 @@ $base = zz_public_base();
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
+        <span class="zz-hud__day-chip" id="zz-day-chip" title="Día actual">D1</span>
         <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población actual / plazas de vivienda">
           <img src="<?= htmlspecialchars($base) ?>assets/art/ui/pop.webp" alt="" width="18" height="18" />
           <span class="zz-hud__pop-wrap">
@@ -127,11 +139,20 @@ $base = zz_public_base();
     <div id="zz-day-brief" class="zz-day-brief" hidden></div>
 
     <footer class="zz-world-dock">
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build">Construir</button>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar">✕</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more">Más</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build" aria-label="Construir">
+        <span class="zz-dock-ico" aria-hidden="true">▣</span>
+        <span class="zz-dock-txt">Construir</span>
+      </button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar">✕</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance" aria-label="Avanzar día">
+        <span class="zz-dock-txt zz-dock-txt--advance">Avanzar día</span>
+        <span class="zz-dock-txt zz-dock-txt--advance-short" aria-hidden="true">Día ›</span>
+      </button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden aria-label="Confirmar construcción">✓ Construir</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more" aria-label="Más">
+        <span class="zz-dock-ico" aria-hidden="true">⋯</span>
+        <span class="zz-dock-txt">Más</span>
+      </button>
     </footer>
 
     <div id="zz-defeat" class="zz-defeat" hidden>

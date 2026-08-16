@@ -36,6 +36,10 @@ $indexPhp = Join-Path $Root 'index.php'
 $playPhp = Join-Path $Root 'play.php'
 $htaccess = Join-Path $Root '.htaccess'
 $metaJson = Join-Path $Root 'meta.json'
+$manifest = Join-Path $Root 'manifest.webmanifest'
+$swJs = Join-Path $Root 'sw.js'
+$assetsPwa = (Join-Path $Root 'assets\pwa').Replace('\', '/')
+$assetsLogo = Join-Path $Root 'assets\logo.svg'
 
 $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine('option batch abort')
@@ -51,6 +55,10 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("put `"$playPhp`" /juegos/zona-zero/play.php")
 [void]$sb.AppendLine("put `"$htaccess`" /juegos/zona-zero/.htaccess")
 [void]$sb.AppendLine("put `"$metaJson`" /juegos/zona-zero/meta.json")
+[void]$sb.AppendLine("put `"$manifest`" /juegos/zona-zero/manifest.webmanifest")
+[void]$sb.AppendLine("put `"$swJs`" /juegos/zona-zero/sw.js")
+[void]$sb.AppendLine("put `"$assetsLogo`" /juegos/zona-zero/assets/logo.svg")
+[void]$sb.AppendLine("synchronize remote -mirror `"$assetsPwa`" /juegos/zona-zero/assets/pwa")
 [void]$sb.AppendLine('exit')
 
 [System.IO.File]::WriteAllText($scriptPath, $sb.ToString())

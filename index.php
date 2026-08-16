@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/zz-assets.php';
 zz_page_require_login();
 $user = zz_page_user();
 $base = zz_public_base();
+$v = zz_asset_v();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,8 +14,14 @@ $base = zz_public_base();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#12100c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Zona Zero" />
   <title>Zona Zero</title>
-  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/cover.svg" type="image/svg+xml" />
+  <link rel="manifest" href="<?= htmlspecialchars($base) ?>manifest.webmanifest?v=<?= rawurlencode($v) ?>" />
+  <link rel="icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="<?= htmlspecialchars($base) ?>assets/pwa/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -31,15 +38,25 @@ $base = zz_public_base();
       <p class="zz-user">Hola, <strong id="zz-user"><?= htmlspecialchars((string) ($user['nombre'] ?? 'Jugador')) ?></strong></p>
     </header>
     <main class="zz-hub__hero">
-      <p class="zz-hub__kicker">Intocables · Supervivencia</p>
-      <h1 class="zz-hub__brand">Zona Zero</h1>
-      <p class="zz-hub__tag">El silencio después del colapso. Gestiona, explora, sobrevive.</p>
+      <h1 class="zz-hub__brand">
+        <img
+          class="zz-hub__logo"
+          src="<?= htmlspecialchars($base) ?>assets/logo.svg"
+          width="200"
+          height="200"
+          alt="Zona Zero"
+          onerror="this.onerror=null;this.src='<?= htmlspecialchars($base) ?>assets/cover.svg'"
+        />
+      </h1>
       <div class="zz-hub__actions" id="zz-hub-actions" aria-label="Empezar"></div>
     </main>
   </div>
   <script type="module">
     const boot = document.getElementById('zz-hub-boot');
     try {
+      if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+        document.body.classList.add('zz-standalone');
+      }
       const { bootHub } = await import('<?= zz_js_entry_href('./js/main.js') ?>');
       await bootHub();
     } catch (err) {

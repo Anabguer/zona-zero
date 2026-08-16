@@ -1,0 +1,47 @@
+{
+  "session": "PT1-A",
+  "verdict": "NO_APROBADO_PLAYTEST_MOVIL",
+  "topBar": {
+    "seenByNeni": "X | Jugar | Zona Zero | intocables13.com | ⋮",
+    "owner": "browser_or_chrome_custom_tab",
+    "inGameDom": false,
+    "evidence": "Matches play.php title 'Jugar · Zona Zero'; close X + URL + overflow are CCT/Chrome chrome. Not present in game DOM measurement."
+  },
+  "before_844x390": {
+    "inner": { "w": 844, "h": 390 },
+    "hud_h": 77.5,
+    "dock_h": 53.3,
+    "coach_h": 109.2,
+    "dockLabels": ["Construir", "Avanzar día", "Más"],
+    "worldBandEstWithBrowserChrome": 167,
+    "worldBandPctOfDeviceEst": 43
+  },
+  "compactA_844x390": {
+    "hud_h": 68.0,
+    "dock_h": 49.1,
+    "worldBandEstWithBrowserChrome": 181,
+    "worldBandPctOfDeviceEst": 46,
+    "deltaWorldPx": 14,
+    "verdict": "insufficient"
+  },
+  "compactB_844x390": {
+    "hud_h": 27.6,
+    "dock_h": 45.2,
+    "worldBandEstWithBrowserChrome": 225,
+    "worldBandPctOfDeviceEst": 58,
+    "deltaWorldPxVsBefore": 58,
+    "notes": "Hide HUD top row; icon dock secs; shorter coach. Local inject only — no deploy."
+  },
+  "chromeAssumptionsPx": {
+    "cctTop": 52,
+    "systemNavBottom": 40,
+    "note": "Estimates for typical Android Chrome CCT + gesture bar on ~390 CSS-height landscape."
+  },
+  "screenshots": [
+    "01-before-world-844x390.png",
+    "02-after-compact-844x390.png",
+    "03-proposal-B-compact-844x390.png",
+    "04-hub-current.png",
+    "05-hub-logo-proposal.png"
+  ]
+}

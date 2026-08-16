@@ -209,6 +209,35 @@ body.zz-from-intro #zz-boot {
   50% { background: rgba(120,40,20,0.55); }
 }
 
+/* Chip de día: oculto en portrait (vive en fila top); visible en landscape compacto */
+.zz-hud__day-chip {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  min-height: 2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(196, 165, 116, 0.35);
+  font-family: var(--zz-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e8dcc8;
+  line-height: 1;
+}
+
+.zz-dock-ico {
+  display: none;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.zz-dock-txt--advance-short {
+  display: none;
+}
+
 .zz-hud__threat {
   flex: 0 0 auto;
   display: flex;
@@ -402,6 +431,16 @@ body.zz-from-intro #zz-boot {
 .zz-btn--dock-sec {
   min-width: 5.2rem;
   min-height: 2.75rem;
+}
+.zz-more-utils {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+.zz-more-utils .zz-btn {
+  flex: 1 1 auto;
+  min-width: 5.5rem;
 }
 #zz-open-build.is-guide-pulse {
   animation: zz-guide-pulse 1.2s ease-in-out infinite;
@@ -1249,71 +1288,89 @@ body.zz-need-landscape #zz-toast {
 }
 
 /*
- * Mobile / tablet LANDSCAPE gameplay — designed for horizontal, not portrait CSS rotated.
- * Priority: world surface > HUD chrome.
+ * Mobile / tablet LANDSCAPE — mundo manda.
+ * Compact B: una sola banda de stats; Inicio/?/♪/G viven en Más.
+ * Objetivo: chrome propio persistente ~≤25% del alto en 800×360 (sin dogma a11y).
  */
 @media (orientation: landscape) and (max-width: 1099px) {
   .zz-body--v13 {
-    --zz-dock-h: 3.1rem;
+    --zz-dock-h: 2.45rem;
   }
 
   .zz-hud {
-    padding: calc(0.2rem + env(safe-area-inset-top, 0px))
-      max(0.4rem, env(safe-area-inset-right, 0px)) 0.25rem
-      max(0.4rem, env(safe-area-inset-left, 0px));
-    background: linear-gradient(180deg, rgba(10, 8, 6, 0.88) 0%, rgba(10, 8, 6, 0.4) 75%, transparent 100%);
+    padding: calc(0.1rem + env(safe-area-inset-top, 0px))
+      max(0.35rem, env(safe-area-inset-right, 0px)) 0.12rem
+      max(0.35rem, env(safe-area-inset-left, 0px));
+    background: linear-gradient(
+      180deg,
+      rgba(10, 8, 6, 0.82) 0%,
+      rgba(10, 8, 6, 0.35) 70%,
+      transparent 100%
+    );
   }
+  /* Fila top → Más (Inicio, colonia, ?, sonido, guardar) */
   .zz-hud__row--top {
-    margin-bottom: 0.12rem;
+    display: none;
   }
-  .zz-hud__title strong {
-    font-size: 0.82rem;
-  }
-  #zz-day-label {
-    font-size: 0.62rem;
-  }
-  .zz-btn--icon {
-    min-width: 34px;
-    min-height: 34px;
+  .zz-hud__day-chip {
+    display: inline-flex;
   }
   .zz-hud__row--stats {
-    gap: 0.25rem;
+    gap: 0.2rem;
+    padding-bottom: 0;
   }
   .zz-hud__pop {
-    padding: 0.14rem 0.35rem;
+    padding: 0.1rem 0.3rem;
+    min-height: 2rem;
+    border-radius: 6px;
+  }
+  .zz-hud__pop img {
+    width: 14px;
+    height: 14px;
   }
   .zz-hud__pop strong {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
   .zz-hud__pop-label {
     display: none;
   }
   .zz-hud__res li {
-    min-width: 2.35rem;
-    padding: 0.1rem 0.22rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.08rem 0.18rem;
+    gap: 0.02rem;
   }
   .zz-hud__res li strong {
     font-size: 0.72rem;
   }
-  /* ZZ-013: nombres legibles en landscape (comida/agua/madera) */
   .zz-hud__res-name {
     display: block;
-    font-size: 0.48rem;
-    max-width: 2.8rem;
+    font-size: 0.5rem;
+    max-width: 2.6rem;
     letter-spacing: 0;
   }
   .zz-hud__res li img {
     width: 12px;
     height: 12px;
   }
+  .zz-mission {
+    margin-top: 0.2rem;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.72rem;
+  }
+  .zz-mode-banner {
+    margin-top: 0.2rem;
+    padding: 0.28rem 0.5rem;
+    font-size: 0.75rem;
+  }
 
-  /* Side card landscape — mismo contrato que desktop (ficha lateral, mundo visible) */
+  /* Side card landscape */
   .zz-world--overlay .zz-sheet {
     left: auto;
     right: max(0.35rem, env(safe-area-inset-right, 0px));
-    top: calc(3.6rem + env(safe-area-inset-top, 0px));
-    bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
-    width: min(44vw, 320px);
+    top: calc(2.35rem + env(safe-area-inset-top, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.3rem + env(safe-area-inset-bottom, 0px));
+    width: min(42vw, 300px);
     max-height: none;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1325,28 +1382,28 @@ body.zz-need-landscape #zz-toast {
     display: none;
   }
   .zz-sheet__body {
-    padding: 0.55rem 0.7rem 0.75rem;
+    padding: 0.5rem 0.65rem 0.7rem;
   }
   .zz-sheet__close {
-    top: 0.35rem;
-    right: 0.35rem;
+    top: 0.3rem;
+    right: 0.3rem;
     width: 34px;
     height: 34px;
   }
   .zz-ctx__head {
-    grid-template-columns: 48px 1fr;
-    gap: 0.45rem;
+    grid-template-columns: 44px 1fr;
+    gap: 0.4rem;
   }
   .zz-ctx__art {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
   }
   .zz-ctx__head h2,
   .zz-sheet-panel__title {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   .zz-ctx__head p {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
   }
   .zz-stepper button {
     width: 36px;
@@ -1354,44 +1411,78 @@ body.zz-need-landscape #zz-toast {
   }
 
   .zz-world--overlay .zz-world-dock {
-    padding: 0.28rem max(0.45rem, env(safe-area-inset-right, 0px))
-      calc(0.28rem + env(safe-area-inset-bottom, 0px)) max(0.45rem, env(safe-area-inset-left, 0px));
-    gap: 0.35rem;
+    padding: 0.18rem max(0.4rem, env(safe-area-inset-right, 0px))
+      calc(0.18rem + env(safe-area-inset-bottom, 0px))
+      max(0.4rem, env(safe-area-inset-left, 0px));
+    gap: 0.3rem;
+    background: linear-gradient(0deg, rgba(10, 8, 6, 0.92), rgba(10, 8, 6, 0.55));
   }
   .zz-btn--dock-sec {
-    min-width: 4.6rem;
-    min-height: 2.55rem;
-    font-size: 0.88rem;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.05rem;
+    min-width: 2.75rem;
+    min-height: 2.2rem;
+    padding: 0.15rem 0.35rem;
+    font-size: 0.62rem;
+    line-height: 1.05;
+  }
+  .zz-btn--dock-sec .zz-dock-ico {
+    display: block;
+    font-size: 1rem;
+  }
+  .zz-btn--dock-sec .zz-dock-txt {
+    font-size: 0.58rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.9;
   }
   .zz-world--overlay .zz-world-dock .zz-btn--wide {
-    min-height: 2.55rem;
-    font-size: 0.95rem;
+    min-height: 2.2rem;
+    font-size: 0.88rem;
+    padding: 0.2rem 0.55rem;
+  }
+  .zz-dock-txt--advance {
+    display: none;
+  }
+  .zz-dock-txt--advance-short {
+    display: inline;
   }
 
   .zz-world--overlay .zz-explorer-rail {
-    left: max(0.4rem, env(safe-area-inset-left, 0px));
+    left: max(0.35rem, env(safe-area-inset-left, 0px));
     right: auto;
-    bottom: calc(var(--zz-dock-h) + 0.4rem + env(safe-area-inset-bottom, 0px));
-    max-width: min(38vw, 200px);
+    bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
+    max-width: min(34vw, 180px);
   }
 
+  /* Coach: tip lateral compacto — no cambia pacing/contenido */
   .zz-coach-card {
-    left: max(0.5rem, env(safe-area-inset-left, 0px));
+    left: max(0.4rem, env(safe-area-inset-left, 0px));
     right: auto;
     transform: none;
     bottom: auto;
-    top: calc(3.35rem + env(safe-area-inset-top, 0px));
-    width: min(260px, 42vw);
-    padding: 0.45rem 0.6rem;
-    max-height: 28vh;
+    top: calc(2.4rem + env(safe-area-inset-top, 0px));
+    width: min(220px, 36vw);
+    padding: 0.32rem 0.5rem;
+    max-height: 22vh;
     overflow: auto;
+    border-radius: 8px;
   }
   .zz-coach-card p {
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+  .zz-coach-card button:not([hidden]) {
+    margin-top: 0.35rem;
+    min-height: 2rem;
     font-size: 0.78rem;
   }
   .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-coach-card {
-    width: min(220px, 32vw);
-    top: calc(3.35rem + env(safe-area-inset-top, 0px));
+    width: min(180px, 28vw);
+    top: calc(2.4rem + env(safe-area-inset-top, 0px));
     bottom: auto;
   }
   .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-explorer-rail {
@@ -1399,41 +1490,72 @@ body.zz-need-landscape #zz-toast {
   }
 
   .zz-map-zoom {
-    right: max(0.4rem, env(safe-area-inset-right, 0px));
-    bottom: calc(var(--zz-dock-h) + 0.45rem + env(safe-area-inset-bottom, 0px));
+    right: max(0.35rem, env(safe-area-inset-right, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
     flex-direction: row;
-  }
-  .zz-map-zoom button {
-    width: 40px;
-    height: 40px;
-  }
-  .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-map-zoom {
-    right: auto;
-    left: max(0.4rem, env(safe-area-inset-left, 0px));
-    bottom: calc(var(--zz-dock-h) + 0.45rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  .zz-day-brief {
-    top: 10%;
-    width: min(320px, 55vw);
-  }
-}
-
-/* Short landscape phones (e.g. 667×375, 740×360) — squeeze chrome harder */
-@media (orientation: landscape) and (max-width: 1099px) and (max-height: 400px) {
-  .zz-body--v13 {
-    --zz-dock-h: 2.85rem;
-  }
-  .zz-hud__row--top .zz-back {
-    font-size: 0.78rem;
-  }
-  .zz-world--overlay .zz-sheet {
-    top: calc(3.15rem + env(safe-area-inset-top, 0px));
-    width: min(38vw, 240px);
   }
   .zz-map-zoom button {
     width: 36px;
     height: 36px;
-    font-size: 1.1rem;
+  }
+  .zz-world--overlay:has(.zz-sheet:not([hidden])) .zz-map-zoom {
+    right: auto;
+    left: max(0.35rem, env(safe-area-inset-left, 0px));
+    bottom: calc(var(--zz-dock-h) + 0.35rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .zz-day-brief {
+    top: 10%;
+    width: min(300px, 52vw);
+  }
+
+  /* PWA standalone: aún más mundo */
+  body.zz-standalone.zz-body--v13 {
+    --zz-dock-h: 2.35rem;
+  }
+  body.zz-standalone .zz-hud {
+    padding-top: calc(0.08rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/* Short landscape phones (740×360, etc.) */
+@media (orientation: landscape) and (max-width: 1099px) and (max-height: 400px) {
+  .zz-body--v13 {
+    --zz-dock-h: 2.3rem;
+  }
+  .zz-hud__day-chip {
+    min-width: 2.15rem;
+    min-height: 1.85rem;
+    font-size: 0.72rem;
+    padding: 0.1rem 0.3rem;
+  }
+  .zz-hud__res-name {
+    font-size: 0.46rem;
+    max-width: 2.3rem;
+  }
+  .zz-btn--dock-sec {
+    min-height: 2.05rem;
+  }
+  .zz-world--overlay .zz-world-dock .zz-btn--wide {
+    min-height: 2.05rem;
+    font-size: 0.82rem;
+  }
+  .zz-world--overlay .zz-sheet {
+    top: calc(2.15rem + env(safe-area-inset-top, 0px));
+    width: min(36vw, 230px);
+  }
+  .zz-coach-card {
+    top: calc(2.15rem + env(safe-area-inset-top, 0px));
+    width: min(200px, 34vw);
+    max-height: 20vh;
+    padding: 0.28rem 0.45rem;
+  }
+  .zz-coach-card p {
+    font-size: 0.68rem;
+  }
+  .zz-map-zoom button {
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
   }
 }

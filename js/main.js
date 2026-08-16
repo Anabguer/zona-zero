@@ -68,6 +68,11 @@ import {
   explorerSlotsUnlocked,
 } from './explorers.js';
 import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
+import {
+  mountHubInstallCta,
+  registerServiceWorker,
+  bindFullscreenOnFirstGesture,
+} from './pwa.js';
 import { initOrientationGate, refreshOrientationGate, isGameplayPortraitBlocked } from './orientation.js';
 import {
   ensureSectors,
@@ -306,6 +311,25 @@ function handleSheetAction(action, btn) {
     const { html } = renderHelpHtml(state);
     openSheet(html, 'help');
     scheduleSave();
+    return;
+  }
+  if (action === 'do-save') {
+    doSave();
+    return;
+  }
+  if (action === 'toggle-sound') {
+    const on = !isSoundEnabled();
+    setSoundEnabled(on);
+    $('zz-sound')?.classList.toggle('is-off', !on);
+    $('zz-sound')?.setAttribute('aria-pressed', on ? 'true' : 'false');
+    toast(on ? 'Sonido activado' : 'Sonido silenciado', 'info');
+    openMoreSheet();
+    return;
+  }
+  if (action === 'go-hub') {
+    const a = document.querySelector('[data-zz-back]');
+    const href = a?.getAttribute('href') || './';
+    window.location.href = href;
     return;
   }
   if (action === 'send-exp') {
@@ -1140,13 +1164,19 @@ function openMoreSheet() {
     .map((s) => `<li>D${s.day}: <strong>${escapeHtml(s.title)}</strong> — ${escapeHtml(s.detail || '')}</li>`)
     .join('');
 
+  const soundOn = isSoundEnabled();
   openSheet(
     sheetPanel(
       'Más',
       'Mundo primero: recuperar territorio, gente y sistemas — sin pestañas de app.',
-      `<p>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--wide" data-action="open-help">Ayuda</button>
-    </p>
+      `<div class="zz-more-utils" role="group" aria-label="Accesos">
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--compact" data-action="go-hub">Inicio</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--compact" data-action="do-save">Guardar</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--compact" data-action="toggle-sound">${
+        soundOn ? 'Sonido ✓' : 'Sonido ✕'
+      }</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--compact" data-action="open-help">Ayuda</button>
+    </div>
     <p>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="expand-mode">
         ${state.uiMode === 'expand' ? 'Salir de recuperación' : 'Recuperar territorio'}
@@ -1448,6 +1478,10 @@ function paintHud() {
   const cap = housingCapacity(state, content.buildings);
   if ($('zz-pop')) $('zz-pop').textContent = `${pop.total}/${cap}`;
   if ($('zz-day-label')) $('zz-day-label').textContent = `Día ${state.day}`;
+  if ($('zz-day-chip')) {
+    $('zz-day-chip').textContent = `D${state.day}`;
+    $('zz-day-chip').title = `Día ${state.day}`;
+  }
   if ($('zz-colony')) $('zz-colony').textContent = state.colonyName || 'Refugio';
   if ($('zz-era')) {
     const eraName = content.erasDoc?.eras?.[state.era]?.name || `Era ${state.era}`;
@@ -2349,6 +2383,8 @@ function bindChrome() {
 export async function bootGame(opts) {
   const boot = $('zz-boot');
   const app = $('zz-app');
+  registerServiceWorker();
+  bindFullscreenOnFirstGesture();
   try {
     content = await loadContent();
   } catch (e) {
@@ -2567,6 +2603,9 @@ export async function bootHub(opts = {}) {
       neu.addEventListener('click', beginNew);
       actions.appendChild(neu);
     }
+
+    mountHubInstallCta(actions);
+    registerServiceWorker();
 
     if (boot) boot.hidden = true;
     if (hub) hub.hidden = false;

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness bloque 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=38" />
-  <link rel="stylesheet" href="../css/world.css?v=38" />
+  <link rel="stylesheet" href="../css/game.css?v=43" />
+  <link rel="stylesheet" href="../css/world.css?v=43" />
   <script type="importmap">
   {
     "imports": {
@@ -41,7 +41,7 @@
     </main>
     <header class="zz-hud" id="zz-hud">
       <div class="zz-hud__row zz-hud__row--top">
-        <a class="zz-back" href="#">Partidas</a>
+        <a class="zz-back" href="#">Inicio</a>
         <div class="zz-hud__title">
           <strong id="zz-colony">Refugio Norte</strong>
           <span id="zz-day-label">Día 1</span>
@@ -54,6 +54,7 @@
         </div>
       </div>
       <div class="zz-hud__row zz-hud__row--stats">
+        <span class="zz-hud__day-chip" id="zz-day-chip" title="Día actual">D1</span>
         <button type="button" class="zz-hud__pop" id="zz-open-pop" title="Población actual / plazas de vivienda">
           <img src="../assets/art/ui/pop.webp" alt="" width="18" height="18" />
           <span class="zz-hud__pop-wrap">
@@ -102,11 +103,20 @@
     <div id="zz-attack-card" class="zz-attack-card" hidden></div>
     <div id="zz-day-brief" class="zz-day-brief" hidden></div>
     <footer class="zz-world-dock">
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build">Construir</button>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar">✕</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more">Más</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build" aria-label="Construir">
+        <span class="zz-dock-ico" aria-hidden="true">▣</span>
+        <span class="zz-dock-txt">Construir</span>
+      </button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar">✕</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance" aria-label="Avanzar día">
+        <span class="zz-dock-txt zz-dock-txt--advance">Avanzar día</span>
+        <span class="zz-dock-txt zz-dock-txt--advance-short" aria-hidden="true">Día ›</span>
+      </button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden aria-label="Confirmar construcción">✓ Construir</button>
+      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more" aria-label="Más">
+        <span class="zz-dock-ico" aria-hidden="true">⋯</span>
+        <span class="zz-dock-txt">Más</span>
+      </button>
     </footer>
     <div id="zz-defeat" class="zz-defeat" hidden>
       <div class="zz-defeat__card">
@@ -139,7 +149,7 @@
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=38';
+    import { bootGame } from '../js/main.js?v=43';
     const q = new URLSearchParams(
       (location.hash || '').replace(/^#/, '') || location.search.replace(/^\?/, '')
     );

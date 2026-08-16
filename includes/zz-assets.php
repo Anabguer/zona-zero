@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Versión única de assets JS/CSS para cache-bust coherente del grafo ES modules.
  * Subir SIEMPRE todo js/ (+ entry PHP) al cambiar esta constante.
  */
-const ZZ_ASSET_V = '42';
+const ZZ_ASSET_V = '43';
 
 function zz_asset_v(): string
 {
