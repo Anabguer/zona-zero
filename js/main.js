@@ -46,6 +46,7 @@ import { renderHelpHtml } from './help.js';
 import {
   buildingsNeedingRepair,
   structuralStateLabel,
+  buildingMaxHp,
 } from './buildings-damage.js';
 import { resolvePendingChoice } from './director.js';
 import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox } from './render-map.js';
@@ -673,7 +674,7 @@ function openBuildingSheet(id) {
           key ? ` · staff ${workers}/${cap}` : ''
         }</p>`
       : '';
-  const hpMax = 100;
+  const hpMax = buildingMaxHp(b, content);
   const hp = Math.max(0, b.hp ?? hpMax);
   const quote = struct !== 'ok' ? repairQuote(state, content, b) : null;
   const repairing = b.repair?.daysLeft > 0;
@@ -691,19 +692,30 @@ function openBuildingSheet(id) {
            <p><button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="repair-building" data-id="${
              b.id
            }">Reparar</button></p>`;
+  const artFilter =
+    struct === 'destroyed'
+      ? 'filter:grayscale(0.7) brightness(0.7)'
+      : struct === 'critical'
+        ? 'filter:grayscale(0.55) brightness(0.85)'
+        : struct === 'damaged'
+          ? 'filter:saturate(0.7) brightness(0.92)'
+          : '';
+  const insulatedBadge =
+    b.type === 'insulated_house'
+      ? '<p class="zz-muted" style="font-size:0.78rem;margin:0.15rem 0 0">Cubierta aislada</p>'
+      : '';
 
   openSheet(`
     <div class="zz-ctx">
       <div class="zz-ctx__head">
-        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" style="${
-          struct === 'critical' || struct === 'destroyed' ? 'filter:grayscale(0.55) brightness(0.85)' : ''
-        }" />
+        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" style="${artFilter}" />
         <div>
           <h2>${escapeHtml(def.name)}</h2>
           <p>${escapeHtml((def.desc || '').slice(0, 90))}</p>
           <p class="zz-muted" style="font-size:0.78rem;margin:0.2rem 0 0">${structuralStateLabel(
             struct
           )} · HP ${Math.round(hp)}/${hpMax}</p>
+          ${insulatedBadge}
         </div>
       </div>
       ${repairBlock}

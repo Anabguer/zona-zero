@@ -3,7 +3,8 @@
  */
 import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
-import { artUrl, buildingArtUrl, zoneArtUrl, TERRAIN_ART, FOG_ART, COLONY_YARD_ART } from './art.js';
+import { artUrl, buildingArtUrl, zoneArtUrl, FOG_ART, COLONY_YARD_ART } from './art.js';
+import { buildingStructuralState, buildingMaxHp } from './buildings-damage.js';
 import {
   ensureSectors,
   ptsStr as sectorPtsStr,
@@ -298,12 +299,13 @@ function drawWorldIdentityCluster(g, cx, cy, kind, rng) {
 
 /**
  * Terreno jugable pintado (no fotografía aérea).
- * Suelo texturizado + restos lejanos — sin manchas GIS ni mapa.
+ * ZZ-161: a zoom alto densifica carretera/grietas cerca del camp (LOD barato).
  */
-function drawPlayableTerrain(parent, camp, tier, day) {
+function drawPlayableTerrain(parent, camp, tier, day, zoom = 1.5) {
   const g = svgEl('g', { class: 'zz-map-layer zz-map-play-ground', 'aria-hidden': 'true' });
   const rng = createRng(hashSeed(`play-ground:${camp?.id || 'c'}:${tier}`));
   const early = day <= 2;
+  const closeUp = zoom >= 2.55;
   g.appendChild(svgEl('rect', { x: 0, y: 0, width: 100, height: 100, class: 'zz-ground-base', fill: 'url(#zzDirtPat)' }));
   g.appendChild(svgEl('rect', { x: 0, y: 0, width: 100, height: 100, class: 'zz-ground-grain', filter: 'url(#zzSoilGrain)' }));
   if (camp) {
@@ -312,44 +314,47 @@ function drawPlayableTerrain(parent, camp, tier, day) {
     const halo = irregularPatch(camp.x, camp.y + 1.0, early ? 28 : 18, early ? 22 : 14, rngH, 11);
     g.appendChild(svgEl('polygon', { points: ptsStr(halo), class: 'zz-ground-camp-halo' }));
   }
-  // Calles diseñadas cerca del camp (estructura visual del mundo — no jugables)
-  if (camp && early) {
-    const roadRng = createRng(hashSeed(`roads-near:${camp.id || 'c'}`));
+  // Calles diseñadas cerca del camp — early siempre; close-up también mid/late (ZZ-161)
+  if (camp && (early || closeUp)) {
+    const roadRng = createRng(hashSeed(`roads-near:${camp.id || 'c'}:${closeUp ? 'z' : 'e'}`));
+    const roadLen = closeUp && !early ? 36 : 56;
+    const roadHalf = roadLen / 2;
     // Arterial E–W como franja irregular (no stroke limpio)
     const arterial = [];
     for (let t = 0; t <= 12; t++) {
       const u = t / 12;
-      const x = camp.x - 28 + u * 56;
+      const x = camp.x - roadHalf + u * roadLen;
       const y = camp.y + 0.3 + Math.sin(u * Math.PI * 1.3) * 0.9 + roadRng.float(-0.35, 0.35);
       arterial.push([x, y - (1.1 + roadRng.float(0, 0.35))]);
     }
     for (let t = 12; t >= 0; t--) {
       const u = t / 12;
-      const x = camp.x - 28 + u * 56;
+      const x = camp.x - roadHalf + u * roadLen;
       const y = camp.y + 0.3 + Math.sin(u * Math.PI * 1.3) * 0.9 + roadRng.float(-0.35, 0.35);
       arterial.push([x, y + (1.15 + roadRng.float(0, 0.4))]);
     }
     g.appendChild(svgEl('polygon', { points: ptsStr(arterial), class: 'zz-world-road-fill' }));
-    // ZZ-019B: bordes sucios / transición a terreno (más irregularidad)
-    for (let i = 0; i < 18; i++) {
-      const u = i / 17;
-      const x = camp.x - 26 + u * 52 + roadRng.float(-0.8, 0.8);
+    const grimeN = closeUp ? 28 : 18;
+    for (let i = 0; i < grimeN; i++) {
+      const u = i / Math.max(1, grimeN - 1);
+      const x = camp.x - roadHalf + 2 + u * (roadLen - 4) + roadRng.float(-0.8, 0.8);
       const y = camp.y + roadRng.float(-2.4, 2.4);
       g.appendChild(
         svgEl('ellipse', {
           cx: x,
           cy: y,
-          rx: roadRng.float(0.7, 1.8),
-          ry: roadRng.float(0.28, 0.7),
+          rx: roadRng.float(0.55, closeUp ? 1.4 : 1.8),
+          ry: roadRng.float(0.22, 0.65),
           class: 'zz-world-road-grime',
         })
       );
     }
-    for (let i = 0; i < 10; i++) {
-      const x0 = camp.x - 24 + i * 5.2;
+    const crackN = closeUp ? 16 : 10;
+    for (let i = 0; i < crackN; i++) {
+      const x0 = camp.x - roadHalf + 4 + i * ((roadLen - 8) / Math.max(1, crackN - 1));
       g.appendChild(
         svgEl('path', {
-          d: `M${x0.toFixed(1)} ${(camp.y + roadRng.float(-0.55, 0.55)).toFixed(1)} L${(x0 + roadRng.float(2.2, 4.5)).toFixed(1)} ${(camp.y + roadRng.float(-0.65, 0.65)).toFixed(1)}`,
+          d: `M${x0.toFixed(1)} ${(camp.y + roadRng.float(-0.55, 0.55)).toFixed(1)} L${(x0 + roadRng.float(1.6, 3.8)).toFixed(1)} ${(camp.y + roadRng.float(-0.65, 0.65)).toFixed(1)}`,
           class: 'zz-world-road-crack',
           fill: 'none',
         })
@@ -358,26 +363,44 @@ function drawPlayableTerrain(parent, camp, tier, day) {
     const spur = irregularPatch(camp.x + 0.8, camp.y - 2, 1.3, 16, roadRng, 9);
     g.appendChild(svgEl('polygon', { points: ptsStr(spur), class: 'zz-world-road-spur' }));
 
-    // Identidades de entorno en coords mundo (legibles al panear)
     drawWorldIdentityCluster(g, camp.x - 18, camp.y + 0.5, 'asphalt', roadRng);
     drawWorldIdentityCluster(g, camp.x + 17, camp.y - 2.5, 'urban', roadRng);
     drawWorldIdentityCluster(g, camp.x + 12, camp.y + 15, 'green', roadRng);
+
+    // Close-up: restos urbanos cercanos legibles (no GIS, no city.webp)
+    if (closeUp) {
+      for (let i = 0; i < 8; i++) {
+        const ang = roadRng.float(0, Math.PI * 2);
+        const dist = roadRng.float(4.5, 9);
+        const x = camp.x + Math.cos(ang) * dist;
+        const y = camp.y + Math.sin(ang) * dist;
+        g.appendChild(
+          svgEl('rect', {
+            x: x - 0.7,
+            y: y - 0.15,
+            width: roadRng.float(1.2, 2.2),
+            height: 0.32,
+            class: 'zz-ground-ruin-wall zz-ground-ruin-wall--near',
+            transform: `rotate(${roadRng.float(-28, 28)} ${x} ${y})`,
+            rx: 0.05,
+          })
+        );
+      }
+    }
   }
-  const farN = early ? 8 : 18;
+  const farN = early ? 8 : closeUp ? 22 : 18;
   for (let i = 0; i < farN; i++) {
     let x = rng.float(5, 95);
     let y = rng.float(5, 95);
     if (camp && Math.hypot(x - camp.x, y - camp.y) < 7) continue;
-    // ZZ-019B: manchas irregulares (no óvalos placeholder)
     const patch = irregularPatch(x, y, rng.float(1.0, 2.2), rng.float(0.55, 1.1), rng, 7);
     g.appendChild(svgEl('polygon', { points: ptsStr(patch), class: 'zz-ground-dirt-far' }));
   }
-  const ruinN = early ? 28 : 18;
+  const ruinN = early ? 28 : closeUp ? 24 : 18;
   for (let i = 0; i < ruinN; i++) {
     let x = rng.float(8, 92);
     let y = rng.float(10, 90);
-    // Ruinas del mundo cerca del camp (no jugables) — ciudad continua
-    if (camp && Math.hypot(x - camp.x, y - camp.y) < (early ? 5.5 : 10)) continue;
+    if (camp && Math.hypot(x - camp.x, y - camp.y) < (early ? 5.5 : closeUp ? 7 : 10)) continue;
     const ang = rng.float(-35, 35);
     const w = rng.float(1.4, 2.4);
     g.appendChild(
@@ -406,6 +429,73 @@ function drawPlayableTerrain(parent, camp, tier, day) {
     }
   }
   parent.appendChild(g);
+}
+
+/** ZZ-160: cubierta aislada + chimenea (sin WebP nuevo). */
+function drawInsulatedOverlays(wrap, cell) {
+  wrap.appendChild(
+    svgEl('path', {
+      d: `M${cell * 0.12} ${cell * 0.28} L${cell * 0.5} ${cell * 0.08} L${cell * 0.88} ${cell * 0.28} L${cell * 0.82} ${cell * 0.34} L${cell * 0.5} ${cell * 0.16} L${cell * 0.18} ${cell * 0.34} Z`,
+      class: 'zz-settle-insul-roof',
+    })
+  );
+  wrap.appendChild(
+    svgEl('rect', {
+      x: cell * 0.62,
+      y: cell * 0.12,
+      width: cell * 0.1,
+      height: cell * 0.18,
+      rx: 1,
+      class: 'zz-settle-insul-chimney',
+    })
+  );
+  wrap.appendChild(
+    svgEl('ellipse', {
+      cx: cell * 0.67,
+      cy: cell * 0.1,
+      rx: cell * 0.07,
+      ry: cell * 0.04,
+      class: 'zz-settle-insul-smoke',
+    })
+  );
+}
+
+/** ZZ-160: escombros cuando destroyed. */
+function drawDestroyedRubble(wrap, cell, rng) {
+  for (let i = 0; i < 5; i++) {
+    wrap.appendChild(
+      svgEl('rect', {
+        x: cell * (0.15 + rng.float(0, 0.5)),
+        y: cell * (0.45 + rng.float(0, 0.28)),
+        width: cell * rng.float(0.12, 0.28),
+        height: cell * rng.float(0.08, 0.16),
+        rx: 1,
+        class: 'zz-settle-rubble',
+        transform: `rotate(${rng.float(-18, 18)} ${cell * 0.5} ${cell * 0.55})`,
+      })
+    );
+  }
+}
+
+/** ZZ-160: grietas / marcas de daño (alternativa estática a animación). */
+function drawDamageMarks(wrap, cell, st) {
+  const heavy = st === 'critical';
+  wrap.appendChild(
+    svgEl('path', {
+      d: `M${cell * 0.22} ${cell * 0.4} L${cell * 0.38} ${cell * 0.55} L${cell * 0.3} ${cell * 0.7}`,
+      class: heavy ? 'zz-settle-crack zz-settle-crack--heavy' : 'zz-settle-crack',
+      fill: 'none',
+    })
+  );
+  if (heavy) {
+    wrap.appendChild(
+      svgEl('path', {
+        d: `M${cell * 0.58} ${cell * 0.35} L${cell * 0.72} ${cell * 0.5} L${cell * 0.65} ${cell * 0.68}`,
+        class: 'zz-settle-crack zz-settle-crack--heavy',
+        fill: 'none',
+      })
+    );
+  }
 }
 
 /** Ruinas urbanas — en D1 se omiten (el suelo jugable ya aporta restos lejanos). */
@@ -1317,60 +1407,64 @@ function drawSettlementCore(g, state, camp, tier, { onSelectBuilding, onGhostPoi
       const lx = (b.x - bw / 2 + 0.5) * scale;
       const ly = (b.y - bh / 2 + 0.5) * scale;
       const isHq = String(b.type).startsWith('hq_');
+      const isInsulated = b.type === 'insulated_house';
       const cell = scale * (isHq ? 1.48 : 1.28);
       const selected = state.selectedBuildingId === b.id;
-      const hp = b.hp ?? 100;
-      const st = hp <= 0 ? 'destroyed' : hp < 35 ? 'critical' : hp < 70 ? 'damaged' : 'ok';
+      const st = buildingStructuralState(b, null);
+      const maxHp = buildingMaxHp(b, null);
+      const hp = b.hp == null ? maxHp : b.hp;
       const highlight = (state.flags?.highlightRepairIds || []).includes(b.id);
       const wrap = svgEl('g', {
         class: `zz-settle-bldg zz-settle-bldg--${st}${selected ? ' is-selected' : ''}${
           highlight ? ' is-repair-focus' : ''
-        }${isHq ? ' zz-settle-bldg--hq' : ''}`,
+        }${isHq ? ' zz-settle-bldg--hq' : ''}${isInsulated ? ' zz-settle-bldg--insulated' : ''}`,
         transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
         'data-type': b.type,
         'data-id': b.id,
-        opacity: st === 'destroyed' ? '0.55' : st === 'critical' ? '0.82' : '1',
+        opacity: st === 'destroyed' ? '0.7' : st === 'critical' ? '0.88' : '1',
       });
       drawBuildingFoundation(wrap, cell, createRng(hashSeed(`found:${b.id}`)));
-      wrap.appendChild(
-        svgEl('image', {
-          href: buildingArtUrl(b.type),
-          x: 0,
-          y: 0,
-          width: cell,
-          height: cell,
-          preserveAspectRatio: 'xMidYMid meet',
-          class: 'zz-settle-bldg-img',
-          style:
-            st === 'damaged' || st === 'critical' || st === 'destroyed'
-              ? 'filter:grayscale(0.35) brightness(0.9)'
-              : '',
-        })
-      );
-      if (st === 'damaged' || st === 'critical') {
+      if (st === 'destroyed') {
+        drawDestroyedRubble(wrap, cell, createRng(hashSeed(`rubble:${b.id}`)));
+      } else {
         wrap.appendChild(
-          svgEl('rect', {
-            x: cell * 0.12,
-            y: cell * 0.72,
-            width: cell * 0.76,
-            height: cell * 0.1,
-            rx: 2,
-            fill: st === 'critical' ? '#a33' : '#c80',
-            opacity: 0.85,
-            class: 'zz-settle-bldg-hpbar',
+          svgEl('image', {
+            href: buildingArtUrl(b.type),
+            x: 0,
+            y: 0,
+            width: cell,
+            height: cell,
+            preserveAspectRatio: 'xMidYMid meet',
+            class: `zz-settle-bldg-img zz-settle-bldg-img--${st}`,
           })
         );
-        wrap.appendChild(
-          svgEl('rect', {
-            x: cell * 0.12,
-            y: cell * 0.72,
-            width: cell * 0.76 * Math.max(0.05, hp / 100),
-            height: cell * 0.1,
-            rx: 2,
-            fill: st === 'critical' ? '#f66' : '#fc6',
-            class: 'zz-settle-bldg-hpfill',
-          })
-        );
+        if (isInsulated) drawInsulatedOverlays(wrap, cell);
+        if (st === 'damaged' || st === 'critical') {
+          drawDamageMarks(wrap, cell, st);
+          wrap.appendChild(
+            svgEl('rect', {
+              x: cell * 0.12,
+              y: cell * 0.72,
+              width: cell * 0.76,
+              height: cell * 0.1,
+              rx: 2,
+              fill: st === 'critical' ? '#a33' : '#c80',
+              opacity: 0.85,
+              class: 'zz-settle-bldg-hpbar',
+            })
+          );
+          wrap.appendChild(
+            svgEl('rect', {
+              x: cell * 0.12,
+              y: cell * 0.72,
+              width: cell * 0.76 * Math.max(0.05, hp / maxHp),
+              height: cell * 0.1,
+              rx: 2,
+              fill: st === 'critical' ? '#f66' : '#fc6',
+              class: 'zz-settle-bldg-hpfill',
+            })
+          );
+        }
       }
       if (highlight) {
         wrap.appendChild(
@@ -2009,8 +2103,8 @@ export function renderMap(svg, state, handlers = {}) {
   const world = svgEl('g', worldAttrs);
   const zones = state.zones || [];
   const camp = zones.find((z) => z.type === 'camp');
-  // Terreno jugable pintado — NO fotografía/mapa aéreo city.webp
-  drawPlayableTerrain(world, camp, tier, state.day || 1);
+  // Terreno jugable pintado — NO fotografía/mapa aéreo city.webp (ZZ-161 LOD por zoom)
+  drawPlayableTerrain(world, camp, tier, state.day || 1, state.mapCamera?.zoom || 1.5);
   const grid = drawRoads(world, zones, tier);
   drawUrbanBlocks(world, zones, grid, tier);
   drawRecoveredPaths(world, zones, tier);

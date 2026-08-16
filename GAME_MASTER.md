@@ -1487,6 +1487,17 @@ Radio alimenta misiones; Centro de expediciones mejora lectura de `placeState`/r
 4. Coach tutorial **en el mundo** (solo mecánicas nuevas; una pista a la vez)  
 5. Tips discreto (p. ej. recovery: chip, no banner)
 
+### ZZ-151…154 (conservar · Neni+ChatGPT)
+
+- Jerarquía: **crítico → banner**; importante/contextual → chip/ficha/foco; histórico → diario; rutina → no registrar ni interrumpir.
+- No duplicar la misma incidencia en banner + chip + modal + diario + toast sin razón funcional.
+- Recovery ≠ alerta crítica (proceso posterior, no cascada de banners).
+- Ayuda gated: sin spoilers de brotes/catástrofes/facciones/crisis final hasta que sean relevantes; `meta.helpSeenTopics`.
+- Ayuda ≠ tutorial eterno: coach enseña primeras acciones; después consulta voluntaria.
+- Diario = historia de esa colonia (ataques, brotes, pérdidas, descubrimientos, expediciones, crisis, hitos) — no spam “amaneció / calefacción / noche tranquila”.
+- Accesibilidad contrato: targets ≥44 · focus-visible · aria-live · prefers-reduced-motion · semántica coherente.
+- Reduced-motion: si una animación comunica estado, debe existir alternativa estática clara.
+
 ### ZZ-151 (conservar)
 
 - No spamear la misma amenaza en banner + chip.  
@@ -1898,6 +1909,13 @@ Staffing §10 ↔ brotes §12 ↔ daño §13 ↔ clima §11 ↔ arte §33.
 # 33. ARTE (INVENTARIO)
 
 Conservar dirección: edificios/retratos WebP actuales como base.
+
+### ZZ-160…161 lean (Neni · no ART PASS completo)
+
+- **Insulated:** diferenciación por overlays SVG + glifo UI sobre `house.webp` (sin WebP nuevo obligatorio).
+- **Estados daño:** ok / damaged / critical / destroyed con filtros + grietas estáticas + escombros (info legible con reduced-motion).
+- **Close-up terreno:** LOD por zoom (≥~2.55 densifica carretera/grietas/restos cerca del camp) — **sin** pintar `city.webp` como fondo GIS.
+- Sin assets solar/generator obligatorios. Deuda artística global sigue **NO BLOQUEANTE**; ART PASS solo en fase expresa del PLAN.
 
 Necesarios a medio plazo:
 - edificios por tipo/nivel  

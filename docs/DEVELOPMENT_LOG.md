@@ -4,7 +4,7 @@
 
 **Versión protocolo:** 1.2 · anclado a GAME_MASTER **2.8** + PLAN **2.8**
 **Fecha:** 2026-08-16  
-**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150 APROBADA**. · **ZZ-151…153** hechas · **ZZ-154 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
+**Estado global:** ZZ-016…019B + **ZZ-012…032 APROBADAS**. · Docs **2.8**. · **ZZ-033…048 APROBADAS**. · **ZZ-050…059 APROBADAS**. · **ZZ-060…065 APROBADAS**. · **ZZ-066…069 APROBADAS**. · **ZZ-070…073 APROBADAS**. · **ZZ-080…083 APROBADAS**. · **ZZ-084…108 APROBADAS**. · **ZZ-110…125 APROBADAS**. · **ZZ-126…133 APROBADAS** (GO lean). · **ZZ-140…144 APROBADAS**. · **ZZ-150…154 APROBADAS**. · **ZZ-160** hecha · **ZZ-161 HUMAN_GATE** PENDIENTE DE REVISIÓN. · Deudas arte **NO BLOQUEANTES**. · No deploy. · Contrato espacial **2.8** intacto.
 **Drive:** `G:\\Mi unidad\\Juegos\\Zona Zero\\GAME_MASTER\\ZONA_ZERO_DEVELOPMENT_LOG.md`  
 **Repo:** `docs/DEVELOPMENT_LOG.md`
 
@@ -2079,28 +2079,76 @@ IMPLEMENTATION_PLAN 2.8 · P · **HUMAN_GATE YES** · deps ZZ-153
 COMPLETADA
 
 ## ESTADO REVISIÓN
+**APROBADA**
+
+## APROBACIÓN FINAL CHATGPT
+**SÍ**
+
+## CIERRE FORMAL (2026-08-16 · Neni+ChatGPT)
+Bloque ZZ-151…154 validado: jerarquía capas §21 · banner solo crítico · chips sin duplicar · recovery ≠ crítico · ayuda gated · `?`/Más · `meta.helpSeenTopics` · sin spoilers · diario filtrado · sin spam amanecer/calefacción/quiet · targets ≥44 · focus-visible · prefers-reduced-motion · aria-live. Criterios a conservar en GAME_MASTER §21. Deuda arte NO BLOQUEANTE. Continuar ZZ-160.
+
+## EVIDENCIAS
+Archivadas en `docs/review-archive/zz-154/`.
+
+## COMMIT
+`81a7fb2`
+
+## PARAR
+No — continuar ZZ-160 → 161 (HUMAN_GATE).
+
+---
+
+# FASE ZZ-160 — Assets edificios (insulated, estados daño)
+
+IMPLEMENTATION_PLAN 2.8 · Q · HUMAN_GATE NO · deps ZZ-015 / ZZ-154 APROBADA
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
+APROBADA *(sin HUMAN_GATE; cerrada al pasar a ZZ-161)*
+
+## HECHO
+- Overlays insulated (techo/chimenea) sobre `house.webp` · glifo `paintInsulatedHouse`.
+- Estados daño vía `buildingStructuralState`: filtros + grietas estáticas + escombros destroyed + barra HP.
+- Ficha: badge Cubierta aislada · filtros daño · `buildingMaxHp`.
+- Sin assets solar/generator. Sin dependencia eléctrica.
+
+## PARAR
+No.
+
+---
+
+# FASE ZZ-161 — Terreno ciudad close-up + gate (HUMAN_GATE)
+
+IMPLEMENTATION_PLAN 2.8 · Q · **HUMAN_GATE YES** · deps ZZ-160
+
+## ESTADO CURSOR
+COMPLETADA
+
+## ESTADO REVISIÓN
 **PENDIENTE DE REVISIÓN**
 
 ## APROBACIÓN FINAL CHATGPT
 **NO** (esperando)
 
 ## OBJETIVO
-Accesibilidad básica + gate. Mundo primero; sin pestañas app.
+Terreno ciudad close-up + gate. Arte lean. Sin city.webp GIS. Sin solar/generator.
 
 ## HECHO
-- Tap targets ≥44 · focus-visible · prefers-reduced-motion · aria-live banner/misión · Escape/dialog conservados.
-- Smoke `smoke-zz151-154` · review shots.
+- LOD `drawPlayableTerrain(..., zoom)`: close-up ≥2.55 densifica carretera/grietas/restos cerca del camp.
+- Anti-GIS: terreno pintado, no fotografía `city.webp`.
+- Smoke `smoke-zz160-161` · review `review-shots-zz161`.
 - Contrato **2.8** intacto. Deuda arte NO BLOQUEANTE.
-- Sin deploy · **no ZZ-160** hasta APROBADA ZZ-154.
 
 ## EVIDENCIAS
 `docs/review/` · Drive Review/ · `review-contact-sheet.jpg`
 
 ## COMMIT
-`81a7fb2`
+*(pendiente)*
 
 ## PARAR
-Sí — HUMAN_GATE ZZ-154. Sin deploy. No ZZ-160.
+Sí — HUMAN_GATE ZZ-161. Sin deploy. No ZZ-162.
 
 ---
 

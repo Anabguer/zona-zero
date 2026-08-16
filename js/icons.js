@@ -181,6 +181,7 @@ export function resolveVisualLevel(type) {
   if (m) return Math.min(3, Math.max(1, Number(m[1])));
   const implied = {
     house: 2,
+    insulated_house: 3,
     block: 3,
     greenhouse: 2,
     cistern: 2,
@@ -261,6 +262,7 @@ export function paintBuildingGlyph(g, type, level = 1) {
     hq_central: paintHq,
     shelter: paintShelter,
     house: paintHouse,
+    insulated_house: paintInsulatedHouse,
     block: paintBlock,
     farm: paintFarm,
     greenhouse: paintGreenhouse,
@@ -333,6 +335,20 @@ function paintHouse(g) {
   append(g, 'rect', { x: 24, y: 19, width: 5, height: 4, fill: '#d4a060', opacity: 0.65 });
   // Chimenea (nivel implícito 2)
   append(g, 'rect', { x: 26, y: 6, width: 4, height: 8, fill: '#4a4038', stroke: '#8a7a68', 'stroke-width': 0.8 });
+}
+
+/** ZZ-160: casa aislada — techo reforzado + chimenea marcada (glifo UI). */
+function paintInsulatedHouse(g) {
+  paintHouse(g);
+  append(g, 'path', {
+    d: 'M5 16.5l15-11 15 11-2.2 1.6L20 9.2 7.2 18.1Z',
+    fill: '#8a6a48',
+    stroke: '#e0c090',
+    'stroke-width': 1.1,
+    opacity: 0.92,
+  });
+  append(g, 'rect', { x: 27, y: 4, width: 4.5, height: 9, fill: '#3a342c', stroke: '#a09070', 'stroke-width': 0.9 });
+  append(g, 'ellipse', { cx: 29.2, cy: 3.2, rx: 2.2, ry: 1.2, fill: '#9a9a98', opacity: 0.45 });
 }
 
 function paintBlock(g) {

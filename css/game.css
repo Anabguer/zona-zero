@@ -409,6 +409,10 @@ body.zz-body {
   opacity: 0.4;
   stroke: none;
 }
+.zz-ground-ruin-wall--near {
+  fill: #5a5040;
+  opacity: 0.55;
+}
 .zz-ground-rubble {
   fill: #32302c;
   opacity: 0.4;
@@ -781,6 +785,60 @@ body.zz-body {
 }
 .zz-settle-bldg--hq .zz-settle-bldg-img {
   filter: none;
+}
+/* ZZ-160: estados daño (filtros estáticos — info sin animación) */
+.zz-settle-bldg-img--damaged {
+  filter: saturate(0.75) brightness(0.92);
+}
+.zz-settle-bldg-img--critical {
+  filter: saturate(0.45) brightness(0.78) contrast(1.05);
+}
+.zz-settle-bldg.is-selected .zz-settle-bldg-img--damaged {
+  filter: saturate(0.75) brightness(1.02);
+}
+.zz-settle-bldg.is-selected .zz-settle-bldg-img--critical {
+  filter: saturate(0.45) brightness(0.88) contrast(1.05);
+}
+.zz-settle-crack {
+  stroke: #1a1210;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.72;
+  pointer-events: none;
+}
+.zz-settle-crack--heavy {
+  stroke: #0e0a08;
+  stroke-width: 1.7;
+  opacity: 0.88;
+}
+.zz-settle-rubble {
+  fill: #3a342c;
+  stroke: #1a1612;
+  stroke-width: 0.4;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.zz-settle-insul-roof {
+  fill: #7a5a3c;
+  stroke: #d4b080;
+  stroke-width: 0.9;
+  opacity: 0.78;
+  pointer-events: none;
+}
+.zz-settle-insul-chimney {
+  fill: #3a342c;
+  stroke: #9a8a70;
+  stroke-width: 0.6;
+  pointer-events: none;
+}
+.zz-settle-insul-smoke {
+  fill: #9a9a98;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.zz-settle-bldg--insulated .zz-settle-insul-roof {
+  opacity: 0.88;
 }
 .zz-settle-warn-dot { display: none !important; }
 /* Slots solo visibles al hover/tap — sin rejilla permanente */
