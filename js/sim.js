@@ -51,6 +51,15 @@ import {
   perimeterIntegrity,
 } from './buildings-damage.js';
 import {
+  lootSpecForZone,
+  scaleLootSpecForZoneState,
+  applyLootDepletion,
+  trySecureContested,
+  controlBenefits,
+  lootHintKeys,
+  zoneStateLabel,
+} from './territory.js';
+import {
   adjustBuildingWorkers,
   adjustCategoryLabor,
   autoStaffColony,
@@ -168,6 +177,7 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   if (veh) risk -= (veh.protection || 0) * 0.02;
   if (state.weather === 'storm' || state.weather === 'fog') risk += 0.08;
   if (zone.state === 'hostile') risk += 0.06;
+  if (zone.state === 'contested') risk += 0.1;
   if (zone.state === 'controlled') risk = Math.max(0.08, risk - 0.12);
   risk = clamp(risk, 0.05, 0.95);
   const camp = state.zones.find((z) => z.type === 'camp') || state.zones[0];
@@ -177,27 +187,34 @@ export function expeditionPreview(state, content, zoneId, explorerId) {
   let days = content.balance.expeditionBaseDurationDays || 1;
   if (dist > 28) days += 1;
   if (dist > 42) days += 1;
-  if (zone.state === 'hostile') days += 1;
+  if (zone.state === 'hostile' || zone.state === 'contested') days += 1;
   if (zone.state === 'unknown') days += 1;
   if (veh?.speedBonus) days = Math.max(1, Math.round(days * (1 - veh.speedBonus)));
   // Trade-off: saqueo vs control (según skills)
   const lootBias = lootSk >= fight + 1;
   const controlBias = explore >= lootSk && !lootBias;
+  const hints = lootHintKeys(zone, content);
   return {
     risk,
     category: riskCategory(risk),
     days,
     fuel: veh ? veh.fuelPerTrip || 0 : content.balance.expeditionFuelCost ?? 0,
     distance: Math.round(dist),
-    lootHint: Object.keys(zone.loot || content.locationsDoc?.locationTypes?.[zone.type]?.lootBias || {}).slice(0, 3),
+    lootHint: hints.slice(0, 4),
+    residual: zone.state === 'controlled',
     explorerName: explorer.name,
     explorerStatus: explorer.status,
     focus: lootBias ? 'saqueo' : controlBias ? 'control' : 'equilibrado',
-    note: lootBias
-      ? 'Perfil saqueo: más botín, menos control'
-      : controlBias
-        ? 'Perfil control: más progreso territorial'
-        : 'Perfil equilibrado',
+    note:
+      zone.state === 'controlled'
+        ? 'Zona controlada: solo loot residual'
+        : zone.state === 'contested'
+          ? 'En disputa: reconsolidar control'
+          : lootBias
+            ? 'Perfil saqueo: más botín, menos control'
+            : controlBias
+              ? 'Perfil control: más progreso territorial'
+              : 'Perfil equilibrado',
   };
 }
 
@@ -389,12 +406,21 @@ function resolveOneExpedition(state, content, ex) {
   }
 
   zone.infectedLeft = Math.max(0, zone.infectedLeft - rng.int(1, 2 + Math.floor(fight / 2)));
-  const typeLoot = content.locationsDoc?.locationTypes?.[zone.type]?.lootBias || zone.loot || {};
-  const lootMap = {};
-  Object.entries(typeLoot).forEach(([k, bias]) => {
-    const n = typeof bias === 'number' ? bias : 1;
-    lootMap[k] = [Math.max(0, Math.floor(n)), Math.max(1, Math.ceil(n + 1 + lootSk * 0.35))];
+  const typeLoot = lootSpecForZone(zone, content);
+  const lootSkAdj = lootSk;
+  const lootMapRaw = {};
+  Object.entries(typeLoot).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      lootMapRaw[k] = [
+        v[0],
+        Math.max(v[1], Math.ceil(v[1] + lootSkAdj * 0.25)),
+      ];
+    } else {
+      const n = typeof v === 'number' ? v : 1;
+      lootMapRaw[k] = [Math.max(0, Math.floor(n)), Math.max(1, Math.ceil(n + 1 + lootSkAdj * 0.35))];
+    }
   });
+  const lootMap = scaleLootSpecForZoneState(zone, lootMapRaw);
   if (!Object.keys(lootMap).length) {
     lootMap.food = [0, 2];
     lootMap.metal = [0, 2];
@@ -404,24 +430,31 @@ function resolveOneExpedition(state, content, ex) {
   const controlFocus = explore >= lootSk && !lootFocus;
   let cargoBonus = (veh?.cargoBonus || 0) + (lootFocus ? 0.35 : 0) + (zone.risk > 0.5 ? 0.2 : 0);
   if (outcome === 'pyrrhic') cargoBonus += 0.15;
+  if (zone.state === 'controlled') cargoBonus *= 0.5;
   const loot = rollLoot(rng, lootMap, cargoBonus);
   if (loot.scrap) {
     loot.metal = (loot.metal || 0) + loot.scrap;
     delete loot.scrap;
   }
-  if (rng.chance(0.12 + explore * 0.02)) {
-    const rare = rng.pick(['medicine', 'ammo', 'parts', 'tools', 'fuel']);
+  // Rare hallazgo sesgado por tipo
+  const rarePool =
+    content.locationsDoc?.locationTypes?.[zone.type]?.lootTable?.rare ||
+    ['medicine', 'ammo', 'parts', 'tools', 'fuel'];
+  if (zone.state !== 'controlled' && rng.chance(0.12 + explore * 0.02)) {
+    const rare = rng.pick(rarePool);
     loot[rare] = (loot[rare] || 0) + rng.int(1, 2);
     pushLog(state, `Hallazgo inesperado en ${zone.name}: ${RES_LABEL[rare] || rare}.`, 'good');
   }
   Object.entries(loot).forEach(([k, v]) => {
     state.resources[k] = (state.resources[k] || 0) + v;
   });
+  if (zone.state === 'controlled') applyLootDepletion(zone, 0.1);
   report.loot = loot;
   const lootTxt = Object.entries(loot)
     .map(([k, v]) => `${v} ${RES_LABEL[k] || k}`)
     .join(', ');
-  const lootLine = `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}.`;
+  const residualNote = zone.state === 'controlled' ? ' (residual)' : '';
+  const lootLine = `${explorer.name} regresa de ${zone.name}: ${lootTxt || 'casi nada'}${residualNote}.`;
   pushLog(state, lootLine, 'good');
   report.lines.push(lootLine);
   if (report.wounded) {
@@ -430,15 +463,19 @@ function resolveOneExpedition(state, content, ex) {
     );
   }
 
-  if (zone.state === 'discovered' || zone.state === 'hostile') {
+  if (zone.state === 'discovered' || zone.state === 'hostile' || zone.state === 'contested') {
     let ctrlGain = 0.28 + explore * 0.035;
     if (controlFocus) ctrlGain += 0.14;
     if (lootFocus) ctrlGain -= 0.08;
     if (outcome === 'clean') ctrlGain += 0.06;
+    if (zone.state === 'contested') ctrlGain += 0.1;
     zone.controlProgress = Math.min(1, (zone.controlProgress || 0) + ctrlGain);
-    if (zone.infectedLeft <= 0 && zone.controlProgress >= (content.balance.controlClearThreshold || 0.55)) {
+    if (zone.state === 'contested') {
+      trySecureContested(state, zone, content, report);
+    } else if (zone.infectedLeft <= 0 && zone.controlProgress >= (content.balance.controlClearThreshold || 0.55)) {
       zone.state = 'controlled';
       zone.controlProgress = 1;
+      zone.lootDepletion = 0;
       report.controlled = true;
       state.stats.zonesControlled = state.zones.filter((z) => z.state === 'controlled').length;
       state.stats.maxControlled = Math.max(state.stats.maxControlled, state.stats.zonesControlled);
@@ -453,7 +490,7 @@ function resolveOneExpedition(state, content, ex) {
           pushLog(state, `Rutas revelan ${n.name}.`, 'info');
         }
       });
-    } else if (zone.state !== 'controlled') {
+    } else if (zone.state !== 'controlled' && zone.state !== 'contested') {
       zone.state = zone.risk >= 0.45 ? 'hostile' : 'discovered';
     }
   }
@@ -804,6 +841,12 @@ export {
   perimeterIntegrity,
   applyBuildingDamage,
 } from './buildings-damage.js';
+export {
+  controlBenefits,
+  lootSpecForZone,
+  zoneStateLabel,
+  loseFrontierZone,
+} from './territory.js';
 
 export function tickResearch(state, content) {
   if (!state.research.active) return;

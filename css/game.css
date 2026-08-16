@@ -868,6 +868,13 @@ body.zz-body {
   stroke-width: 0.2;
   fill-opacity: 0;
 }
+.zz-zone--contested .zz-zone-plot,
+.zz-zone--contested .zz-zone-poly {
+  fill: transparent;
+  stroke: rgba(200,140,40,0.4);
+  stroke-width: 0.28;
+  fill-opacity: 0;
+}
 .zz-zone.is-selected .zz-zone-plot,
 .zz-zone.is-selected .zz-zone-poly {
   stroke: rgba(232, 200, 140, 0.55);

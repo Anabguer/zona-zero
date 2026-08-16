@@ -440,6 +440,17 @@ export function currentObjective(state, content) {
       text: 'Explora los alrededores con tu explorador.',
     };
   }
+  {
+    const contested = (state.zones || []).filter((z) => z.state === 'contested');
+    if (contested.length) {
+      return {
+        id: 'secure_contested',
+        title: 'Zona en disputa',
+        text: `Reconsolidá ${contested[0].name}${contested.length > 1 ? ` (+${contested.length - 1})` : ''}.`,
+        zoneId: contested[0].id,
+      };
+    }
+  }
   // ZZ-063: munición baja con amenaza
   if ((state.resources?.ammo || 0) < 3 && (state.director?.threat || 0) >= 22) {
     return {

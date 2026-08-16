@@ -29,6 +29,8 @@ import {
   startRepair,
   repairQuote,
   buildingStructuralState,
+  controlBenefits,
+  zoneStateLabel,
 } from './sim.js';
 import {
   buildingsNeedingRepair,
@@ -714,9 +716,9 @@ function openZoneSheet(zoneId) {
 
   const ex = state.explorers.find((e) => e.id === state.selectedExplorerId) || readyExplorers(state)[0];
   const preview = ex ? expeditionPreview(state, content, zoneId, ex.id) : null;
-  const badge =
-    z.state === 'controlled' ? 'Controlada' : z.state === 'hostile' ? 'Hostil' : 'Conocida';
+  const badge = zoneStateLabel(z.state);
   const art = zoneArtUrl(z) || buildingArtUrl('storage');
+  const benefits = controlBenefits(state, content);
   const lootIcons = (preview?.lootHint || [])
     .slice(0, 4)
     .map((k) => {
@@ -736,10 +738,25 @@ function openZoneSheet(zoneId) {
                     ? 'fuel'
                     : key.includes('muni') || key.includes('ammo')
                       ? 'ammo'
-                      : null;
-      return res ? `<img src="${artUrl(RES_ART[res])}" alt="${escapeHtml(k)}" title="${escapeHtml(k)}" />` : `<span>${escapeHtml(k)}</span>`;
+                      : key.includes('tool')
+                        ? 'tools'
+                        : key.includes('part')
+                          ? 'parts'
+                          : null;
+      return res
+        ? `<img src="${artUrl(RES_ART[res])}" alt="${escapeHtml(k)}" title="${escapeHtml(k)}" />`
+        : `<span>${escapeHtml(k)}</span>`;
     })
     .join('');
+
+  const controlNote =
+    z.state === 'controlled'
+      ? `<p class="zz-muted" style="font-size:0.8rem">Controlada: def. colonia +${benefits.defenseBonus} · loot residual${
+          z.lootDepletion ? ` (agotamiento ${Math.round(z.lootDepletion * 100)}%)` : ''
+        }.</p>`
+      : z.state === 'contested'
+        ? `<p class="zz-ctx__warn">En disputa — enviad explorador para reconsolidar.</p>`
+        : '';
 
   openSheet(`
     <div class="zz-ctx">
@@ -747,9 +764,14 @@ function openZoneSheet(zoneId) {
         <img class="zz-ctx__art" src="${art}" alt="" />
         <div>
           <h2>${escapeHtml(z.name)}</h2>
-          <p>${badge} · Riesgo ${(z.risk * 100).toFixed(0)}%</p>
+          <p>${badge} · Riesgo ${(z.risk * 100).toFixed(0)}%${
+            z.controlProgress != null && z.state !== 'controlled'
+              ? ` · control ${Math.round((z.controlProgress || 0) * 100)}%`
+              : ''
+          }</p>
         </div>
       </div>
+      ${controlNote}
       ${
         preview
           ? `             <div class="zz-ctx__stats">
@@ -761,9 +783,9 @@ function openZoneSheet(zoneId) {
                (preview.fuel || 0) > 0
                  ? `Combustible: ${preview.fuel}`
                  : 'A pie · sin combustible'
-             }</p>
+             }${preview.note ? ` · ${escapeHtml(preview.note)}` : ''}</p>
              <div class="zz-ctx__loot">
-               <span class="zz-muted">Botín posible</span>
+               <span class="zz-muted">${preview.residual ? 'Botín residual' : 'Botín posible'}</span>
                <div class="zz-loot-row">${lootIcons || '<span>¿?</span>'}</div>
              </div>
              <p class="zz-ctx__explorer">Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · nivel ${ex.level || 1}</p>
@@ -996,6 +1018,13 @@ function openMoreSheet() {
         if ((state.research.unlocked || []).includes('ammo_craft')) bits.push('recarga ammo');
         if ((state.research.unlocked || []).includes('watch_protocols')) bits.push('guardia');
         return bits.join(' · ');
+      })()}
+    </p>
+    <h3 style="font-family:var(--zz-display)">Territorio</h3>
+    <p class="zz-muted" style="font-size:0.82rem;margin:0.25rem 0 0.5rem">
+      ${(() => {
+        const b = controlBenefits(state, content);
+        return `${b.label}${b.contested ? ` · ${b.contested} en disputa` : ''} · loot residual en controladas`;
       })()}
     </p>
     <h3 style="font-family:var(--zz-display)">Investigación</h3>
@@ -1917,6 +1946,11 @@ function bindChrome() {
         paint();
         return;
       }
+    }
+    if (obj.id === 'secure_contested' && obj.zoneId) {
+      openZoneSheet(obj.zoneId);
+      paint();
+      return;
     }
     openSheet(`
       <div class="zz-ctx">

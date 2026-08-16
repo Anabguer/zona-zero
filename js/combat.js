@@ -6,6 +6,7 @@ import { createRng } from './rng.js';
 import { pushLog, defenseBreakdown } from './state.js';
 import { applyCasualties } from './population.js';
 import { applyBuildingDamage, perimeterIntegrity } from './buildings-damage.js';
+import { loseFrontierZone } from './territory.js';
 
 function rngOf(state) {
   return createRng((state.rngState || 1) + state.day * 9973 + 17);
@@ -103,19 +104,6 @@ export function tickPendingAttack(state) {
   if (!p) return null;
   if (state.day < p.arrivesOnDay) return { waiting: true, pending: p };
   return { due: true, pending: p };
-}
-
-function loseFrontierZone(state, rng) {
-  const frontier = (state.zones || []).filter(
-    (z) => z.state === 'controlled' && z.type !== 'camp' && z.id !== 'camp'
-  );
-  if (!frontier.length) return null;
-  const z = rng.pick(frontier);
-  z.state = 'hostile';
-  z.infectedLeft = Math.max(z.infectedLeft || 0, rng.int(2, 6));
-  pushLog(state, `Zona fronteriza perdida: ${z.name || z.id}.`, 'bad');
-  state.stats.zonesControlled = state.zones.filter((x) => x.state === 'controlled').length;
-  return z;
 }
 
 /**

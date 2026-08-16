@@ -32,6 +32,7 @@ export function buildingStructuralState(building, content = null) {
   if (!building) return 'destroyed';
   const max = buildingMaxHp(building, content);
   const hp = building.hp == null ? max : building.hp;
+  // destroyed: sin output; rubble visual; reparación completa (≠ critical más caro solo en coste)
   if (hp <= 0) return 'destroyed';
   const pct = hp / max;
   const cfg = content?.balance?.buildingDamage;

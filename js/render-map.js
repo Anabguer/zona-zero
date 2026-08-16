@@ -24,6 +24,7 @@ const STATE_CLASS = {
   discovered: 'zz-zone--discovered',
   controlled: 'zz-zone--controlled',
   hostile: 'zz-zone--hostile',
+  contested: 'zz-zone--contested',
 };
 
 function clamp(v, a, b) {
@@ -460,20 +461,45 @@ function footprintsForType(type, z, rng) {
 }
 
 function drawLifeInControlled(g, z, tier, rng) {
-  // Sin puntos verdes decorativos — la vida se lee por landmarks/iluminación
+  // Vida legible sin “pintar verde”: lamparilla + 1–2 figuras, no relleno de polígono
   if (z.type === 'camp') return;
-  if (tier < 2) return;
-  // Un solo parche de maleza, no lluvia de círculos
   g.appendChild(
-    svgEl('ellipse', {
-      cx: z.x + rng.float(-z.r * 0.3, z.r * 0.3),
-      cy: z.y + rng.float(-z.r * 0.25, z.r * 0.25),
-      rx: rng.float(0.6, 1.1),
-      ry: rng.float(0.4, 0.7),
-      class: 'zz-map-life-tree',
-      opacity: '0.35',
+    svgEl('circle', {
+      cx: z.x + z.r * 0.28,
+      cy: z.y - z.r * 0.22,
+      r: 0.35 + tier * 0.06,
+      class: 'zz-prop-lamp',
+      opacity: '0.75',
     })
   );
+  if (tier >= 1) {
+    const n = Math.min(2, 1 + Math.floor(tier / 2));
+    for (let i = 0; i < n; i++) {
+      const ox = rng.float(-z.r * 0.25, z.r * 0.25);
+      const oy = rng.float(-z.r * 0.15, z.r * 0.2);
+      g.appendChild(
+        svgEl('circle', {
+          cx: z.x + ox,
+          cy: z.y + oy - 0.25,
+          r: 0.22,
+          class: 'zz-settle-person',
+          opacity: '0.55',
+        })
+      );
+    }
+  }
+  if (tier >= 2) {
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x + rng.float(-z.r * 0.3, z.r * 0.3),
+        cy: z.y + rng.float(-z.r * 0.25, z.r * 0.25),
+        rx: rng.float(0.6, 1.1),
+        ry: rng.float(0.4, 0.7),
+        class: 'zz-map-life-tree',
+        opacity: '0.35',
+      })
+    );
+  }
 }
 
 function drawProp(layer, kind, x, y, s = 1) {
@@ -1528,6 +1554,63 @@ function drawZone(layer, z, state, tier, handlers) {
       })
     );
   }
+  if (z.state === 'contested') {
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x,
+        cy: z.y,
+        rx: z.r * 0.5,
+        ry: z.r * 0.38,
+        fill: '#c48a2a',
+        class: 'zz-zone-tint zz-zone-tint--contested',
+        opacity: '0.28',
+      })
+    );
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x,
+        cy: z.y,
+        rx: z.r * 0.48,
+        ry: z.r * 0.36,
+        fill: 'none',
+        stroke: '#e8b84a',
+        'stroke-width': '0.35',
+        'stroke-dasharray': '1.2 0.8',
+        class: 'zz-zone-contested-ring',
+        opacity: '0.85',
+      })
+    );
+  }
+  if (z.state === 'discovered' && !exploreTarget) {
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x,
+        cy: z.y,
+        rx: z.r * 0.42,
+        ry: z.r * 0.32,
+        fill: 'none',
+        stroke: '#8a7a60',
+        'stroke-width': '0.2',
+        opacity: '0.35',
+        class: 'zz-zone-discovered-edge',
+      })
+    );
+  }
+  if (z.state === 'controlled' && z.type !== 'camp') {
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: z.x,
+        cy: z.y,
+        rx: z.r * 0.46,
+        ry: z.r * 0.34,
+        fill: 'none',
+        stroke: '#c4a882',
+        'stroke-width': '0.28',
+        opacity: '0.55',
+        class: 'zz-zone-owned-ring',
+      })
+    );
+  }
   if (exploreTarget) {
     g.appendChild(
       svgEl('ellipse', {
@@ -1609,7 +1692,7 @@ function drawZone(layer, z, state, tier, handlers) {
         )
       );
     }
-    if (z.state === 'hostile' || (z.state === 'discovered' && z.risk >= 0.5)) {
+    if (z.state === 'hostile' || z.state === 'contested' || (z.state === 'discovered' && z.risk >= 0.5)) {
       drawInfectedMarkers(g, z, rng);
     }
     if (z.state === 'controlled') {

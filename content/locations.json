@@ -2,111 +2,737 @@
   "locationTypes": {
     "camp": {
       "name": "Campamento",
-      "lootBias": { "food": 1, "water": 1, "wood": 1 },
+      "lootBias": {
+        "food": 1,
+        "water": 1,
+        "wood": 1
+      },
       "baseRisk": 0.05,
-      "infected": [0, 1]
+      "infected": [
+        0,
+        1
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "water"
+        ],
+        "secondary": [
+          "wood"
+        ],
+        "rare": [],
+        "ranges": {
+          "food": [
+            0,
+            1
+          ],
+          "water": [
+            0,
+            1
+          ],
+          "wood": [
+            0,
+            1
+          ]
+        }
+      }
     },
     "apartments": {
       "name": "Bloques de pisos",
-      "lootBias": { "food": 2, "wood": 1, "metal": 1, "ammo": 1 },
+      "lootBias": {
+        "food": 2,
+        "wood": 1,
+        "metal": 1,
+        "ammo": 1
+      },
       "baseRisk": 0.32,
-      "infected": [1, 4]
+      "infected": [
+        1,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "wood"
+        ],
+        "secondary": [
+          "metal",
+          "ammo"
+        ],
+        "rare": [
+          "medicine"
+        ],
+        "ranges": {
+          "food": [
+            1,
+            4
+          ],
+          "wood": [
+            1,
+            3
+          ],
+          "metal": [
+            0,
+            2
+          ],
+          "ammo": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "supermarket": {
       "name": "Supermercado",
-      "lootBias": { "food": 2, "water": 1, "medicine": 1 },
+      "lootBias": {
+        "food": 2,
+        "water": 1,
+        "medicine": 1
+      },
       "baseRisk": 0.35,
-      "infected": [1, 4]
+      "infected": [
+        1,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "water"
+        ],
+        "secondary": [
+          "medicine"
+        ],
+        "rare": [
+          "ammo"
+        ],
+        "ranges": {
+          "food": [
+            2,
+            5
+          ],
+          "water": [
+            1,
+            3
+          ],
+          "medicine": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "pharmacy": {
       "name": "Farmacia",
-      "lootBias": { "medicine": 3, "water": 1, "food": 1 },
+      "lootBias": {
+        "medicine": 3,
+        "water": 1,
+        "food": 1
+      },
       "baseRisk": 0.4,
-      "infected": [2, 4]
+      "infected": [
+        2,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "medicine"
+        ],
+        "secondary": [
+          "water",
+          "food"
+        ],
+        "rare": [
+          "ammo"
+        ],
+        "ranges": {
+          "medicine": [
+            2,
+            5
+          ],
+          "water": [
+            0,
+            2
+          ],
+          "food": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "hospital": {
       "name": "Hospital",
-      "lootBias": { "medicine": 3, "food": 1, "water": 1, "ammo": 1 },
+      "lootBias": {
+        "medicine": 3,
+        "food": 1,
+        "water": 1,
+        "ammo": 1
+      },
       "baseRisk": 0.55,
-      "infected": [3, 6]
+      "infected": [
+        3,
+        6
+      ],
+      "lootTable": {
+        "primary": [
+          "medicine",
+          "food"
+        ],
+        "secondary": [
+          "water",
+          "ammo"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "medicine": [
+            3,
+            6
+          ],
+          "food": [
+            1,
+            3
+          ],
+          "water": [
+            1,
+            2
+          ],
+          "ammo": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "workshop": {
       "name": "Taller abandonado",
-      "lootBias": { "metal": 3, "wood": 1, "fuel": 1 },
+      "lootBias": {
+        "metal": 3,
+        "wood": 1,
+        "fuel": 1
+      },
       "baseRisk": 0.38,
-      "infected": [1, 4]
+      "infected": [
+        1,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "metal",
+          "wood"
+        ],
+        "secondary": [
+          "fuel"
+        ],
+        "rare": [
+          "parts",
+          "tools"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            5
+          ],
+          "wood": [
+            1,
+            3
+          ],
+          "fuel": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "gas_station": {
       "name": "Gasolinera",
-      "lootBias": { "fuel": 3, "metal": 1, "food": 1 },
+      "lootBias": {
+        "fuel": 3,
+        "metal": 1,
+        "food": 1
+      },
       "baseRisk": 0.48,
-      "infected": [2, 5]
+      "infected": [
+        2,
+        5
+      ],
+      "lootTable": {
+        "primary": [
+          "fuel",
+          "metal"
+        ],
+        "secondary": [
+          "food"
+        ],
+        "rare": [
+          "ammo"
+        ],
+        "ranges": {
+          "fuel": [
+            2,
+            5
+          ],
+          "metal": [
+            1,
+            2
+          ],
+          "food": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "warehouse": {
       "name": "Almacén",
-      "lootBias": { "metal": 2, "fuel": 2, "food": 1, "ammo": 1 },
+      "lootBias": {
+        "metal": 2,
+        "fuel": 2,
+        "food": 1,
+        "ammo": 1
+      },
       "baseRisk": 0.5,
-      "infected": [2, 5]
+      "infected": [
+        2,
+        5
+      ],
+      "lootTable": {
+        "primary": [
+          "metal",
+          "fuel"
+        ],
+        "secondary": [
+          "food",
+          "ammo"
+        ],
+        "rare": [
+          "parts"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            4
+          ],
+          "fuel": [
+            1,
+            3
+          ],
+          "food": [
+            0,
+            2
+          ],
+          "ammo": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "hardware": {
       "name": "Ferretería",
-      "lootBias": { "metal": 2, "wood": 2, "ammo": 1 },
+      "lootBias": {
+        "metal": 2,
+        "wood": 2,
+        "ammo": 1
+      },
       "baseRisk": 0.36,
-      "infected": [1, 3]
+      "infected": [
+        1,
+        3
+      ],
+      "lootTable": {
+        "primary": [
+          "metal",
+          "wood"
+        ],
+        "secondary": [
+          "ammo"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            4
+          ],
+          "wood": [
+            2,
+            4
+          ],
+          "ammo": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "police": {
       "name": "Comisaría",
-      "lootBias": { "ammo": 3, "metal": 1, "medicine": 1 },
+      "lootBias": {
+        "ammo": 3,
+        "metal": 1,
+        "medicine": 1
+      },
       "baseRisk": 0.52,
-      "infected": [2, 5]
+      "infected": [
+        2,
+        5
+      ],
+      "lootTable": {
+        "primary": [
+          "ammo",
+          "metal"
+        ],
+        "secondary": [
+          "medicine"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "ammo": [
+            2,
+            5
+          ],
+          "metal": [
+            1,
+            3
+          ],
+          "medicine": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "station": {
       "name": "Estación",
-      "lootBias": { "metal": 2, "fuel": 2, "ammo": 1, "wood": 1 },
+      "lootBias": {
+        "metal": 2,
+        "fuel": 2,
+        "ammo": 1,
+        "wood": 1
+      },
       "baseRisk": 0.45,
-      "infected": [2, 5]
+      "infected": [
+        2,
+        5
+      ],
+      "lootTable": {
+        "primary": [
+          "metal",
+          "fuel"
+        ],
+        "secondary": [
+          "ammo",
+          "wood"
+        ],
+        "rare": [
+          "parts"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            4
+          ],
+          "fuel": [
+            1,
+            3
+          ],
+          "ammo": [
+            0,
+            2
+          ],
+          "wood": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "school": {
       "name": "Colegio",
-      "lootBias": { "food": 1, "water": 1, "medicine": 1, "wood": 1 },
+      "lootBias": {
+        "food": 1,
+        "water": 1,
+        "medicine": 1,
+        "wood": 1
+      },
       "baseRisk": 0.34,
-      "infected": [1, 4]
+      "infected": [
+        1,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "water"
+        ],
+        "secondary": [
+          "medicine",
+          "wood"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "food": [
+            1,
+            3
+          ],
+          "water": [
+            1,
+            2
+          ],
+          "medicine": [
+            0,
+            2
+          ],
+          "wood": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "park": {
       "name": "Parque",
-      "lootBias": { "food": 2, "wood": 2, "water": 1 },
+      "lootBias": {
+        "food": 2,
+        "wood": 2,
+        "water": 1
+      },
       "baseRisk": 0.3,
-      "infected": [1, 3]
+      "infected": [
+        1,
+        3
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "wood"
+        ],
+        "secondary": [
+          "water"
+        ],
+        "rare": [
+          "medicine"
+        ],
+        "ranges": {
+          "food": [
+            1,
+            3
+          ],
+          "wood": [
+            2,
+            4
+          ],
+          "water": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "industrial": {
       "name": "Polígono industrial",
-      "lootBias": { "metal": 3, "fuel": 2, "wood": 1 },
+      "lootBias": {
+        "metal": 3,
+        "fuel": 2,
+        "wood": 1
+      },
       "baseRisk": 0.5,
-      "infected": [2, 6]
+      "infected": [
+        2,
+        6
+      ],
+      "lootTable": {
+        "primary": [
+          "metal",
+          "fuel"
+        ],
+        "secondary": [
+          "wood"
+        ],
+        "rare": [
+          "parts"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            5
+          ],
+          "fuel": [
+            1,
+            3
+          ],
+          "wood": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "offices": {
       "name": "Oficinas",
-      "lootBias": { "food": 1, "metal": 1, "medicine": 1, "ammo": 1 },
+      "lootBias": {
+        "food": 1,
+        "metal": 1,
+        "medicine": 1,
+        "ammo": 1
+      },
       "baseRisk": 0.33,
-      "infected": [1, 3]
+      "infected": [
+        1,
+        3
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "metal"
+        ],
+        "secondary": [
+          "water"
+        ],
+        "rare": [
+          "ammo"
+        ],
+        "ranges": {
+          "food": [
+            1,
+            3
+          ],
+          "metal": [
+            1,
+            3
+          ],
+          "water": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "mall": {
       "name": "Centro comercial",
-      "lootBias": { "food": 2, "water": 1, "medicine": 1, "ammo": 1, "metal": 1 },
+      "lootBias": {
+        "food": 2,
+        "water": 1,
+        "medicine": 1,
+        "ammo": 1,
+        "metal": 1
+      },
       "baseRisk": 0.58,
-      "infected": [3, 7]
+      "infected": [
+        3,
+        7
+      ],
+      "lootTable": {
+        "primary": [
+          "food",
+          "medicine"
+        ],
+        "secondary": [
+          "ammo",
+          "water"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "food": [
+            2,
+            5
+          ],
+          "medicine": [
+            1,
+            3
+          ],
+          "ammo": [
+            0,
+            2
+          ],
+          "water": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "water_plant": {
       "name": "Planta de agua",
-      "lootBias": { "water": 3, "metal": 1, "fuel": 1 },
+      "lootBias": {
+        "water": 3,
+        "metal": 1,
+        "fuel": 1
+      },
       "baseRisk": 0.42,
-      "infected": [2, 4]
+      "infected": [
+        2,
+        4
+      ],
+      "lootTable": {
+        "primary": [
+          "water",
+          "metal"
+        ],
+        "secondary": [
+          "food"
+        ],
+        "rare": [
+          "tools"
+        ],
+        "ranges": {
+          "water": [
+            3,
+            6
+          ],
+          "metal": [
+            1,
+            3
+          ],
+          "food": [
+            0,
+            2
+          ]
+        }
+      }
     },
     "substation": {
       "name": "Subestación",
-      "lootBias": { "metal": 3, "fuel": 1, "ammo": 1 },
+      "lootBias": {
+        "metal": 3,
+        "fuel": 1,
+        "ammo": 1
+      },
       "baseRisk": 0.46,
-      "infected": [2, 5]
+      "infected": [
+        2,
+        5
+      ],
+      "lootTable": {
+        "primary": [
+          "metal"
+        ],
+        "secondary": [
+          "fuel"
+        ],
+        "rare": [
+          "parts"
+        ],
+        "ranges": {
+          "metal": [
+            2,
+            5
+          ],
+          "fuel": [
+            0,
+            2
+          ]
+        }
+      }
     }
   },
   "seedLayout": [
@@ -118,7 +744,12 @@
       "y": 62,
       "r": 16,
       "startState": "controlled",
-      "neighbors": ["market", "apartments", "warehouse", "park"]
+      "neighbors": [
+        "market",
+        "apartments",
+        "warehouse",
+        "park"
+      ]
     },
     {
       "id": "market",
@@ -128,7 +759,12 @@
       "y": 48,
       "r": 14,
       "startState": "unknown",
-      "neighbors": ["camp", "pharmacy", "station", "hardware"]
+      "neighbors": [
+        "camp",
+        "pharmacy",
+        "station",
+        "hardware"
+      ]
     },
     {
       "id": "apartments",
@@ -138,7 +774,12 @@
       "y": 46,
       "r": 15,
       "startState": "unknown",
-      "neighbors": ["camp", "hospital", "park", "school"]
+      "neighbors": [
+        "camp",
+        "hospital",
+        "park",
+        "school"
+      ]
     },
     {
       "id": "pharmacy",
@@ -148,7 +789,11 @@
       "y": 28,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["market", "station", "offices"]
+      "neighbors": [
+        "market",
+        "station",
+        "offices"
+      ]
     },
     {
       "id": "station",
@@ -158,7 +803,12 @@
       "y": 22,
       "r": 14,
       "startState": "unknown",
-      "neighbors": ["market", "pharmacy", "hospital", "police"]
+      "neighbors": [
+        "market",
+        "pharmacy",
+        "hospital",
+        "police"
+      ]
     },
     {
       "id": "hospital",
@@ -168,7 +818,12 @@
       "y": 24,
       "r": 15,
       "startState": "unknown",
-      "neighbors": ["apartments", "station", "mall", "park"]
+      "neighbors": [
+        "apartments",
+        "station",
+        "mall",
+        "park"
+      ]
     },
     {
       "id": "park",
@@ -178,7 +833,12 @@
       "y": 58,
       "r": 14,
       "startState": "unknown",
-      "neighbors": ["camp", "apartments", "hospital", "water_plant"]
+      "neighbors": [
+        "camp",
+        "apartments",
+        "hospital",
+        "water_plant"
+      ]
     },
     {
       "id": "warehouse",
@@ -188,7 +848,12 @@
       "y": 78,
       "r": 13,
       "startState": "unknown",
-      "neighbors": ["camp", "gas_station", "industrial", "market"]
+      "neighbors": [
+        "camp",
+        "gas_station",
+        "industrial",
+        "market"
+      ]
     },
     {
       "id": "gas_station",
@@ -198,7 +863,11 @@
       "y": 72,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["warehouse", "hardware", "workshop"]
+      "neighbors": [
+        "warehouse",
+        "hardware",
+        "workshop"
+      ]
     },
     {
       "id": "hardware",
@@ -208,7 +877,12 @@
       "y": 52,
       "r": 11,
       "startState": "unknown",
-      "neighbors": ["market", "gas_station", "workshop", "pharmacy"]
+      "neighbors": [
+        "market",
+        "gas_station",
+        "workshop",
+        "pharmacy"
+      ]
     },
     {
       "id": "workshop",
@@ -218,7 +892,11 @@
       "y": 68,
       "r": 11,
       "startState": "unknown",
-      "neighbors": ["gas_station", "hardware", "industrial"]
+      "neighbors": [
+        "gas_station",
+        "hardware",
+        "industrial"
+      ]
     },
     {
       "id": "police",
@@ -228,7 +906,11 @@
       "y": 12,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["station", "offices", "mall"]
+      "neighbors": [
+        "station",
+        "offices",
+        "mall"
+      ]
     },
     {
       "id": "school",
@@ -238,7 +920,11 @@
       "y": 40,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["apartments", "offices", "mall"]
+      "neighbors": [
+        "apartments",
+        "offices",
+        "mall"
+      ]
     },
     {
       "id": "offices",
@@ -248,7 +934,11 @@
       "y": 14,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["pharmacy", "police", "school"]
+      "neighbors": [
+        "pharmacy",
+        "police",
+        "school"
+      ]
     },
     {
       "id": "mall",
@@ -258,7 +948,11 @@
       "y": 18,
       "r": 16,
       "startState": "unknown",
-      "neighbors": ["hospital", "police", "school"]
+      "neighbors": [
+        "hospital",
+        "police",
+        "school"
+      ]
     },
     {
       "id": "industrial",
@@ -268,7 +962,12 @@
       "y": 88,
       "r": 15,
       "startState": "unknown",
-      "neighbors": ["warehouse", "workshop", "substation", "gas_station"]
+      "neighbors": [
+        "warehouse",
+        "workshop",
+        "substation",
+        "gas_station"
+      ]
     },
     {
       "id": "water_plant",
@@ -278,7 +977,10 @@
       "y": 72,
       "r": 13,
       "startState": "unknown",
-      "neighbors": ["park", "substation"]
+      "neighbors": [
+        "park",
+        "substation"
+      ]
     },
     {
       "id": "substation",
@@ -288,7 +990,11 @@
       "y": 88,
       "r": 12,
       "startState": "unknown",
-      "neighbors": ["industrial", "water_plant", "warehouse"]
+      "neighbors": [
+        "industrial",
+        "water_plant",
+        "warehouse"
+      ]
     }
   ]
 }
