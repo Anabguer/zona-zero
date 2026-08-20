@@ -8469,3 +8469,22 @@ NO
 - HUMAN_GATE nuevos clave: ZZ-048 invierno madera, ZZ-059 crisis sanitaria, ZZ-069 repair visual, ZZ-108 variedad expediciones, ZZ-172 vida visual perf.
 
 *Fin DEVELOPMENT_LOG — plan 2.5 / ZZ-001 CAMBIOS SOLICITADOS.*
+
+---
+
+# REGISTRO 2026-08-20 — PROPUESTA NENI + AUDITORÍA (solo docs)
+
+## Qué
+- GAME_MASTER §43: PROPUESTA NENI 2026-08-20 (A–G) **pendiente de implementación**.
+- `docs/CURRENT_GAMEPLAY_AUDIT_20260820.md`: matriz real de jugabilidad + mapa fuel/vehicles + orden P0–P7.
+- Método: 1 bloque → tests → commit → push → PARAR.
+
+## Qué NO
+- Sin cambios de gameplay, HUD, assets, mapa, piloto, saves, balance.
+
+## ESTADO REVISIÓN
+PENDIENTE DE REVISIÓN ChatGPT / Neni (HUMAN_GATE docs).
+
+## APROBACIÓN FINAL CHATGPT
+NO
+

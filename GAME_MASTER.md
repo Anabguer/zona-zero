@@ -1,9 +1,9 @@
-# ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
+﻿# ZONA ZERO — GAME MASTER (BIBLIA DE DISEÑO DEFINITIVA)
 
 > **SYNC VERIFY GAME_MASTER** · stamp=2026-08-15 19:41:46 · sha256_16=E699961EE3D959BF · source=repo→Drive force rewrite · plan must be 2.5 / 128 phases if IMPLEMENTATION_PLAN
 
 **Versión de diseño:** 2.8 · **BIBLIA ÚNICA DEL PROYECTO** (diseño + forma de trabajar · ronda revisión ChatGPT↔Cursor)
-**Estado:** Contrato vigente — enmienda **superficies edificables orgánicas + escenario diseñado** (2026-08-16) · no descarta B0/ZZ-019
+**Estado:** Contrato vigente — enmienda **superficies edificables orgánicas + escenario diseñado** (2026-08-16) · **PROPUESTA NENI 2026-08-20** (§43) pendiente de implementación · no descarta B0/ZZ-019
 **Fecha:** 2026-08-16  
 **Plataforma:** Web · **gameplay landscape-first** (móvil horizontal obligatorio) · desktop panorámico · HTML/CSS/JS + PHP + MySQL  
 **Repositorio:** `Anabguer/zona-zero`  
@@ -111,6 +111,9 @@ A–N. Apéndices (techs, logros, misiones, costes, save, gates, inventario moto
 | Infectados tipados | JSON ornamental |
 | Misiones / logros / estaciones | **No como sistemas** |
 | Onboarding D1 | Prototipo UI |
+
+
+> **Nota 2026-08-20:** la tabla §0.2 está **desfasada** respecto al motor actual. Estado real de jugabilidad → `docs/CURRENT_GAMEPLAY_AUDIT_20260820.md`. No reescribir §0.2 aquí hasta HUMAN_GATE de esa auditoría.
 
 ## 0.3 Reglas de prioridad
 
@@ -3561,4 +3564,112 @@ content/*.json                        ← datos de juego (implementación)
 ## 42.4 Si dentro de 6 meses alguien abre solo un archivo
 
 Debe poder entender **todo Zona Zero** leyendo `ZONA_ZERO_GAME_MASTER.md` / `GAME_MASTER.md`, y saber **cómo se trabaja** leyendo §41–§42; el detalle de fases y el historial de ejecución viven en los otros dos maestros sincronizados.
+
+
+
+---
+
+# 43. PROPUESTA NENI 2026-08-20 — PENDIENTE DE IMPLEMENTACIÓN
+
+> **Estado:** PROPUESTA · registrada 2026-08-20 · **NO implementada** en este commit.  
+> **Gobernanza:** ChatGPT revisa el commit de documentación antes de autorizar código.  
+> **Método de trabajo:** 1 bloque funcional pequeño → tests → commit → push → resumen → PARAR.  
+> **Auditoría de estado actual:** `docs/CURRENT_GAMEPLAY_AUDIT_20260820.md`.
+
+Estas decisiones **no** sustituyen todavía el contrato 2.8 vigente hasta HUMAN_GATE + implementación por bloques. Quedan como dirección deseada de Neni.
+
+## 43.A Recolección de madera
+
+La madera **no** debe aparecer mágicamente solo porque existe un aserradero.
+
+Dirección deseada:
+
+- las zonas `forest` del mapa canónico (`neni-pilot-zones-v3`) son **fuentes reales** de madera;
+- el aserradero tiene workers asignados;
+- esos workers representan **cuadrillas** que salen al bosque y vuelven;
+- visualmente pueden verse figuras/rutas ambientales (agregadas, no Sims);
+- la producción depende de: workers del aserradero · bosque disponible · distancia/estado si aporta decisión · mejoras/research;
+- **no** crear personajes individuales tipo Sims;
+- la población sigue siendo **colectiva**.
+
+*Hoy (auditoría):* `sawmill` produce wood flat; `forest` solo bloquea footprints en piloto.
+
+## 43.B Chatarra → metal
+
+No duplicar chatarrería y taller.
+
+Dirección deseada:
+
+1. zonas `scrap` = fuente física;
+2. chatarrería / cuadrilla de recuperación obtiene chatarra;
+3. el taller procesa/refina esa chatarra en metal útil.
+
+Antes de inventar recurso nuevo: auditar si el motor ya tiene distinción útil (`scrap` en loot → metal, etc.). Objetivo jugable: si se agotan/no están disponibles las fuentes de chatarra, la producción de metal debe resentirse.
+
+*Hoy:* `scrapyard` y `workshop` producen metal flat; celdas scrap solo no-buildable en piloto.
+
+## 43.C Agua
+
+**NO** añadir por ahora recolectores manuales de agua.
+
+Mantener:
+
+- pozo = producción de agua;
+- cisterna = almacenamiento/reserva + posibles efectos de lluvia;
+- loot/eventos pueden aportar agua.
+
+Evitar una tercera vía de microgestión salvo necesidad real.
+
+## 43.D Eliminar fuel de v1
+
+Neni decide: **NO habrá vehículos en v1.**
+
+Por tanto (cuando se autorice el bloque):
+
+- eliminar `fuel` como recurso jugable de v1;
+- eliminar vehículos y dependencias de fuel;
+- revisar expediciones para duración/rango **sin** coches;
+- **NO** sustituir fuel por otro recurso.
+
+**IMPORTANTE:** antes de borrar código → mapa de dependencias (ya en la auditoría § Fuel/Vehicles). Este commit **no** borra código.
+
+## 43.E Exploradores — UI futura
+
+Máximo 3 exploradores sigue canónico.
+
+Dirección UI (no implementar aún):
+
+```
+[ Iñaki ] [ + ] [ + ]
+```
+
+Cada slot: retrato · estado resumido · tap → ficha.  
+Vacío desbloqueado: `+` reclutar.  
+Bloqueado: candado/criterio discreto.  
+**NO** barra enorme a todo el ancho.
+
+## 43.F Estaciones / clima en HUD
+
+Recuperar el diseño ya existente de estaciones/clima.
+
+Cabecera aprobada como dirección:
+
+```
+Refugio Norte
+Día X
+```
+
+Integración compacta posterior:
+
+```
+Día 12 · Otoño · ☁ Niebla
+⚠ Tormenta en 2 días
+⚠ Frío fuerte en 3 días
+```
+
+**NO** implementar HUD en este commit.
+
+## 43.G Método de trabajo (operativo)
+
+A partir de 2026-08-20: **no** bloques grandes sin revisión. Un bloque pequeño → tests → commit → push → resumen → **PARAR**. Neni + ChatGPT revisan el commit antes del siguiente.
 
