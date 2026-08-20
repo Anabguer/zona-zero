@@ -77,7 +77,12 @@ export function pilotTestBuildableTypes() {
 }
 
 export function isPilotNeni(state) {
-  return state?.flags?.pilot === 'neni';
+  if (state?.flags?.pilot === 'neni') return true;
+  try {
+    return typeof document !== 'undefined' && document.body?.classList?.contains('zz-body--pilot-neni');
+  } catch {
+    return false;
+  }
 }
 
 export function isPilotTestMode(state) {

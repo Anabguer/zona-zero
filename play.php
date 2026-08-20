@@ -5,6 +5,10 @@ require_once __DIR__ . '/includes/zz-auth.php';
 require_once __DIR__ . '/includes/zz-assets.php';
 zz_page_require_login();
 
+// No cachear el HTML de partida: evita boot sin ?pilot=neni o asset V antigua.
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+
 $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
 $clear = isset($_GET['clear']) && (string) $_GET['clear'] === '1';
 $fromIntro = isset($_GET['intro']) && (string) $_GET['intro'] === '1';

@@ -73,7 +73,13 @@ export function mapMetrics(svg) {
 }
 
 function isPilotNeni(state) {
-  return state?.flags?.pilot === 'neni';
+  if (state?.flags?.pilot === 'neni') return true;
+  // Cinturón: play.php pone esta clase cuando ?pilot=neni — no depender solo del flag JS.
+  try {
+    return typeof document !== 'undefined' && document.body?.classList?.contains('zz-body--pilot-neni');
+  } catch {
+    return false;
+  }
 }
 
 function worldDimsForState(state) {
@@ -3032,10 +3038,23 @@ export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
   const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer, onSelectSlot, content } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
+  // Sincronizar flag con body class de play.php (evita mapa legacy si el flag se perdió).
+  if (
+    state &&
+    typeof document !== 'undefined' &&
+    document.body?.classList?.contains('zz-body--pilot-neni')
+  ) {
+    state.flags = state.flags || {};
+    state.flags.pilot = 'neni';
+  }
   const pilot = isPilotNeni(state);
   const dims = worldDimsForState(state);
   svg.dataset.zzWorldW = String(dims.w);
   svg.dataset.zzWorldH = String(dims.h);
+  if (pilot && typeof document !== 'undefined') {
+    document.body.dataset.zzPilotMap = 'neni-1819x865';
+    document.body.dataset.zzWorld = `${dims.w}x${dims.h}`;
+  }
   const m = mapMetrics(svg);
   if (!state.mapCamera) {
     const nucleus = nucleusForState(state);

@@ -43,6 +43,7 @@ $icon192 = Join-Path $Root 'assets\icon-192.png'
 $icon512 = Join-Path $Root 'assets\icon-512.png'
 $cityIso = Join-Path $Root 'assets\art\terrain\city-iso.png'
 $colonyDirt = Join-Path $Root 'assets\art\terrain\colony-iso-world-v3.png'
+$mapaNeni = Join-Path $Root 'assets\art\terrain\mapa-neni-1819x865-brownmatch-up2x.png'
 $dwellingV1 = Join-Path $Root 'assets\art\buildings\dwelling-v1b.png'
 $farmIso = Join-Path $Root 'assets\art\buildings\farm-iso.png'
 $wellIso = Join-Path $Root 'assets\art\buildings\well-iso.png'
@@ -71,6 +72,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("put `"$icon512`" /juegos/zona-zero/assets/icon-512.png")
 [void]$sb.AppendLine("put `"$cityIso`" /juegos/zona-zero/assets/art/terrain/city-iso.png")
 [void]$sb.AppendLine("put `"$colonyDirt`" /juegos/zona-zero/assets/art/terrain/colony-iso-world-v3.png")
+[void]$sb.AppendLine("put `"$mapaNeni`" /juegos/zona-zero/assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png")
 [void]$sb.AppendLine("put `"$dwellingV1`" /juegos/zona-zero/assets/art/buildings/dwelling-v1b.png")
 [void]$sb.AppendLine("put `"$farmIso`" /juegos/zona-zero/assets/art/buildings/farm-iso.png")
 [void]$sb.AppendLine("put `"$wellIso`" /juegos/zona-zero/assets/art/buildings/well-iso.png")

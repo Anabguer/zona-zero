@@ -2738,6 +2738,11 @@ function bindChrome() {
 }
 
 export async function bootGame(opts) {
+  opts = { ...(opts || {}) };
+  // Si play.php marcó el body como piloto, forzar opts aunque el JSON de boot fallara.
+  if (typeof document !== 'undefined' && document.body?.classList?.contains('zz-body--pilot-neni')) {
+    opts.pilot = 'neni';
+  }
   const boot = $('zz-boot');
   const app = $('zz-app');
   registerServiceWorker();
