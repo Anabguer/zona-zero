@@ -7,6 +7,41 @@
   background: #0a0908;
 }
 
+/* Marca discreta modo QA piloto Neni */
+.zz-qa-mark {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #1a1510;
+  background: #c4a060;
+  border-radius: 0.2rem;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+
+.zz-build-section {
+  margin: 0.85rem 0 0.4rem;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #c8b090;
+}
+
+.zz-build-card__thumb--empty {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: rgba(40, 36, 30, 0.85);
+  border: 1px dashed rgba(140, 120, 90, 0.45);
+  border-radius: 0.25rem;
+}
+
 /* Llegada desde mini-intro ZZ-008 */
 body.zz-from-intro .zz-world--overlay {
   opacity: 0;
@@ -47,6 +82,8 @@ body.zz-from-intro #zz-boot {
   min-height: 0;
   overflow: hidden;
   background: #0c0e10;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 .zz-world--overlay .zz-world-map-wrap .zz-map {
   width: 100%;
@@ -55,6 +92,7 @@ body.zz-from-intro #zz-boot {
   display: block;
   aspect-ratio: auto;
   background: #0c0e10;
+  touch-action: none;
 }
 
 /* —— HUD overlay —— */
@@ -201,8 +239,42 @@ body.zz-from-intro #zz-boot {
 }
 .zz-hud__res li.is-low strong { color: #e09070; }
 .zz-hud__res li.is-crit {
+  outline: 1px solid rgba(200, 90, 70, 0.45);
   box-shadow: 0 0 0 1px rgba(200,80,50,0.7);
   animation: zz-pulse-soft 1.4s ease-in-out infinite;
+}
+.zz-hud__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+.zz-hud__tool {
+  font-family: var(--zz-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(196, 160, 96, 0.45);
+  background: rgba(28, 22, 16, 0.88);
+  color: #e8d8b8;
+  border-radius: 8px;
+  min-height: 2rem;
+  padding: 0.15rem 0.55rem;
+  cursor: pointer;
+}
+.zz-hud__tool--build {
+  background: rgba(90, 68, 36, 0.92);
+  border-color: rgba(212, 176, 112, 0.7);
+  color: #f3e6c8;
+}
+.zz-hud__tool--build.is-build-on {
+  outline: 2px solid rgba(212, 176, 112, 0.85);
+}
+.zz-hud__tool--more {
+  min-width: 2rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 @keyframes zz-pulse-soft {
   0%,100% { background: rgba(80,20,10,0.35); }
@@ -427,6 +499,20 @@ body.zz-from-intro #zz-boot {
   border-top: 1px solid rgba(255,255,255,0.06);
   max-width: none;
   margin: 0;
+}
+.zz-world--overlay .zz-world-dock--day {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  background: linear-gradient(0deg, rgba(10,8,6,0.72), rgba(10,8,6,0));
+  border-top: none;
+  pointer-events: none;
+}
+.zz-world--overlay .zz-world-dock--day .zz-btn {
+  pointer-events: auto;
+}
+.zz-world--overlay .zz-world-dock--day .zz-btn--wide {
+  max-width: 16rem;
+  width: min(70vw, 16rem);
 }
 .zz-btn--dock-sec {
   min-width: 5.2rem;
@@ -922,52 +1008,34 @@ body.zz-from-intro #zz-boot {
   }
 
   body.zz-desk-layout .zz-desk-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: var(--zz-desk-w);
-    z-index: 22;
-    padding: 1rem 1rem 1.1rem;
-    background:
-      linear-gradient(180deg, rgba(22, 18, 14, 0.97) 0%, rgba(14, 12, 10, 0.96) 100%);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.35);
-    overflow: auto;
+    display: none !important;
   }
 
   body.zz-desk-layout .zz-world--overlay .zz-world-stage {
-    right: var(--zz-desk-w);
+    right: 0;
   }
   body.zz-desk-layout .zz-hud {
-    right: var(--zz-desk-w);
+    right: 0;
   }
-  body.zz-desk-layout .zz-world--overlay .zz-world-dock {
-    left: calc((100% - var(--zz-desk-w)) / 2);
-    transform: translateX(-50%);
-    width: min(560px, 40vw);
-    bottom: 1rem;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(14, 12, 10, 0.92);
+  body.zz-desk-layout .zz-world--overlay .zz-world-dock--day {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
   body.zz-desk-layout .zz-world--overlay .zz-explorer-rail {
-    display: none;
+    display: flex;
   }
   body.zz-desk-layout .zz-coach-card {
     left: 1.25rem;
     right: auto;
     transform: none;
     bottom: 6.25rem;
-    width: min(360px, calc(100% - var(--zz-desk-w) - 3rem));
+    width: min(360px, calc(100% - 3rem));
     max-width: 380px;
   }
   body.zz-desk-layout .zz-map-zoom {
     bottom: 5.75rem;
-    right: calc(var(--zz-desk-w) + 1rem);
+    right: 1rem;
   }
   body.zz-desk-layout .zz-world--overlay .zz-sheet {
     left: auto;
@@ -1353,6 +1421,15 @@ body.zz-need-landscape #zz-toast {
     width: 12px;
     height: 12px;
   }
+  .zz-hud__tool {
+    min-height: 1.85rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.72rem;
+  }
+  .zz-hud__tool--more {
+    min-width: 1.85rem;
+    font-size: 0.95rem;
+  }
   .zz-mission {
     margin-top: 0.2rem;
     padding: 0.18rem 0.45rem;
@@ -1559,3 +1636,205 @@ body.zz-need-landscape #zz-toast {
     font-size: 1.05rem;
   }
 }
+
+/* Colonia: tierra continua + edificios anclados */
+.zz-colony-dirt-art {
+  pointer-events: none;
+}
+.zz-colony-slot-shadow {
+  fill: #0c0a08;
+  opacity: 0.34;
+  pointer-events: none;
+}
+.zz-colony-prop-img {
+  pointer-events: none;
+  mix-blend-mode: normal;
+}
+.zz-colony-slot-img {
+  mix-blend-mode: multiply;
+}
+.zz-colony-slots--dirt .zz-colony-slot-img,
+.zz-colony-slot-img--planted {
+  mix-blend-mode: normal;
+}
+.zz-colony-slots--dirt .zz-colony-slot-shadow,
+.zz-colony-slots--dirt .zz-colony-lot-pad,
+.zz-colony-slots--dirt .zz-colony-sprite-blend {
+  display: none;
+}
+.zz-colony-slots--dirt .zz-colony-slot-hit {
+  stroke: none;
+  fill: transparent;
+}
+.zz-colony-slots--dirt .zz-colony-slot.is-selected .zz-colony-slot-hit,
+.zz-colony-slots--dirt .zz-colony-slot.is-buildable .zz-colony-slot-hit,
+.zz-colony-slots--dirt .zz-colony-slot.is-guide-lot .zz-colony-slot-hit {
+  stroke: #c4a060;
+  stroke-width: 0.2;
+  fill: rgba(196, 160, 96, 0.14);
+}
+.zz-colony-slots--dirt .zz-colony-slot.is-guide-lot .zz-colony-slot-hit {
+  animation: zz-lot-pulse 1.5s ease-in-out infinite;
+}
+@keyframes zz-lot-pulse {
+  0%,
+  100% {
+    stroke-opacity: 0.45;
+    fill-opacity: 0.12;
+  }
+  50% {
+    stroke-opacity: 1;
+    fill-opacity: 0.28;
+  }
+}
+.zz-colony-slots--yard .zz-colony-slot-img,
+.zz-colony-slots--iso .zz-colony-slot-img {
+  mix-blend-mode: normal;
+}
+.zz-colony-slots--yard .zz-colony-slot-img.is-ruin {
+  filter: brightness(0.78) saturate(0.55);
+  opacity: 0.92;
+}
+.zz-colony-yard-art {
+  pointer-events: none;
+  mix-blend-mode: lighten;
+}
+.zz-colony-yard-iso-pad {
+  fill: #5a5044;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.zz-colony-slot-img--yard {
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 0.12px 0.18px rgba(0, 0, 0, 0.55));
+}
+.zz-map-colony-ground--yard .zz-colony-dirt {
+  fill: #6a5438;
+}
+.zz-map-colony-ground--iso .zz-colony-dirt {
+  fill: #3a4a52;
+}
+.zz-colony-iso-left {
+  fill: #b07a48;
+  stroke: #1a1410;
+  stroke-width: 0.08;
+}
+.zz-colony-iso-right {
+  fill: #e8c888;
+  stroke: #1a1410;
+  stroke-width: 0.08;
+}
+.zz-colony-iso-roof {
+  fill: #c45a3a;
+  stroke: #1a1410;
+  stroke-width: 0.08;
+}
+.zz-colony-iso-peak {
+  fill: #f0d090;
+}
+.zz-colony-iso-building.is-vacant .zz-colony-iso-left {
+  fill: #8a8880;
+}
+.zz-colony-iso-building.is-vacant .zz-colony-iso-right {
+  fill: #c4c0b4;
+}
+.zz-colony-iso-building.is-vacant .zz-colony-iso-roof,
+.zz-colony-iso-building.is-vacant .zz-colony-iso-peak {
+  fill: #9a9890;
+}
+.zz-colony-yard-iso-pad {
+  fill: #5a6a72;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.zz-colony-style-tag {
+  paint-order: stroke;
+  stroke: #12100c;
+  stroke-width: 0.35px;
+}
+.zz-colony-iso-window {
+  fill: #16120e;
+  opacity: 0.65;
+}
+.zz-colony-iso-glyph {
+  pointer-events: none;
+}
+.zz-colony-slot-shadow--iso {
+  opacity: 0.28;
+}
+.zz-colony-sprite-blend {
+  fill: #2a241c;
+  opacity: 0.22;
+  pointer-events: none;
+}
+.zz-colony-lot-pad {
+  fill: url(#zzPackedPat);
+  stroke: none;
+  opacity: 0.9;
+}
+.zz-colony-lot-debris {
+  fill: #4a4034;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.zz-colony-slot-img.is-ruin {
+  filter: brightness(0.55) saturate(0.35) contrast(0.9);
+  opacity: 0.82;
+}
+.zz-colony-slot.is-locked {
+  opacity: 0.5;
+}
+.zz-colony-slot.is-buildable .zz-colony-lot-pad {
+  fill: #4a4030;
+  opacity: 0.95;
+}
+.zz-colony-slot.is-buildable .zz-colony-slot-shadow,
+.zz-colony-slot.is-selected .zz-colony-slot-shadow {
+  fill: #c4a060;
+  opacity: 0.22;
+}
+.zz-colony-slot-hit {
+  pointer-events: auto;
+}
+
+/* Demo: solo mapa (comparativa estilos) */
+.zz-body--demo .zz-hud,
+.zz-body--demo .zz-world-dock,
+.zz-body--demo .zz-coach-card,
+.zz-body--demo .zz-explorer-rail,
+.zz-body--demo .zz-desk-panel,
+.zz-body--demo .zz-day-brief {
+  display: none !important;
+}
+.zz-body--demo .zz-world-map-wrap {
+  inset: 0 !important;
+}
+.zz-style-picks {
+  position: fixed;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  background: rgba(12, 10, 8, 0.88);
+  border: 1px solid #c4a060;
+  border-radius: 10px;
+}
+.zz-style-picks[hidden] { display: none !important; }
+.zz-style-picks button {
+  font: 700 0.95rem/1 Rajdhani, sans-serif;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #5a4a38;
+  background: #2a2218;
+  color: #e8e0d4;
+  cursor: pointer;
+}
+.zz-style-picks button:hover {
+  border-color: #e8c070;
+  color: #e8c070;
+}
+

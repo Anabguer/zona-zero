@@ -13,9 +13,10 @@ function isDesktopPanoramic() {
 }
 
 export function isGameplayPortraitBlocked() {
-  if (!isPlayShell()) return false;
-  if (isDesktopPanoramic()) return false;
-  return window.innerHeight > window.innerWidth;
+  // Portrait habilitado — contrato de cámara real 4096×2720 aprobado.
+  // El mapa es más grande que cualquier viewport; portrait simplemente
+  // muestra una ventana más estrecha del mismo mundo.
+  return false;
 }
 
 function applyGate(active) {

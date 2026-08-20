@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Propuesta portada · logo</title>
+<link rel="stylesheet" href="/css/game.css"/>
+<link rel="stylesheet" href="/css/hub.css"/>
+<style>
+.zz-hub__kicker, .zz-hub__brand { display: none !important; }
+.zz-hub__logo-hero {
+  width: min(42vw, 168px);
+  height: auto;
+  margin: 0 auto 1.1rem;
+  display: block;
+  filter: drop-shadow(0 8px 28px rgba(0,0,0,0.55));
+}
+.zz-hub__tag { display: none !important; }
+.zz-hub__hero { justify-content: flex-end; padding-bottom: 2rem; }
+.zz-hub__actions { width: 100%; max-width: 16rem; margin: 0 auto; display: grid; gap: 0.55rem; }
+.zz-hub__actions .zz-btn { min-height: 2.75rem; }
+.zz-hub__proposal-note {
+  position: absolute; top: 0.5rem; left: 0.5rem; z-index: 5;
+  font-size: 0.65rem; color: #c4a574; opacity: 0.9;
+}
+</style>
+</head>
+<body class="zz-body zz-body--hub">
+<div id="zz-hub" class="zz-hub">
+  <p class="zz-hub__proposal-note">PROPUESTA · logo-first (no deploy)</p>
+  <div class="zz-hub__atmosphere" aria-hidden="true"></div>
+  <header class="zz-hub__top">
+    <a class="zz-back" href="#">← Juegos</a>
+    <p class="zz-user">Hola, <strong>Neni</strong></p>
+  </header>
+  <main class="zz-hub__hero">
+    <img class="zz-hub__logo-hero" src="/assets/logo.svg" alt="Zona Zero" width="168" height="168"
+      onerror="this.src='/assets/cover.svg'"/>
+    <div class="zz-hub__actions" id="zz-hub-actions">
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--hero">Nueva partida</button>
+      <button type="button" class="zz-btn zz-btn--ghost">Continuar</button>
+    </div>
+  </main>
+</div>
+</body></html>

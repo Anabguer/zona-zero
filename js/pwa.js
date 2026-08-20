@@ -129,8 +129,17 @@ export function mountHubInstallCta(actionsEl) {
 
 /** Una sola petición de fullscreen tras gesto válido; sin bucles. */
 let fullscreenAsked = false;
+
+function isDesktopPointer() {
+  try {
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  } catch {
+    return true;
+  }
+}
+
 export function requestFullscreenOnce() {
-  if (fullscreenAsked || isStandaloneDisplay()) return;
+  if (fullscreenAsked || isStandaloneDisplay() || isDesktopPointer()) return;
   fullscreenAsked = true;
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen;
@@ -143,9 +152,9 @@ export function requestFullscreenOnce() {
   }
 }
 
-/** Enlaza el primer pointerdown del documento a una única petición FS. */
+/** Enlaza el primer pointerdown a fullscreen — solo móvil, nunca PC con ratón. */
 export function bindFullscreenOnFirstGesture() {
-  if (isStandaloneDisplay() || fullscreenAsked) return;
+  if (isStandaloneDisplay() || fullscreenAsked || isDesktopPointer()) return;
   const once = () => {
     document.removeEventListener('pointerdown', once, true);
     requestFullscreenOnce();

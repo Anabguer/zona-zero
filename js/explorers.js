@@ -32,6 +32,10 @@ export function makeExplorer(rng, survivorsDoc, opts = {}) {
 }
 
 export function explorerSlotsUnlocked(state, balance) {
+  // Modo pruebas piloto: 3 plazas siempre (auditoría).
+  if (state?.flags?.pilot === 'neni' && (state?.flags?.pilotTestMode || state?.flags?.pilotQaMode)) {
+    return Math.min(balance?.explorers?.maxActive || 3, 3);
+  }
   const cfg = balance?.explorers || {};
   let slots = cfg.startSlots || 1;
   const pop = state.population?.total || 0;

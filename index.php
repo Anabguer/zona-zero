@@ -27,6 +27,7 @@ $v = zz_asset_v();
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'game.css') ?>" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'hub.css') ?>" />
+  <script src="/juegos/js/mobile-fullscreen.js?v=6"></script>
   <?php zz_print_js_importmap($base); ?>
 </head>
 <body class="zz-body zz-body--hub">

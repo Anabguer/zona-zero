@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Piloto cuadrícula invisible · Zona Zero</title>
+  <style>
+    body { margin: 0; background: #12100c; color: #e8e0d4; font-family: system-ui, sans-serif; padding: 1.5rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 .4rem; }
+    p { color: #9a9080; max-width: 72ch; }
+    .grid { display: grid; gap: 1rem; }
+    figure { margin: 0; background: #1a1612; border: 1px solid #333; border-radius: 10px; overflow: hidden; }
+    img { width: 100%; display: block; background: #000; }
+    figcaption { padding: .55rem .7rem; font-size: .85rem; }
+    figcaption strong { display: block; }
+  </style>
+</head>
+<body>
+  <h1>Escena piloto · arte primero, rejilla después</h1>
+  <p>DEBUG interno. El jugador solo vería la imagen limpia. No está integrado en el juego.</p>
+  <div class="grid">
+    <figure>
+      <img src="01-scene-clean.png" alt="Escena limpia" />
+      <figcaption><strong>1. Imagen limpia</strong>Sin grid. HQ, carretera, árboles, coche, ruinas, dos explanadas.</figcaption>
+    </figure>
+    <figure>
+      <img src="02-scene-debug-grid.png" alt="Grid debug" />
+      <figcaption><strong>2. DEBUG A1–L6</strong>Solo para diseño. Nunca en partida.</figcaption>
+    </figure>
+    <figure>
+      <img src="03-occupancy-tint.png" alt="Ocupación" />
+      <figcaption><strong>3. Tint de ocupación</strong>Verde = edificable (28 celdas: hierba limpia también). Rojo = bloqueo. Gris = carretera.</figcaption>
+    </figure>
+    <figure>
+      <img src="04-place-house-valid.png" alt="Casa válida" />
+      <figcaption><strong>4. Casa 2×2 válida</strong>Ancla D3 · celdas D3 E3 D4 E4.</figcaption>
+    </figure>
+    <figure>
+      <img src="05-place-house-invalid.png" alt="Casa inválida" />
+      <figcaption><strong>5. Casa 2×2 inválida</strong>Ancla A4 · pisa carretera y valla.</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

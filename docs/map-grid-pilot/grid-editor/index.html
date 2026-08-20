@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grid Editor Interno · Zona Zero</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="title">Editor de cuadrícula lógica (DEBUG interno)</div>
+        <div class="subtitle">
+          Fondo: ilustración limpia (sin vehículos/ruinas) · Grid: <span id="gridMeta">78×18</span> ·
+          Modo: <span id="modeMeta">MOVER</span> · Celda: <span id="cellMeta">—</span>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button id="btnUndo" class="btn btn--ghost" type="button">Deshacer</button>
+        <button id="btnRedo" class="btn btn--ghost" type="button">Rehacer</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="section">
+          <div class="section__title">Modo</div>
+          <div class="row">
+            <button id="btnModeMove" class="btn" type="button">Mover</button>
+            <button id="btnModePaint" class="btn btn--primary" type="button">Pintar</button>
+          </div>
+          <div class="hint">
+            En <b>Mover</b> arrastras para paneo. En <b>Pintar</b> arrastras para clasificar celdas.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Pincel</div>
+          <div class="row row--tight" id="brushRow">
+            <button id="btnBrush1" class="btn" type="button">Pincel 1×1</button>
+            <button id="btnBrush2" class="btn btn--primary" type="button">Pincel 2×2</button>
+            <button id="btnBrush3" class="btn" type="button">Pincel 3×3</button>
+            <label class="toggle" style="margin-left:auto; margin-top:0; border-top:none; padding-top:0;">
+              <input id="toggleRectSelect" type="checkbox" />
+              <span>Selección rectangular</span>
+            </label>
+          </div>
+          <div class="hint">
+            Arrastra para pintar. En selección rectangular, pinta el área del rectángulo que dibujas.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Paleta — qué hay aquí (terrain)</div>
+          <div id="paletteTerrain" class="palette"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Paleta — construcción (buildState)</div>
+          <div id="paletteBuild" class="palette"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Overlay</div>
+          <label class="toggle">
+            <input id="toggleGrid" type="checkbox" checked />
+            <span>Grid</span>
+          </label>
+          <label class="toggle">
+            <input id="toggleTerrainOverlay" type="checkbox" checked />
+            <span>Terreno</span>
+          </label>
+          <label class="toggle">
+            <input id="toggleBuildOverlay" type="checkbox" checked />
+            <span>Construcción</span>
+          </label>
+          <label class="toggle">
+            <input id="toggleLabels" type="checkbox" checked />
+            <span>Etiquetas</span>
+          </label>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Editar</div>
+          <div class="row row--tight">
+            <button id="btnErase" class="btn btn--warn" type="button">Borrar celda (reset)</button>
+            <button id="btnReset" class="btn btn--ghost" type="button">Restablecer TODO</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Estadísticas</div>
+          <div id="stats" class="stats"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__title">JSON</div>
+          <div class="row row--tight">
+            <button id="btnExport" class="btn" type="button">Exportar JSON</button>
+            <button id="btnImport" class="btn btn--ghost" type="button">Importar JSON</button>
+            <input id="fileImport" class="fileInput" type="file" accept="application/json" />
+          </div>
+          <textarea id="jsonBox" class="jsonBox" spellcheck="false" placeholder="(Exportar / editar aquí)"></textarea>
+        </div>
+
+        <div class="section section--foot">
+          <div class="hint">
+            Progreso guardado automáticamente (localStorage). Si recargas, el editor continúa.
+          </div>
+        </div>
+      </section>
+
+      <section class="viewport">
+        <div class="viewport__hud">
+          <div class="hudItem">Zoom: <span id="zoomMeta">100%</span></div>
+          <div class="hudItem">Pan: <span id="panMeta">0,0</span></div>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div id="help" class="help">
+          Consejo: usa la rueda del ratón/pinch para hacer zoom. En móvil, cambia a MOVER para paneo.
+        </div>
+      </section>
+    </main>
+
+    <script src="./editor.js"></script>
+  </body>
+</html>
+

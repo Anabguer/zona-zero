@@ -3,23 +3,85 @@
  */
 import { svgEl, paintBuildingGlyph, resolveVisualLevel } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
-import { artUrl, buildingArtUrl, zoneArtUrl, FOG_ART, COLONY_YARD_ART } from './art.js';
+import { artUrl, buildingArtUrl, zoneArtUrl, propArtUrl, FOG_ART, COLONY_YARD_ART, COLONY_YARD_CLEAN_ART, COLONY_DIRT_ART, WORLD_MAP_ART, PILOT_WORLD_MAP_ART, pilotBuildingArtUrl } from './art.js';
+import {
+  ensureColonyLayout,
+  buildingForSlot,
+  slotIsVacant,
+  slotIsUnlocked,
+  slotForBuilding,
+  slotFitsType,
+  slotBlockedByProp,
+} from './colony-layout.js';
 import { buildingStructuralState, buildingMaxHp } from './buildings-damage.js';
 import { drawAmbientLife, expeditionProgress } from './ambient-life.js';
+import { onboardingStatus } from './onboarding.js';
 import {
   ensureSectors,
   ptsStr as sectorPtsStr,
   getSector,
   recoveredSurfaces,
 } from './sectors.js';
+import { settlementScale } from './build-place.js';
+import {
+  pilotFootprint,
+  pilotDebugFootprintPlacements,
+  footprintWorldRect,
+} from './pilot-footprints.js';
+import {
+  listBuildableTerrainCells,
+  terrainCellToWorld,
+  logPilotPlaceDebug,
+  getPilotZoneMap,
+} from './pilot-terrain.js';
 
-const VB_SQ = 100;
+// ── CONTRATO DE CÁMARA REAL (migrado de mundo 100×100) ──────────────────────
+// El mundo ahora tiene dimensiones reales en píxeles del mapa maestro.
+// 1 unidad de mundo = 1 px del mapa maestro a zoom=1.
+const NORMAL_WORLD_W = 4096;
+const NORMAL_WORLD_H = 2720;
+// Núcleo normal: compat migrada (100×100 → mundo real).
+const NORMAL_NUCLEUS_X = 2600;
+const NORMAL_NUCLEUS_Y = 380;
+
+// Núcleo piloto Neni — Refugio Central / HQ canónico A (human gate 2026-08-20).
+// Anchor terreno (-7,14) → world centro (824,520).
+const PILOT_WORLD_W = 1819;
+const PILOT_WORLD_H = 865;
+const PILOT_NUCLEUS_X = 824;
+const PILOT_NUCLEUS_Y = 520;
+
+/** Estilos de colonia comparables (dev/review). */
+export const COLONY_STYLES = ['yard', 'dirt', 'iso'];
+
+export function colonyVisualStyle(state) {
+  if (typeof document !== 'undefined' && document.body?.classList.contains('zz-body--demo')) {
+    const s = state?.flags?.colonyStyle;
+    return COLONY_STYLES.includes(s) ? s : 'dirt';
+  }
+  return 'dirt';
+}
 
 export function mapMetrics(svg) {
-  // Mundo lógico 100×100; el SVG llena el viewport (slice) — sin bandas negras.
+  // El mundo real puede variar (modo piloto). El viewBox del SVG es una "ventana" sobre el mundo,
+  // con contrato 1 unidad de mundo = 1 px del mapa a zoom=1.
   const wide =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
-  return { vbW: 100, vbH: 100, ox: 0, oy: 0, wide: !!wide };
+  const vbW = Number(svg?.dataset?.zzWorldW || NORMAL_WORLD_W);
+  const vbH = Number(svg?.dataset?.zzWorldH || NORMAL_WORLD_H);
+  return { vbW, vbH, ox: 0, oy: 0, wide: !!wide };
+}
+
+function isPilotNeni(state) {
+  return state?.flags?.pilot === 'neni';
+}
+
+function worldDimsForState(state) {
+  return isPilotNeni(state) ? { w: PILOT_WORLD_W, h: PILOT_WORLD_H } : { w: NORMAL_WORLD_W, h: NORMAL_WORLD_H };
+}
+
+function nucleusForState(state) {
+  return isPilotNeni(state) ? { x: PILOT_NUCLEUS_X, y: PILOT_NUCLEUS_Y } : { x: NORMAL_NUCLEUS_X, y: NORMAL_NUCLEUS_Y };
 }
 const STATE_CLASS = {
   unknown: 'zz-zone--unknown',
@@ -31,6 +93,28 @@ const STATE_CLASS = {
 
 function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v));
+}
+
+/** SVG del mapa (o aproximación si aún no está montado). */
+function resolveMapSvg(svg) {
+  if (svg?.getBoundingClientRect) return svg;
+  if (typeof document !== 'undefined') {
+    return document.getElementById('zz-map');
+  }
+  return null;
+}
+
+/** Viewport real del mapa en px de pantalla (no window — respeta HUD/full-bleed). */
+function mapViewportPx(svg) {
+  const el = resolveMapSvg(svg);
+  const rect = el?.getBoundingClientRect?.();
+  if (rect && rect.width > 1 && rect.height > 1) {
+    return { vpW: rect.width, vpH: rect.height };
+  }
+  return {
+    vpW: typeof window !== 'undefined' ? window.innerWidth : 390,
+    vpH: typeof window !== 'undefined' ? window.innerHeight : 844,
+  };
 }
 
 function ptsStr(pts) {
@@ -137,13 +221,23 @@ function addDefs(svg, tier) {
   const dirtPat = svgEl('pattern', {
     id: 'zzDirtPat',
     patternUnits: 'userSpaceOnUse',
-    width: '8',
-    height: '8',
+    width: '16',
+    height: '16',
   });
-  dirtPat.appendChild(svgEl('rect', { width: '8', height: '8', fill: '#2a241c' }));
-  dirtPat.appendChild(svgEl('circle', { cx: '1.5', cy: '2', r: '0.6', fill: '#322c22', opacity: '0.5' }));
-  dirtPat.appendChild(svgEl('circle', { cx: '5.5', cy: '5.5', r: '0.5', fill: '#1e1a14', opacity: '0.45' }));
-  dirtPat.appendChild(svgEl('circle', { cx: '4', cy: '1', r: '0.4', fill: '#3a3228', opacity: '0.35' }));
+  dirtPat.appendChild(svgEl('rect', { width: '16', height: '16', fill: '#2a241c' }));
+  const specks = [
+    [2, 3, 0.7, '#322c22'],
+    [7, 5, 0.55, '#1e1a14'],
+    [12, 2, 0.45, '#3a3228'],
+    [4, 11, 0.6, '#262018'],
+    [10, 13, 0.5, '#342c22'],
+    [14, 8, 0.4, '#1a1610'],
+    [8, 9, 0.35, '#3c3428'],
+    [1, 14, 0.5, '#2e281e'],
+  ];
+  specks.forEach(([cx, cy, r, fill]) => {
+    dirtPat.appendChild(svgEl('circle', { cx: String(cx), cy: String(cy), r: String(r), fill, opacity: '0.55' }));
+  });
   defs.appendChild(dirtPat);
 
   const packedPat = svgEl('pattern', {
@@ -156,6 +250,49 @@ function addDefs(svg, tier) {
   packedPat.appendChild(svgEl('circle', { cx: '2', cy: '2.5', r: '0.45', fill: '#4a4034', opacity: '0.4' }));
   packedPat.appendChild(svgEl('circle', { cx: '4.5', cy: '4', r: '0.35', fill: '#32281e', opacity: '0.35' }));
   defs.appendChild(packedPat);
+
+  const earthNoise = svgEl('filter', {
+    id: 'zzEarthNoise',
+    x: '0%',
+    y: '0%',
+    width: '100%',
+    height: '100%',
+    filterUnits: 'objectBoundingBox',
+  });
+  earthNoise.appendChild(
+    svgEl('feTurbulence', {
+      type: 'fractalNoise',
+      baseFrequency: '0.032 0.045',
+      numOctaves: '4',
+      seed: '11',
+      result: 'n',
+    })
+  );
+  earthNoise.appendChild(
+    svgEl('feColorMatrix', {
+      in: 'n',
+      type: 'matrix',
+      values: '0 0 0 0 0.20  0 0 0 0 0.16  0 0 0 0 0.10  0 0 0 0.62 0',
+    })
+  );
+  defs.appendChild(earthNoise);
+
+  const softBlob = svgEl('filter', {
+    id: 'zzSoftBlob',
+    x: '-25%',
+    y: '-25%',
+    width: '150%',
+    height: '150%',
+  });
+  softBlob.appendChild(svgEl('feGaussianBlur', { stdDeviation: '1.7' }));
+  defs.appendChild(softBlob);
+
+  const campDust = svgEl('radialGradient', { id: 'zzCampDust', cx: '50%', cy: '48%', r: '50%' });
+  campDust.appendChild(svgEl('stop', { offset: '0%', 'stop-color': '#3a3228', 'stop-opacity': '0.92' }));
+  campDust.appendChild(svgEl('stop', { offset: '42%', 'stop-color': '#322a22', 'stop-opacity': '0.55' }));
+  campDust.appendChild(svgEl('stop', { offset: '78%', 'stop-color': '#2a241c', 'stop-opacity': '0.18' }));
+  campDust.appendChild(svgEl('stop', { offset: '100%', 'stop-color': '#241e18', 'stop-opacity': '0' }));
+  defs.appendChild(campDust);
 
   svg.appendChild(defs);
 }
@@ -296,6 +433,33 @@ function drawWorldIdentityCluster(g, cx, cy, kind, rng) {
     drawProp(g, 'tree', cx - 5.0, cy + 2.5, 1.05);
     drawProp(g, 'tree', cx + 5.5, cy - 2.0, 0.9);
   }
+}
+
+/** Suelo a pantalla: terreno iso anclado al camp (sin árboles/vallas/coches pintados). */
+function drawColonyGround(parent, camp, state) {
+  const style = colonyVisualStyle(state);
+  const g = svgEl('g', { class: `zz-map-layer zz-map-colony-ground zz-map-colony-ground--${style}`, 'aria-hidden': 'true' });
+  const cx = camp?.x || 48;
+  const cy = camp?.y || 62;
+  const w = 420;
+  const h = 240;
+  const ox = 0;
+  const oy = 0;
+  const x = cx - w / 2 + ox;
+  const y = cy - h / 2 + oy;
+  g.appendChild(svgEl('rect', { x, y, width: w, height: h, fill: '#5a5844', class: 'zz-colony-dirt' }));
+  g.appendChild(
+    svgEl('image', {
+      href: artUrl(COLONY_DIRT_ART),
+      x,
+      y,
+      width: w,
+      height: h,
+      preserveAspectRatio: 'xMidYMid slice',
+      class: 'zz-colony-dirt-art',
+    })
+  );
+  parent.appendChild(g);
 }
 
 /**
@@ -593,6 +757,23 @@ function drawLifeInControlled(g, z, tier, rng) {
   }
 }
 
+function drawPropSprite(layer, kind, x, y, s = 1) {
+  const k = kind === 'vehicle' ? 'vehicle' : kind === 'tree' ? 'tree' : 'barrel';
+  const w = (k === 'tree' ? 5.6 : k === 'vehicle' ? 7.1 : 6.2) * s;
+  const h = (k === 'tree' ? 9.4 : k === 'vehicle' ? 5.1 : 5.3) * s;
+  layer.appendChild(
+    svgEl('image', {
+      href: propArtUrl(k),
+      x: x - w * 0.5,
+      y: y - h * (k === 'tree' ? 0.82 : 0.7),
+      width: w,
+      height: h,
+      preserveAspectRatio: 'xMidYMid meet',
+      class: 'zz-colony-prop-img',
+    })
+  );
+}
+
 function drawProp(layer, kind, x, y, s = 1) {
   if (kind === 'crate') {
     layer.appendChild(svgEl('rect', { x: x - 0.55 * s, y: y - 0.4 * s, width: 1.1 * s, height: 0.8 * s, rx: 0.08, class: 'zz-prop-crate' }));
@@ -732,6 +913,190 @@ function irregularPatch(cx, cy, rx, ry, rng, n = 7) {
     pts.push([cx + Math.cos(a) * rx * pr, cy + Math.sin(a) * ry * pr]);
   }
   return pts;
+}
+
+function plantOnDirt(wrap, slot, style) {
+  if (style === 'dirt') return;
+  wrap.appendChild(
+    svgEl('ellipse', {
+      cx: 0,
+      cy: slot.rh * 0.4,
+      rx: slot.rw * 0.8,
+      ry: slot.rh * 0.26,
+      class: 'zz-colony-slot-shadow',
+    })
+  );
+}
+
+function isoPt(x, y, z) {
+  return [(x - y) * 0.9, (x + y) * 0.46 - z];
+}
+
+function isoPoly(corners) {
+  return corners.map(([x, y, z]) => isoPt(x, y, z).join(',')).join(' ');
+}
+
+/** Ruina isométrica SVG (opción C — sin WebP). */
+function drawIsoRuin(parent, slot, rng) {
+  const w = slot.rw * 0.92;
+  const d = slot.rw * 0.58;
+  const h = slot.size === 'l' ? slot.rh * 0.88 : slot.size === 's' ? slot.rh * 0.62 : slot.rh * 0.74;
+  const g = svgEl('g', { class: 'zz-colony-iso-building is-vacant' });
+  const left = isoPoly([
+    [-w / 2, d / 2, 0],
+    [-w / 2, d / 2, h],
+    [-w / 2, -d / 2, h],
+    [-w / 2, -d / 2, 0],
+  ]);
+  const right = isoPoly([
+    [-w / 2, d / 2, 0],
+    [-w / 2, d / 2, h],
+    [w / 2, d / 2, h],
+    [w / 2, d / 2, 0],
+  ]);
+  const roofH = h + slot.rh * 0.16;
+  const top = isoPoly([
+    [-w / 2, -d / 2, h],
+    [w / 2, -d / 2, h],
+    [w / 2, d / 2, h],
+    [-w / 2, d / 2, h],
+  ]);
+  const peak = isoPoly([
+    [-w / 2, 0, h],
+    [0, 0, roofH],
+    [w / 2, 0, h],
+  ]);
+  g.appendChild(svgEl('polygon', { points: left, class: 'zz-colony-iso-left' }));
+  g.appendChild(svgEl('polygon', { points: right, class: 'zz-colony-iso-right' }));
+  g.appendChild(svgEl('polygon', { points: top, class: 'zz-colony-iso-roof' }));
+  g.appendChild(
+    svgEl('polygon', {
+      points: peak,
+      class: 'zz-colony-iso-peak',
+      stroke: '#1a1410',
+      'stroke-width': '0.08',
+    })
+  );
+  if (rng.chance(0.5)) {
+    const [wx, wy] = isoPt(w * 0.1, d / 2 + 0.02, h * 0.38);
+    g.appendChild(
+      svgEl('rect', {
+        x: wx - 0.14,
+        y: wy - 0.18,
+        width: 0.28,
+        height: 0.26,
+        class: 'zz-colony-iso-window',
+      })
+    );
+  }
+  parent.appendChild(g);
+}
+
+/** Edificio isométrico + icono de función (opción C). */
+function drawIsoBuilding(parent, slot, type, vacant) {
+  const w = slot.rw * 0.92;
+  const d = slot.rw * 0.58;
+  const h = vacant ? slot.rh * 0.5 : slot.rh * 0.82;
+  const g = svgEl('g', { class: `zz-colony-iso-building ${vacant ? 'is-vacant' : 'is-built'}` });
+  const left = isoPoly([
+    [-w / 2, d / 2, 0],
+    [-w / 2, d / 2, h],
+    [-w / 2, -d / 2, h],
+    [-w / 2, -d / 2, 0],
+  ]);
+  const right = isoPoly([
+    [-w / 2, d / 2, 0],
+    [-w / 2, d / 2, h],
+    [w / 2, d / 2, h],
+    [w / 2, d / 2, 0],
+  ]);
+  const top = isoPoly([
+    [-w / 2, -d / 2, h],
+    [w / 2, -d / 2, h],
+    [w / 2, d / 2, h],
+    [-w / 2, d / 2, h],
+  ]);
+  g.appendChild(svgEl('polygon', { points: left, class: 'zz-colony-iso-left' }));
+  g.appendChild(svgEl('polygon', { points: right, class: 'zz-colony-iso-right' }));
+  g.appendChild(svgEl('polygon', { points: top, class: 'zz-colony-iso-roof' }));
+  if (!vacant && type) {
+    const badge = svgEl('g', {
+      class: 'zz-colony-iso-glyph',
+      transform: `translate(0, ${-h - slot.rh * 0.08}) scale(${slot.kind === 'hq' ? 0.42 : 0.34})`,
+    });
+    paintBuildingGlyph(badge, type, resolveVisualLevel(type));
+    g.appendChild(badge);
+  }
+  parent.appendChild(g);
+}
+
+function drawSlotSprite(wrap, slot, type, vacant, unlocked, style, opts = {}) {
+  const { spriteScale = 1, ghost = false, ghostValid = null } = opts || {};
+  const planted = style === 'dirt';
+  const hq = slot.kind === 'hq';
+  const farmish = type === 'farm' || type === 'greenhouse';
+  const wellish = type === 'well' || type === 'cistern';
+  const mulW = hq ? 3.4 : farmish ? 2.5 : wellish ? 1.95 : 2.15;
+  const mulH = hq ? 4.1 : farmish ? 2.4 : wellish ? 2.75 : 2.55;
+  const imgW = slot.rw * (planted ? mulW : style === 'yard' ? 2.35 : 2.2) * spriteScale;
+  const imgH = slot.rh * (planted ? mulH : style === 'yard' ? 2.75 : 2.65) * spriteScale;
+  const x = -imgW * 0.5;
+  const y = planted ? -imgH * 0.62 : -imgH * 0.9;
+  const img = svgEl('image', {
+    href: buildingArtUrl(type),
+    x,
+    y,
+    width: imgW,
+    height: imgH,
+    preserveAspectRatio: 'xMidYMid meet',
+    opacity: ghost ? (ghostValid ? '0.88' : '0.55') : undefined,
+    class: [
+      'zz-colony-slot-img',
+      style === 'yard' ? 'zz-colony-slot-img--yard' : '',
+      planted ? 'zz-colony-slot-img--planted' : '',
+      vacant || !unlocked ? 'is-ruin' : '',
+      ghost ? 'zz-pilot-ghost' : '',
+      ghost ? (ghostValid ? 'zz-pilot-ghost--ok' : 'zz-pilot-ghost--bad') : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
+  });
+  wrap.appendChild(img);
+  return img;
+}
+
+function drawVacantLot(wrap, slot, rng) {
+  /* Solar vacío: solo hit. Sin óvalos ni escombros SVG. */
+}
+
+function drawCampGround(layer, state) {
+  const style = colonyVisualStyle(state);
+  if (style === 'dirt') return;
+  const g = svgEl('g', { class: `zz-colony-yard zz-colony-yard--${style}`, 'aria-hidden': 'true' });
+  if (style === 'yard') {
+    g.appendChild(
+      svgEl('image', {
+        href: artUrl(COLONY_YARD_CLEAN_ART),
+        x: -34,
+        y: -26,
+        width: 68,
+        height: 52,
+        preserveAspectRatio: 'xMidYMid meet',
+        class: 'zz-colony-yard-art',
+      })
+    );
+  } else if (style === 'iso') {
+    g.appendChild(
+      svgEl('ellipse', {
+        cx: 0,
+        cy: 1.2,
+        rx: 21,
+        ry: 14.5,
+        class: 'zz-colony-yard-iso-pad',
+      })
+    );
+  }
+  layer.appendChild(g);
 }
 
 /** Convex hull 2D (Monotone chain). */
@@ -1222,7 +1587,7 @@ function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX,
       y: -yardH / 2 + scale * 0.08,
       width: yardW,
       height: yardH,
-      opacity: '0.16',
+      opacity: '0',
       preserveAspectRatio: 'xMidYMid slice',
       class: 'zz-settle-yard-art',
       style: 'pointer-events:none',
@@ -1275,6 +1640,7 @@ function drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX,
 
 /** Overlays solo en expand / selección / recovering — no GIS permanente */
 function drawSectorOverlays(g, state, camp, { onSelectSector } = {}) {
+  if (state.uiMode !== 'expand') return;
   ensureSectors(state);
   const expand = state.uiMode === 'expand';
   const selected = state.selectedSectorId;
@@ -1375,198 +1741,424 @@ function drawBuildableSurfaceHints(layer, state, scale, bw, bh) {
   layer.appendChild(group);
 }
 
-function drawSettlementCore(g, state, camp, tier, handlers = {}) {
-  const { onSelectBuilding, onGhostPointer } = handlers;
-  const buildings = state.base?.buildings || [];
-  if (!buildings.length && state.uiMode !== 'build') return;
-  const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
-  const life = Math.min(3, tier + Math.floor(buildings.length / 5));
-  const bw = state.base.w || 10;
-  const bh = state.base.h || 8;
-  const day = state.day || 1;
-  const rng = createRng(hashSeed(`yard:${camp.id || 'camp'}:${tier}`));
-  const wide =
-    typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
+function drawColonySlots(layer, state, handlers = {}) {
+  const { onSelectSlot } = handlers;
+  const layout = ensureColonyLayout(state);
+  const buildMode = state.uiMode === 'build' && state.buildMode;
+  const style = colonyVisualStyle(state);
+  const pilot = state.flags?.pilot === 'neni';
+  const spriteScale = pilot ? Number(state.flags?.pilotSpriteScale || 1) : 1;
+  const guide = onboardingStatus(state);
+  const hintVacantLots = !!guide?.step?.suggestBuild;
+  const hintStaffFarm = guide?.step?.wait === 'farmStaffed';
+  const hintStaffWell = guide?.step?.wait === 'wellStaffed';
+  const group = svgEl('g', { class: `zz-colony-slots zz-colony-slots--${style}` });
+  const slots = [...(layout?.slots || [])].sort((a, b) => a.ly - b.ly || a.lx - b.lx);
+  slots.forEach((slot) => {
+    const b = buildingForSlot(state, slot);
+    const vacant = !b;
+    const unlocked = slotIsUnlocked(state, slot);
+    const selected = state.selectedPlotId === slot.id || (b && state.selectedBuildingId === b.id);
+    const wantType = buildMode ? state.buildMode : null;
+    const blocked = vacant && slotBlockedByProp(state, slot);
+    const canDrop = buildMode && vacant && unlocked && !blocked && slotFitsType(slot, wantType);
+    const guideLot =
+      !blocked &&
+      ((hintVacantLots && vacant && unlocked && slot.kind === 'lot') ||
+        (hintStaffFarm && b && (b.type === 'farm' || b.type === 'greenhouse')) ||
+        (hintStaffWell && b && (b.type === 'well' || b.type === 'cistern')));
+    const rng = createRng(hashSeed(`slot-art:${slot.id}:${state.seed || 's'}`));
+    const wrap = svgEl('g', {
+      class: [
+        'zz-colony-slot',
+        `zz-colony-slot--${slot.kind}`,
+        vacant ? 'is-vacant' : 'is-built',
+        unlocked ? '' : 'is-locked',
+        selected ? 'is-selected' : '',
+        canDrop ? 'is-buildable' : '',
+        blocked ? 'is-blocked' : '',
+        guideLot ? 'is-guide-lot' : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      transform: `translate(${slot.lx},${slot.ly})`,
+      'data-slot': slot.id,
+      'data-id': b?.id || '',
+    });
+    plantOnDirt(wrap, slot, style);
+    if (style === 'dirt') {
+      if (b) {
+        drawSlotSprite(wrap, slot, b.type || 'hq_central_l1', false, unlocked, style, { spriteScale });
+      }
+    } else if (slot.kind === 'lot' && vacant) {
+      drawVacantLot(wrap, slot, rng);
+    } else if (style === 'iso' && slot.kind === 'lot' && b) {
+      drawSlotSprite(wrap, slot, b.type, false, unlocked, style, { spriteScale });
+    } else if (style === 'iso' && slot.kind === 'house' && vacant) {
+      drawIsoRuin(wrap, slot, rng);
+    } else if (style === 'iso' && slot.kind === 'house' && b) {
+      drawIsoBuilding(wrap, slot, b.type, false);
+    } else if (style === 'iso' && slot.kind === 'hq') {
+      drawIsoBuilding(wrap, slot, b?.type || 'hq_central_l1', vacant);
+    } else {
+      const type = vacant
+        ? 'shelter'
+        : b?.type || (slot.kind === 'hq' ? 'hq_central_l1' : 'house');
+      drawSlotSprite(wrap, slot, type, vacant, unlocked, style, { spriteScale });
+    }
 
-  // Escala D1: edificio y terreno en la misma “unidad” visual
-  const scale = day <= 2 ? (wide ? 4.6 : 4.3) : day <= 5 ? 3.6 : 2.95 + life * 0.18;
-  let minX = 0;
-  let maxX = 0;
-  let minY = 0;
-  let maxY = 0;
-  if (buildings.length) {
-    minX = Infinity;
-    maxX = -Infinity;
-    minY = Infinity;
-    maxY = -Infinity;
+    const showGhost =
+      pilot &&
+      buildMode &&
+      state.buildGhost &&
+      Number.isFinite(state.buildGhost.x) &&
+      Number.isFinite(state.buildGhost.y) &&
+      state.buildGhost.x === slot.cell[0] &&
+      state.buildGhost.y === slot.cell[1];
+    if (showGhost && !b) {
+      const ghostValid = !!state.buildGhostValid;
+      const wantType = state.buildMode || 'house';
+      drawSlotSprite(wrap, slot, wantType, true, unlocked, style, { spriteScale, ghost: true, ghostValid });
+
+      const ghostRx = slot.rw * (style === 'dirt' && slot.kind === 'lot' ? 1.35 : 1);
+      const ghostRy = slot.rh * (style === 'dirt' && slot.kind === 'lot' ? 1.05 : 0.85);
+      wrap.appendChild(
+        svgEl('ellipse', {
+          cx: 0,
+          cy: slot.rh * 0.1,
+          rx: ghostRx,
+          ry: ghostRy,
+          fill: 'transparent',
+          stroke: ghostValid ? '#3ddc6b' : '#e36a6a',
+          'stroke-width': 0.22,
+          'stroke-dasharray': ghostValid ? '0.3 0.2' : '0.2 0.25',
+          opacity: ghostValid ? '0.95' : '0.85',
+          class: 'zz-pilot-ghost-outline',
+          style: 'pointer-events:none',
+        })
+      );
+    }
+    const hit = svgEl('ellipse', {
+      cx: 0,
+      cy: slot.rh * 0.1,
+      rx: slot.rw * (style === 'dirt' && slot.kind === 'lot' ? 1.35 : 1),
+      ry: slot.rh * (style === 'dirt' && slot.kind === 'lot' ? 1.05 : 0.85),
+      class: 'zz-colony-slot-hit',
+      fill: 'transparent',
+    });
+    wrap.appendChild(hit);
+    wrap.style.cursor = 'pointer';
+    wrap.style.pointerEvents = 'auto';
+    wrap.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      onSelectSlot && onSelectSlot(slot.id);
+    });
+    group.appendChild(wrap);
+  });
+  layer.appendChild(group);
+}
+
+/** Piloto Neni: edificios + ghost + overlay buildable (coords terreno canónicas). */
+function drawPilotBuildingsLayer(parent, state, camp, handlers = {}) {
+  if (!camp || !isPilotNeni(state)) return;
+  const scale = settlementScale(state);
+  const spriteScale = Number(state.flags?.pilotSpriteScale || 1.5);
+  const layer = svgEl('g', { class: 'zz-pilot-buildings-layer' });
+  const buildings = (state.base?.buildings || []).filter((b) => b.hp > 0);
+
+  const showFpDebug = !!state.flags?.pilotFootprintDebug;
+  const buildMode = state.uiMode === 'build' && state.buildMode;
+
+  // Overlay sutil de zonas buildable (solo en modo construir).
+  if (buildMode && getPilotZoneMap()) {
+    const overlay = svgEl('g', {
+      class: 'zz-pilot-buildable-overlay',
+      style: 'pointer-events:none',
+      opacity: '0.22',
+    });
+    const cellPx = getPilotZoneMap().cellPx || 24;
+    for (const [cx, cy] of listBuildableTerrainCells()) {
+      const tl = terrainCellToWorld(cx, cy);
+      overlay.appendChild(
+        svgEl('rect', {
+          x: tl.x,
+          y: tl.y,
+          width: cellPx,
+          height: cellPx,
+          fill: 'rgba(110, 130, 70, 0.55)',
+          stroke: 'none',
+          class: 'zz-pilot-buildable-cell',
+        })
+      );
+    }
+    layer.appendChild(overlay);
+  }
+
+  // Hit plane = mapa completo (no el rectángulo artificial 28×20).
+  if (buildMode) {
+    const hit = svgEl('rect', {
+      x: 0,
+      y: 0,
+      width: PILOT_WORLD_W,
+      height: PILOT_WORLD_H,
+      fill: 'rgba(0,0,0,0.001)',
+      class: 'zz-pilot-build-hit zz-settle-ghost-handle',
+    });
+    hit.style.pointerEvents = 'auto';
+    hit.style.cursor = 'crosshair';
+    hit.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      handlers.onGhostPointer && handlers.onGhostPointer(ev);
+    });
+    layer.appendChild(hit);
+  }
+
+  buildings
+    .slice()
+    .sort((a, b) => a.y + (pilotFootprint(a.type)?.h || 1) - (b.y + (pilotFootprint(b.type)?.h || 1)))
+    .forEach((b) => {
+      const fp = pilotFootprint(b.type);
+      if (!fp) return;
+      const rect = footprintWorldRect(state, camp, b.x, b.y, fp.w, fp.h, scale);
+      if (showFpDebug) drawPilotFootprintOutline(layer, rect, '#8a7a60', 0.35, `${fp.w}×${fp.h}`);
+      drawPilotBuildingSprite(layer, b.type, rect, fp, spriteScale);
+      if (showFpDebug) {
+        logPilotPlaceDebug('render-building', {
+          id: b.id,
+          type: b.type,
+          anchor: { x: b.x, y: b.y },
+          worldTL: { x: rect.x, y: rect.y },
+          worldCenter: { x: rect.cx, y: rect.cy - rect.h / 2 },
+        });
+      }
+    });
+
+  // Hits: tap corto → sheet; drag → pan (no stopPropagation en down).
+  if (!buildMode) {
     buildings.forEach((b) => {
-      const lx = (b.x - bw / 2 + 0.5) * scale;
-      const ly = (b.y - bh / 2 + 0.5) * scale;
-      minX = Math.min(minX, lx);
-      maxX = Math.max(maxX, lx);
-      minY = Math.min(minY, ly);
-      maxY = Math.max(maxY, ly);
+      const fp = pilotFootprint(b.type);
+      if (!fp) return;
+      const rect = footprintWorldRect(state, camp, b.x, b.y, fp.w, fp.h, scale);
+      const hit = svgEl('rect', {
+        x: rect.x,
+        y: rect.y,
+        width: rect.w,
+        height: rect.h,
+        fill: 'rgba(0,0,0,0.001)',
+        class: 'zz-pilot-bldg-hit',
+        'data-bldg': b.id,
+      });
+      hit.style.pointerEvents = 'auto';
+      hit.style.cursor = 'pointer';
+      let pd = null;
+      hit.addEventListener('pointerdown', (ev) => {
+        pd = { x: ev.clientX, y: ev.clientY, id: ev.pointerId };
+      });
+      hit.addEventListener('pointerup', (ev) => {
+        if (!pd || pd.id !== ev.pointerId) return;
+        const dist = Math.hypot(ev.clientX - pd.x, ev.clientY - pd.y);
+        pd = null;
+        if (dist > 12) return; // drag → pan; no abrir sheet
+        ev.preventDefault();
+        ev.stopPropagation();
+        handlers.onSelectBuilding && handlers.onSelectBuilding(b.id);
+      });
+      hit.addEventListener('pointercancel', () => {
+        pd = null;
+      });
+      layer.appendChild(hit);
     });
   }
-  const ox = buildings.length ? (minX + maxX) / 2 : 0;
-  const oy = buildings.length ? (minY + maxY) / 2 : 0;
-  const spanX = Math.max(scale * 2.9, (maxX - minX) / 2 + scale * 1.55);
-  const spanY = Math.max(scale * 2.45, (maxY - minY) / 2 + scale * 1.35);
 
-  drawSettlementYard(layer, buildings, scale, bw, bh, rng, ox, oy, spanX, spanY, day, state, camp);
-
-  const buildMode = state.uiMode === 'build' && state.buildMode;
-  if (buildMode) {
-    drawBuildableSurfaceHints(layer, state, scale, bw, bh);
+  if (buildMode && state.buildGhost && Number.isFinite(state.buildGhost.x)) {
+    const fp = pilotFootprint(state.buildMode);
+    if (fp) {
+      const rect = footprintWorldRect(state, camp, state.buildGhost.x, state.buildGhost.y, fp.w, fp.h, scale);
+      const ok = !!state.buildGhostValid;
+      drawPilotFootprintOutline(
+        layer,
+        rect,
+        ok ? '#6a8f3a' : '#c4783a',
+        ok ? 0.32 : 0.28,
+        showFpDebug ? `${fp.w}×${fp.h} ghost` : '',
+        true,
+        ok
+      );
+      drawPilotBuildingSprite(layer, state.buildMode, rect, fp, spriteScale, { ghost: true, ghostValid: ok });
+    }
   }
-  if (buildMode && state.buildGhost) {
-    const gx = state.buildGhost.x;
-    const gy = state.buildGhost.y;
-    const lx = (gx - bw / 2 + 0.5) * scale;
-    const ly = (gy - bh / 2 + 0.5) * scale;
-    const cell = scale * 1.28;
-    const valid = !!state.buildGhostValid;
+
+  if (state.flags?.pilotFootprintDebug) {
+    pilotDebugFootprintPlacements(state, camp).forEach((p) => {
+      const fp = pilotFootprint(p.type);
+      if (!fp) return;
+      const rect = footprintWorldRect(state, camp, p.x, p.y, fp.w, fp.h, scale);
+      drawPilotFootprintOutline(layer, rect, '#e8c070', 0.22, p.label, true, true);
+    });
+  }
+
+  parent.appendChild(layer);
+}
+
+function drawPilotFootprintOutline(parent, rect, stroke, fillOpacity, label, dashed = false, valid = true) {
+  parent.appendChild(
+    svgEl('rect', {
+      x: rect.x,
+      y: rect.y,
+      width: rect.w,
+      height: rect.h,
+      fill: valid ? `rgba(106,143,58,${fillOpacity})` : `rgba(196,120,58,${fillOpacity})`,
+      stroke,
+      'stroke-width': 2,
+      'stroke-dasharray': dashed ? '8 6' : 'none',
+      class: 'zz-pilot-footprint-outline',
+      style: 'pointer-events:none',
+    })
+  );
+  if (label) {
+    const txt = svgEl('text', {
+      x: rect.x + 6,
+      y: rect.y + 16,
+      fill: stroke,
+      'font-size': 14,
+      'font-family': 'Rajdhani, system-ui, sans-serif',
+      'font-weight': 700,
+      class: 'zz-pilot-footprint-label',
+      style: 'pointer-events:none',
+    });
+    txt.textContent = label;
+    parent.appendChild(txt);
+  }
+}
+
+function drawPilotBuildingSprite(parent, type, rect, fp, spriteScale, opts = {}) {
+  const href = pilotBuildingArtUrl(type);
+  if (!href) return;
+  const pw = fp.w * rect.scale * spriteScale;
+  const ph = fp.h * rect.scale * spriteScale;
+  const wx = rect.cx;
+  const wy = rect.cy;
+  parent.appendChild(
+    svgEl('image', {
+      href,
+      x: wx - pw / 2,
+      y: wy - ph,
+      width: pw,
+      height: ph,
+      preserveAspectRatio: 'xMidYMax meet',
+      class: [
+        'zz-pilot-building-sprite',
+        opts.ghost ? 'zz-pilot-ghost' : '',
+        opts.ghost ? (opts.ghostValid ? 'zz-pilot-ghost--ok' : 'zz-pilot-ghost--bad') : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      opacity: opts.ghost ? (opts.ghostValid ? 0.72 : 0.55) : 1,
+      style: 'pointer-events:none',
+    })
+  );
+}
+
+/** Hit areas de slots en piloto (tap para elegir anchor). */
+function drawPilotSlotHits(layer, state, handlers = {}) {
+  const { onSelectSlot } = handlers;
+  const layout = ensureColonyLayout(state);
+  const buildMode = state.uiMode === 'build' && state.buildMode;
+  (layout?.slots || []).forEach((slot) => {
+    if (buildMode && !slotFitsType(slot, state.buildMode)) return;
     const wrap = svgEl('g', {
-      class: `zz-settle-ghost-handle${valid ? ' is-valid' : ' is-invalid'}`,
-      transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
-      'data-ghost': '1',
+      class: 'zz-pilot-slot-hit',
+      transform: `translate(${slot.lx},${slot.ly})`,
+      'data-slot': slot.id,
     });
     wrap.appendChild(
       svgEl('ellipse', {
-        cx: cell / 2,
-        cy: cell * 0.78,
-        rx: cell * 0.42,
-        ry: cell * 0.16,
-        class: valid ? 'zz-settle-ghost-pad is-valid' : 'zz-settle-ghost-pad is-invalid',
-      })
-    );
-    wrap.appendChild(
-      svgEl('image', {
-        href: buildingArtUrl(state.buildMode),
-        x: 0,
-        y: 0,
-        width: cell,
-        height: cell,
-        opacity: valid ? '0.78' : '0.45',
-        class: 'zz-settle-ghost',
-        preserveAspectRatio: 'xMidYMid meet',
-      })
-    );
-    // Handle amplio para arrastrar el ghost (no construye al soltar)
-    wrap.appendChild(
-      svgEl('rect', {
-        x: -cell * 0.08,
-        y: -cell * 0.08,
-        width: cell * 1.16,
-        height: cell * 1.16,
-        class: 'zz-settle-ghost-hit',
+        cx: 0,
+        cy: slot.rh * 0.1,
+        rx: slot.rw * 1.1,
+        ry: slot.rh * 0.95,
         fill: 'transparent',
+        class: 'zz-colony-slot-hit',
       })
     );
-    if (onGhostPointer) {
-      wrap.addEventListener('pointerdown', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        onGhostPointer(ev, { phase: 'down', camp, scale, bw, bh });
-      });
-    }
-    layer.appendChild(wrap);
-  }
-
-  [...buildings]
-    .sort((a, b) => a.y - b.y || a.x - b.x)
-    .forEach((b) => {
-      const lx = (b.x - bw / 2 + 0.5) * scale;
-      const ly = (b.y - bh / 2 + 0.5) * scale;
-      const isHq = String(b.type).startsWith('hq_');
-      const isInsulated = b.type === 'insulated_house';
-      const cell = scale * (isHq ? 1.48 : 1.28);
-      const selected = state.selectedBuildingId === b.id;
-      const st = buildingStructuralState(b, null);
-      const maxHp = buildingMaxHp(b, null);
-      const hp = b.hp == null ? maxHp : b.hp;
-      const highlight = (state.flags?.highlightRepairIds || []).includes(b.id);
-      const wrap = svgEl('g', {
-        class: `zz-settle-bldg zz-settle-bldg--${st}${selected ? ' is-selected' : ''}${
-          highlight ? ' is-repair-focus' : ''
-        }${isHq ? ' zz-settle-bldg--hq' : ''}${isInsulated ? ' zz-settle-bldg--insulated' : ''}`,
-        transform: `translate(${lx - cell / 2},${ly - cell / 2})`,
-        'data-type': b.type,
-        'data-id': b.id,
-        opacity: st === 'destroyed' ? '0.7' : st === 'critical' ? '0.88' : '1',
-      });
-      drawBuildingFoundation(wrap, cell, createRng(hashSeed(`found:${b.id}`)));
-      if (st === 'destroyed') {
-        drawDestroyedRubble(wrap, cell, createRng(hashSeed(`rubble:${b.id}`)));
-      } else {
-        wrap.appendChild(
-          svgEl('image', {
-            href: buildingArtUrl(b.type),
-            x: 0,
-            y: 0,
-            width: cell,
-            height: cell,
-            preserveAspectRatio: 'xMidYMid meet',
-            class: `zz-settle-bldg-img zz-settle-bldg-img--${st}`,
-          })
-        );
-        if (isInsulated) drawInsulatedOverlays(wrap, cell);
-        if (st === 'damaged' || st === 'critical') {
-          drawDamageMarks(wrap, cell, st);
-          wrap.appendChild(
-            svgEl('rect', {
-              x: cell * 0.12,
-              y: cell * 0.72,
-              width: cell * 0.76,
-              height: cell * 0.1,
-              rx: 2,
-              fill: st === 'critical' ? '#a33' : '#c80',
-              opacity: 0.85,
-              class: 'zz-settle-bldg-hpbar',
-            })
-          );
-          wrap.appendChild(
-            svgEl('rect', {
-              x: cell * 0.12,
-              y: cell * 0.72,
-              width: cell * 0.76 * Math.max(0.05, hp / maxHp),
-              height: cell * 0.1,
-              rx: 2,
-              fill: st === 'critical' ? '#f66' : '#fc6',
-              class: 'zz-settle-bldg-hpfill',
-            })
-          );
-        }
-      }
-      if (highlight) {
-        wrap.appendChild(
-          svgEl('rect', {
-            x: -2,
-            y: -2,
-            width: cell + 4,
-            height: cell + 4,
-            fill: 'none',
-            stroke: '#e8c060',
-            'stroke-width': 2,
-            rx: 4,
-            class: 'zz-settle-bldg-repair-ring',
-          })
-        );
-      }
-      wrap.style.cursor = 'pointer';
-      wrap.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        onSelectBuilding && onSelectBuilding(b.id);
-      });
-      layer.appendChild(wrap);
+    wrap.style.cursor = buildMode ? 'crosshair' : 'pointer';
+    wrap.style.pointerEvents = 'auto';
+    wrap.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      onSelectSlot && onSelectSlot(slot.id);
     });
-
-  drawAmbientLife(layer, state, handlers?.content || null, { scale, bw, bh });
-
-  g.appendChild(layer);
+    layer.appendChild(wrap);
+  });
 }
 
+function drawSettlementCore(g, state, camp, tier, handlers = {}) {
+  const { onSelectSlot } = handlers;
+  const layout = ensureColonyLayout(state);
+  const style = colonyVisualStyle(state);
+  const pilot = state.flags?.pilot === 'neni';
+  const layer = svgEl('g', { class: 'zz-map-settlement', transform: `translate(${camp.x},${camp.y})` });
+  const bw = state.base.w || 10;
+  const bh = state.base.h || 8;
+
+  if (pilot) {
+    // Piloto: sin slots/hits residuales del colony-layout (círculos/elipses legacy).
+    // Edificios + ghost viven en drawPilotBuildingsLayer (coords terreno).
+    g.appendChild(layer);
+    return;
+  }
+
+  if (!pilot) drawCampGround(layer, state);
+
+  drawColonySlots(layer, state, { onSelectSlot });
+  if (!pilot) {
+    const props = svgEl('g', { class: 'zz-colony-props', style: 'pointer-events:none' });
+    if (style === 'dirt') {
+      const deco = [
+        ...(layout?.wrecks || []).map((p) => ({
+          y: p.y,
+          draw: () => drawPropSprite(props, p.kind || 'vehicle', p.x, p.y, p.s || 1),
+        })),
+        ...(layout?.trees || []).map((t) => ({
+          y: t.y,
+          draw: () => drawPropSprite(props, 'tree', t.x, t.y, t.s || 1),
+        })),
+      ].sort((a, b) => a.y - b.y);
+      deco.forEach((d) => d.draw());
+    } else {
+      (layout?.wrecks || []).forEach((p) => drawProp(props, p.kind || 'vehicle', p.x, p.y, p.s || 1));
+      (layout?.trees || []).forEach((t) => drawProp(props, 'tree', t.x, t.y, t.s || 1));
+    }
+    layer.appendChild(props);
+
+    drawAmbientLife(layer, state, handlers?.content || null, {
+      scale: 1.15,
+      bw,
+      bh,
+      scatter: style === 'dirt' ? 8.5 : 1.2,
+      personScale: style === 'dirt' ? 2.4 : 1.15,
+    });
+    if (typeof document !== 'undefined' && document.body?.classList.contains('zz-body--demo')) {
+      const names = { yard: 'A · PATIO ILUSTRADO', dirt: 'B · TIERRA CONTINUA', iso: 'C · BLOQUES ISO' };
+      const tag = svgEl('text', {
+        x: 0,
+        y: -28,
+        'text-anchor': 'middle',
+        fill: '#e8c070',
+        'font-size': '3.2',
+        'font-family': 'Rajdhani, sans-serif',
+        'font-weight': '700',
+        class: 'zz-colony-style-tag',
+        style: 'pointer-events:none',
+      });
+      tag.textContent = names[style] || style;
+      layer.appendChild(tag);
+    }
+  }
+  g.appendChild(layer);
+}
 
 function drawIrregularFog(g, z, rng, early = false) {
   const fogG = svgEl('g', { class: 'zz-zone-fog-group', style: 'pointer-events:none' });
@@ -1793,6 +2385,7 @@ function drawZone(layer, z, state, tier, handlers) {
   const attacked = state.flags?.lastAttackZoneId === z.id || z._attackFlash;
   const exploreMode = state.uiMode === 'explore';
   const exploreTarget = exploreMode && z.state !== 'unknown' && z.type !== 'camp';
+  const pilot = state.flags?.pilot === 'neni';
   const g = svgEl('g', {
     class: [
       'zz-zone',
@@ -1812,81 +2405,92 @@ function drawZone(layer, z, state, tier, handlers) {
   const plot = districtPlot(z);
   const polyPts = ptsStr(plot);
   const rng = createRng(hashSeed(`zvis:${z.id}:${tier}`));
+  const sw = pilot ? 2.4 : 0.35; // stroke legible en mundo piloto
 
-  // Hit area invisible (nunca stroke/fill visibles)
-  g.appendChild(svgEl('polygon', { points: polyPts, class: 'zz-zone-hit', fill: 'transparent', stroke: 'none' }));
+  // Hit area invisible. El camp no tapa el pan (clic en casitas).
+  if (z.type !== 'camp') {
+    g.appendChild(svgEl('polygon', { points: polyPts, class: 'zz-zone-hit', fill: 'transparent', stroke: 'none' }));
+  }
 
   if (z.state === 'hostile' || attacked) {
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: z.x,
-        cy: z.y,
-        rx: z.r * 0.55,
-        ry: z.r * 0.42,
-        fill: attacked ? 'url(#zzAttackGlow)' : 'url(#zzHostTint)',
-        class: 'zz-zone-tint',
-        opacity: '0.4',
-      })
-    );
+    if (!pilot) {
+      g.appendChild(
+        svgEl('ellipse', {
+          cx: z.x,
+          cy: z.y,
+          rx: z.r * 0.55,
+          ry: z.r * 0.42,
+          fill: attacked ? 'url(#zzAttackGlow)' : 'url(#zzHostTint)',
+          class: 'zz-zone-tint',
+          opacity: '0.4',
+        })
+      );
+    }
   }
   if (z.state === 'contested') {
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: z.x,
-        cy: z.y,
-        rx: z.r * 0.5,
-        ry: z.r * 0.38,
-        fill: '#c48a2a',
-        class: 'zz-zone-tint zz-zone-tint--contested',
-        opacity: '0.28',
-      })
-    );
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: z.x,
-        cy: z.y,
-        rx: z.r * 0.48,
-        ry: z.r * 0.36,
-        fill: 'none',
-        stroke: '#e8b84a',
-        'stroke-width': '0.35',
-        'stroke-dasharray': '1.2 0.8',
-        class: 'zz-zone-contested-ring',
-        opacity: '0.85',
-      })
-    );
+    if (!pilot) {
+      g.appendChild(
+        svgEl('ellipse', {
+          cx: z.x,
+          cy: z.y,
+          rx: z.r * 0.5,
+          ry: z.r * 0.38,
+          fill: '#c48a2a',
+          class: 'zz-zone-tint zz-zone-tint--contested',
+          opacity: '0.28',
+        })
+      );
+      g.appendChild(
+        svgEl('ellipse', {
+          cx: z.x,
+          cy: z.y,
+          rx: z.r * 0.48,
+          ry: z.r * 0.36,
+          fill: 'none',
+          stroke: '#e8b84a',
+          'stroke-width': String(sw),
+          'stroke-dasharray': '1.2 0.8',
+          class: 'zz-zone-contested-ring',
+          opacity: '0.85',
+        })
+      );
+    }
   }
   if (z.state === 'discovered' && !exploreTarget) {
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: z.x,
-        cy: z.y,
-        rx: z.r * 0.42,
-        ry: z.r * 0.32,
-        fill: 'none',
-        stroke: '#8a7a60',
-        'stroke-width': '0.2',
-        opacity: '0.35',
-        class: 'zz-zone-discovered-edge',
-      })
-    );
+    if (!pilot) {
+      g.appendChild(
+        svgEl('ellipse', {
+          cx: z.x,
+          cy: z.y,
+          rx: z.r * 0.42,
+          ry: z.r * 0.32,
+          fill: 'none',
+          stroke: '#8a7a60',
+          'stroke-width': '0.2',
+          opacity: '0.35',
+          class: 'zz-zone-discovered-edge',
+        })
+      );
+    }
   }
   if (z.state === 'controlled' && z.type !== 'camp') {
-    g.appendChild(
-      svgEl('ellipse', {
-        cx: z.x,
-        cy: z.y,
-        rx: z.r * 0.46,
-        ry: z.r * 0.34,
-        fill: 'none',
-        stroke: '#c4a882',
-        'stroke-width': '0.28',
-        opacity: '0.55',
-        class: 'zz-zone-owned-ring',
-      })
-    );
+    if (!pilot) {
+      g.appendChild(
+        svgEl('ellipse', {
+          cx: z.x,
+          cy: z.y,
+          rx: z.r * 0.46,
+          ry: z.r * 0.34,
+          fill: 'none',
+          stroke: '#c4a882',
+          'stroke-width': '0.28',
+          opacity: '0.55',
+          class: 'zz-zone-owned-ring',
+        })
+      );
+    }
   }
-  if (exploreTarget) {
+  if (exploreTarget && !pilot) {
     g.appendChild(
       svgEl('ellipse', {
         cx: z.x,
@@ -1900,13 +2504,17 @@ function drawZone(layer, z, state, tier, handlers) {
   }
 
   if (z.type === 'camp') {
-    drawSettlementCore(g, state, z, tier, { onSelectBuilding, onGhostPointer, content: handlers?.content });
-    drawSectorOverlays(g, state, z, { onSelectSector });
+    drawSettlementCore(g, state, z, tier, {
+      onSelectSlot: handlers?.onSelectSlot,
+      content: handlers?.content,
+    });
+    if (!pilot) drawSectorOverlays(g, state, z, { onSelectSector });
   } else if (z.state === 'unknown') {
     drawIrregularFog(g, z, rng, (state.day || 1) <= 2);
   } else {
     const zArt = zoneArtUrl(z);
-    const s = Math.min(7.2, z.r * 0.9);
+    // Piloto: mundo 1819×865 — el tope 7.2 del mapa 100×100 deja landmarks invisibles.
+    const s = pilot ? Math.min(80, Math.max(48, (z.r || 36) * 1.15)) : Math.min(7.2, z.r * 0.9);
     if (zArt) {
       g.appendChild(
         svgEl('ellipse', {
@@ -1931,7 +2539,10 @@ function drawZone(layer, z, state, tier, handlers) {
         })
       );
     } else {
-      drawLandmarkSilhouette(g, z, z.type);
+      // QA colonia: siluetas de exploración se confunden con edificios — ocultar temporalmente.
+      if (!(pilot && state.flags?.pilotQaMode)) {
+        drawLandmarkSilhouette(g, z, z.type);
+      }
       if (selected) {
         g.appendChild(
           svgEl('ellipse', {
@@ -1950,16 +2561,17 @@ function drawZone(layer, z, state, tier, handlers) {
     }
     // Etiqueta discreta solo al seleccionar
     if (selected) {
-      const markH = zArt ? s : Math.min(6.5, z.r * 0.85);
+      const markH = zArt ? s : pilot ? Math.min(70, z.r * 0.85) : Math.min(6.5, z.r * 0.85);
       const short = (z.name || 'Lugar').split(/\s+/).slice(0, 2).join(' ');
       g.appendChild(
         svgEl(
           'text',
           {
             x: z.x,
-            y: z.y + markH / 2 + 1.1,
+            y: z.y + markH / 2 + (pilot ? 14 : 1.1),
             'text-anchor': 'middle',
             class: 'zz-zone-mark-label is-focus',
+            'font-size': pilot ? '16' : undefined,
           },
           [short]
         )
@@ -1973,9 +2585,9 @@ function drawZone(layer, z, state, tier, handlers) {
     }
   }
 
-  if (z.state !== 'unknown') {
+  if (z.state !== 'unknown' && z.type !== 'camp') {
     g.addEventListener('click', (ev) => {
-      if (ev.target?.closest?.('.zz-settle-bldg, .zz-settle-slot')) return;
+      if (ev.target?.closest?.('.zz-colony-slot, .zz-settle-bldg')) return;
       ev.preventDefault();
       onSelectZone && onSelectZone(z.id);
     });
@@ -1988,6 +2600,8 @@ function drawExpeditions(svg, state) {
   if (!list.length) return;
   const camp = state.zones.find((z) => z.type === 'camp') || state.zones.find((z) => z.state === 'controlled');
   if (!camp) return;
+  const pilot = isPilotNeni(state);
+  const figScale = pilot ? 10 : 1;
 
   list.forEach((ex, idx) => {
     const dest = state.zones.find((z) => z.id === ex.zoneId);
@@ -1999,15 +2613,30 @@ function drawExpeditions(svg, state) {
     const mx = (camp.x + dest.x) / 2 + (dest.y - camp.y) * bend;
     const my = (camp.y + dest.y) / 2 - (dest.x - camp.x) * bend;
     const d = `M${camp.x} ${camp.y} Q${mx} ${my} ${dest.x} ${dest.y}`;
-    g.appendChild(svgEl('path', { d, class: 'zz-map-route', fill: 'none' }));
+    g.appendChild(
+      svgEl('path', {
+        d,
+        class: 'zz-map-route',
+        fill: 'none',
+        'stroke-width': pilot ? '3' : undefined,
+      })
+    );
     const t = expeditionProgress(ex, state.day || 1);
     const px = (1 - t) * (1 - t) * camp.x + 2 * (1 - t) * t * mx + t * t * dest.x;
     const py = (1 - t) * (1 - t) * camp.y + 2 * (1 - t) * t * my + t * t * dest.y;
-    const fig = svgEl('g', { transform: `translate(${px},${py})`, class: 'zz-map-explorer-marker' });
+    const fig = svgEl('g', { transform: `translate(${px},${py}) scale(${figScale})`, class: 'zz-map-explorer-marker' });
     fig.appendChild(svgEl('circle', { cx: 0, cy: -1.1, r: 1.1, fill: '#e8c090', stroke: '#5a4030', 'stroke-width': 0.35 }));
     fig.appendChild(svgEl('path', { d: 'M-1.2 0.3 Q0 2.2 1.2 0.3', fill: '#6a5040' }));
     g.appendChild(fig);
-    g.appendChild(svgEl('text', { x: px, y: py - 3.0, 'text-anchor': 'middle', class: 'zz-map-route-label' }, [label]));
+    g.appendChild(
+      svgEl('text', {
+        x: px,
+        y: py - 3.0 * figScale,
+        'text-anchor': 'middle',
+        class: 'zz-map-route-label',
+        'font-size': pilot ? '14' : undefined,
+      }, [label])
+    );
     svg.appendChild(g);
   });
 }
@@ -2058,20 +2687,15 @@ function drawHeatingChimneys(parent, state, m) {
   if (!state.lastHeating?.active || !(state.lastHeating.consumed > 0)) return;
   const g = svgEl('g', { class: 'zz-map-chimneys', 'aria-hidden': 'true' });
   const camp = state.zones?.find((z) => z.type === 'camp');
-  (state.base?.buildings || []).forEach((b) => {
-    if (b.hp <= 0) return;
-    const def = /* content not here */ null;
-    void def;
-  });
-  // Usar edificios con housing en el campamento
   const houses = (state.base?.buildings || []).filter((b) => {
     if (b.hp <= 0) return false;
     const t = String(b.type || '');
     return t.includes('house') || t.includes('shelter') || t.startsWith('hq_') || t === 'block';
   });
-  houses.slice(0, 6).forEach((b, i) => {
-    const ox = camp ? (camp.x || 50) - 8 + (b.x || 0) * 1.1 : 40 + i * 3;
-    const oy = camp ? (camp.y || 50) - 6 + (b.y || 0) * 1.1 : 45;
+  houses.slice(0, 6).forEach((b) => {
+    const slot = slotForBuilding(state, b);
+    const ox = camp ? camp.x + (slot?.lx || 0) : 40;
+    const oy = camp ? camp.y + (slot?.ly || 0) - 2.2 : 45;
     g.appendChild(
       svgEl('path', {
         d: `M ${ox} ${oy} q 0.6 -2.2 0.2 -4.2`,
@@ -2087,82 +2711,101 @@ function drawLegend() {
   /* Leyenda retirada: el estado de zona se lee por luz/borde/niebla */
 }
 
-const ZOOM_MIN = 1.45;
-const ZOOM_MAX = 3.85;
+// ── ZOOM: rango con contrato 1 unidad mundo = 1 px del mapa a zoom=1 ──────────────────────────
+const ZOOM_MIN_NORMAL = 0.25;
+const ZOOM_MAX = 3.0;
+
+function zoomMinForState(state, svg) {
+  const dims = worldDimsForState(state);
+  const { vpW, vpH } = mapViewportPx(svg);
+  // Contrato demo-neni: visibleW = vpW/zoom. Zoom mínimo = no mostrar exterior del mapa.
+  const fitMin = Math.max(vpW / Math.max(1, dims.w), vpH / Math.max(1, dims.h));
+  return clamp(fitMin, 0.01, ZOOM_MAX);
+}
 
 export function recenterCamera(state) {
   if (!state) return;
-  const camp = state.zones?.find((z) => z.type === 'camp');
   state.mapCamera = state.mapCamera || {};
-  if (camp) {
-    state.mapCamera.x = camp.x;
-    // Ligero sesgo hacia abajo para mostrar acceso + espacio de crecimiento
-    state.mapCamera.y = camp.y + (state.day <= 2 ? 0.6 : 0);
-  } else {
-    state.mapCamera.x = 50;
-    state.mapCamera.y = 50;
-  }
-  const day = state.day || 1;
-  const wide =
-    typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 900px)').matches;
-  // ZZ-018 ronda: D1 más cerca (HQ + entorno); pan para lo lejano
-  if (day <= 1) state.mapCamera.zoom = wide ? 2.85 : 3.05;
-  else if (day <= 3) state.mapCamera.zoom = wide ? 2.35 : 2.55;
-  else if (day <= 5) state.mapCamera.zoom = 2.15;
-  else state.mapCamera.zoom = 1.75;
-}
+  const cam = state.mapCamera;
+  const nucleus = nucleusForState(state);
 
-export function clampCamera(state) {
-  if (!state?.mapCamera) return;
-  const day = state.day || 1;
-  // Zoom out permitido para lectura global; min deja margen de alejamiento
-  const minZ = day <= 2 ? 1.65 : day <= 5 ? 1.5 : ZOOM_MIN;
-  state.mapCamera.zoom = clamp(state.mapCamera.zoom || 1.4, minZ, ZOOM_MAX);
-  const camp = state.zones?.find((z) => z.type === 'camp');
-  if (camp) {
-    const maxDist = day <= 2 ? 42 : day <= 5 ? 48 : 55;
-    const dx = (state.mapCamera.x || camp.x) - camp.x;
-    const dy = (state.mapCamera.y || camp.y) - camp.y;
-    const d = Math.hypot(dx, dy);
-    if (d > maxDist) {
-      state.mapCamera.x = camp.x + (dx / d) * maxDist;
-      state.mapCamera.y = camp.y + (dy / d) * maxDist;
+  if (isPilotNeni(state)) {
+    state.flags = state.flags || {};
+    const zmin = zoomMinForState(state, resolveMapSvg());
+    const isFirst = !state.flags.pilotNeniCamInitialized;
+
+    if (isFirst) {
+      // Cámara inicial canónica: centrada en HQ D (824,532). No reutilizar vistas demo antiguas.
+      cam.x = nucleus.x;
+      cam.y = nucleus.y;
+      cam.zoom = Math.min(ZOOM_MAX, Math.max(zmin * 2.5, zmin));
+      state.flags.pilotNeniCamInitialized = true;
+    } else {
+      // Recentrar (botón): sólo centra en núcleo y deja un zoom razonable.
+      cam.x = nucleus.x;
+      cam.y = nucleus.y;
+      cam.zoom = Math.max(1.0, zmin);
     }
+    return;
   }
-  state.mapCamera.x = clamp(state.mapCamera.x ?? 50, 4, 96);
-  state.mapCamera.y = clamp(state.mapCamera.y ?? 50, 4, 96);
+
+  // Normal (no piloto)
+  cam.x = nucleus.x;
+  cam.y = nucleus.y;
+  cam.zoom = 1.0;
 }
 
-/** Zoom relativo (±) respetando clamp D1. factor>1 acerca. */
-export function zoomCameraBy(state, factor) {
+export function clampCamera(state, svg) {
   if (!state?.mapCamera) return;
-  const f = Number(factor) || 1;
-  state.mapCamera.zoom = (state.mapCamera.zoom || 1) * f;
-  clampCamera(state);
+  const cam = state.mapCamera;
+  const el = resolveMapSvg(svg);
+  cam.zoom = clamp(cam.zoom || 1.0, zoomMinForState(state, el), ZOOM_MAX);
+  const dims = worldDimsForState(state);
+  const nucleus = nucleusForState(state);
+  const { vpW, vpH } = mapViewportPx(el);
+  const halfW = (vpW / 2) / cam.zoom;
+  const halfH = (vpH / 2) / cam.zoom;
+  const visW = vpW / cam.zoom;
+  const visH = vpH / cam.zoom;
+  if (visW >= dims.w) {
+    cam.x = dims.w / 2;
+  } else {
+    cam.x = clamp(cam.x ?? nucleus.x, halfW, dims.w - halfW);
+  }
+  if (visH >= dims.h) {
+    cam.y = dims.h / 2;
+  } else {
+    cam.y = clamp(cam.y ?? nucleus.y, halfH, dims.h - halfH);
+  }
 }
 
-/** Pan relativo en unidades de mundo. */
-export function panCameraBy(state, dx, dy) {
+/** Zoom relativo (factor>1 acerca). */
+export function zoomCameraBy(state, factor, svg) {
   if (!state?.mapCamera) return;
-  state.mapCamera.x = (state.mapCamera.x || 50) + (Number(dx) || 0);
-  state.mapCamera.y = (state.mapCamera.y || 50) + (Number(dy) || 0);
-  clampCamera(state);
+  state.mapCamera.zoom = (state.mapCamera.zoom || 1.0) * (Number(factor) || 1);
+  clampCamera(state, svg);
 }
 
-export function cameraViewBox(state, m) {
-  clampCamera(state);
-  const cam = state.mapCamera || { x: 50, y: 48, zoom: 1.4 };
-  const day = state.day || 1;
-  const minZ = day <= 2 ? 1.65 : day <= 5 ? 1.5 : ZOOM_MIN;
-  const zoom = clamp(cam.zoom || 1.4, minZ, ZOOM_MAX);
-  const vw = m.vbW / zoom;
-  const vh = m.vbH / zoom;
-  const worldW = 100;
-  const worldH = 100;
-  let cx = cam.x ?? 50;
-  let cy = cam.y ?? 48;
-  cx = clamp(cx, vw / 2, worldW - vw / 2);
-  cy = clamp(cy, vh / 2, worldH - vh / 2);
+/** Pan relativo en unidades de mundo (px). */
+export function panCameraBy(state, dx, dy, svg) {
+  if (!state?.mapCamera) return;
+  const nucleus = nucleusForState(state);
+  state.mapCamera.x = (state.mapCamera.x || nucleus.x) + (Number(dx) || 0);
+  state.mapCamera.y = (state.mapCamera.y || nucleus.y) + (Number(dy) || 0);
+  clampCamera(state, svg);
+}
+
+export function cameraViewBox(state, m, svg) {
+  const el = resolveMapSvg(svg);
+  clampCamera(state, el);
+  const nucleus = nucleusForState(state);
+  const cam = state.mapCamera || { x: nucleus.x, y: nucleus.y, zoom: 1.0 };
+  const zoom = clamp(cam.zoom || 1.0, zoomMinForState(state, el), ZOOM_MAX);
+  const { vpW, vpH } = mapViewportPx(el);
+  const vw = vpW / zoom;
+  const vh = vpH / zoom;
+  const cx = cam.x ?? nucleus.x;
+  const cy = cam.y ?? nucleus.y;
   return {
     x: cx - vw / 2,
     y: cy - vh / 2,
@@ -2174,10 +2817,22 @@ export function cameraViewBox(state, m) {
   };
 }
 
+/** Fit-mundo: ajusta zoom al "zoom mínimo" de fit y centra en el mundo completo. */
+export function fitWorldCamera(state, svg) {
+  if (!state?.mapCamera) return;
+  const el = resolveMapSvg(svg);
+  const dims = worldDimsForState(state);
+  const zmin = zoomMinForState(state, el);
+  state.mapCamera.x = dims.w / 2;
+  state.mapCamera.y = dims.h / 2;
+  state.mapCamera.zoom = zmin;
+  clampCamera(state, el);
+}
+
 export function applyMapCamera(svg, state) {
   if (!svg || !state) return;
   const m = mapMetrics(svg);
-  const vb = cameraViewBox(state, m);
+  const vb = cameraViewBox(state, m, svg);
   svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
 }
 
@@ -2188,9 +2843,22 @@ export function bindMapCamera(wrap, getState, onChange) {
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
+  let startX = 0;
+  let startY = 0;
   let moved = false;
 
+  const activePointers = new Map(); // pointerId -> {x,y}
+  let pinch = null; // { lastDist, u, v, worldMidX, worldMidY, zoom0 }
+
   const svg = () => wrap.querySelector('svg.zz-map') || wrap.querySelector('svg');
+  const pilotTouch = () => getState()?.flags?.pilot === 'neni';
+
+  const markPanned = () => {
+    wrap.dataset.zzPanned = '1';
+    setTimeout(() => {
+      delete wrap.dataset.zzPanned;
+    }, 80);
+  };
 
   wrap.addEventListener(
     'wheel',
@@ -2206,78 +2874,182 @@ export function bindMapCamera(wrap, getState, onChange) {
     { passive: false }
   );
 
+  wrap.addEventListener(
+    'click',
+    (ev) => {
+      if (wrap.dataset.zzPanned) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    },
+    true
+  );
+
   wrap.addEventListener('pointerdown', (ev) => {
     if (ev.button != null && ev.button !== 0) return;
     const t = ev.target;
-    // Ghost: mover edificio, no pan (§9.6)
     if (t?.closest?.('.zz-settle-ghost-handle')) {
       dragging = false;
       wrap.dataset.zzGhostDrag = '1';
       return;
     }
-    if (t?.closest?.('.zz-settle-bldg, .zz-settle-slot, .zz-zone-hit, .zz-zone-poly, .zz-ex-card')) {
-      // zonas sí permiten pan con drag: marcamos y vemos si hay movimiento
+
+    const state = getState();
+    if (!state?.mapCamera) return;
+    const pilot = pilotTouch();
+
+    activePointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+    // Pinch-to-zoom SOLO en piloto
+    if (pilot && activePointers.size === 2) {
+      const pts = [...activePointers.values()];
+      const a = pts[0];
+      const b = pts[1];
+      const lastDist = Math.hypot(b.x - a.x, b.y - a.y);
+      const midX = (a.x + b.x) / 2;
+      const midY = (a.y + b.y) / 2;
+
+      const el = svg();
+      const rect = el?.getBoundingClientRect?.();
+      if (!el || !rect || rect.width <= 0 || rect.height <= 0) return;
+
+      const u = (midX - rect.left) / rect.width;
+      const v = (midY - rect.top) / rect.height;
+      const { vpW, vpH } = mapViewportPx(el);
+      const zoom0 = state.mapCamera.zoom || 1.0;
+      const vw0 = vpW / zoom0;
+      const vh0 = vpH / zoom0;
+      const worldMidX = state.mapCamera.x + (u - 0.5) * vw0;
+      const worldMidY = state.mapCamera.y + (v - 0.5) * vh0;
+
+      pinch = { lastDist, u, v, worldMidX, worldMidY, zoom0 };
+      dragging = false;
+      moved = false;
+      markPanned();
+      ev.preventDefault?.();
+      return;
     }
+
+    // Sólo arrastre con 1 dedo (o no piloto)
+    if (activePointers.size !== 1) return;
+    pinch = null;
     dragging = true;
     moved = false;
     lastX = ev.clientX;
     lastY = ev.clientY;
+    startX = ev.clientX;
+    startY = ev.clientY;
     wrap.setPointerCapture?.(ev.pointerId);
   });
+
   wrap.addEventListener('pointermove', (ev) => {
     if (wrap.dataset.zzGhostDrag === '1') return;
-    if (!dragging) return;
     const state = getState();
     const el = svg();
     if (!state?.mapCamera || !el) return;
+
+    // actualizar puntero
+    if (activePointers.has(ev.pointerId)) {
+      activePointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    }
+
+    const pilot = pilotTouch();
+
+    // Pinch activo
+    if (pilot && pinch && activePointers.size === 2) {
+      const pts = [...activePointers.values()];
+      const a = pts[0];
+      const b = pts[1];
+      const dist = Math.hypot(b.x - a.x, b.y - a.y);
+      if (!pinch.lastDist || pinch.lastDist <= 0) return;
+      const ratio = dist / pinch.lastDist;
+
+      const newZoom = pinch.zoom0 * ratio;
+      const { vpW, vpH } = mapViewportPx(el);
+      const vw = vpW / newZoom;
+      const vh = vpH / newZoom;
+      state.mapCamera.zoom = newZoom;
+      state.mapCamera.x = pinch.worldMidX - (pinch.u - 0.5) * vw;
+      state.mapCamera.y = pinch.worldMidY - (pinch.v - 0.5) * vh;
+
+      clampCamera(state, el);
+      applyMapCamera(el, state);
+      moved = true;
+      // Evitar clicks residuales
+      markPanned();
+      return;
+    }
+
+    if (!dragging) return;
+    if (activePointers.size !== 1) return;
+
     const dx = ev.clientX - lastX;
     const dy = ev.clientY - lastY;
-    if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
     lastX = ev.clientX;
     lastY = ev.clientY;
+    const fromStart = Math.hypot(ev.clientX - startX, ev.clientY - startY);
+    if (fromStart > 10) moved = true;
+
     const m = mapMetrics(el);
-    const vb = cameraViewBox(state, m);
+    const vb = cameraViewBox(state, m, el);
     const rect = el.getBoundingClientRect();
     const scaleX = vb.w / Math.max(1, rect.width);
     const scaleY = vb.h / Math.max(1, rect.height);
     state.mapCamera.x = (state.mapCamera.x || 50) - dx * scaleX;
     state.mapCamera.y = (state.mapCamera.y || 48) - dy * scaleY;
-    clampCamera(state);
+    clampCamera(state, el);
     applyMapCamera(el, state);
   });
-  const endDrag = (ev) => {
-    if (wrap.dataset.zzGhostDrag === '1') {
-      delete wrap.dataset.zzGhostDrag;
+
+  const endPointer = (ev) => {
+    if (wrap.dataset.zzGhostDrag === '1') delete wrap.dataset.zzGhostDrag;
+
+    activePointers.delete(ev.pointerId);
+
+    const pilot = pilotTouch();
+    const endedPinch = pilot && pinch && activePointers.size < 2;
+    if (endedPinch) {
+      pinch = null;
+      if (moved) onChange && onChange();
+      // markPanned ya se hizo durante el pinch
+      return;
     }
+
     if (!dragging) return;
     dragging = false;
     wrap.releasePointerCapture?.(ev.pointerId);
     if (moved) {
-      wrap.dataset.zzPanned = '1';
       onChange && onChange();
-      setTimeout(() => {
-        delete wrap.dataset.zzPanned;
-      }, 0);
+      markPanned();
     }
   };
-  wrap.addEventListener('pointerup', endDrag);
-  wrap.addEventListener('pointercancel', endDrag);
+
+  wrap.addEventListener('pointerup', endPointer);
+  wrap.addEventListener('pointercancel', endPointer);
 }
 
 export function renderMap(svg, state, handlers = {}) {
   if (!svg) return;
-  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer, content } = handlers;
+  const { onSelectZone, onSelectBuilding, onPlaceCell, onSelectSector, onGhostPointer, onSelectSlot, content } = handlers;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const pilot = isPilotNeni(state);
+  const dims = worldDimsForState(state);
+  svg.dataset.zzWorldW = String(dims.w);
+  svg.dataset.zzWorldH = String(dims.h);
   const m = mapMetrics(svg);
-  if (!state.mapCamera) state.mapCamera = { x: 50, y: 48, zoom: 1.15 };
-  const vb = cameraViewBox(state, m);
+  if (!state.mapCamera) {
+    const nucleus = nucleusForState(state);
+    state.mapCamera = { x: nucleus.x, y: nucleus.y, zoom: 1.0 };
+  }
+  const vb = cameraViewBox(state, m, svg);
   svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  svg.setAttribute('preserveAspectRatio', 'none');
 
   const tier = colonyVisualTier(state);
   svg.dataset.tier = String(tier);
   svg.dataset.wide = m.wide ? '1' : '0';
   svg.dataset.mode = state.uiMode || '';
+  svg.dataset.colonyStyle = colonyVisualStyle(state);
   addDefs(svg, tier);
 
   const pad = 40;
@@ -2292,29 +3064,59 @@ export function renderMap(svg, state, handlers = {}) {
     })
   );
 
+  // ── MAPA MAESTRO como fondo del mundo ─────────────────────────────────
+  // La imagen ocupa exactamente W×H del mundo en coordenadas de mundo.
+  svg.appendChild(
+    svgEl('image', {
+      href: artUrl(pilot ? PILOT_WORLD_MAP_ART : WORLD_MAP_ART),
+      x: '0',
+      y: '0',
+      width: String(dims.w),
+      height: String(dims.h),
+      preserveAspectRatio: 'none',
+      class: 'zz-world-map-bg',
+      style: 'pointer-events:none',
+    })
+  );
+
   const worldAttrs = { class: 'zz-map-world' };
   const world = svgEl('g', worldAttrs);
   const zones = state.zones || [];
   const camp = zones.find((z) => z.type === 'camp');
-  // Terreno jugable pintado — NO fotografía/mapa aéreo city.webp (ZZ-161 LOD por zoom)
-  drawPlayableTerrain(world, camp, tier, state.day || 1, state.mapCamera?.zoom || 1.5);
-  const grid = drawRoads(world, zones, tier);
-  drawUrbanBlocks(world, zones, grid, tier);
-  drawRecoveredPaths(world, zones, tier);
+  if (!pilot) {
+    // En piloto, el fondo raster ya contiene el terreno; esto duplica/sucede visualmente.
+    drawColonyGround(world, camp, state);
+  }
 
   const layer = svgEl('g', { class: 'zz-map-layer zz-map-zones' });
   const ordered = [...zones].sort((a, b) => {
     const rank = { unknown: 0, discovered: 1, hostile: 2, controlled: 3 };
     return (rank[a.state] || 0) - (rank[b.state] || 0);
   });
-  ordered.forEach((z) =>
-    drawZone(layer, z, state, tier, { onSelectZone, onSelectBuilding, onSelectSector, onGhostPointer, content })
+  const toDraw = ordered;
+  toDraw.forEach((z) =>
+    drawZone(layer, z, state, tier, {
+      onSelectZone,
+      onSelectBuilding,
+      onSelectSector,
+      onSelectSlot,
+      content,
+    })
   );
   world.appendChild(layer);
 
   drawExpeditions(world, state);
   svg.appendChild(world);
-  drawWeather(svg, state.weather, m);
-  drawHeatingChimneys(world, state, m);
-  drawLegend();
+  if (pilot && camp) {
+    drawPilotBuildingsLayer(world, state, camp, {
+      onSelectSlot,
+      onGhostPointer,
+      onSelectBuilding,
+    });
+  }
+  if (!pilot) {
+    drawWeather(svg, state.weather, m);
+    drawHeatingChimneys(world, state, m);
+    drawLegend();
+  }
 }

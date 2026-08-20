@@ -76,6 +76,8 @@ import {
   allTechs,
 } from './research.js';
 import { isCellBuildable, tickSectorRecovery, ensureSectors } from './sectors.js';
+import { footprintFits, pilotFootprint, isPilotQaReadyBuilding } from './pilot-footprints.js';
+import { hasPilotBuildingArt } from './art.js';
 import {
   tripFuelCost,
   vehicleUsable,
@@ -141,37 +143,71 @@ export function placeBuilding(state, content, type, x, y) {
   const def = content.buildings[type];
   if (!def) return { ok: false, error: 'Tipo desconocido' };
   if (state.flags.defeated) return { ok: false, error: 'Partida terminada' };
-  if ((def.minEra || 0) > state.era) return { ok: false, error: 'Aún no desbloqueado (era)' };
-  if (def.requires?.length) {
-    const missing = def.requires.filter((t) => !(state.research.unlocked || []).includes(t));
-    if (missing.length) return { ok: false, error: 'Falta investigación' };
+  if ((def.minEra || 0) > state.era && !(state.flags?.pilot === 'neni' && (state.flags?.pilotTestMode || state.flags?.pilotQaMode))) {
+    return { ok: false, error: 'Aún no desbloqueado (era)' };
   }
-  if (def.requiresBuilding) {
-    if (!state.base.buildings.some((b) => b.type === def.requiresBuilding && b.hp > 0)) {
-      return { ok: false, error: 'Requiere otro edificio' };
+  const pilot = state.flags?.pilot === 'neni';
+  // Piloto Neni: construimos “visualmente” sin migrar prerequisitos de gameplay.
+  // Seguimos respetando: sector recuperado, ocupación y límites de base.
+  if (!pilot) {
+    if (def.requires?.length) {
+      const missing = def.requires.filter((t) => !(state.research.unlocked || []).includes(t));
+      if (missing.length) return { ok: false, error: 'Falta investigación' };
+    }
+    if (def.requiresBuilding) {
+      if (!state.base.buildings.some((b) => b.type === def.requiresBuilding && b.hp > 0)) {
+        return { ok: false, error: 'Requiere otro edificio' };
+      }
     }
   }
   const count = state.base.buildings.filter((b) => b.type === type && b.hp > 0).length;
   if (def.max != null && count >= def.max) return { ok: false, error: 'Límite de este edificio' };
-  if (x < 0 || y < 0 || x >= state.base.w || y >= state.base.h) return { ok: false, error: 'Fuera de la base' };
-  ensureSectors(state);
-  if (!isCellBuildable(state, x, y)) {
-    return { ok: false, error: 'Terreno no recuperado — recupera el sector primero' };
+  // Piloto: x/y = ancla terreno canónica (puede ser negativa). No usar bounds del grid base.
+  if (!pilot && (x < 0 || y < 0 || x >= state.base.w || y >= state.base.h)) {
+    return { ok: false, error: 'Fuera de la base' };
   }
-  if (state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) {
-    return { ok: false, error: 'Celda ocupada' };
+  ensureSectors(state);
+  if (pilot) {
+    const fp = pilotFootprint(type);
+    if (!fp) return { ok: false, error: 'Edificio no disponible en piloto' };
+    if (state.flags?.pilotQaMode) {
+      if (String(type).startsWith('hq_')) return { ok: false, error: 'El Refugio Central ya está anclado' };
+      if (!isPilotQaReadyBuilding(type) || !hasPilotBuildingArt(type)) {
+        return { ok: false, error: 'No adaptado en QA' };
+      }
+    }
+    if (!footprintFits(state, type, x, y)) {
+      return { ok: false, error: 'Terreno no válido o footprint solapado' };
+    }
+  } else {
+    if (!isCellBuildable(state, x, y)) {
+      return { ok: false, error: 'Terreno no recuperado — recupera el sector primero' };
+    }
+    if (state.base.buildings.some((b) => b.x === x && b.y === y && b.hp > 0)) {
+      return { ok: false, error: 'Celda ocupada' };
+    }
   }
   const buildLabor = state.population?.labor?.build || 0;
   const idle = state.population?.labor?.idle || 0;
-  if (buildLabor + idle < 1) return { ok: false, error: 'Sin mano de obra para construir' };
+  if (!pilot && buildLabor + idle < 1) return { ok: false, error: 'Sin mano de obra para construir' };
 
   const costRed = Math.min(0.35, sumTechEffect(state, content, 'buildCostReduction'));
   const paid = {};
   Object.entries(def.cost || {}).forEach(([k, v]) => {
     paid[k] = Math.max(1, Math.ceil(v * (1 - costRed)));
   });
-  if (!canAfford(state, paid)) return { ok: false, error: 'Recursos insuficientes' };
-  payCost(state, paid);
+  if (!(state.flags?.pilot === 'neni' && (state.flags?.pilotTestMode || state.flags?.pilotQaMode)) && !canAfford(state, paid)) {
+    return { ok: false, error: 'Recursos insuficientes' };
+  }
+  // Modo QA piloto: no gastar recursos (auditoría libre).
+  if (!(pilot && (state.flags?.pilotTestMode || state.flags?.pilotQaMode))) {
+    payCost(state, paid);
+  } else {
+    // Aun así reponer stock alto para que el HUD muestre abundancia.
+    Object.keys(paid).forEach((k) => {
+      state.resources[k] = Math.max(state.resources[k] || 0, 9999);
+    });
+  }
   if (def.upgradeFrom) {
     const old = state.base.buildings.find((b) => b.type === def.upgradeFrom && b.hp > 0);
     if (old) {

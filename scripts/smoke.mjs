@@ -49,6 +49,7 @@ const {
   makeSurvivor,
 } = await import(stateUrl);
 const { advanceDay, startExpedition, placeBuilding } = await import(simUrl);
+const { freeBuildableCells } = await import(pathToFileURL(join(root, 'js', 'build-place.js')).href);
 
 let fails = 0;
 function assert(cond, msg) {
@@ -77,9 +78,13 @@ assert(state.resources.water > 0 && state.resources.wood > 0 && state.resources.
 assert(state.resources.medicine > 0 && state.resources.fuel > 0, 'medicine/fuel');
 assert(state.zones?.length > 0, 'zonas desde locations');
 
-const build = placeBuilding(state, content, 'farm', 1, 1);
+const free = freeBuildableCells(state);
+assert(free.length >= 2, 'celdas edificables D1');
+const [fx, fy] = free[0];
+const [wx, wy] = free[1] || free[0];
+const build = placeBuilding(state, content, 'farm', fx, fy);
 assert(build.ok, 'construir huerto: ' + (build.error || 'ok'));
-const well = placeBuilding(state, content, 'well', 1, 2);
+const well = placeBuilding(state, content, 'well', wx, wy);
 assert(well.ok, 'construir pozo: ' + (well.error || 'ok'));
 
 const market = state.zones.find((z) => z.id === 'market' || z.type === 'supermarket') || state.zones[1];

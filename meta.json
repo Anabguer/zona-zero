@@ -2,7 +2,7 @@
   "slug": "zona-zero",
   "name": "Zona Zero",
   "description": "Tras el colapso, un refugio mínimo. Explora la ciudad, construye, sobrevive a la amenaza.",
-  "cover": "assets/cover.svg",
+  "cover": "cover.png",
   "category": "supervivencia",
   "status": "jugable",
   "url": "/juegos/zona-zero/",

@@ -111,3 +111,24 @@ Eso **no** significa “arte aprobado para release”.
 | Publicación | Requiere decisión Neni: qué A es obligatorio en v1 |
 
 **No** se autoriza publicar con el arte actual solo porque el gate funcional esté APROBADO.
+
+---
+
+## Hallazgos humanos PT1-A (2026-08-16) — sin ART PASS
+
+Sesión Neni **interrumpida** por viewport móvil (`docs/review-mobile-pt1a/PT1A_VIEWPORT_MOBILE.md`). Arte observado en D1 (registrar, no ejecutar):
+
+| Observación Neni | Clase | Nota |
+|------------------|-------|------|
+| Rayas / banding visual | A/B | Terreno / render; no fix ahora |
+| Superficies/zonas visualmente raras | B | Highlight buildable / lectura |
+| Elementos provisionales evidentes | A | Refuerza necesidad ART PASS A |
+| Composición poco natural | A/B | Integración edificio–suelo + props |
+
+**Portada (feedback Neni, propuesta pendiente de aprobación):**
+
+- Quiere **logo gráfico** como héroe.  
+- Quitar redundancia: texto «Zona Zero» + kicker «Intocables · Supervivencia».  
+- Mock local: `docs/review-mobile-pt1a/05-hub-logo-proposal.png` — **no deploy**.
+
+**Intro:** feedback positivo; no tocar estructura.

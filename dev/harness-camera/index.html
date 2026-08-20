@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Harness Cámara v2 — Zona Zero</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #0a0908;
+  font-family: monospace;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/*
+  El viewport del mapa ocupa toda la pantalla menos la barra de debug.
+  overflow: hidden  → nunca se ve fuera del mundo.
+*/
+#map-viewport {
+  position: absolute;
+  inset: 0;
+  bottom: 52px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  overscroll-behavior: none;
+  background: #0c0e10;
+}
+#map-viewport.dragging { cursor: grabbing; }
+
+/*
+  #map-world es el contenedor del mundo.
+  Su tamaño SIEMPRE es WORLD_W × WORLD_H en px (a zoom=1).
+  Se mueve con transform: translate + scale.
+  transform-origin: 0 0  →  zoom desde esquina superior-izquierda.
+*/
+#map-world {
+  position: absolute;
+  top: 0; left: 0;
+  width: 4096px;
+  height: 2720px;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+#map-world img {
+  display: block;
+  /* TAMAÑO FIJO: 1px imagen = 1px pantalla a zoom=1. Sin width:100%, sin height:auto. */
+  width: 4096px;
+  height: 2720px;
+  image-rendering: auto;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* Línea de unión entre bloque A y B (solo visual de debug) */
+#seam-line {
+  position: absolute;
+  left: 0; right: 0;
+  top: 1360px;
+  height: 2px;
+  background: rgba(240,80,80,0.5);
+  pointer-events: none;
+}
+#seam-label {
+  position: absolute;
+  left: 12px;
+  top: 1364px;
+  font-size: 11px;
+  color: rgba(240,100,100,0.8);
+  pointer-events: none;
+}
+
+/* Marcador del núcleo */
+#debug-nucleus {
+  position: absolute;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 3px solid #f0d060;
+  background: rgba(240,208,80,0.2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+#debug-nucleus::after {
+  content: 'NÚCLEO';
+  position: absolute;
+  top: 40px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #f0d060;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
+  letter-spacing: 1px;
+}
+
+/* Barra de debug inferior */
+#debug-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 52px;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+  font-size: 11px;
+  color: #80a080;
+  z-index: 30;
+  flex-wrap: wrap;
+}
+#debug-bar span { color: #d0f0d0; }
+#debug-bar button {
+  padding: 4px 10px;
+  background: #1a2a1a;
+  color: #80d080;
+  border: 1px solid #3a5a3a;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: monospace;
+}
+#debug-bar button:hover { background: #2a4a2a; }
+
+/* Botones simuladores de viewport */
+#viewport-sims {
+  position: absolute;
+  top: 8px; right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 20;
+}
+.sim-btn {
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.75);
+  color: #b0c8b0;
+  border: 1px solid #304030;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  font-family: monospace;
+  text-align: center;
+  min-width: 110px;
+}
+.sim-btn:hover  { background: rgba(30,50,30,0.9); }
+.sim-btn.active { border-color: #f0d060; color: #f0d060; }
+
+/* Marco simulado del viewport */
+#viewport-frame {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid rgba(240,208,80,0.6);
+  z-index: 15;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div id="map-viewport">
+  <div id="map-world">
+    <img id="map-img" src="mapa-4096x2720-B-real.png" alt="Mapa Zona Zero 4096×2720" draggable="false">
+    <div id="seam-line"></div>
+    <div id="seam-label">— unión bloque A / bloque B (y=1360) —</div>
+    <div id="debug-nucleus"></div>
+  </div>
+</div>
+
+<div id="debug-bar">
+  <button onclick="recenter()">⊕ Recentrar</button>
+  <div>WORLD: <span>4096×2720</span></div>
+  <div>cam: <span id="dbg-cam">-</span></div>
+  <div>zoom: <span id="dbg-zoom">-</span></div>
+  <div>VP: <span id="dbg-vp">-</span></div>
+  <div>visible: <span id="dbg-vis">-</span></div>
+</div>
+
+<div id="viewport-sims">
+  <div class="sim-btn active"    onclick="simFull(this)">↔ Pantalla completa</div>
+  <div class="sim-btn" onclick="simVP(this,390,844)">📱 390×844 portrait</div>
+  <div class="sim-btn" onclick="simVP(this,844,390)">📱 844×390 landscape</div>
+  <div class="sim-btn" onclick="simVP(this,1366,768)">🖥 1366×768 desktop</div>
+</div>
+
+<!-- Marco visual del viewport simulado -->
+<div id="viewport-frame"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// MUNDO REAL — sin escalar, sin fit
+// ═══════════════════════════════════════════
+const WORLD_W = 4096;
+const WORLD_H = 2720;   // duplicado vertical
+
+// Núcleo: coordenadas reales en el mundo (px)
+// Bloque A superior → núcleo en la parte superior del mapa
+const NUCLEUS_X = 2600;
+const NUCLEUS_Y = 380;
+
+// Zoom inicial: 1.0 = 1px mundo = 1px pantalla
+// Nunca calculamos zoom automático para hacer entrar el mundo.
+const ZOOM_INITIAL = 1.0;
+const ZOOM_MIN     = 0.25;  // 4x alejado (permite ver región amplia)
+const ZOOM_MAX     = 3.0;
+
+// ═══════════════════════════════════════════
+// ESTADO CÁMARA
+// cam.x / cam.y: coordenadas mundo del centro del viewport
+// ═══════════════════════════════════════════
+const cam = { x: NUCLEUS_X, y: NUCLEUS_Y, zoom: ZOOM_INITIAL };
+
+// Posicionar marcador del núcleo (coordenadas mundo)
+const nucleus = document.getElementById('debug-nucleus');
+nucleus.style.left = NUCLEUS_X + 'px';
+nucleus.style.top  = NUCLEUS_Y + 'px';
+
+// ═══════════════════════════════════════════
+// VIEWPORT
+// ═══════════════════════════════════════════
+const vp = document.getElementById('map-viewport');
+const world = document.getElementById('map-world');
+
+function vpW() { return vp.clientWidth;  }
+function vpH() { return vp.clientHeight; }
+
+// ═══════════════════════════════════════════
+// CLAMP — límites son los bordes REALES del mundo
+// ═══════════════════════════════════════════
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+function clampCam() {
+  // La cámara no puede mostrar fuera del mundo.
+  // El centro (cam.x, cam.y) debe quedar al menos a "medio viewport / zoom" del borde.
+  const halfW = (vpW() / 2) / cam.zoom;
+  const halfH = (vpH() / 2) / cam.zoom;
+
+  // Si el mundo es más pequeño que el viewport (zoom muy bajo), centramos.
+  const minX = Math.min(halfW, WORLD_W / 2);
+  const maxX = Math.max(WORLD_W - halfW, WORLD_W / 2);
+  const minY = Math.min(halfH, WORLD_H / 2);
+  const maxY = Math.max(WORLD_H - halfH, WORLD_H / 2);
+
+  cam.x = clamp(cam.x, minX, maxX);
+  cam.y = clamp(cam.y, minY, maxY);
+  cam.zoom = clamp(cam.zoom, ZOOM_MIN, ZOOM_MAX);
+}
+
+// ═══════════════════════════════════════════
+// APLICAR CÁMARA
+// La transform traslada el mundo de modo que cam.x/y quede en el centro del viewport.
+// origin 0 0 → translate primero, luego scale.
+// ═══════════════════════════════════════════
+function applyCamera() {
+  clampCam();
+  const tx = vpW() / 2 - cam.x * cam.zoom;
+  const ty = vpH() / 2 - cam.y * cam.zoom;
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${cam.zoom})`;
+  updateDebug();
+}
+
+function updateDebug() {
+  const visW = (vpW() / cam.zoom).toFixed(0);
+  const visH = (vpH() / cam.zoom).toFixed(0);
+  document.getElementById('dbg-cam').textContent  = `${cam.x.toFixed(0)}, ${cam.y.toFixed(0)}`;
+  document.getElementById('dbg-zoom').textContent = cam.zoom.toFixed(3) + '×';
+  document.getElementById('dbg-vp').textContent   = `${vpW()}×${vpH()}`;
+  document.getElementById('dbg-vis').textContent  = `${visW}×${visH}px mundo`;
+}
+
+// ═══════════════════════════════════════════
+// RECENTRAR
+// ═══════════════════════════════════════════
+function recenter() {
+  cam.x    = NUCLEUS_X;
+  cam.y    = NUCLEUS_Y;
+  cam.zoom = ZOOM_INITIAL;
+  applyCamera();
+}
+
+// ═══════════════════════════════════════════
+// PAN — POINTER (ratón + touch single)
+// ═══════════════════════════════════════════
+let isDragging = false;
+let lastPX = 0, lastPY = 0;
+
+vp.addEventListener('pointerdown', e => {
+  isDragging = true;
+  lastPX = e.clientX;
+  lastPY = e.clientY;
+  vp.setPointerCapture(e.pointerId);
+  vp.classList.add('dragging');
+});
+vp.addEventListener('pointermove', e => {
+  if (!isDragging) return;
+  // dx/dy en píxeles pantalla → convertir a unidades mundo
+  const dx = (e.clientX - lastPX) / cam.zoom;
+  const dy = (e.clientY - lastPY) / cam.zoom;
+  lastPX = e.clientX;
+  lastPY = e.clientY;
+  cam.x -= dx;
+  cam.y -= dy;
+  applyCamera();
+});
+vp.addEventListener('pointerup',     () => { isDragging = false; vp.classList.remove('dragging'); });
+vp.addEventListener('pointercancel', () => { isDragging = false; vp.classList.remove('dragging'); });
+
+// ═══════════════════════════════════════════
+// ZOOM — RUEDA
+// ═══════════════════════════════════════════
+vp.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+  cam.zoom *= factor;
+  applyCamera();
+}, { passive: false });
+
+// ═══════════════════════════════════════════
+// ZOOM — PINCH TOUCH
+// ═══════════════════════════════════════════
+let pinchDist = null;
+vp.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    pinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+}, { passive: true });
+vp.addEventListener('touchmove', e => {
+  if (e.touches.length === 2 && pinchDist !== null) {
+    e.preventDefault();
+    const d = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    cam.zoom *= d / pinchDist;
+    pinchDist = d;
+    applyCamera();
+  }
+}, { passive: false });
+vp.addEventListener('touchend', () => { pinchDist = null; });
+
+// ═══════════════════════════════════════════
+// SIMULADORES DE VIEWPORT
+// Limitan el área visible del mapa-viewport, sin cambiar el mundo.
+// ═══════════════════════════════════════════
+const frame = document.getElementById('viewport-frame');
+
+function clearSim() {
+  vp.style.width  = '';
+  vp.style.height = '';
+  vp.style.left   = '';
+  vp.style.top    = '';
+  vp.style.right  = 'auto';
+  vp.style.bottom = '52px';
+  frame.style.display = 'none';
+  document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+}
+
+function simFull(btn) {
+  clearSim();
+  btn.classList.add('active');
+  applyCamera();
+}
+
+function simVP(btn, w, h) {
+  clearSim();
+  btn.classList.add('active');
+
+  const maxW = window.innerWidth;
+  const maxH = window.innerHeight - 52;
+  const sw = Math.min(w, maxW);
+  const sh = Math.min(h, maxH);
+  const ox = Math.round((maxW - sw) / 2);
+  const oy = Math.round((maxH - sh) / 2);
+
+  vp.style.left   = ox + 'px';
+  vp.style.top    = oy + 'px';
+  vp.style.right  = 'auto';
+  vp.style.bottom = 'auto';
+  vp.style.width  = sw + 'px';
+  vp.style.height = sh + 'px';
+
+  // Marco visual amarillo
+  frame.style.display = 'block';
+  frame.style.left    = (ox - 2) + 'px';
+  frame.style.top     = (oy - 2) + 'px';
+  frame.style.width   = (sw + 4) + 'px';
+  frame.style.height  = (sh + 4) + 'px';
+
+  applyCamera();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('resize', applyCamera);
+recenter();
+</script>
+</body>
+</html>

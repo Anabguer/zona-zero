@@ -1,0 +1,708 @@
+{
+  "id": "scale-iter-clean-4x2",
+  "note": "Piloto de revisión. Fondo = ilustración aprobada limpia (sin vehículos ni ruinas grandes). NO integrado en Zona Zero. 16 viviendas NO es el máximo del mapa.",
+  "grid": {
+    "cols": 78,
+    "rows": 18,
+    "cells_total": 1404
+  },
+  "house_reference": {
+    "footprint": "4x2 (o 2x4 rotada)",
+    "inhabitants": 4,
+    "upgrades_not_in_scope": true
+  },
+  "parcel_capacity_cells_estimate": 656,
+  "used_cells": 293,
+  "free_cells_estimate": 363,
+  "occupied_pct_of_useful": 44.7,
+  "occupied_pct_of_total_grid": 20.9,
+  "fits_comfortably": true,
+  "additional_houses_4x2_estimate": {
+    "comfortable_leave_open_land": 16,
+    "moderate_70pct_useful": 20,
+    "tight_pack_remaining_parcels": 45
+  },
+  "counts": {
+    "houses": 16,
+    "farms": 6,
+    "wells": 2,
+    "services": [
+      "taller_01 5x2",
+      "almacen_01 5x3",
+      "clinica_01 5x3"
+    ],
+    "test_buildings": [
+      "edificio_4x4",
+      "edificio_5x3",
+      "edificio_5x4",
+      "edificio_6x4"
+    ]
+  },
+  "placements": [
+    {
+      "id": "edificio_6x4",
+      "kind": "special",
+      "label_es": "edificio prueba",
+      "anchor": "E2",
+      "col0": 4,
+      "row0": 1,
+      "w": 6,
+      "h": 4,
+      "cells": [
+        "E2",
+        "F2",
+        "G2",
+        "H2",
+        "I2",
+        "J2",
+        "E3",
+        "F3",
+        "G3",
+        "H3",
+        "I3",
+        "J3",
+        "E4",
+        "F4",
+        "G4",
+        "H4",
+        "I4",
+        "J4",
+        "E5",
+        "F5",
+        "G5",
+        "H5",
+        "I5",
+        "J5"
+      ]
+    },
+    {
+      "id": "casa_01",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "L3",
+      "col0": 11,
+      "row0": 2,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "L3",
+        "M3",
+        "N3",
+        "O3",
+        "L4",
+        "M4",
+        "N4",
+        "O4"
+      ]
+    },
+    {
+      "id": "casa_02",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "E7",
+      "col0": 4,
+      "row0": 6,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "E7",
+        "F7",
+        "G7",
+        "H7",
+        "E8",
+        "F8",
+        "G8",
+        "H8"
+      ]
+    },
+    {
+      "id": "casa_03",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "S2",
+      "col0": 18,
+      "row0": 1,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "S2",
+        "T2",
+        "U2",
+        "V2",
+        "S3",
+        "T3",
+        "U3",
+        "V3"
+      ]
+    },
+    {
+      "id": "casa_04",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "Y4",
+      "col0": 24,
+      "row0": 3,
+      "w": 2,
+      "h": 4,
+      "cells": [
+        "Y4",
+        "Z4",
+        "Y5",
+        "Z5",
+        "Y6",
+        "Z6",
+        "Y7",
+        "Z7"
+      ]
+    },
+    {
+      "id": "casa_05",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "AF2",
+      "col0": 31,
+      "row0": 1,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "AF2",
+        "AG2",
+        "AH2",
+        "AI2",
+        "AF3",
+        "AG3",
+        "AH3",
+        "AI3"
+      ]
+    },
+    {
+      "id": "casa_06",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "AL4",
+      "col0": 37,
+      "row0": 3,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "AL4",
+        "AM4",
+        "AN4",
+        "AO4",
+        "AL5",
+        "AM5",
+        "AN5",
+        "AO5"
+      ]
+    },
+    {
+      "id": "casa_07",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "AT2",
+      "col0": 45,
+      "row0": 1,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "AT2",
+        "AU2",
+        "AV2",
+        "AW2",
+        "AT3",
+        "AU3",
+        "AV3",
+        "AW3"
+      ]
+    },
+    {
+      "id": "casa_08",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "BH3",
+      "col0": 59,
+      "row0": 2,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "BH3",
+        "BI3",
+        "BJ3",
+        "BK3",
+        "BH4",
+        "BI4",
+        "BJ4",
+        "BK4"
+      ]
+    },
+    {
+      "id": "casa_09",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "BS2",
+      "col0": 70,
+      "row0": 1,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "BS2",
+        "BT2",
+        "BU2",
+        "BV2",
+        "BS3",
+        "BT3",
+        "BU3",
+        "BV3"
+      ]
+    },
+    {
+      "id": "casa_10",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "F14",
+      "col0": 5,
+      "row0": 13,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "F14",
+        "G14",
+        "H14",
+        "I14",
+        "F15",
+        "G15",
+        "H15",
+        "I15"
+      ]
+    },
+    {
+      "id": "casa_11",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "L16",
+      "col0": 11,
+      "row0": 15,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "L16",
+        "M16",
+        "N16",
+        "O16",
+        "L17",
+        "M17",
+        "N17",
+        "O17"
+      ]
+    },
+    {
+      "id": "casa_12",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "T13",
+      "col0": 19,
+      "row0": 12,
+      "w": 2,
+      "h": 4,
+      "cells": [
+        "T13",
+        "U13",
+        "T14",
+        "U14",
+        "T15",
+        "U15",
+        "T16",
+        "U16"
+      ]
+    },
+    {
+      "id": "casa_13",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "Y15",
+      "col0": 24,
+      "row0": 14,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "Y15",
+        "Z15",
+        "AA15",
+        "AB15",
+        "Y16",
+        "Z16",
+        "AA16",
+        "AB16"
+      ]
+    },
+    {
+      "id": "casa_14",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "AH14",
+      "col0": 33,
+      "row0": 13,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "AH14",
+        "AI14",
+        "AJ14",
+        "AK14",
+        "AH15",
+        "AI15",
+        "AJ15",
+        "AK15"
+      ]
+    },
+    {
+      "id": "casa_15",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "AV16",
+      "col0": 47,
+      "row0": 15,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "AV16",
+        "AW16",
+        "AX16",
+        "AY16",
+        "AV17",
+        "AW17",
+        "AX17",
+        "AY17"
+      ]
+    },
+    {
+      "id": "casa_16",
+      "kind": "house",
+      "label_es": "vivienda 4 hab.",
+      "anchor": "BH15",
+      "col0": 59,
+      "row0": 14,
+      "w": 4,
+      "h": 2,
+      "cells": [
+        "BH15",
+        "BI15",
+        "BJ15",
+        "BK15",
+        "BH16",
+        "BI16",
+        "BJ16",
+        "BK16"
+      ]
+    },
+    {
+      "id": "huerto_01",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "P6",
+      "col0": 15,
+      "row0": 5,
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "P6",
+        "Q6",
+        "P7",
+        "Q7"
+      ]
+    },
+    {
+      "id": "huerto_02",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "AY2",
+      "col0": 50,
+      "row0": 1,
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "AY2",
+        "AZ2",
+        "AY3",
+        "AZ3"
+      ]
+    },
+    {
+      "id": "huerto_03",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "BX4",
+      "col0": 75,
+      "row0": 3,
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BX4",
+        "BY4",
+        "BX5",
+        "BY5"
+      ]
+    },
+    {
+      "id": "huerto_04",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "AF6",
+      "col0": 31,
+      "row0": 5,
+      "w": 4,
+      "h": 3,
+      "cells": [
+        "AF6",
+        "AG6",
+        "AH6",
+        "AI6",
+        "AF7",
+        "AG7",
+        "AH7",
+        "AI7",
+        "AF8",
+        "AG8",
+        "AH8",
+        "AI8"
+      ]
+    },
+    {
+      "id": "huerto_05",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "AM14",
+      "col0": 38,
+      "row0": 13,
+      "w": 4,
+      "h": 3,
+      "cells": [
+        "AM14",
+        "AN14",
+        "AO14",
+        "AP14",
+        "AM15",
+        "AN15",
+        "AO15",
+        "AP15",
+        "AM16",
+        "AN16",
+        "AO16",
+        "AP16"
+      ]
+    },
+    {
+      "id": "huerto_06",
+      "kind": "farm",
+      "label_es": "huerto",
+      "anchor": "AZ14",
+      "col0": 51,
+      "row0": 13,
+      "w": 4,
+      "h": 3,
+      "cells": [
+        "AZ14",
+        "BA14",
+        "BB14",
+        "BC14",
+        "AZ15",
+        "BA15",
+        "BB15",
+        "BC15",
+        "AZ16",
+        "BA16",
+        "BB16",
+        "BC16"
+      ]
+    },
+    {
+      "id": "pozo_01",
+      "kind": "well",
+      "label_es": "pozo",
+      "anchor": "R5",
+      "col0": 17,
+      "row0": 4,
+      "w": 1,
+      "h": 1,
+      "cells": [
+        "R5"
+      ]
+    },
+    {
+      "id": "pozo_02",
+      "kind": "well",
+      "label_es": "pozo",
+      "anchor": "BD13",
+      "col0": 55,
+      "row0": 12,
+      "w": 1,
+      "h": 1,
+      "cells": [
+        "BD13"
+      ]
+    },
+    {
+      "id": "taller_01",
+      "kind": "workshop",
+      "label_es": "taller",
+      "anchor": "AB13",
+      "col0": 27,
+      "row0": 12,
+      "w": 5,
+      "h": 2,
+      "cells": [
+        "AB13",
+        "AC13",
+        "AD13",
+        "AE13",
+        "AF13",
+        "AB14",
+        "AC14",
+        "AD14",
+        "AE14",
+        "AF14"
+      ]
+    },
+    {
+      "id": "almacen_01",
+      "kind": "warehouse",
+      "label_es": "almacén",
+      "anchor": "BS13",
+      "col0": 70,
+      "row0": 12,
+      "w": 5,
+      "h": 3,
+      "cells": [
+        "BS13",
+        "BT13",
+        "BU13",
+        "BV13",
+        "BW13",
+        "BS14",
+        "BT14",
+        "BU14",
+        "BV14",
+        "BW14",
+        "BS15",
+        "BT15",
+        "BU15",
+        "BV15",
+        "BW15"
+      ]
+    },
+    {
+      "id": "clinica_01",
+      "kind": "clinic",
+      "label_es": "clínica",
+      "anchor": "BL15",
+      "col0": 63,
+      "row0": 14,
+      "w": 5,
+      "h": 3,
+      "cells": [
+        "BL15",
+        "BM15",
+        "BN15",
+        "BO15",
+        "BP15",
+        "BL16",
+        "BM16",
+        "BN16",
+        "BO16",
+        "BP16",
+        "BL17",
+        "BM17",
+        "BN17",
+        "BO17",
+        "BP17"
+      ]
+    },
+    {
+      "id": "edificio_4x4",
+      "kind": "special",
+      "label_es": "edificio prueba",
+      "anchor": "AZ4",
+      "col0": 51,
+      "row0": 3,
+      "w": 4,
+      "h": 4,
+      "cells": [
+        "AZ4",
+        "BA4",
+        "BB4",
+        "BC4",
+        "AZ5",
+        "BA5",
+        "BB5",
+        "BC5",
+        "AZ6",
+        "BA6",
+        "BB6",
+        "BC6",
+        "AZ7",
+        "BA7",
+        "BB7",
+        "BC7"
+      ]
+    },
+    {
+      "id": "edificio_5x3",
+      "kind": "special",
+      "label_es": "edificio prueba",
+      "anchor": "BM2",
+      "col0": 64,
+      "row0": 1,
+      "w": 5,
+      "h": 3,
+      "cells": [
+        "BM2",
+        "BN2",
+        "BO2",
+        "BP2",
+        "BQ2",
+        "BM3",
+        "BN3",
+        "BO3",
+        "BP3",
+        "BQ3",
+        "BM4",
+        "BN4",
+        "BO4",
+        "BP4",
+        "BQ4"
+      ]
+    },
+    {
+      "id": "edificio_5x4",
+      "kind": "special",
+      "label_es": "edificio prueba",
+      "anchor": "AS6",
+      "col0": 44,
+      "row0": 5,
+      "w": 5,
+      "h": 4,
+      "cells": [
+        "AS6",
+        "AT6",
+        "AU6",
+        "AV6",
+        "AW6",
+        "AS7",
+        "AT7",
+        "AU7",
+        "AV7",
+        "AW7",
+        "AS8",
+        "AT8",
+        "AU8",
+        "AV8",
+        "AW8",
+        "AS9",
+        "AT9",
+        "AU9",
+        "AV9",
+        "AW9"
+      ]
+    }
+  ]
+}

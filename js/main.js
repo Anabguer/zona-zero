@@ -19,6 +19,7 @@ import {
   placeBuilding,
   RES_LABEL,
   canAfford,
+  payCost,
   expeditionPreview,
   startResearch,
   buyVehicle,
@@ -50,7 +51,8 @@ import {
   buildingMaxHp,
 } from './buildings-damage.js';
 import { resolvePendingChoice } from './director.js';
-import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox } from './render-map.js';
+import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
+import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox, fitWorldCamera } from './render-map.js';
 import {
   ensureBuildGhost,
   setBuildGhostCell,
@@ -58,6 +60,7 @@ import {
   ghostPlacementOk,
   clearBuildMode,
   cellToWorld,
+  settlementScale,
   freeBuildableCells,
 } from './build-place.js';
 import {
@@ -67,7 +70,19 @@ import {
   recruitExplorer,
   explorerSlotsUnlocked,
 } from './explorers.js';
-import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
+import {
+  ensureColonyLayout,
+  slotById,
+  buildingForSlot,
+  slotIsUnlocked,
+  slotFitsType,
+  attachBuildingToSlot,
+  vacantSlots,
+  slotKindForBuildingType,
+  sectorOfSlot,
+  slotForCell,
+  slotBlockedByProp,
+} from './colony-layout.js';
 import {
   mountHubInstallCta,
   registerServiceWorker,
@@ -76,6 +91,7 @@ import {
 import { initOrientationGate, refreshOrientationGate, isGameplayPortraitBlocked } from './orientation.js';
 import {
   ensureSectors,
+  createColonySectors,
   getSector,
   summarizeRecoveryCost,
   canStartRecovery,
@@ -96,9 +112,11 @@ import { RES_ICONS, renderPortraitSvg, buildingThumb, familyIcon } from './icons
 import {
   artUrl,
   buildingArtUrl,
+  uiBuildingArtUrl,
   zoneArtUrl,
   portraitArtUrl,
   RES_ART,
+  hasPilotBuildingArt,
 } from './art.js';
 import {
   onboardingStatus,
@@ -115,6 +133,13 @@ import {
 import * as api from './api.js';
 import { initSound, setSoundEnabled, isSoundEnabled, sfx } from './sound.js';
 import { hudResourceKeys } from './hud-resources.js';
+import { applyPilotTestMode, pilotBuildableTypeIds, remapPilotZones } from './pilot-test.js';
+import { pilotFootprint, isPilotQaReadyBuilding, PILOT_HOLD_FOOTPRINTS } from './pilot-footprints.js';
+import {
+  loadPilotZoneMap,
+  terrainFootprintWorldRect,
+  logPilotPlaceDebug,
+} from './pilot-terrain.js';
 
 const RES_LABEL_UI = {
   food: 'Comida',
@@ -183,6 +208,25 @@ function scheduleSave() {
 async function doSave() {
   if (!state) return;
   try {
+    if (state.flags?.pilot === 'neni') {
+      // Piloto / QA: guardado SOLO local (no toca la persistencia normal).
+      const key = state.flags?.pilotQaMode ? 'pilotNeniQaSave' : 'pilotNeniSave';
+      const payload = {
+        v: 1,
+        savedAt: Date.now(),
+        state,
+      };
+      try {
+        localStorage.setItem(key, JSON.stringify(payload));
+      } catch {
+        /* ignore */
+      }
+      dirty = false;
+      if ($('zz-save-state')) {
+        $('zz-save-state').textContent = state.flags?.pilotQaMode ? 'Guardado (QA)' : 'Guardado (piloto)';
+      }
+      return;
+    }
     const r = await api.saveGame(state, state.colonyName, summarizeState(state));
     if (!r.ok) throw new Error(r.error || 'save');
     dirty = false;
@@ -355,8 +399,20 @@ function handleSheetAction(action, btn) {
       toast('Edificio no disponible', 'warn');
       return;
     }
+    if (state.flags?.pilot === 'neni' && !pilotFootprint(type)) {
+      toast('Edificio sin footprint en piloto', 'warn');
+      return;
+    }
+    if (state.flags?.pilotQaMode && !isPilotQaReadyBuilding(type)) {
+      toast('No adaptado en QA — solo Listos para revisar', 'warn');
+      return;
+    }
+    if (state.flags?.pilotQaMode && !hasPilotBuildingArt(type)) {
+      toast('Sin PNG piloto aprobado', 'warn');
+      return;
+    }
     const def = content.buildings[type];
-    if (!canAfford(state, def?.cost)) {
+    if (!(state.flags?.pilotTestMode || state.flags?.pilotQaMode) && !canAfford(state, def?.cost)) {
       toast('Faltan recursos', 'warn');
       return;
     }
@@ -365,10 +421,49 @@ function handleSheetAction(action, btn) {
     state.selectedBuildingId = null;
     state.selectedSectorId = null;
     state.buildGhost = null;
-    ensureBuildGhost(state);
+    if (state.flags?.pilot === 'neni') {
+      // Piloto: mostrar ghost preview inmediatamente tras elegir edificio.
+      ensureBuildGhost(state);
+      syncGhostValidity();
+    }
     closeSheet();
     paint();
-    toast(`Mové el fantasma · confirmá con ✓`, 'info');
+    toast(
+      state.flags?.pilot === 'neni'
+        ? 'Tocá el suelo junto al Refugio para mover el fantasma · confirmá con ✓'
+        : 'Tocá una ruina o un solar vacío',
+      'info'
+    );
+    return;
+  }
+  if (action === 'build-on-slot') {
+    const type = btn.getAttribute('data-build');
+    const slotId = btn.getAttribute('data-slot');
+    const slot = slotById(state, slotId);
+    if (!slot) return;
+    placeOnSlot(type, slot);
+    return;
+  }
+  if (action === 'upgrade-building') {
+    const type = btn.getAttribute('data-build');
+    const fromId = btn.getAttribute('data-id');
+    const def = content.buildings[type];
+    const old = state.base.buildings.find((b) => b.id === fromId);
+    if (!def?.upgradeFrom || !old || old.type !== def.upgradeFrom) {
+      toast('No se puede mejorar', 'warn');
+      return;
+    }
+    if (!canAfford(state, def.cost)) {
+      toast('Faltan recursos', 'warn');
+      return;
+    }
+    payCost(state, def.cost);
+    old.type = type;
+    sfx.build?.();
+    toast(`${def.name} listo`, 'good');
+    scheduleSave();
+    openBuildingSheet(fromId);
+    paint();
     return;
   }
   if (action === 'expand-mode') {
@@ -685,7 +780,7 @@ function openBuildingSheet(id) {
       : def.housing
         ? `+${Math.floor(def.housing * structMult)} capacidad`
         : '—');
-  const art = buildingArtUrl(b.type);
+  const art = uiBuildingArtUrl(state, b.type) || buildingArtUrl(b.type);
   const unstaffed = key && workers < 1 && struct !== 'destroyed';
   const climateProt = def.housing != null ? climateProtectionOf(def) : null;
   const climateLabel =
@@ -734,6 +829,15 @@ function openBuildingSheet(id) {
     b.type === 'insulated_house'
       ? '<p class="zz-muted" style="font-size:0.78rem;margin:0.15rem 0 0">Cubierta aislada</p>'
       : '';
+  const upgradeDef = playableBuildingDefs(content.buildings).find(
+    (d) => d.upgradeFrom === b.type && (d.minEra || 0) <= state.era
+  );
+  const upgradeBlock =
+    upgradeDef && struct === 'ok'
+      ? `<p><button type="button" class="zz-btn zz-btn--wide" data-action="upgrade-building" data-build="${upgradeDef.id}" data-id="${b.id}" ${
+          canAfford(state, upgradeDef.cost) ? '' : 'disabled'
+        }>Mejorar a ${escapeHtml(upgradeDef.name)}</button></p>`
+      : '';
 
   openSheet(`
     <div class="zz-ctx">
@@ -748,6 +852,7 @@ function openBuildingSheet(id) {
           ${insulatedBadge}
         </div>
       </div>
+      ${upgradeBlock}
       ${repairBlock}
       ${
         struct === 'destroyed'
@@ -956,62 +1061,146 @@ function openZoneSheet(zoneId) {
 
 function openBuildSheet() {
   const suggest = suggestedBuildType(state);
+  const pilot = state.flags?.pilot === 'neni';
+  const qa = !!state.flags?.pilotQaMode;
+  const testMode = !!(state.flags?.pilotTestMode || qa);
+
+  const cardHtml = (b, { locked, lockReason, guided, thumb }) => {
+    const cost = Object.entries(b.cost || {})
+      .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
+      .join(' · ');
+    const jobs = b.jobs > 0 ? `${b.jobs} puesto${b.jobs > 1 ? 's' : ''}` : 'Pasivo';
+    const benefit = b.produces
+      ? Object.entries(b.produces)
+          .map(([k, v]) => `+${v} ${RES_LABEL_UI[k] || k}/día a plena plantilla`)
+          .join(' · ')
+      : b.defense
+        ? `+${b.defense} defensa`
+        : b.housing
+          ? `+${b.housing} capacidad`
+          : b.desc || '';
+    const img = thumb
+      ? `<img class="zz-build-card__thumb" src="${thumb}" alt="" width="48" height="48" />`
+      : `<span class="zz-build-card__thumb zz-build-card__thumb--empty" aria-hidden="true"></span>`;
+    return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''} ${guided ? 'is-guide-suggest' : ''}" data-action="build-pick" data-build="${b.id}" ${
+      locked ? 'disabled' : ''
+    }>
+        ${img}
+        <span class="zz-build-card__body">
+          <strong>${escapeHtml(b.name)}${guided ? ' · ahora' : ''}</strong>
+          <span class="zz-build-row zz-build-row--cost"><i>Coste</i> ${cost || 'Gratis'}</span>
+          <span class="zz-build-row zz-build-row--gain"><i>Beneficio</i> ${escapeHtml(String(benefit || '—').slice(0, 56))}</span>
+          <span class="zz-build-row zz-build-row--jobs"><i>Trabajo</i> ${jobs}</span>
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Elegir →</span>'}
+        </span>
+      </button>`;
+  };
+
+  if (qa) {
+    const defs = playableBuildingDefs(content.buildings).filter((b) => !String(b.id).startsWith('hq_'));
+    const ready = defs.filter((b) => isPilotQaReadyBuilding(b.id) && hasPilotBuildingArt(b.id));
+    const hold = defs.filter((b) => b.id === 'shelter' || PILOT_HOLD_FOOTPRINTS[b.id]);
+    const notReady = defs.filter(
+      (b) => !isPilotQaReadyBuilding(b.id) && b.id !== 'shelter' && !PILOT_HOLD_FOOTPRINTS[b.id]
+    );
+
+    const readyList = ready
+      .map((b) => {
+        const count = state.base.buildings.filter((x) => x.type === b.id && x.hp > 0).length;
+        const maxed = b.max != null && count >= b.max;
+        const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
+        return cardHtml(b, {
+          locked: maxed,
+          lockReason: maxed ? 'Límite alcanzado' : '',
+          guided,
+          thumb: uiBuildingArtUrl(state, b.id),
+        });
+      })
+      .join('');
+
+    const holdList = hold
+      .map((b) =>
+        cardHtml(b, {
+          locked: true,
+          lockReason: 'HOLD · pendiente de aprobación',
+          guided: false,
+          thumb: null,
+        })
+      )
+      .join('');
+
+    const notList = notReady
+      .slice(0, 24)
+      .map((b) =>
+        cardHtml(b, {
+          locked: true,
+          lockReason: 'No adaptado · sin PNG/footprint piloto',
+          guided: false,
+          thumb: null,
+        })
+      )
+      .join('');
+
+    openSheet(
+      `
+    <h2 class="zz-sheet-panel__title">Construir · QA</h2>
+    <p class="zz-sheet-panel__lead">Solo “Listos” usan arte y footprint nuevos. Tocá el suelo · confirmá con ✓</p>
+    <h3 class="zz-build-section">Listos para revisar</h3>
+    <div class="zz-build-grid">${readyList || '<p class="zz-muted">Ninguno</p>'}</div>
+    <h3 class="zz-build-section">HOLD humano</h3>
+    <div class="zz-build-grid">${holdList || '<p class="zz-muted">—</p>'}</div>
+    <h3 class="zz-build-section">No adaptados</h3>
+    <div class="zz-build-grid">${notList || '<p class="zz-muted">—</p>'}</div>
+  `,
+      'build'
+    );
+    return;
+  }
+
+  const pilotAllowed = pilot ? new Set(['house', 'well', 'storage']) : null;
   const list = playableBuildingDefs(content.buildings)
-    .filter((b) => (b.minEra || 0) <= state.era)
+    .filter((b) => testMode || (b.minEra || 0) <= state.era)
+    .filter((b) => (!pilotAllowed || pilotAllowed.has(b.id)))
     .filter((b) => {
+      if (pilot && String(b.id).startsWith('hq_')) return false;
       if (b.upgradeFrom) {
         return state.base.buildings.some((x) => x.type === b.upgradeFrom && x.hp > 0);
       }
       const count = state.base.buildings.filter((x) => x.type === b.id && x.hp > 0).length;
       return b.max == null || count < b.max;
     })
-    .slice(0, 18)
+    .slice(0, pilot ? 40 : 18)
     .map((b) => {
-      const afford = canAfford(state, b.cost);
+      const afford = testMode || canAfford(state, b.cost);
       const missing = Object.entries(b.cost || {})
         .filter(([k, v]) => (state.resources[k] || 0) < v)
         .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
         .join(', ');
       const reqTech = (b.requires || []).filter((t) => !(state.research.unlocked || []).includes(t));
       const reqBld = b.requiresBuilding && !state.base.buildings.some((x) => x.type === b.requiresBuilding && x.hp > 0);
-      const locked = !afford || reqTech.length || reqBld || (state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1;
-      const cost = Object.entries(b.cost || {})
-        .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
-        .join(' · ');
-      const jobs = b.jobs > 0 ? `${b.jobs} puesto${b.jobs > 1 ? 's' : ''}` : 'Pasivo';
-      const benefit = b.produces
-        ? Object.entries(b.produces)
-            .map(([k, v]) => `+${v} ${RES_LABEL_UI[k] || k}/día a plena plantilla`)
-            .join(' · ')
-        : b.defense
-          ? `+${b.defense} defensa`
-          : b.housing
-            ? `+${b.housing} capacidad`
-            : b.desc || '';
+      const laborOk = (state.population.labor?.build || 0) + (state.population.labor?.idle || 0) >= 1;
+      const locked = pilot ? !afford : !afford || reqTech.length || reqBld || !laborOk;
       let lockReason = '';
-      if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
-      else if (reqTech.length) lockReason = 'Falta investigación';
-      else if (!afford) lockReason = `Falta: ${missing}`;
-      else if ((state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1)
-        lockReason = 'Asignad gente a construcción';
+      if (pilot) {
+        lockReason = !afford ? `Falta: ${missing}` : '';
+      } else {
+        if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
+        else if (reqTech.length) lockReason = 'Falta investigación';
+        else if (!afford) lockReason = `Falta: ${missing}`;
+        else if (!laborOk) lockReason = 'Asignad gente a construcción';
+      }
       const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
-      return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''} ${guided ? 'is-guide-suggest' : ''}" data-action="build-pick" data-build="${b.id}" ${
-        locked ? 'disabled' : ''
-      }>
-        <img class="zz-build-card__thumb" src="${buildingArtUrl(b.id)}" alt="" width="48" height="48" />
-        <span class="zz-build-card__body">
-          <strong>${escapeHtml(b.name)}${guided ? ' · ahora' : ''}</strong>
-          <span class="zz-build-row zz-build-row--cost"><i>Coste</i> ${cost || 'Gratis'}</span>
-          <span class="zz-build-row zz-build-row--gain"><i>Beneficio</i> ${escapeHtml(String(benefit || '—').slice(0, 56))}</span>
-          <span class="zz-build-row zz-build-row--jobs"><i>Trabajo</i> ${jobs}</span>
-          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Colocar →</span>'}
-        </span>
-      </button>`;
+      const thumb = pilot ? uiBuildingArtUrl(state, b.id) : buildingArtUrl(b.id);
+      return cardHtml(b, { locked, lockReason, guided, thumb });
     })
     .join('');
   openSheet(`
     <h2 class="zz-sheet-panel__title">Construir</h2>
-    <p class="zz-sheet-panel__lead">Elegí un edificio → tocá dónde colocarlo en el refugio.</p>
+    <p class="zz-sheet-panel__lead">${
+      pilot
+        ? 'Elegí un edificio · tocá el suelo junto al Refugio · confirmá con ✓'
+        : 'Elegí un edificio y después tocá una ruina o un solar vacío.'
+    }</p>
     <div class="zz-build-grid">${list}</div>
   `, 'build');
 }
@@ -1356,7 +1545,8 @@ function syncDeskLayout() {
   const on = isDeskLayout();
   document.body.classList.toggle('zz-desk-layout', on);
   const panel = $('zz-desk-panel');
-  if (panel) panel.hidden = !on;
+  // PC: el mundo llena la pantalla; población/recursos van en HUD + Más.
+  if (panel) panel.hidden = true;
 }
 
 function paintDeskPanel() {
@@ -1461,16 +1651,10 @@ function fillExplorerHost(host) {
 }
 
 function paintExplorers() {
-  const desk = isDeskLayout();
   const rail = $('zz-explorer-rail');
   const deskEx = $('zz-desk-explorers');
-  if (desk) {
-    if (rail) rail.innerHTML = '';
-    fillExplorerHost(deskEx);
-  } else {
-    if (deskEx) deskEx.innerHTML = '';
-    fillExplorerHost(rail);
-  }
+  if (deskEx) deskEx.innerHTML = '';
+  fillExplorerHost(rail);
 }
 
 function paintHud() {
@@ -1592,14 +1776,14 @@ function focusBuildingCamera(id) {
   state.mapCamera = state.mapCamera || {};
   state.mapCamera.x = w.x;
   state.mapCamera.y = w.y;
-  clampCamera(state);
+  clampCamera(state, $('zz-map'));
 }
 
 function clientToWorld(ev) {
   const el = $('zz-map');
   if (!el) return null;
   const m = mapMetrics(el);
-  const vb = cameraViewBox(state, m);
+  const vb = cameraViewBox(state, m, el);
   const rect = el.getBoundingClientRect();
   return {
     x: vb.x + ((ev.clientX - rect.left) / Math.max(1, rect.width)) * vb.w,
@@ -1639,13 +1823,29 @@ function confirmBuildPlacement() {
     toast(r.error || 'No se pudo construir', 'warn');
     return;
   }
+  const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
+  if (state.flags?.pilot === 'neni') {
+    const fp = pilotFootprint(type);
+    const rect = fp ? terrainFootprintWorldRect(x, y, fp.w, fp.h) : null;
+    logPilotPlaceDebug('confirm-place', {
+      type,
+      confirmedAnchor: { x, y },
+      buildingId: b?.id,
+      buildingStored: b ? { x: b.x, y: b.y } : null,
+      renderWorldTL: rect ? { x: rect.x, y: rect.y } : null,
+      match: !!(b && b.x === x && b.y === y),
+    });
+  }
+  if (b && state.flags?.pilot !== 'neni') {
+    const slot = slotById(state, state.selectedPlotId) || slotForCell(state, x, y);
+    if (slot) attachBuildingToSlot(state, b, slot);
+  }
   sfx.build?.();
   toast(`${content.buildings[type]?.name || type} construido`, 'good');
   clearBuildMode(state);
   checkOnboardingProgress(state);
   scheduleSave();
   paint();
-  const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
   if (b) openBuildingSheet(b.id);
 }
 
@@ -1655,10 +1855,15 @@ function paintBuildDock() {
   const ok = $('zz-build-ok');
   const cancel = $('zz-build-cancel');
   const building = state.uiMode === 'build' && state.buildMode;
-  if (ok) ok.hidden = !building;
+  const pilot = state.flags?.pilot === 'neni';
+  if (ok) ok.hidden = pilot ? !building : true;
   if (cancel) cancel.hidden = !building;
   if (advance) advance.hidden = !!building;
-  if (openBuild) openBuild.hidden = !!building;
+  if (openBuild) {
+    openBuild.hidden = false;
+    openBuild.classList.toggle('is-build-on', !!building);
+    openBuild.setAttribute('aria-pressed', building ? 'true' : 'false');
+  }
   if (building && ok) {
     syncGhostValidity();
     ok.disabled = !state.buildGhostValid;
@@ -1705,8 +1910,8 @@ function paint() {
   maybeRevealEarlyLandmarks(state);
   checkOnboardingProgress(state);
   syncLaborFromColony(state, content);
-  if (state.uiMode === 'build' && state.buildMode) ensureBuildGhost(state);
-  syncGhostValidity();
+  ensureColonyLayout(state);
+  // Piloto: NO reanclar HQ al centro del grid base (era la causa del apilado / rectángulo artificial).
   syncDeskLayout();
   paintHud();
   paintExplorers();
@@ -1759,7 +1964,8 @@ function paint() {
       openZoneSheet(id);
     },
     onSelectBuilding: (id) => {
-      if (wrap?.dataset.zzPanned) return;
+      // Piloto: el hit del footprint ya filtra tap vs drag; no bloquear con zzPanned (jitter de pan).
+      if (state.flags?.pilot !== 'neni' && wrap?.dataset.zzPanned) return;
       if (state.uiMode === 'expand' || state.uiMode === 'build') return;
       sfx.click?.();
       openBuildingSheet(id);
@@ -1770,7 +1976,15 @@ function paint() {
       openSectorSheet(id);
       paint();
     },
+    onSelectSlot: (slotId) => {
+      if (wrap?.dataset.zzPanned) return;
+      sfx.click?.();
+      handleSelectSlot(slotId);
+    },
     onGhostPointer: (ev) => {
+      if (wrap?.dataset.zzPanned) return;
+      if (state.flags?.pilot !== 'neni') return;
+      if (state.uiMode !== 'build' || !state.buildMode) return;
       handleGhostPointer(ev);
     },
   });
@@ -1890,7 +2104,7 @@ function paintCoach() {
   card.classList.add('zz-coach-card--tip');
   text.textContent = coachMessage(state) || st.step.text;
   if (st.step.highlight === 'build' && !state.buildMode) {
-    buildBtn?.classList.add('is-guide-pulse');
+    /* Construir: tocar casita/solar en el mapa, no el dock. */
   }
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
     confirmBtn?.classList.add('is-guide-pulse');
@@ -1900,12 +2114,7 @@ function paintCoach() {
   }
   // Sin cascada Continuar: solo CTA de acción (abrir Construir).
   if (cta) {
-    if (st.step.highlight === 'build' && !state.buildMode) {
-      cta.hidden = false;
-      cta.textContent = 'Construir';
-    } else {
-      cta.hidden = true;
-    }
+    cta.hidden = true;
   }
 }
 
@@ -2006,16 +2215,159 @@ function showDayBrief(brief) {
   }, 20000);
 }
 
+function placeOnSlot(type, slot) {
+  if (!slot || !type) return false;
+  if (!slotFitsType(slot, type)) {
+    toast(slot.kind === 'lot' ? 'Eso va en un solar de tierra' : 'Eso va en una casa o ruina', 'warn');
+    return false;
+  }
+  if (!slotIsUnlocked(state, slot)) {
+    toast('Recuperad este territorio primero', 'warn');
+    return false;
+  }
+  if (buildingForSlot(state, slot)) {
+    toast('Ese sitio ya está ocupado', 'warn');
+    return false;
+  }
+  if (slotBlockedByProp(state, slot)) {
+    toast('Ahí hay un árbol o chatarra — no se puede construir encima', 'warn');
+    return false;
+  }
+  const [x, y] = slot.cell;
+  const check = ghostPlacementOk(state, content, type, x, y);
+  if (!check.ok) {
+    toast(check.reason || 'Ubicación inválida', 'warn');
+    paint();
+    return false;
+  }
+  const r = placeBuilding(state, content, type, x, y);
+  if (!r.ok) {
+    toast(r.error || 'No se pudo construir', 'warn');
+    return false;
+  }
+  const b = state.base.buildings.find((bl) => bl.x === x && bl.y === y && bl.type === type);
+  if (b) attachBuildingToSlot(state, b, slot);
+  sfx.build?.();
+  toast(`${content.buildings[type]?.name || type} listo`, 'good');
+  clearBuildMode(state);
+  checkOnboardingProgress(state);
+  scheduleSave();
+  paint();
+  if (b) openBuildingSheet(b.id);
+  return true;
+}
+
+function openVacantSlotSheet(slot) {
+  const kindLabel = slot.kind === 'lot' ? 'solar vacío' : slot.kind === 'hq' ? 'refugio' : 'ruina';
+  const suggest = suggestedBuildType(state);
+  const pilot = state.flags?.pilot === 'neni';
+  const pilotAllowed = pilot ? new Set(['house', 'well', 'storage']) : null;
+  const list = playableBuildingDefs(content.buildings)
+    .filter((b) => (b.minEra || 0) <= state.era)
+    .filter((b) => !b.upgradeFrom)
+    .filter((b) => (!pilotAllowed || pilotAllowed.has(b.id)))
+    .filter((b) => slotFitsType(slot, b.id))
+    .filter((b) => {
+      const count = state.base.buildings.filter((x) => x.type === b.id && x.hp > 0).length;
+      return b.max == null || count < b.max;
+    })
+    .slice(0, 18)
+    .map((b) => {
+      const afford = canAfford(state, b.cost);
+      const missing = Object.entries(b.cost || {})
+        .filter(([k, v]) => (state.resources[k] || 0) < v)
+        .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
+        .join(', ');
+      const reqTech = (b.requires || []).filter((t) => !(state.research.unlocked || []).includes(t));
+      const reqBld = b.requiresBuilding && !state.base.buildings.some((x) => x.type === b.requiresBuilding && x.hp > 0);
+      const locked =
+        !afford || reqTech.length || reqBld || (state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1;
+      const cost = Object.entries(b.cost || {})
+        .map(([k, v]) => `${v} ${RES_LABEL_UI[k] || k}`)
+        .join(' · ');
+      let lockReason = '';
+      if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
+      else if (reqTech.length) lockReason = 'Falta investigación';
+      else if (!afford) lockReason = `Falta: ${missing}`;
+      else if ((state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1)
+        lockReason = 'Asignad gente a construcción';
+      const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
+      return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''} ${guided ? 'is-guide-suggest' : ''}" data-action="build-on-slot" data-slot="${slot.id}" data-build="${b.id}" ${
+        locked ? 'disabled' : ''
+      }>
+        <img class="zz-build-card__thumb" src="${buildingArtUrl(b.id)}" alt="" width="48" height="48" />
+        <span class="zz-build-card__body">
+          <strong>${escapeHtml(b.name)}${guided ? ' · ahora' : ''}</strong>
+          <span class="zz-build-row zz-build-row--cost"><i>Coste</i> ${cost || 'Gratis'}</span>
+          ${lockReason ? `<span class="zz-build-lock">${escapeHtml(lockReason)}</span>` : '<span class="zz-build-go">Construir aquí</span>'}
+        </span>
+      </button>`;
+    })
+    .join('');
+  openSheet(
+    `
+    <h2 class="zz-sheet-panel__title">¿Construir aquí?</h2>
+    <p class="zz-sheet-panel__lead">${kindLabel === 'solar vacío' ? 'Solar de tierra' : 'Casa en ruinas'} · elegí la función.</p>
+    <div class="zz-build-grid">${list || '<p class="zz-muted">Nada encaja en este sitio ahora.</p>'}</div>
+  `,
+    'build'
+  );
+}
+
+function handleSelectSlot(slotId) {
+  ensureColonyLayout(state);
+  const slot = slotById(state, slotId);
+  if (!slot) return;
+  state.selectedPlotId = slotId;
+  const b = buildingForSlot(state, slot);
+  if (b) {
+    openBuildingSheet(b.id);
+    paint();
+    return;
+  }
+  if (!slotIsUnlocked(state, slot)) {
+    const sec = sectorOfSlot(state, slot);
+    toast(sec ? `«${sec.name}» aún no está recuperado` : 'Terreno no recuperado', 'warn');
+    if (sec) openSectorSheet(sec.id);
+    paint();
+    return;
+  }
+  if (slotBlockedByProp(state, slot)) {
+    toast('Ahí hay un árbol o chatarra — no se puede construir encima', 'warn');
+    paint();
+    return;
+  }
+  if (state.uiMode === 'build' && state.buildMode) {
+    if (state.flags?.pilot === 'neni') {
+      // Human gate: el click sólo define el ghost (tap/click), la ✓ confirma y construye.
+      const type = state.buildMode;
+      const [x, y] = slot.cell;
+      state.buildGhost = { x, y };
+      const check = ghostPlacementOk(state, content, type, x, y);
+      state.buildGhostValid = !!check.ok;
+      state.selectedPlotId = slot.id;
+      paint();
+      return;
+    }
+
+    placeOnSlot(state.buildMode, slot);
+    return;
+  }
+  openVacantSlotSheet(slot);
+  paint();
+}
+
 function paintModeBanner() {
   const el = $('zz-mode-banner');
   if (!el) return;
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
     const name = content.buildings[state.buildMode]?.name || 'edificio';
-    const hint = state.buildGhostValid
-      ? 'posición válida'
-      : 'posición no válida · arrastrá el fantasma';
-    el.innerHTML = `Colocá <strong>${escapeHtml(name)}</strong> · ${hint} · arrastrá el fantasma · <button type="button" class="zz-linkish" data-cancel-build>✕ Cancelar</button>`;
+    const pilot = state.flags?.pilot === 'neni';
+    const placeHint = pilot
+      ? 'tocá el suelo junto al Refugio · confirmá con ✓'
+      : `tocá ${slotKindForBuildingType(state.buildMode) === 'lot' ? 'un solar de tierra' : 'una ruina'}`;
+    el.innerHTML = `Colocá <strong>${escapeHtml(name)}</strong> · ${placeHint} · <button type="button" class="zz-linkish" data-cancel-build>✕ Cancelar</button>`;
     el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
       clearBuildMode(state);
       paint();
@@ -2230,7 +2582,7 @@ function runGuideAction(action) {
       state.mapCamera.x = (z.x + (state.zones.find((c) => c.type === 'camp')?.x || z.x)) / 2;
       state.mapCamera.y = (z.y + (state.zones.find((c) => c.type === 'camp')?.y || z.y)) / 2;
       state.mapCamera.zoom = 1.35;
-      clampCamera(state);
+      clampCamera(state, $('zz-map'));
       openZoneSheet(z.id);
     }
     paint();
@@ -2257,10 +2609,9 @@ function bindChrome() {
     openPopulationSheet();
   });
   window.addEventListener('resize', () => {
-    const was = document.body.classList.contains('zz-desk-layout');
     syncDeskLayout();
-    if (was !== document.body.classList.contains('zz-desk-layout') && state) {
-      clampCamera(state);
+    if (state) {
+      clampCamera(state, $('zz-map'));
       paint();
     }
   });
@@ -2334,6 +2685,11 @@ function bindChrome() {
     paint();
     scheduleSave();
   });
+  $('zz-fit-world')?.addEventListener('click', () => {
+    fitWorldCamera(state, $('zz-map'));
+    paint();
+    scheduleSave();
+  });
   $('zz-help')?.addEventListener('click', () => {
     const { html } = renderHelpHtml(state);
     openSheet(html, 'help');
@@ -2359,7 +2715,7 @@ function bindChrome() {
     ev.preventDefault();
     ev.stopPropagation();
     if (!state.mapCamera) return;
-    zoomCameraBy(state, 1.12);
+    zoomCameraBy(state, 1.12, $('zz-map'));
     paint();
     scheduleSave();
   });
@@ -2367,7 +2723,7 @@ function bindChrome() {
     ev.preventDefault();
     ev.stopPropagation();
     if (!state.mapCamera) return;
-    zoomCameraBy(state, 1 / 1.12);
+    zoomCameraBy(state, 1 / 1.12, $('zz-map'));
     paint();
     scheduleSave();
   });
@@ -2392,32 +2748,139 @@ export async function bootGame(opts) {
   }
   initSound();
 
-  if (opts.mode === 'new') {
-    if (opts.clearExisting) {
-      await api.clearGame().catch(() => {});
+  const pilot = opts?.pilot === 'neni';
+
+  if (pilot) {
+    // Refugio Central canónico — Human Gate Neni 2026-08-20: candidato A.
+    // Anchor terreno (-7,14) → world centro (824,520). Congelado; no recalcular.
+    const PILOT_HQ_AX = -7;
+    const PILOT_HQ_AY = 14;
+    const PILOT_NENI_NUCLEUS_X = 824;
+    const PILOT_NENI_NUCLEUS_Y = 520;
+    const PILOT_HQ_CANON = 'A-(-7,14)-824-520';
+    const qa = !!opts?.qa;
+    const saveKey = qa ? 'pilotNeniQaSave' : 'pilotNeniSave';
+
+    // Autoridad espacial: JSON canónico de zonas (cargar ANTES de anclar HQ / construir).
+    await loadPilotZoneMap();
+
+    // Cargar piloto / QA (localStorage aislado del juego normal y entre sí)
+    let loaded = null;
+    try {
+      if (opts.mode === 'new' || opts.clearExisting) {
+        localStorage.removeItem(saveKey);
+      }
+      const raw = localStorage.getItem(saveKey);
+      if (raw) loaded = JSON.parse(raw);
+    } catch {
+      loaded = null;
     }
-    state = createNewState(content, opts.name || 'Refugio 0');
-    if (opts.fromIntro) {
-      markIntroSeen(state);
+
+    state = loaded?.state ? migrateState(loaded.state, content) : createNewState(content, opts.name || (qa ? 'QA Neni' : 'Pilot Neni'));
+
+    // Overrides de aislamiento + preparación UI
+    state.flags = state.flags || {};
+    state.flags.pilot = 'neni';
+    state.flags.pilotQaMode = qa;
+    state.flags.colonyCamV2 = 1; // evita override automático de cámara desde ensureColonyLayout()
+    state.flags.onboardingDone = true;
+    state.flags.onboardingActive = false;
+    state.flags.pilotNeniCamInitialized = false;
+    state.flags.pilotFootprintDebug = !!opts.debugFootprints;
+    state.flags.pilotNeniHqCanon = PILOT_HQ_CANON;
+    state.flags.pilotTerrainCoords = 1;
+    state.flags.pilotTerrainVersion = 3;
+    delete state.flags.pilotHqProvisional;
+    delete state.flags.pilotHqCandidates;
+    delete state.flags.pilotHqForcedValid;
+
+    // Camp / cámara = centro world del HQ canónico A.
+    const camp = state.zones?.find((z) => z.type === 'camp');
+    if (camp) {
+      camp.x = PILOT_NENI_NUCLEUS_X;
+      camp.y = PILOT_NENI_NUCLEUS_Y;
     }
-    const saved = await api.saveGame(state, state.colonyName, summarizeState(state));
-    if (!saved.ok) throw new Error(saved.error || 'save_failed');
+    ensureSectors(state);
+
+    // Grid base ya NO es autoridad de construcción en piloto (legacy sim).
+    state.base = state.base || { w: 14, h: 12, buildings: [] };
+    state.base.w = Math.max(state.base.w || 0, 76);
+    state.base.h = Math.max(state.base.h || 0, 37);
+
+    // HQ inicial fijo: no lo construye ni mueve el jugador; no se recalcula en paint.
+    let hq = (state.base.buildings || []).find((b) => b && b.hp > 0 && String(b.type).startsWith('hq_'));
+    if (!hq) {
+      hq = {
+        id: 'b_hq_pilot',
+        type: 'hq_central_l1',
+        x: PILOT_HQ_AX,
+        y: PILOT_HQ_AY,
+        hp: 100,
+        workers: 0,
+      };
+      state.base.buildings = [hq, ...(state.base.buildings || []).filter((b) => b && b.hp > 0)];
+    } else {
+      hq.type = String(hq.type).startsWith('hq_') ? hq.type : 'hq_central_l1';
+      hq.x = PILOT_HQ_AX;
+      hq.y = PILOT_HQ_AY;
+      hq.hp = Math.max(1, hq.hp || 100);
+      delete hq.plotId;
+    }
+    for (const b of state.base.buildings || []) {
+      if (b) delete b.plotId;
+    }
+
+    // Escala visual aprobada (sprites). No mezclar con footprints lógicos.
+    state.flags.pilotSpriteScale = 1.5;
+
+    // Zonas remapeadas siempre en piloto (mapa nuevo).
+    // Unlocks / 9999 / no-cost SOLO con ?qa=1.
+    remapPilotZones(state);
+    if (qa) {
+      applyPilotTestMode(state, content);
+    } else {
+      state.flags.pilotTestMode = false;
+    }
+
+    // Estado de UI de construcción: ghost se decide en el click humano (human gate).
+    state.uiMode = null;
+    state.buildMode = null;
+    state.buildGhost = null;
+    state.buildGhostValid = false;
     dirty = false;
   } else {
-    const res = await api.loadGame();
-    if (!res.ok) throw new Error(res.error || 'load');
-    state = migrateState(res.state, content);
-    if (res.recoveredFromBackup) {
-      const banner = $('zz-recover-banner');
-      if (banner) {
-        banner.hidden = false;
-        banner.textContent = res.message || 'Recuperamos tu colonia desde una copia de seguridad.';
-        setTimeout(() => {
-          banner.hidden = true;
-        }, 6000);
+    if (opts.mode === 'new') {
+      if (opts.clearExisting) {
+        await api.clearGame().catch(() => {});
       }
-      toast(res.message || 'Colonia recuperada', 'warn');
+      state = createNewState(content, opts.name || 'Refugio 0');
+      if (opts.fromIntro) {
+        markIntroSeen(state);
+      }
+      const saved = await api.saveGame(state, state.colonyName, summarizeState(state));
+      if (!saved.ok) throw new Error(saved.error || 'save_failed');
+      dirty = false;
+    } else {
+      const res = await api.loadGame();
+      if (!res.ok) throw new Error(res.error || 'load');
+      state = migrateState(res.state, content);
+      if (res.recoveredFromBackup) {
+        const banner = $('zz-recover-banner');
+        if (banner) {
+          banner.hidden = false;
+          banner.textContent = res.message || 'Recuperamos tu colonia desde una copia de seguridad.';
+          setTimeout(() => {
+            banner.hidden = true;
+          }, 6000);
+        }
+        toast(res.message || 'Colonia recuperada', 'warn');
+      }
     }
+  }
+
+  if (opts.colonyStyle && ['yard', 'dirt', 'iso'].includes(opts.colonyStyle)) {
+    state.flags = state.flags || {};
+    state.flags.colonyStyle = opts.colonyStyle;
   }
 
   bindChrome();
@@ -2433,26 +2896,58 @@ export async function bootGame(opts) {
   paint();
   if (app) app.hidden = false;
   if (boot) boot.hidden = true;
+  // Tras mostrar el mundo, el SVG ya tiene tamaño real — reclamp + repintar cámara.
+  requestAnimationFrame(() => {
+    clampCamera(state, $('zz-map'));
+    paint();
+  });
   if (opts.fromIntro) {
     applyIntroArrival();
   }
 
   window.__zz = {
     getState: () => state,
+    setColonyStyle: (style) => {
+      if (!['yard', 'dirt', 'iso'].includes(style)) return;
+      state.flags = state.flags || {};
+      state.flags.colonyStyle = style;
+      paint();
+      const picks = document.getElementById('zz-style-picks');
+      picks?.querySelectorAll('button').forEach((btn) => {
+        btn.style.outline = btn.dataset.style === style ? '2px solid #e8c070' : '';
+      });
+    },
     getContent: () => content,
     paint,
-    clampCam: () => clampCamera(state),
+    clampCam: () => clampCamera(state, $('zz-map')),
     zoomBy: (f) => {
-      zoomCameraBy(state, f);
+      zoomCameraBy(state, f, $('zz-map'));
       paint();
     },
     panBy: (dx, dy) => {
-      panCameraBy(state, dx, dy);
+      panCameraBy(state, dx, dy, $('zz-map'));
       paint();
     },
     place: (type, x, y) => {
-      const r = placeBuilding(state, content, type, x, y);
+      if (state.flags?.pilot === 'neni') {
+        const r = placeBuilding(state, content, type, x, y);
+        if (r.ok) {
+          checkOnboardingProgress(state);
+          scheduleSave();
+          paint();
+        }
+        return r;
+      }
+      ensureColonyLayout(state);
+      const kind = slotKindForBuildingType(type);
+      const free = vacantSlots(state, kind);
+      const use = free.find((s) => s.cell[0] === x && s.cell[1] === y) || free[0];
+      const sx = use ? use.cell[0] : x;
+      const sy = use ? use.cell[1] : y;
+      const r = placeBuilding(state, content, type, sx, sy);
       if (r.ok) {
+        const b = state.base.buildings.find((bl) => bl.x === sx && bl.y === sy && bl.type === type);
+        if (b && use) attachBuildingToSlot(state, b, use);
         checkOnboardingProgress(state);
         paint();
       }

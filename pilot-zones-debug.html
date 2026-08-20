@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Zona Zero — DEBUG zonas canónicas v3</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:#0e0b06; font-family:'Segoe UI',system-ui,sans-serif; }
+#viewport {
+  position:fixed; inset:0; bottom:56px;
+  overflow:hidden; cursor:grab; touch-action:none; background:#0e0b06;
+}
+#viewport.grabbing { cursor:grabbing; }
+#world {
+  position:absolute; width:1819px; height:865px;
+  transform-origin:0 0; will-change:transform;
+}
+#map-img {
+  position:absolute; inset:0; width:1819px; height:865px;
+  display:block; pointer-events:none;
+}
+#overlay {
+  position:absolute; inset:0; width:1819px; height:865px;
+  pointer-events:none;
+}
+#hud {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  padding:6px 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  background:rgba(0,0,0,.82); color:#f5e9c0; font-size:12px;
+  pointer-events:none;
+}
+#hud strong { font-size:13px; }
+#toolbar {
+  position:fixed; left:0; right:0; bottom:0; z-index:300;
+  display:flex; flex-wrap:wrap; gap:5px; align-items:center;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  background:rgba(8,6,4,.94); border-top:1px solid rgba(255,255,255,.12);
+}
+#toolbar button {
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2);
+  color:#f5e9c0; border-radius:6px; padding:6px 9px; font-size:11px; font-weight:600; cursor:pointer;
+}
+#toolbar button.on { outline:2px solid #ffd87a; background:rgba(255,216,122,.18); }
+#toolbar .sep { width:1px; height:22px; background:rgba(255,255,255,.15); margin:0 2px; }
+#toolbar .stat { color:rgba(255,255,255,.55); font-size:10px; flex:1 1 100%; }
+#legend {
+  position:fixed; right:8px; top:40px; z-index:200;
+  background:rgba(0,0,0,.86); border:1px solid rgba(255,255,255,.14);
+  border-radius:8px; padding:8px 10px; color:#e8ddb0; font:11px/1.5 Consolas,monospace;
+  pointer-events:none; min-width:170px;
+}
+#legend .row { display:flex; align-items:center; gap:7px; margin:3px 0; }
+#legend i { width:12px; height:12px; border-radius:2px; display:inline-block; border:1px solid rgba(255,255,255,.3); }
+#toast {
+  position:fixed; top:40px; left:50%; transform:translateX(-50%); z-index:400;
+  background:rgba(30,80,30,.92); color:#d6ffd6; padding:7px 12px; border-radius:8px;
+  font-size:12px; display:none; pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <strong>DEBUG zonas canónicas v3</strong>
+  <span>SOLO visualización · no gameplay</span>
+  <span id="hud-meta">cargando…</span>
+  <span id="hud-cam"></span>
+</div>
+<div id="toast"></div>
+<div id="legend">
+  <div style="font-weight:700;margin-bottom:4px;color:#ffd87a">Overlay DEBUG</div>
+  <div class="row"><i style="background:rgba(90,200,90,0.18)"></i> buildable</div>
+  <div class="row"><i style="background:rgba(200,70,50,0.55)"></i> blocked</div>
+  <div class="row"><i style="background:rgba(40,140,55,0.55)"></i> forest</div>
+  <div class="row"><i style="background:rgba(200,130,40,0.55)"></i> scrap</div>
+  <div style="margin-top:6px;opacity:.7;font-size:10px">Etiquetas = destinos</div>
+</div>
+
+<div id="viewport">
+  <div id="world">
+    <img id="map-img" src="assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png" width="1819" height="865" alt="">
+    <svg id="overlay" viewBox="0 0 1819 865" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<div id="toolbar">
+  <button type="button" class="on" id="btn-buildable" data-layer="buildable">buildable</button>
+  <button type="button" class="on" id="btn-blocked" data-layer="blocked">blocked</button>
+  <button type="button" class="on" id="btn-forest" data-layer="forest">forest</button>
+  <button type="button" class="on" id="btn-scrap" data-layer="scrap">scrap</button>
+  <span class="sep"></span>
+  <button type="button" class="on" id="btn-labels">Etiquetas destino</button>
+  <button type="button" class="on" id="btn-grid">Grid</button>
+  <span class="sep"></span>
+  <button type="button" id="btn-fit">Fit mundo</button>
+  <button type="button" id="btn-focus-forest">Focus bosques</button>
+  <button type="button" id="btn-focus-scrap">Focus chatarra</button>
+  <span class="stat" id="stat"></span>
+</div>
+
+<script>
+const CANONICAL_URL = 'content/pilot/neni-pilot-zones-v3.json';
+const WORLD_W = 1819, WORLD_H = 865;
+const ZOOM_MAX = 3.0;
+
+const STYLE = {
+  buildable: { fill: 'rgba(90,200,90,0.12)', stroke: 'rgba(120,255,120,0.2)' },
+  blocked:   { fill: 'rgba(200,70,50,0.48)', stroke: 'rgba(255,120,90,0.85)' },
+  forest:    { fill: 'rgba(40,140,55,0.50)', stroke: 'rgba(80,220,100,0.9)' },
+  scrap:     { fill: 'rgba(200,130,40,0.52)', stroke: 'rgba(255,190,80,0.95)' },
+};
+
+let data = null;
+let cam = { x: WORLD_W / 2, y: WORLD_H / 2, zoom: 1 };
+let layers = { buildable: true, blocked: true, forest: true, scrap: true };
+let showLabels = true;
+let showGrid = true;
+
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+const overlay = document.getElementById('overlay');
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.display = 'none'; }, 2200);
+}
+
+function zoomMin() {
+  return Math.max(viewport.clientWidth / WORLD_W, viewport.clientHeight / WORLD_H);
+}
+
+function applyCamera() {
+  const vw = viewport.clientWidth, vh = viewport.clientHeight;
+  const zm = zoomMin();
+  cam.zoom = Math.max(zm, Math.min(ZOOM_MAX, cam.zoom));
+  const halfW = vw / 2 / cam.zoom;
+  const halfH = vh / 2 / cam.zoom;
+  if (vw / cam.zoom >= WORLD_W) cam.x = WORLD_W / 2;
+  else cam.x = Math.max(halfW, Math.min(WORLD_W - halfW, cam.x));
+  if (vh / cam.zoom >= WORLD_H) cam.y = WORLD_H / 2;
+  else cam.y = Math.max(halfH, Math.min(WORLD_H - halfH, cam.y));
+  world.style.transform = `scale(${cam.zoom}) translate(${-(cam.x - halfW)}px,${-(cam.y - halfH)}px)`;
+  document.getElementById('hud-cam').textContent =
+    `z=${cam.zoom.toFixed(2)} · (${Math.round(cam.x)},${Math.round(cam.y)})`;
+}
+
+function fitWorld() {
+  cam.zoom = zoomMin();
+  cam.x = WORLD_W / 2;
+  cam.y = WORLD_H / 2;
+  applyCamera();
+}
+
+function parseKey(k) {
+  const [cx, cy] = k.split(',').map(Number);
+  return { cx, cy };
+}
+
+function cellRect(cx, cy, g) {
+  const [ox, oy] = g.origin;
+  const cell = g.cellPx;
+  return { x: ox + cx * cell, y: oy + cy * cell, w: cell, h: cell };
+}
+
+function render() {
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  if (!data) return;
+  const g = data.grid;
+  const { minX, minY, maxX, maxY, columns, rows } = g.bounds;
+  const [ox, oy] = g.origin;
+  const cell = g.cellPx;
+
+  // buildable base (suave) si layer on
+  if (layers.buildable) {
+    const base = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    base.setAttribute('x', ox + minX * cell);
+    base.setAttribute('y', oy + minY * cell);
+    base.setAttribute('width', columns * cell);
+    base.setAttribute('height', rows * cell);
+    base.setAttribute('fill', STYLE.buildable.fill);
+    overlay.appendChild(base);
+  }
+
+  if (showGrid) {
+    const gridG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    gridG.setAttribute('stroke', 'rgba(255,255,255,0.12)');
+    gridG.setAttribute('stroke-width', '1');
+    for (let cx = minX; cx <= maxX + 1; cx++) {
+      const x = ox + cx * cell;
+      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ln.setAttribute('x1', x); ln.setAttribute('y1', oy + minY * cell);
+      ln.setAttribute('x2', x); ln.setAttribute('y2', oy + (maxY + 1) * cell);
+      gridG.appendChild(ln);
+    }
+    for (let cy = minY; cy <= maxY + 1; cy++) {
+      const y = oy + cy * cell;
+      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ln.setAttribute('x1', ox + minX * cell); ln.setAttribute('y1', y);
+      ln.setAttribute('x2', ox + (maxX + 1) * cell); ln.setAttribute('y2', y);
+      gridG.appendChild(ln);
+    }
+    overlay.appendChild(gridG);
+  }
+
+  // Overrides (blocked / forest / scrap) — no redibujar buildable celda a celda
+  const order = ['blocked', 'forest', 'scrap'];
+  for (const sem of order) {
+    if (!layers[sem]) continue;
+    const st = STYLE[sem];
+    Object.entries(data.overrides || {}).forEach(([k, v]) => {
+      if (v !== sem) return;
+      const { cx, cy } = parseKey(k);
+      const r = cellRect(cx, cy, g);
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', r.x + 0.5);
+      rect.setAttribute('y', r.y + 0.5);
+      rect.setAttribute('width', r.w - 1);
+      rect.setAttribute('height', r.h - 1);
+      rect.setAttribute('fill', st.fill);
+      rect.setAttribute('stroke', st.stroke);
+      rect.setAttribute('stroke-width', '1.2');
+      overlay.appendChild(rect);
+    });
+  }
+
+  if (showLabels && data.destinations) {
+    Object.values(data.destinations).forEach((dest) => {
+      if (!layers[dest.semantic]) return;
+      const [wx, wy] = dest.centroidWorld;
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', wx);
+      txt.setAttribute('y', wy);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'middle');
+      txt.setAttribute('fill', dest.semantic === 'forest' ? '#c8ffc8' : '#ffd080');
+      txt.setAttribute('font-size', '11');
+      txt.setAttribute('font-family', 'Consolas, monospace');
+      txt.setAttribute('font-weight', '700');
+      txt.setAttribute('stroke', '#000');
+      txt.setAttribute('stroke-width', '3');
+      txt.setAttribute('paint-order', 'stroke');
+      txt.textContent = dest.id;
+      overlay.appendChild(txt);
+    });
+  }
+
+  // núcleo
+  const n = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  n.setAttribute('cx', g.nucleus[0]);
+  n.setAttribute('cy', g.nucleus[1]);
+  n.setAttribute('r', 5);
+  n.setAttribute('fill', 'none');
+  n.setAttribute('stroke', 'rgba(255,220,100,0.95)');
+  n.setAttribute('stroke-width', '2');
+  overlay.appendChild(n);
+}
+
+function focusDestinations(semantic) {
+  const list = Object.values(data.destinations || {}).filter((d) => d.semantic === semantic);
+  if (!list.length) return;
+  let sx = 0, sy = 0;
+  list.forEach((d) => { sx += d.centroidWorld[0]; sy += d.centroidWorld[1]; });
+  cam.x = sx / list.length;
+  cam.y = sy / list.length;
+  cam.zoom = Math.max(zoomMin(), 1.15);
+  applyCamera();
+}
+
+async function loadCanonical() {
+  const res = await fetch(CANONICAL_URL + '?v=' + Date.now());
+  if (!res.ok) throw new Error('No se pudo cargar ' + CANONICAL_URL);
+  data = await res.json();
+  if (data.schema !== 'neni-pilot-zone-map-v3') throw new Error('Schema inesperado: ' + data.schema);
+  if (data.grid?.cellPx !== 24) throw new Error('cellPx inesperado');
+
+  const g = data.grid;
+  const ov = Object.values(data.overrides || {});
+  const counts = {
+    blocked: ov.filter((x) => x === 'blocked').length,
+    forest: ov.filter((x) => x === 'forest').length,
+    scrap: ov.filter((x) => x === 'scrap').length,
+  };
+  const dest = Object.values(data.destinations || {});
+  const fN = dest.filter((d) => d.semantic === 'forest').length;
+  const sN = dest.filter((d) => d.semantic === 'scrap').length;
+  const buildable = (g.bounds.columns * g.bounds.rows) - counts.blocked - counts.forest - counts.scrap;
+
+  document.getElementById('hud-meta').textContent =
+    `cellPx ${g.cellPx} · grid ${g.bounds.columns}×${g.bounds.rows} · origin [${g.origin.join(',')}] · ${data.savedAt}`;
+  document.getElementById('stat').textContent =
+    `C:${buildable} · X:${counts.blocked} · Forest:${counts.forest} (${fN} dest) · Scrap:${counts.scrap} (${sN} dest) · archivo: ${CANONICAL_URL}`;
+
+  render();
+  fitWorld();
+  toast('JSON canónico cargado');
+}
+
+// UI
+document.querySelectorAll('[data-layer]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.layer;
+    layers[k] = !layers[k];
+    btn.classList.toggle('on', layers[k]);
+    render();
+  });
+});
+document.getElementById('btn-labels').addEventListener('click', () => {
+  showLabels = !showLabels;
+  document.getElementById('btn-labels').classList.toggle('on', showLabels);
+  render();
+});
+document.getElementById('btn-grid').addEventListener('click', () => {
+  showGrid = !showGrid;
+  document.getElementById('btn-grid').classList.toggle('on', showGrid);
+  render();
+});
+document.getElementById('btn-fit').addEventListener('click', fitWorld);
+document.getElementById('btn-focus-forest').addEventListener('click', () => focusDestinations('forest'));
+document.getElementById('btn-focus-scrap').addEventListener('click', () => focusDestinations('scrap'));
+
+// Cámara
+let drag = null, camD = null;
+viewport.addEventListener('pointerdown', (e) => {
+  drag = { x: e.clientX, y: e.clientY };
+  camD = { ...cam };
+  viewport.classList.add('grabbing');
+  viewport.setPointerCapture?.(e.pointerId);
+});
+viewport.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  cam.x = camD.x - (e.clientX - drag.x) / cam.zoom;
+  cam.y = camD.y - (e.clientY - drag.y) / cam.zoom;
+  applyCamera();
+});
+function endP() { drag = null; viewport.classList.remove('grabbing'); }
+viewport.addEventListener('pointerup', endP);
+viewport.addEventListener('pointercancel', endP);
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.909;
+  const rect = viewport.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const ox = cam.x - viewport.clientWidth / 2 / cam.zoom;
+  const oy = cam.y - viewport.clientHeight / 2 / cam.zoom;
+  const wx = ox + mx / cam.zoom, wy = oy + my / cam.zoom;
+  cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, cam.zoom * factor));
+  cam.x = wx - mx / cam.zoom + viewport.clientWidth / 2 / cam.zoom;
+  cam.y = wy - my / cam.zoom + viewport.clientHeight / 2 / cam.zoom;
+  applyCamera();
+}, { passive: false });
+window.addEventListener('resize', applyCamera);
+
+loadCanonical().catch((err) => {
+  document.getElementById('hud-meta').textContent = 'ERROR: ' + err.message;
+  toast(err.message);
+});
+</script>
+</body>
+</html>

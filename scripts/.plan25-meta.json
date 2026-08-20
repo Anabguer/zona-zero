@@ -1,0 +1,43 @@
+{
+  "total": 128,
+  "gates": [
+    "ZZ-001",
+    "ZZ-010",
+    "ZZ-012",
+    "ZZ-014",
+    "ZZ-015",
+    "ZZ-021",
+    "ZZ-023",
+    "ZZ-032",
+    "ZZ-048",
+    "ZZ-059",
+    "ZZ-065",
+    "ZZ-069",
+    "ZZ-073",
+    "ZZ-083",
+    "ZZ-108",
+    "ZZ-125",
+    "ZZ-133",
+    "ZZ-144",
+    "ZZ-150",
+    "ZZ-154",
+    "ZZ-161",
+    "ZZ-165",
+    "ZZ-172",
+    "ZZ-178",
+    "ZZ-183"
+  ],
+  "gateCount": 25,
+  "newBlocks": [
+    "G2 · Daño y reparación",
+    "J2 · Radio y Centro",
+    "Q2 · Vida visual"
+  ],
+  "removedScope": [
+    "electricidad",
+    "generator",
+    "solar",
+    "needEnergy",
+    "fuel heating"
+  ]
+}

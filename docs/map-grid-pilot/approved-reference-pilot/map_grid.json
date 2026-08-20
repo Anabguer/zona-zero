@@ -1,0 +1,2880 @@
+{
+  "id": "approved-reference-pilot",
+  "title": "Piloto sobre referencia visual aprobada (Neni/ChatGPT, 18 ago 2026)",
+  "note": "El fondo es la ilustración aprobada, no un mapa redibujado. Sin HQ ni edificios de colonia. Rejilla solo para el motor/DEBUG. No integrado en el juego.",
+  "source": "00-approved-source.png",
+  "image": "01-map-clean.png",
+  "original_crop_px": [
+    1024,
+    340
+  ],
+  "image_size": [
+    4096,
+    1360
+  ],
+  "scale": 4,
+  "viewport_concept": "Landscape más estrecho que el mapa. Pan principal izquierda-derecha.",
+  "grid": {
+    "cols": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z"
+    ],
+    "rows": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "origin": "A1 = noroeste (arriba-izquierda)",
+    "cell_px_approx": [
+      157.5,
+      226.7
+    ],
+    "debug_only": true
+  },
+  "stats": {
+    "cells_total": 156,
+    "buildable": 86,
+    "blocked": 70,
+    "buildable_pct": 55.1,
+    "demo_pieces": 12,
+    "demo_cells_used": 52,
+    "buildable_left_after_demo": 34
+  },
+  "footprints_demo": {
+    "well": {
+      "w": 1,
+      "h": 1
+    },
+    "house_small": {
+      "w": 2,
+      "h": 2
+    },
+    "farm": {
+      "w": 2,
+      "h": 2
+    },
+    "workshop": {
+      "w": 3,
+      "h": 2
+    },
+    "large": {
+      "w": 3,
+      "h": 3
+    }
+  },
+  "building_test": [
+    {
+      "name": "edificio_grande",
+      "w": 3,
+      "h": 3,
+      "anchor": "H1",
+      "cells": [
+        "H1",
+        "I1",
+        "J1",
+        "H2",
+        "I2",
+        "J2",
+        "H3",
+        "I3",
+        "J3"
+      ]
+    },
+    {
+      "name": "taller",
+      "w": 3,
+      "h": 2,
+      "anchor": "V1",
+      "cells": [
+        "V1",
+        "W1",
+        "X1",
+        "V2",
+        "W2",
+        "X2"
+      ]
+    },
+    {
+      "name": "casa_1",
+      "w": 2,
+      "h": 2,
+      "anchor": "H5",
+      "cells": [
+        "H5",
+        "I5",
+        "H6",
+        "I6"
+      ]
+    },
+    {
+      "name": "casa_2",
+      "w": 2,
+      "h": 2,
+      "anchor": "M1",
+      "cells": [
+        "M1",
+        "N1",
+        "M2",
+        "N2"
+      ]
+    },
+    {
+      "name": "casa_3",
+      "w": 2,
+      "h": 2,
+      "anchor": "S2",
+      "cells": [
+        "S2",
+        "T2",
+        "S3",
+        "T3"
+      ]
+    },
+    {
+      "name": "casa_4",
+      "w": 2,
+      "h": 2,
+      "anchor": "D5",
+      "cells": [
+        "D5",
+        "E5",
+        "D6",
+        "E6"
+      ]
+    },
+    {
+      "name": "casa_5",
+      "w": 2,
+      "h": 2,
+      "anchor": "J5",
+      "cells": [
+        "J5",
+        "K5",
+        "J6",
+        "K6"
+      ]
+    },
+    {
+      "name": "casa_6",
+      "w": 2,
+      "h": 2,
+      "anchor": "S5",
+      "cells": [
+        "S5",
+        "T5",
+        "S6",
+        "T6"
+      ]
+    },
+    {
+      "name": "huerto_1",
+      "w": 2,
+      "h": 2,
+      "anchor": "Q1",
+      "cells": [
+        "Q1",
+        "R1",
+        "Q2",
+        "R2"
+      ]
+    },
+    {
+      "name": "huerto_2",
+      "w": 2,
+      "h": 2,
+      "anchor": "M5",
+      "cells": [
+        "M5",
+        "N5",
+        "M6",
+        "N6"
+      ]
+    },
+    {
+      "name": "huerto_3",
+      "w": 2,
+      "h": 2,
+      "anchor": "W5",
+      "cells": [
+        "W5",
+        "X5",
+        "W6",
+        "X6"
+      ]
+    },
+    {
+      "name": "pozo",
+      "w": 1,
+      "h": 1,
+      "anchor": "K1",
+      "cells": [
+        "K1"
+      ]
+    }
+  ],
+  "cells": {
+    "A1": {
+      "id": "A1",
+      "col": "A",
+      "row": 1,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "west"
+    },
+    "B1": {
+      "id": "B1",
+      "col": "B",
+      "row": 1,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "C1": {
+      "id": "C1",
+      "col": "C",
+      "row": 1,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "D1": {
+      "id": "D1",
+      "col": "D",
+      "row": 1,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "E1": {
+      "id": "E1",
+      "col": "E",
+      "row": 1,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "F1": {
+      "id": "F1",
+      "col": "F",
+      "row": 1,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "G1": {
+      "id": "G1",
+      "col": "G",
+      "row": 1,
+      "occupancy": "BLOCKED_OBSTACLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_obstacle"
+      ],
+      "reason": "BLOCKED_OBSTACLE",
+      "sector": "west"
+    },
+    "H1": {
+      "id": "H1",
+      "col": "H",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "I1": {
+      "id": "I1",
+      "col": "I",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "J1": {
+      "id": "J1",
+      "col": "J",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "K1": {
+      "id": "K1",
+      "col": "K",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "L1": {
+      "id": "L1",
+      "col": "L",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "M1": {
+      "id": "M1",
+      "col": "M",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "N1": {
+      "id": "N1",
+      "col": "N",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "O1": {
+      "id": "O1",
+      "col": "O",
+      "row": 1,
+      "occupancy": "BLOCKED_OBSTACLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_obstacle"
+      ],
+      "reason": "BLOCKED_OBSTACLE",
+      "sector": "core"
+    },
+    "P1": {
+      "id": "P1",
+      "col": "P",
+      "row": 1,
+      "occupancy": "BLOCKED_OBSTACLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_obstacle"
+      ],
+      "reason": "BLOCKED_OBSTACLE",
+      "sector": "core"
+    },
+    "Q1": {
+      "id": "Q1",
+      "col": "Q",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "R1": {
+      "id": "R1",
+      "col": "R",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "S1": {
+      "id": "S1",
+      "col": "S",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "T1": {
+      "id": "T1",
+      "col": "T",
+      "row": 1,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    },
+    "U1": {
+      "id": "U1",
+      "col": "U",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "V1": {
+      "id": "V1",
+      "col": "V",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "W1": {
+      "id": "W1",
+      "col": "W",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "X1": {
+      "id": "X1",
+      "col": "X",
+      "row": 1,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Y1": {
+      "id": "Y1",
+      "col": "Y",
+      "row": 1,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    },
+    "Z1": {
+      "id": "Z1",
+      "col": "Z",
+      "row": 1,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    },
+    "A2": {
+      "id": "A2",
+      "col": "A",
+      "row": 2,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "B2": {
+      "id": "B2",
+      "col": "B",
+      "row": 2,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "C2": {
+      "id": "C2",
+      "col": "C",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "D2": {
+      "id": "D2",
+      "col": "D",
+      "row": 2,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "E2": {
+      "id": "E2",
+      "col": "E",
+      "row": 2,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "F2": {
+      "id": "F2",
+      "col": "F",
+      "row": 2,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "G2": {
+      "id": "G2",
+      "col": "G",
+      "row": 2,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "H2": {
+      "id": "H2",
+      "col": "H",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "I2": {
+      "id": "I2",
+      "col": "I",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "J2": {
+      "id": "J2",
+      "col": "J",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "K2": {
+      "id": "K2",
+      "col": "K",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "L2": {
+      "id": "L2",
+      "col": "L",
+      "row": 2,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "core"
+    },
+    "M2": {
+      "id": "M2",
+      "col": "M",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "N2": {
+      "id": "N2",
+      "col": "N",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "O2": {
+      "id": "O2",
+      "col": "O",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "P2": {
+      "id": "P2",
+      "col": "P",
+      "row": 2,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "core"
+    },
+    "Q2": {
+      "id": "Q2",
+      "col": "Q",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "R2": {
+      "id": "R2",
+      "col": "R",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "S2": {
+      "id": "S2",
+      "col": "S",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "T2": {
+      "id": "T2",
+      "col": "T",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "U2": {
+      "id": "U2",
+      "col": "U",
+      "row": 2,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "east"
+    },
+    "V2": {
+      "id": "V2",
+      "col": "V",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "W2": {
+      "id": "W2",
+      "col": "W",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "X2": {
+      "id": "X2",
+      "col": "X",
+      "row": 2,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Y2": {
+      "id": "Y2",
+      "col": "Y",
+      "row": 2,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "east"
+    },
+    "Z2": {
+      "id": "Z2",
+      "col": "Z",
+      "row": 2,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "east"
+    },
+    "A3": {
+      "id": "A3",
+      "col": "A",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "B3": {
+      "id": "B3",
+      "col": "B",
+      "row": 3,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "west"
+    },
+    "C3": {
+      "id": "C3",
+      "col": "C",
+      "row": 3,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "D3": {
+      "id": "D3",
+      "col": "D",
+      "row": 3,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "E3": {
+      "id": "E3",
+      "col": "E",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "F3": {
+      "id": "F3",
+      "col": "F",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "G3": {
+      "id": "G3",
+      "col": "G",
+      "row": 3,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "H3": {
+      "id": "H3",
+      "col": "H",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "I3": {
+      "id": "I3",
+      "col": "I",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "J3": {
+      "id": "J3",
+      "col": "J",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "K3": {
+      "id": "K3",
+      "col": "K",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "L3": {
+      "id": "L3",
+      "col": "L",
+      "row": 3,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "core"
+    },
+    "M3": {
+      "id": "M3",
+      "col": "M",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "N3": {
+      "id": "N3",
+      "col": "N",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "O3": {
+      "id": "O3",
+      "col": "O",
+      "row": 3,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "core"
+    },
+    "P3": {
+      "id": "P3",
+      "col": "P",
+      "row": 3,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "core"
+    },
+    "Q3": {
+      "id": "Q3",
+      "col": "Q",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "R3": {
+      "id": "R3",
+      "col": "R",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "S3": {
+      "id": "S3",
+      "col": "S",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "T3": {
+      "id": "T3",
+      "col": "T",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "U3": {
+      "id": "U3",
+      "col": "U",
+      "row": 3,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "east"
+    },
+    "V3": {
+      "id": "V3",
+      "col": "V",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "W3": {
+      "id": "W3",
+      "col": "W",
+      "row": 3,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "east"
+    },
+    "X3": {
+      "id": "X3",
+      "col": "X",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Y3": {
+      "id": "Y3",
+      "col": "Y",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Z3": {
+      "id": "Z3",
+      "col": "Z",
+      "row": 3,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "A4": {
+      "id": "A4",
+      "col": "A",
+      "row": 4,
+      "occupancy": "BLOCKED_VEHICLE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_vehicle"
+      ],
+      "reason": "BLOCKED_VEHICLE",
+      "sector": "west"
+    },
+    "B4": {
+      "id": "B4",
+      "col": "B",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "C4": {
+      "id": "C4",
+      "col": "C",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "D4": {
+      "id": "D4",
+      "col": "D",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "E4": {
+      "id": "E4",
+      "col": "E",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "F4": {
+      "id": "F4",
+      "col": "F",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "G4": {
+      "id": "G4",
+      "col": "G",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "H4": {
+      "id": "H4",
+      "col": "H",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "I4": {
+      "id": "I4",
+      "col": "I",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "west"
+    },
+    "J4": {
+      "id": "J4",
+      "col": "J",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "K4": {
+      "id": "K4",
+      "col": "K",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "L4": {
+      "id": "L4",
+      "col": "L",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "M4": {
+      "id": "M4",
+      "col": "M",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "N4": {
+      "id": "N4",
+      "col": "N",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "O4": {
+      "id": "O4",
+      "col": "O",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "P4": {
+      "id": "P4",
+      "col": "P",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "Q4": {
+      "id": "Q4",
+      "col": "Q",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "R4": {
+      "id": "R4",
+      "col": "R",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "core"
+    },
+    "S4": {
+      "id": "S4",
+      "col": "S",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "T4": {
+      "id": "T4",
+      "col": "T",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "U4": {
+      "id": "U4",
+      "col": "U",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "V4": {
+      "id": "V4",
+      "col": "V",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "W4": {
+      "id": "W4",
+      "col": "W",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "X4": {
+      "id": "X4",
+      "col": "X",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "Y4": {
+      "id": "Y4",
+      "col": "Y",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "Z4": {
+      "id": "Z4",
+      "col": "Z",
+      "row": 4,
+      "occupancy": "BLOCKED_ROAD",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_road"
+      ],
+      "reason": "BLOCKED_ROAD",
+      "sector": "east"
+    },
+    "A5": {
+      "id": "A5",
+      "col": "A",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "B5": {
+      "id": "B5",
+      "col": "B",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "C5": {
+      "id": "C5",
+      "col": "C",
+      "row": 5,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "D5": {
+      "id": "D5",
+      "col": "D",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "E5": {
+      "id": "E5",
+      "col": "E",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "F5": {
+      "id": "F5",
+      "col": "F",
+      "row": 5,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "G5": {
+      "id": "G5",
+      "col": "G",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "H5": {
+      "id": "H5",
+      "col": "H",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "I5": {
+      "id": "I5",
+      "col": "I",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "J5": {
+      "id": "J5",
+      "col": "J",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "K5": {
+      "id": "K5",
+      "col": "K",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "L5": {
+      "id": "L5",
+      "col": "L",
+      "row": 5,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "core"
+    },
+    "M5": {
+      "id": "M5",
+      "col": "M",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "N5": {
+      "id": "N5",
+      "col": "N",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "O5": {
+      "id": "O5",
+      "col": "O",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "P5": {
+      "id": "P5",
+      "col": "P",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "Q5": {
+      "id": "Q5",
+      "col": "Q",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "R5": {
+      "id": "R5",
+      "col": "R",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "S5": {
+      "id": "S5",
+      "col": "S",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "T5": {
+      "id": "T5",
+      "col": "T",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "U5": {
+      "id": "U5",
+      "col": "U",
+      "row": 5,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "east"
+    },
+    "V5": {
+      "id": "V5",
+      "col": "V",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "W5": {
+      "id": "W5",
+      "col": "W",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "X5": {
+      "id": "X5",
+      "col": "X",
+      "row": 5,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Y5": {
+      "id": "Y5",
+      "col": "Y",
+      "row": 5,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    },
+    "Z5": {
+      "id": "Z5",
+      "col": "Z",
+      "row": 5,
+      "occupancy": "BLOCKED_RUIN",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_ruin"
+      ],
+      "reason": "BLOCKED_RUIN",
+      "sector": "east"
+    },
+    "A6": {
+      "id": "A6",
+      "col": "A",
+      "row": 6,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "west"
+    },
+    "B6": {
+      "id": "B6",
+      "col": "B",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "C6": {
+      "id": "C6",
+      "col": "C",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "D6": {
+      "id": "D6",
+      "col": "D",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "E6": {
+      "id": "E6",
+      "col": "E",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "F6": {
+      "id": "F6",
+      "col": "F",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "G6": {
+      "id": "G6",
+      "col": "G",
+      "row": 6,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "west"
+    },
+    "H6": {
+      "id": "H6",
+      "col": "H",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "I6": {
+      "id": "I6",
+      "col": "I",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "west"
+    },
+    "J6": {
+      "id": "J6",
+      "col": "J",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "K6": {
+      "id": "K6",
+      "col": "K",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "L6": {
+      "id": "L6",
+      "col": "L",
+      "row": 6,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "core"
+    },
+    "M6": {
+      "id": "M6",
+      "col": "M",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "N6": {
+      "id": "N6",
+      "col": "N",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "O6": {
+      "id": "O6",
+      "col": "O",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "P6": {
+      "id": "P6",
+      "col": "P",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "Q6": {
+      "id": "Q6",
+      "col": "Q",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "R6": {
+      "id": "R6",
+      "col": "R",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "core"
+    },
+    "S6": {
+      "id": "S6",
+      "col": "S",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "T6": {
+      "id": "T6",
+      "col": "T",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "U6": {
+      "id": "U6",
+      "col": "U",
+      "row": 6,
+      "occupancy": "DIRT_PATH",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "dirt_path"
+      ],
+      "reason": "DIRT_PATH",
+      "sector": "east"
+    },
+    "V6": {
+      "id": "V6",
+      "col": "V",
+      "row": 6,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    },
+    "W6": {
+      "id": "W6",
+      "col": "W",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "X6": {
+      "id": "X6",
+      "col": "X",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Y6": {
+      "id": "Y6",
+      "col": "Y",
+      "row": 6,
+      "occupancy": "BUILDABLE",
+      "blocked": false,
+      "buildable": true,
+      "allows": {
+        "farm": true,
+        "building": true,
+        "infra": true
+      },
+      "tags": [],
+      "reason": null,
+      "sector": "east"
+    },
+    "Z6": {
+      "id": "Z6",
+      "col": "Z",
+      "row": 6,
+      "occupancy": "BLOCKED_TREE",
+      "blocked": true,
+      "buildable": false,
+      "allows": {
+        "farm": false,
+        "building": false,
+        "infra": false
+      },
+      "tags": [
+        "blocked_tree"
+      ],
+      "reason": "BLOCKED_TREE",
+      "sector": "east"
+    }
+  }
+}

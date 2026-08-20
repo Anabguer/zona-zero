@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "grid": "76×37",
+  "totalCells": 2812,
+  "checks": {
+    "cellPx=24": true,
+    "total celdas 2812": true,
+    "default buildable": true,
+    "persiste blocked left-top": true,
+    "persiste scrap right-bottom": true,
+    "forest buildable false": true,
+    "scrap buildable false": true,
+    "destinos forest>=1": true,
+    "destinos scrap>=1": true,
+    "centroidWorld presente": true,
+    "import restaura overrides": true,
+    "import destinos iguales": true
+  },
+  "destinations": [
+    "forest_zone_01",
+    "forest_zone_02",
+    "forest_zone_03",
+    "scrap_zone_01",
+    "scrap_zone_02",
+    "scrap_zone_03",
+    "scrap_zone_04"
+  ],
+  "painted": [
+    {
+      "cx": -39,
+      "cy": -6,
+      "sem": "blocked",
+      "label": "left-top"
+    },
+    {
+      "cx": 36,
+      "cy": -6,
+      "sem": "blocked",
+      "label": "right-top"
+    },
+    {
+      "cx": -39,
+      "cy": 30,
+      "sem": "forest",
+      "label": "left-bottom"
+    },
+    {
+      "cx": 36,
+      "cy": 30,
+      "sem": "scrap",
+      "label": "right-bottom"
+    },
+    {
+      "cx": 0,
+      "cy": 0,
+      "sem": "forest",
+      "label": "center-forest"
+    },
+    {
+      "cx": 5,
+      "cy": 5,
+      "sem": "scrap",
+      "label": "center-scrap"
+    }
+  ]
+}

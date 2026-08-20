@@ -1,0 +1,9 @@
+﻿{
+  "schema": "zz-map-grid-editor-base-v2",
+  "grid": { "cols": 78, "rows": 18 },
+  "defaults": { "terrain": "dirt", "buildState": "blocked" },
+  "cells": {},
+  "meta": {
+    "note": "Base vacía para clasificar manualmente. El jugador no ve grid/etiquetas ni esto integra gameplay."
+  }
+}

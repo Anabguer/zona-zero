@@ -1,0 +1,244 @@
+{
+  "loginResult": {
+    "status": 200,
+    "data": {
+      "success": true,
+      "message": "Login exitoso",
+      "user": {
+        "id": 55,
+        "email": "1954amg@gmail.com",
+        "nombre": "Antonio Miguel",
+        "apellido_1": "Guerrero",
+        "apellido_2": "Diaz",
+        "perfil": "admin",
+        "rol": "intocables",
+        "sexo": "H",
+        "mensaje_bienvenida": "Bienvenido"
+      },
+      "remember": true
+    }
+  },
+  "state": {
+    "href": "https://intocables13.com/juegos/zona-zero/",
+    "title": "Zona Zero",
+    "bootText": "Cargando…",
+    "bootHidden": true,
+    "hubHidden": false,
+    "actionsText": "Nueva partida",
+    "bodyText": "← Juegos\n\nHola, Antonio Miguel\n\nINTOCABLES · SUPERVIVENCIA\n\nZona Zero\n\nEl silencio después del colapso. Gestiona, explora, sobrevive.\n\nNUEVA PARTIDA"
+  },
+  "errors": [],
+  "logs": [],
+  "net": [
+    {
+      "status": 200,
+      "url": "https://intocables13.com/login.php",
+      "ct": "text/html; charset=UTF-8"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/api/auth.php",
+      "ct": "application/json"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/",
+      "ct": "text/html; charset=UTF-8"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/css/hub.css?v=40",
+      "ct": "text/css"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/css/game.css?v=40",
+      "ct": "text/css"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/main.js?v=40",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/state.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/v1-catalog.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/missions.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/vehicles.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/radio.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/sim.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/factions.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/alerts.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/explorers.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/achievements.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/help.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/orientation.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/intro.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/buildings-damage.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/sectors.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/build-place.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/population.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/outbreaks.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/colony.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/onboarding.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/icons.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/ambient-life.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/render-map.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/hud-resources.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/art.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/director.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/sound.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/api.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/rng.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/util.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/territory.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/combat.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/victory.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/js/research.js",
+      "ct": "application/javascript"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/api/slots.php",
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "status": 200,
+      "url": "https://intocables13.com/juegos/zona-zero/assets/logo.png",
+      "ct": "image/png"
+    }
+  ]
+}

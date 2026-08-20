@@ -7,6 +7,7 @@ import { emptyLabor, redistributeLabor, workforce } from './population.js';
 import { makeExplorer, livingExplorers } from './explorers.js';
 import { syncLaborFromColony } from './colony.js';
 import { createColonySectors, ensureSectors } from './sectors.js';
+import { ensureColonyLayout } from './colony-layout.js';
 
 export const SAVE_VERSION = 7;
 /** @deprecated legacy individual skills — solo migración */
@@ -213,7 +214,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
     uiPanel: null,
     uiMode: null, // 'build' | 'explore' | null
     buildMode: null,
-    mapCamera: { x: 50, y: 48, zoom: 1.15 },
+    mapCamera: { x: 50, y: 48, zoom: 1.08 },
     layoutVersion: 3,
     sectors: createColonySectors(zones.find((z) => z.type === 'camp') || { x: 48, y: 62 }),
     lastDayBrief: null,
@@ -272,6 +273,9 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
       introSeen: false,
       narrative: {},
       coach: { explore: false, labor: false, build: false, dismissed: false },
+      _wipeColonyToHqV1: 1,
+      colonyCamV1: 1,
+      colonyCamV2: 1,
     },
     meta: {
       helpSeenTopics: [],
@@ -303,6 +307,7 @@ export function createNewState(content, colonyName = 'Refugio 0', seedInput = nu
 
   redistributeLabor(state, balance);
   syncLaborFromColony(state, content);
+  ensureColonyLayout(state);
   return state;
 }
 
@@ -421,8 +426,21 @@ export function migrateState(state, content) {
       workers: b.workers != null ? Math.max(0, b.workers) : 0,
     };
   });
+  // Colonia a cero salvo HQ: quitar huertos/pozos/casas de saves viejos para probar la vivienda.
+  if (!next.flags._wipeColonyToHqV1) {
+    next.flags._wipeColonyToHqV1 = 1;
+    next.base.buildings = (next.base.buildings || []).filter((b) =>
+      String(b.type || '').startsWith('hq_')
+    );
+    if (next.colonyLayout?.slots) {
+      for (const s of next.colonyLayout.slots) {
+        if (s.kind !== 'hq') s.buildingId = null;
+      }
+    }
+  }
   if (!next.mapCamera) next.mapCamera = { x: 50, y: 48, zoom: 1.15 };
   ensureSectors(next);
+  ensureColonyLayout(next);
   if (next.uiMode == null) next.uiMode = null;
   if (!next.population.manual) next.population.manual = {};
   (next.zones || []).forEach((z) => {

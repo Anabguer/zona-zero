@@ -1,0 +1,2664 @@
+{
+  "schema": "zz-map-grid-editor-export-v2",
+  "grid": {
+    "cols": 78,
+    "rows": 18
+  },
+  "defaults": {
+    "terrain": "dirt",
+    "buildState": "blocked"
+  },
+  "cells": {
+    "V13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AC15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AC16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AC14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AC13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BD16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BD14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BD15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BF13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BF14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BF15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BK16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BK14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BK13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BK15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY16": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR13": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR14": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX15": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX12": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT11": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU11": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV11": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW11": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX11": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BW6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BY6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BL4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BM3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BV3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BX4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BO7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BN7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BP6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BQ6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BR6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BU10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BS5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BT5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BF3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BF4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AY7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AY9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AY8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AZ3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AY3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AY4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BA3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BB3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BC3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BH9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BI8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BJ9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "BG8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AI10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AW10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX10": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AX7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AJ3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AP4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AO4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AN4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AM4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AL4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AK4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AV6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AU6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AT6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AS6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AR6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AQ6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AG3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AG4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AG6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AG5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AF9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AE9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AD9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AA8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "AB8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y9": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Z7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "X6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Y6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "W3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "U5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "V5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "T2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "S2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "R2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "Q2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "P2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "O2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "N2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "M2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "L2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B8": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "B2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H2": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I4": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I6": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "C7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "D7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "H7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I7": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "I5": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "G3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "F3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    },
+    "E3": {
+      "terrain": "dirt",
+      "buildState": "buildable"
+    }
+  },
+  "meta": {
+    "note": "Editor interno. El jugador no ve grid/labels."
+  }
+}

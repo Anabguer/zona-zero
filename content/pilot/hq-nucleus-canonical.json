@@ -1,0 +1,11 @@
+{
+  "schema": "hq-nucleus-canonical-v1",
+  "id": "D",
+  "world": [824, 532],
+  "approvedAt": "2026-08-20",
+  "note": "Refugio Central / HQ del piloto Neni. No construible por el jugador. Existe desde partida nueva.",
+  "discarded": {
+    "C": [848, 340],
+    "E": [944, 676]
+  }
+}

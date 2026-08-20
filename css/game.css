@@ -1097,10 +1097,20 @@ body.zz-body {
 .zz-ambient-shadow {
   fill: rgba(0, 0, 0, 0.28);
 }
-.zz-ambient-head {
-  fill: #c4a078;
-  stroke: #3a2a1c;
-  stroke-width: 0.06;
+.zz-ambient-dot {
+  stroke-width: 0.07;
+}
+.zz-ambient-hue--green .zz-ambient-dot {
+  fill: #4cba45;
+  stroke: #1a3d16;
+}
+.zz-ambient-hue--amber .zz-ambient-dot {
+  fill: #e39a2e;
+  stroke: #5a3a0c;
+}
+.zz-ambient-hue--red .zz-ambient-dot {
+  fill: #d23b32;
+  stroke: #4a1210;
 }
 .zz-ambient-body {
   fill: #6a5848;

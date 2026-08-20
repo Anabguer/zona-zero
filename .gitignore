@@ -1,4 +1,4 @@
-# Dependencias / build
+﻿# Dependencias / build
 node_modules/
 dist/
 build/
@@ -33,6 +33,15 @@ temp/
 
 # Deploy local (scripts sí; logs/credenciales no)
 deploy/logs/
+scripts/deploy-logs/
+
+# Dumps / copias de servidor (no fuente)
+*.server
+*.server-backup
+*.server2
+*.BACKUP.png
+*.nuevo-backup
+*-server.webp
 
 # APK / nativo (este proyecto es web)
 *.apk

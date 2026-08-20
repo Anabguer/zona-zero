@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZZ hub boot</title>
+<link rel="stylesheet" href="/css/game.css" />
+<link rel="stylesheet" href="/css/hub.css" />
+</head>
+<body class="zz-body zz-body--hub">
+  <div id="zz-hub-boot" class="zz-boot">Cargando…</div>
+  <div id="zz-hub" class="zz-hub" hidden>
+    <header class="zz-hub__top">
+      <p class="zz-user">Hola, <strong id="zz-user">…</strong></p>
+    </header>
+    <main class="zz-hub__hero">
+      <h1 class="zz-hub__brand">Zona Zero</h1>
+      <div class="zz-hub__actions" id="zz-hub-actions" aria-label="Empezar"></div>
+    </main>
+  </div>
+  <script type="module">
+    import { bootHub } from '/js/main.js';
+    bootHub().catch((e) => { window.__bootErr = String(e && e.stack || e); });
+  </script>
+</body></html>

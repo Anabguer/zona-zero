@@ -39,7 +39,8 @@ Eso exige **pocas frentes grandes** (playtest → UX fricción → objetivos →
 
 | ID | Ítem | Origen | Notas |
 |----|------|--------|-------|
-| PR-P0-1 | Ejecutar PLAYTEST 1–2 (móvil landscape) | PLAYTEST_PLAN | Sin esto, el resto es hipótesis |
+| **P0-MOBILE-VIEWPORT** | Superficie de mundo insuficiente en móvil landscape (chrome browser + HUD/dock) | PT1-A Neni | `docs/MOBILE_VIEWPORT_AUDIT.md`. Bloquea reinicio PT1. PWA + HUD compacto. **Sin deploy hasta revisión.** |
+| PR-P0-1 | Ejecutar PLAYTEST 1–2 (móvil landscape) | PLAYTEST_PLAN | **PT1-A interrumpido** — reiniciar tras viewport |
 | PR-P0-2 | Hub Continuar → carga (si hub entra en paquete) | REGRESSION_SUITE_CANDIDATE | E2E o prueba manual documentada |
 | PR-P0-3 | Placement ghost→✓ estable en dispositivo real | REGRESSION_SUITE_CANDIDATE | Confirmar no rotura |
 | PR-P0-4 | Decisión producto: ¿qué arte A es obligatorio en v1? | ART_DEBT_AUDIT | Humana |

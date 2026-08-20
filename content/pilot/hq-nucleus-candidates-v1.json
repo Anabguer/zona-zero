@@ -1,0 +1,109 @@
+{
+  "schema": "hq-nucleus-candidates-v1",
+  "note": "Footprint HQ 5×4 en celdas terreno cellPx=24 SOLO revisión de posición. No congela footprint construcción. JSON zonas canónico intacto.",
+  "currentNucleus": {
+    "world": [
+      1100,
+      280
+    ],
+    "label": "ACTUAL"
+  },
+  "candidates": {
+    "A": {
+      "id": "A",
+      "why": "A — Centro geométrico del mapa (snap a footprint 5×4 libre)",
+      "cell": [
+        1,
+        9
+      ],
+      "world": [
+        968,
+        364
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 107,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 3,
+        "W": 7,
+        "S": 2,
+        "N": 3,
+        "min": 2,
+        "sum": 15
+      },
+      "nearRoadCells": 2,
+      "edgeMargin": 15
+    },
+    "B": {
+      "id": "B",
+      "why": "B — Corazón de la mayor zona construible (466 celdas)",
+      "cell": [
+        -29,
+        4
+      ],
+      "world": [
+        248,
+        244
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 96,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 4,
+        "W": 10,
+        "S": 4,
+        "N": 5,
+        "min": 4,
+        "sum": 23
+      },
+      "nearRoadCells": 4,
+      "edgeMargin": 10
+    },
+    "C": {
+      "id": "C",
+      "why": "C — Intermedia: cerca de caminos, espacio libre, no esquina",
+      "cell": [
+        -4,
+        8
+      ],
+      "world": [
+        848,
+        340
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 108,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 8,
+        "W": 2,
+        "S": 2,
+        "N": 2,
+        "min": 2,
+        "sum": 14
+      },
+      "nearRoadCells": 3,
+      "edgeMargin": 14
+    }
+  }
+}

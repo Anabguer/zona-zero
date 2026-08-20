@@ -1,0 +1,14 @@
+1 OK login Antonio Miguel
+2 OK hub: Cargando oculto
+2b confirm overwrite
+intro step 0: ›
+intro step 1: ›
+intro step 2: ENTRAR EN ZONA ZERO
+3 OK play.php https://intocables13.com/juegos/zona-zero/play.php?new=1&name=Refugio+Norte&intro=1&clear=1
+4 OK D1 arrancó (Cargando/Preparando oculto)
+5 día: Día 1
+6 acción buildings=["hq_central_l1"]
+7 Guardar: 
+8 hub: CONTINUAR Refugio Norte · Día 1 · Era 0 · 3 hab. · estab. 52 Nueva partida
+9 Continuar OK day=Día 1 buildings=1
+errors=0

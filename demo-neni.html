@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Zona Zero – Demo escala grid (prueba final)</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:#0e0b06; }
+
+#viewport {
+  position:fixed; inset:0;
+  overflow:hidden; cursor:grab; touch-action:none;
+  background:#0e0b06;
+}
+#viewport.grabbing { cursor:grabbing; }
+
+#world {
+  position:absolute;
+  /* Dimensiones exactas del mundo de Neni */
+  width:1819px; height:865px;
+  transform-origin:0 0;
+  will-change:transform;
+}
+#map-img {
+  position:absolute; inset:0;
+  width:1819px; height:865px;
+  display:block; pointer-events:none;
+  image-rendering:auto;
+}
+.building {
+  position:absolute;
+  pointer-events:none;
+  image-rendering:auto;
+}
+.bld-label {
+  position:absolute;
+  color:#fff;
+  font:bold 10px 'Segoe UI',system-ui,sans-serif;
+  text-shadow:0 0 4px #000, 0 0 8px #000;
+  pointer-events:none;
+  white-space:nowrap;
+  transform:translateX(-50%);
+}
+
+/* ── HUD TOP ── */
+#hud {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  padding:5px 12px;
+  display:flex; align-items:center; gap:8px;
+  background:rgba(0,0,0,.75);
+  color:#f5e9c0;
+  font:12px/1.4 'Segoe UI',system-ui,sans-serif;
+  pointer-events:none;
+}
+#hud-title { font-weight:700; font-size:13px; }
+#hud-sep { flex:1; }
+#saved-indicator { font-size:11px; color:#7ddb7d; display:none; }
+
+/* ── PANEL DEBUG ── */
+#debug-panel {
+  position:fixed; left:8px; top:34px; z-index:200;
+  background:rgba(0,0,0,.82);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  padding:9px 11px;
+  color:#e8ddb0;
+  font:11px/1.7 'Consolas',monospace;
+  min-width:215px;
+  max-width:240px;
+  pointer-events:all;
+}
+#grid-lab {
+  position:fixed; right:8px; top:34px; z-index:200;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(120,200,255,.25);
+  border-radius:10px;
+  padding:10px 12px;
+  color:#e8ddb0;
+  font:11px/1.6 'Consolas',monospace;
+  min-width:230px;
+  max-width:260px;
+  pointer-events:all;
+}
+#grid-lab h3 {
+  font:700 12px 'Segoe UI',system-ui,sans-serif;
+  color:#a8d4ff;
+  margin-bottom:6px;
+}
+#grid-lab label { display:block; color:rgba(255,255,255,.5); font-size:10px; margin-top:6px; }
+#grid-lab input[type=range] { width:100%; accent-color:#6ab0ff; }
+#grid-lab input[type=number] {
+  width:42px; background:#1a1612; border:1px solid rgba(255,255,255,.2);
+  color:#ffd87a; border-radius:4px; padding:2px 4px; font:inherit;
+}
+.fp-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+#btn-copy-decision {
+  width:100%; margin-top:8px;
+  background:#1a4a7a; border:1px solid #4a9ae8;
+  color:#d6eeff; font-size:12px; padding:8px;
+  border-radius:6px; cursor:pointer; font-weight:700;
+}
+#btn-copy-decision:hover { background:#2260a0; }
+#copy-block {
+  display:none; margin-top:8px;
+  background:rgba(0,0,0,.65); border:1px solid #4a9ae8;
+  border-radius:6px; padding:6px 8px;
+  font:9px/1.5 'Consolas',monospace; color:#9fd0ff;
+  max-height:120px; overflow:auto; word-break:break-all;
+}
+#grid-svg {
+  position:absolute; inset:0; width:1819px; height:865px;
+  pointer-events:none; z-index:2;
+}
+.fp-rect {
+  position:absolute; box-sizing:border-box;
+  border:2px dashed rgba(120,255,120,.85);
+  background:rgba(80,200,80,.08);
+  pointer-events:none; z-index:3;
+}
+.fp-rect.hq { border-color:rgba(100,180,255,.9); background:rgba(80,140,255,.08); }
+.fp-rect.sawmill { border-color:rgba(255,170,80,.9); background:rgba(255,140,40,.08); }
+.ref-wrap { position:absolute; pointer-events:none; z-index:4; }
+.ref-wrap img { display:block; pointer-events:none; }
+#ref-layer { position:absolute; inset:0; z-index:3; }
+#bld-stats {
+  position:fixed; left:8px; bottom:78px; z-index:200;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,200,80,.3);
+  border-radius:10px; padding:8px 10px;
+  color:#e8ddb0; font:10px/1.55 'Consolas',monospace;
+  max-width:340px; pointer-events:none;
+}
+#bld-stats h4 { font:700 11px 'Segoe UI',sans-serif; color:#ffd87a; margin-bottom:4px; }
+.bld-stat { margin-bottom:6px; padding-bottom:5px; border-bottom:1px solid rgba(255,255,255,.08); }
+.bld-stat:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.bld-stat strong { color:#a8d4ff; }
+.car-marker {
+  position:absolute; z-index:5; pointer-events:none;
+  color:#fff; font:bold 10px 'Segoe UI',sans-serif;
+  text-shadow:0 0 4px #000, 0 0 8px #000;
+  transform:translate(-50%,-100%);
+  white-space:nowrap;
+}
+#grid-lab { max-height:calc(100vh - 42px); overflow-y:auto; }
+.toggle-on { background:rgba(50,120,200,.45)!important; border-color:rgba(100,180,255,.7)!important; }
+#debug-panel .label { color:rgba(255,255,255,.42); font-size:10px; }
+#debug-panel .val   { color:#ffd87a; font-weight:700; }
+#debug-panel .row   { display:flex; justify-content:space-between; gap:8px; }
+
+.dp-btn {
+  display:inline-block;
+  background:rgba(255,255,255,.10);
+  color:#f5e9c0; border:1px solid rgba(255,255,255,.22);
+  border-radius:6px; padding:4px 9px;
+  font:600 11px 'Segoe UI',system-ui,sans-serif;
+  cursor:pointer; margin-top:3px;
+  transition:background .12s;
+}
+.dp-btn:hover { background:rgba(255,255,255,.22); }
+#btn-fit { background:rgba(50,100,200,.35); border-color:rgba(100,150,255,.5); }
+#btn-fit:hover { background:rgba(50,100,200,.55); }
+#btn-save-neni {
+  width:100%; margin-top:6px;
+  background:#1a6b1a; border-color:#3da83d;
+  color:#d6ffd6; font-size:12px; padding:6px;
+}
+#btn-save-neni:hover { background:#227022; }
+#saved-block {
+  display:none; margin-top:7px;
+  background:rgba(0,0,0,.6); border:1px solid #3da83d;
+  border-radius:6px; padding:5px 8px;
+  font:10px/1.6 'Consolas',monospace; color:#7ddb7d;
+}
+
+/* ── ESCALA ── */
+#scale-ctrl {
+  position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+  z-index:200;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:rgba(0,0,0,.80); border-radius:16px; padding:7px 13px;
+  pointer-events:all;
+}
+#scale-buttons { display:flex; gap:5px; }
+.scale-btn {
+  background:rgba(255,255,255,.10); color:#f5e9c0;
+  border:1.5px solid rgba(255,255,255,.22); border-radius:14px;
+  padding:5px 11px; font:600 12px 'Segoe UI',system-ui,sans-serif;
+  cursor:pointer; transition:background .12s, border-color .12s;
+}
+.scale-btn.active { background:#b8820f; border-color:#f5c842; color:#fff; }
+.scale-btn:hover:not(.active) { background:rgba(255,255,255,.20); }
+#scale-slider-row {
+  display:flex; align-items:center; gap:7px;
+  color:#d0c090; font:11px 'Segoe UI',sans-serif;
+}
+#scale-slider { width:150px; cursor:pointer; accent-color:#f5c842; }
+#scale-val-label { min-width:34px; text-align:right; color:#ffd87a; font-weight:700; }
+
+/* ── BTN RECENTER ── */
+#btn-recenter {
+  position:fixed; bottom:12px; right:12px; z-index:200;
+  background:rgba(0,0,0,.80); color:#f5e9c0;
+  border:1.5px solid rgba(255,255,255,.22); border-radius:10px;
+  padding:7px 13px; font:600 12px 'Segoe UI',system-ui,sans-serif;
+  cursor:pointer; pointer-events:all;
+}
+#btn-recenter:hover { background:rgba(255,255,255,.14); }
+
+/* núcleo marker */
+#nucleus-mark {
+  position:absolute; width:12px; height:12px; border-radius:50%;
+  background:rgba(255,210,40,.9); border:2px solid #fff;
+  transform:translate(-50%,-50%); pointer-events:none;
+  box-shadow:0 0 10px 4px rgba(255,200,40,.4);
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <span id="hud-title">ZONA ZERO – Prueba final escala grid &nbsp;|&nbsp; NO congelar</span>
+  <span id="hud-sep"></span>
+  <span id="saved-indicator">✔ Vista guardada</span>
+</div>
+
+<div id="debug-panel">
+  <div class="row"><span class="label">zoom</span><span class="val" id="dv-zoom">—</span></div>
+  <div class="row"><span class="label">zoomMin (fit)</span><span class="val" id="dv-zmin">—</span></div>
+  <div class="row"><span class="label">cameraX</span><span class="val" id="dv-cx">—</span></div>
+  <div class="row"><span class="label">cameraY</span><span class="val" id="dv-cy">—</span></div>
+  <div class="row"><span class="label">visible W</span><span class="val" id="dv-vw">—</span></div>
+  <div class="row"><span class="label">visible H</span><span class="val" id="dv-vh">—</span></div>
+  <div class="row"><span class="label">escala sprites</span><span class="val" id="dv-sc">—</span></div>
+  <button class="dp-btn" id="btn-review-cam" style="width:100%;margin-top:4px;background:rgba(80,60,20,.5);border-color:#c9a030">📷 Vista comparación Neni</button>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">
+    <button class="dp-btn" id="btn-zoom-minus">Z −</button>
+    <button class="dp-btn" id="btn-zoom-plus">Z +</button>
+    <button class="dp-btn" id="btn-nucleus">Núcleo</button>
+    <button class="dp-btn" id="btn-fit">Fit mundo</button>
+  </div>
+  <button class="dp-btn" id="btn-save-neni">💾 GUARDAR VISTA NENI</button>
+  <div id="saved-block"></div>
+</div>
+
+<div id="grid-lab">
+  <h3>⚙ Escala del mundo</h3>
+  <label>Celda cellPx — <span id="lab-cell-val" style="color:#ffd87a">24</span> px mundo</label>
+  <input type="range" id="cell-slider" min="16" max="48" step="1" value="24">
+  <div class="fp-row" style="margin-top:4px">
+    <button class="dp-btn" data-cell="20">20</button>
+    <button class="dp-btn" data-cell="24">24</button>
+    <button class="dp-btn" data-cell="28">28</button>
+    <button class="dp-btn" data-cell="32">32</button>
+    <input type="number" id="cell-manual" min="8" max="128" value="24" title="cellPx manual">
+  </div>
+  <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
+    <button class="dp-btn toggle-on" id="btn-toggle-grid">Grid</button>
+    <button class="dp-btn toggle-on" id="btn-toggle-fp">Footprints</button>
+    <button class="dp-btn toggle-on" id="btn-toggle-bld">Edificios</button>
+  </div>
+  <p style="font-size:9px;color:rgba(255,255,255,.45);margin-top:6px;line-height:1.45">
+    Casa + HQ + Aserradero junto al coche del mapa. Cambia cellPx y compara al instante.
+  </p>
+  <button type="button" id="btn-copy-decision">📋 COPIAR JSON (sin congelar)</button>
+  <div id="copy-block"></div>
+</div>
+
+<div id="bld-stats"><h4>Edificios de referencia @ cellPx actual</h4><div id="bld-stats-body"></div></div>
+
+<div id="viewport">
+  <div id="world">
+    <img id="map-img"
+         src="assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png?v=4"
+         alt="Mapa Zona Zero" draggable="false">
+    <svg id="grid-svg" viewBox="0 0 1819 865" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="ref-layer"></div>
+    <div class="car-marker" id="car-marker" style="left:872px;top:502px">🚗 coche (mapa)</div>
+    <div id="nucleus-mark"></div>
+  </div>
+</div>
+
+<div id="scale-ctrl">
+  <div id="scale-buttons">
+    <button class="scale-btn" data-scale="1.0">1×</button>
+    <button class="scale-btn" data-scale="1.25">1.25×</button>
+    <button class="scale-btn active" data-scale="1.5">1.5×</button>
+    <button class="scale-btn" data-scale="1.75">1.75×</button>
+    <button class="scale-btn" data-scale="2.0">2×</button>
+  </div>
+  <div id="scale-slider-row">
+    <span>fino:</span>
+    <input type="range" id="scale-slider" min="0.5" max="2.5" step="0.05" value="1.5">
+    <span id="scale-val-label">1.50×</span>
+  </div>
+</div>
+
+<button id="btn-recenter">⌖ Núcleo</button>
+
+<script>
+// ── MUNDO ─────────────────────────────────────────────
+const WORLD_W = 1819;
+const WORLD_H = 865;
+const NUCLEUS_X = 1100;
+const NUCLEUS_Y = 280;
+const PILOT_GRID_W = 14;
+const PILOT_GRID_H = 12;
+const ZOOM_MAX = 3.0;
+const DECISION_KEY = 'neni-grid-decision-v1';
+
+/** Vista exportada por Neni — prueba final escala (NO congelar). */
+const REVIEW_DEFAULT = {
+  cellPx: 24,
+  spriteScale: 1.5,
+  camera: { x: 910, y: 433, zoom: 1.0532 },
+  carMarker: [872, 502],
+};
+
+/** Edificios de referencia: sprite nativo + footprint legacy + propuesto editable. */
+const REF_BUILDINGS = [
+  {
+    key: 'house',
+    label: 'Casa',
+    src: 'assets/art/buildings/pilot/01-house-4x2-matchcolor.png',
+    nativeW: 1108, nativeH: 798,
+    legacyFw: 4, legacyFh: 2,
+    fw: 4, fh: 2,
+    wx: 900, wy: 480,
+  },
+  {
+    key: 'hq',
+    label: 'HQ / Núcleo',
+    src: 'docs/map-grid-pilot/approved-master/buildings/01-hq-5x4-matchcolor.png',
+    nativeW: 1400, nativeH: 877,
+    legacyFw: 5, legacyFh: 4,
+    fw: 5, fh: 4,
+    wx: 1040, wy: 360,
+  },
+  {
+    key: 'sawmill',
+    label: 'Aserradero',
+    src: 'docs/map-grid-pilot/approved-master/buildings/01-sawmill-5x3-matchcolor.png',
+    nativeW: 1497, nativeH: 902,
+    legacyFw: 5, legacyFh: 3,
+    fw: 5, fh: 3,
+    wx: 760, wy: 520,
+  },
+];
+
+let cellPx = REVIEW_DEFAULT.cellPx;
+let showGrid = true;
+let showFootprints = true;
+let showBuildings = true;
+let cam = { ...REVIEW_DEFAULT.camera };
+let currentScale = REVIEW_DEFAULT.spriteScale;
+
+// ── GRID ──────────────────────────────────────────────
+function gridOrigin() {
+  return {
+    x: NUCLEUS_X - (PILOT_GRID_W / 2) * cellPx,
+    y: NUCLEUS_Y - (PILOT_GRID_H / 2) * cellPx,
+  };
+}
+
+function gridBounds() {
+  const o = gridOrigin();
+  const minX = Math.min(0, Math.floor((0 - o.x) / cellPx));
+  const minY = Math.min(0, Math.floor((0 - o.y) / cellPx));
+  const maxX = Math.max(PILOT_GRID_W - 1, Math.ceil((WORLD_W - o.x) / cellPx) - 1);
+  const maxY = Math.max(PILOT_GRID_H - 1, Math.ceil((WORLD_H - o.y) / cellPx) - 1);
+  return { originX: o.x, originY: o.y, minX, minY, maxX, maxY };
+}
+
+/** Comprueba cobertura completa del asset 1819×865. */
+function gridCoverageOk(b) {
+  const o = gridOrigin();
+  const coverLeft = o.x + b.minX * cellPx <= 0;
+  const coverTop = o.y + b.minY * cellPx <= 0;
+  const coverRight = o.x + (b.maxX + 1) * cellPx >= WORLD_W;
+  const coverBottom = o.y + (b.maxY + 1) * cellPx >= WORLD_H;
+  return coverLeft && coverTop && coverRight && coverBottom;
+}
+
+function drawGrid() {
+  const svg = document.getElementById('grid-svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!showGrid) return;
+  const b = gridBounds();
+  const o = gridOrigin();
+  const ns = 'http://www.w3.org/2000/svg';
+
+  const pilot = document.createElementNS(ns, 'rect');
+  pilot.setAttribute('x', o.x);
+  pilot.setAttribute('y', o.y);
+  pilot.setAttribute('width', PILOT_GRID_W * cellPx);
+  pilot.setAttribute('height', PILOT_GRID_H * cellPx);
+  pilot.setAttribute('fill', 'none');
+  pilot.setAttribute('stroke', 'rgba(255,220,80,0.75)');
+  pilot.setAttribute('stroke-width', '2');
+  pilot.setAttribute('stroke-dasharray', '8 4');
+  svg.appendChild(pilot);
+
+  for (let gx = b.minX; gx <= b.maxX; gx++) {
+    const x = o.x + gx * cellPx;
+    const ln = document.createElementNS(ns, 'line');
+    ln.setAttribute('x1', x); ln.setAttribute('y1', 0);
+    ln.setAttribute('x2', x); ln.setAttribute('y2', WORLD_H);
+    ln.setAttribute('stroke', 'rgba(120,200,255,0.22)');
+    ln.setAttribute('stroke-width', '1');
+    svg.appendChild(ln);
+  }
+  for (let gy = b.minY; gy <= b.maxY; gy++) {
+    const y = o.y + gy * cellPx;
+    const ln = document.createElementNS(ns, 'line');
+    ln.setAttribute('x1', 0); ln.setAttribute('y1', y);
+    ln.setAttribute('x2', WORLD_W); ln.setAttribute('y2', y);
+    ln.setAttribute('stroke', 'rgba(120,200,255,0.22)');
+    ln.setAttribute('stroke-width', '1');
+    svg.appendChild(ln);
+  }
+}
+
+function renderRefBuildings() {
+  const layer = document.getElementById('ref-layer');
+  layer.innerHTML = '';
+  if (!showBuildings && !showFootprints) return;
+
+  REF_BUILDINGS.forEach((b) => {
+    const occW = b.fw * cellPx;
+    const occH = b.fh * cellPx;
+    const renderW = occW * currentScale;
+    const renderH = occH * currentScale;
+
+    if (showFootprints) {
+      const fp = document.createElement('div');
+      fp.className = 'fp-rect ' + b.key;
+      fp.style.left = (b.wx - occW / 2) + 'px';
+      fp.style.top = (b.wy - occH) + 'px';
+      fp.style.width = occW + 'px';
+      fp.style.height = occH + 'px';
+      layer.appendChild(fp);
+    }
+
+    if (showBuildings) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ref-wrap';
+      const img = document.createElement('img');
+      img.src = b.src;
+      img.alt = b.label;
+      img.draggable = false;
+      img.style.width = renderW + 'px';
+      img.style.height = renderH + 'px';
+      img.style.objectFit = 'contain';
+      img.style.objectPosition = 'bottom center';
+      wrap.style.left = (b.wx - renderW / 2) + 'px';
+      wrap.style.top = (b.wy - renderH) + 'px';
+      wrap.appendChild(img);
+      layer.appendChild(wrap);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'bld-label';
+      lbl.textContent = b.label;
+      lbl.style.left = b.wx + 'px';
+      lbl.style.top = (b.wy + 4) + 'px';
+      layer.appendChild(lbl);
+    }
+  });
+}
+
+function fitContainSize(nativeW, nativeH, boxW, boxH) {
+  const ar = nativeW / nativeH;
+  let w = boxW;
+  let h = w / ar;
+  if (h > boxH) { h = boxH; w = h * ar; }
+  return { w: Math.round(w), h: Math.round(h) };
+}
+
+function updateBldStats() {
+  const body = document.getElementById('bld-stats-body');
+  body.innerHTML = REF_BUILDINGS.map((b) => {
+    const occW = b.fw * cellPx;
+    const occH = b.fh * cellPx;
+    const renderW = occW * currentScale;
+    const renderH = occH * currentScale;
+    const fit = fitContainSize(b.nativeW, b.nativeH, renderW, renderH);
+    const legacyOcc = `${b.legacyFw}×${b.legacyFh} = ${b.legacyFw * cellPx}×${b.legacyFh * cellPx} px`;
+    const sameLegacy = b.fw === b.legacyFw && b.fh === b.legacyFh;
+    return `<div class="bld-stat"><strong>${b.label}</strong><br>
+      sprite nativo: ${b.nativeW}×${b.nativeH} px<br>
+      sprite visual (contain): ${fit.w}×${fit.h} px mundo<br>
+      caja render (@${currentScale.toFixed(2)}×): ${Math.round(renderW)}×${Math.round(renderH)} px<br>
+      footprint propuesto: ${b.fw}×${b.fh} celdas<br>
+      ocupación: ${occW}×${occH} px mundo<br>
+      legacy (${cellPx}px/celda): ${legacyOcc}${sameLegacy ? '' : ' — distinto al propuesto'}</div>`;
+  }).join('');
+}
+
+function updateLabLabels() {
+  document.getElementById('lab-cell-val').textContent = cellPx;
+  document.getElementById('cell-slider').value = cellPx;
+  document.getElementById('cell-manual').value = cellPx;
+  document.getElementById('btn-toggle-grid').classList.toggle('toggle-on', showGrid);
+  document.getElementById('btn-toggle-fp').classList.toggle('toggle-on', showFootprints);
+  document.getElementById('btn-toggle-bld').classList.toggle('toggle-on', showBuildings);
+}
+
+function buildDecisionPayload() {
+  const o = gridOrigin();
+  const b = gridBounds();
+  return {
+    schema: 'neni-grid-decision-v1',
+    mode: 'scale-review-not-frozen',
+    timestamp: new Date().toISOString(),
+    world: { w: WORLD_W, h: WORLD_H },
+    nucleus: [NUCLEUS_X, NUCLEUS_Y],
+    cellPx,
+    grid: {
+      pilotW: PILOT_GRID_W,
+      pilotH: PILOT_GRID_H,
+      origin: [Math.round(o.x), Math.round(o.y)],
+      bounds: { minX: b.minX, maxX: b.maxX, minY: b.minY, maxY: b.maxY },
+      coversFullMap: gridCoverageOk(b),
+    },
+    footprints: Object.fromEntries(REF_BUILDINGS.map((x) => [x.key, {
+      cellsW: x.fw,
+      cellsH: x.fh,
+      legacyCellsW: x.legacyFw,
+      legacyCellsH: x.legacyFh,
+      worldPxW: x.fw * cellPx,
+      worldPxH: x.fh * cellPx,
+      sprite: x.src,
+      nativePx: [x.nativeW, x.nativeH],
+    }])),
+    placements: Object.fromEntries(REF_BUILDINGS.map((x) => [x.key, {
+      anchor: [Math.round(x.wx), Math.round(x.wy)],
+      footprintCells: `${x.fw}×${x.fh}`,
+    }])),
+    carMarker: REVIEW_DEFAULT.carMarker,
+    camera: {
+      x: Math.round(cam.x),
+      y: Math.round(cam.y),
+      zoom: parseFloat(cam.zoom.toFixed(4)),
+    },
+    spriteScale: parseFloat(currentScale.toFixed(2)),
+    instruction: 'Revisión de escala — NO congelar hasta OK de Neni.',
+  };
+}
+
+function refreshGridLab() {
+  updateLabLabels();
+  drawGrid();
+  renderRefBuildings();
+  updateBldStats();
+  const b = gridBounds();
+  document.getElementById('dv-cell').textContent = cellPx + ' px';
+  document.getElementById('dv-bounds').textContent =
+    `X ${b.minX}…${b.maxX} Y ${b.minY}…${b.maxY}` + (gridCoverageOk(b) ? ' ✓' : ' ⚠');
+  try { localStorage.setItem(DECISION_KEY, JSON.stringify(buildDecisionPayload())); } catch (e) {}
+}
+
+function applyReviewDefaults() {
+  cellPx = REVIEW_DEFAULT.cellPx;
+  currentScale = REVIEW_DEFAULT.spriteScale;
+  cam = { ...REVIEW_DEFAULT.camera };
+  document.getElementById('scale-slider').value = currentScale;
+  document.getElementById('scale-val-label').textContent = currentScale.toFixed(2) + '×';
+  document.querySelectorAll('.scale-btn').forEach((btn) => {
+    btn.classList.toggle('active', parseFloat(btn.dataset.scale) === currentScale);
+  });
+  const car = document.getElementById('car-marker');
+  car.style.left = REVIEW_DEFAULT.carMarker[0] + 'px';
+  car.style.top = REVIEW_DEFAULT.carMarker[1] + 'px';
+}
+
+// ── DOM refs ──────────────────────────────────────────
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+
+document.getElementById('nucleus-mark').style.left = NUCLEUS_X + 'px';
+document.getElementById('nucleus-mark').style.top = NUCLEUS_Y + 'px';
+
+// ── CÁMARA ────────────────────────────────────────────
+function zoomMin() {
+  return Math.min(viewport.clientWidth / WORLD_W, viewport.clientHeight / WORLD_H);
+}
+
+function applyCamera() {
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  const zm = zoomMin();
+  cam.zoom = Math.max(zm, Math.min(ZOOM_MAX, cam.zoom));
+  const halfW = vw / 2 / cam.zoom;
+  const halfH = vh / 2 / cam.zoom;
+  if (WORLD_W * cam.zoom <= vw) cam.x = WORLD_W / 2;
+  else cam.x = Math.max(halfW, Math.min(WORLD_W - halfW, cam.x));
+  if (WORLD_H * cam.zoom <= vh) cam.y = WORLD_H / 2;
+  else cam.y = Math.max(halfH, Math.min(WORLD_H - halfH, cam.y));
+  const ox = cam.x - halfW;
+  const oy = cam.y - halfH;
+  world.style.transform = `scale(${cam.zoom}) translate(${-ox}px,${-oy}px)`;
+  document.getElementById('dv-zoom').textContent = cam.zoom.toFixed(3) + '×';
+  document.getElementById('dv-zmin').textContent = zm.toFixed(3) + '×';
+  document.getElementById('dv-cx').textContent = Math.round(cam.x);
+  document.getElementById('dv-cy').textContent = Math.round(cam.y);
+  document.getElementById('dv-vw').textContent = Math.round(vw / cam.zoom) + ' px';
+  document.getElementById('dv-vh').textContent = Math.round(vh / cam.zoom) + ' px';
+  document.getElementById('dv-sc').textContent = currentScale.toFixed(2) + '×';
+}
+
+function recenter() {
+  cam.x = NUCLEUS_X;
+  cam.y = NUCLEUS_Y;
+  cam.zoom = Math.max(zoomMin(), 1.0);
+  applyCamera();
+}
+function fitWorld() {
+  cam.zoom = zoomMin();
+  cam.x = WORLD_W / 2;
+  cam.y = WORLD_H / 2;
+  applyCamera();
+}
+
+// ── PAN ───────────────────────────────────────────────
+let drag = null, camD = null;
+viewport.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  drag = { x: e.clientX, y: e.clientY };
+  camD = { ...cam };
+  viewport.classList.add('grabbing');
+});
+window.addEventListener('mousemove', (e) => {
+  if (!drag) return;
+  cam.x = camD.x - (e.clientX - drag.x) / cam.zoom;
+  cam.y = camD.y - (e.clientY - drag.y) / cam.zoom;
+  applyCamera();
+});
+window.addEventListener('mouseup', () => { drag = null; viewport.classList.remove('grabbing'); });
+
+let touches = {}, lastDist = null, touchCam = null, touchMid = null;
+viewport.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  for (const t of e.changedTouches) touches[t.identifier] = { x: t.clientX, y: t.clientY };
+  const ids = Object.keys(touches);
+  if (ids.length === 1) { drag = { x: touches[ids[0]].x, y: touches[ids[0]].y }; camD = { ...cam }; }
+  else if (ids.length === 2) {
+    const a = touches[ids[0]], b = touches[ids[1]];
+    lastDist = Math.hypot(b.x - a.x, b.y - a.y);
+    touchMid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    touchCam = { ...cam };
+    drag = null;
+  }
+}, { passive: false });
+viewport.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  for (const t of e.changedTouches) touches[t.identifier] = { x: t.clientX, y: t.clientY };
+  const ids = Object.keys(touches);
+  if (ids.length === 1 && drag) {
+    cam.x = camD.x - (touches[ids[0]].x - drag.x) / cam.zoom;
+    cam.y = camD.y - (touches[ids[0]].y - drag.y) / cam.zoom;
+  } else if (ids.length === 2 && lastDist && touchCam) {
+    const a = touches[ids[0]], b = touches[ids[1]];
+    const dist = Math.hypot(b.x - a.x, b.y - a.y);
+    cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, touchCam.zoom * dist / lastDist));
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    if (touchMid) {
+      cam.x = touchCam.x - (mid.x - touchMid.x) / cam.zoom;
+      cam.y = touchCam.y - (mid.y - touchMid.y) / cam.zoom;
+    }
+  }
+  applyCamera();
+}, { passive: false });
+viewport.addEventListener('touchend', (e) => {
+  for (const t of e.changedTouches) delete touches[t.identifier];
+  const ids = Object.keys(touches);
+  if (ids.length < 2) { lastDist = null; touchCam = null; touchMid = null; }
+  if (ids.length === 1) { drag = { x: touches[ids[0]].x, y: touches[ids[0]].y }; camD = { ...cam }; }
+  if (ids.length === 0) drag = null;
+});
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.909;
+  const rect = viewport.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const ox = cam.x - viewport.clientWidth / 2 / cam.zoom;
+  const oy = cam.y - viewport.clientHeight / 2 / cam.zoom;
+  const wx = ox + mx / cam.zoom;
+  const wy = oy + my / cam.zoom;
+  cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, cam.zoom * factor));
+  cam.x = wx - mx / cam.zoom + viewport.clientWidth / 2 / cam.zoom;
+  cam.y = wy - my / cam.zoom + viewport.clientHeight / 2 / cam.zoom;
+  applyCamera();
+}, { passive: false });
+
+// ── CONTROLES ─────────────────────────────────────────
+document.getElementById('btn-zoom-minus').addEventListener('click', () => { cam.zoom = Math.max(zoomMin(), cam.zoom / 1.15); applyCamera(); });
+document.getElementById('btn-zoom-plus').addEventListener('click', () => { cam.zoom = Math.min(ZOOM_MAX, cam.zoom * 1.15); applyCamera(); });
+document.getElementById('btn-nucleus').addEventListener('click', recenter);
+document.getElementById('btn-recenter').addEventListener('click', recenter);
+document.getElementById('btn-fit').addEventListener('click', fitWorld);
+document.getElementById('btn-review-cam').addEventListener('click', () => { applyReviewDefaults(); refreshGridLab(); applyCamera(); });
+
+document.getElementById('btn-save-neni').addEventListener('click', () => {
+  const data = { x: Math.round(cam.x), y: Math.round(cam.y), zoom: parseFloat(cam.zoom.toFixed(4)) };
+  localStorage.setItem('neni-camera-v2', JSON.stringify(data));
+  localStorage.setItem('neni-scale-v2', currentScale.toFixed(4));
+  const block = document.getElementById('saved-block');
+  block.style.display = 'block';
+  block.innerHTML = `cameraX: <b>${data.x}</b><br>cameraY: <b>${data.y}</b><br>zoom: <b>${data.zoom}</b><br>escala: <b>${currentScale.toFixed(2)}×</b>`;
+  const ind = document.getElementById('saved-indicator');
+  ind.style.display = 'inline';
+  setTimeout(() => { ind.style.display = 'none'; }, 3000);
+});
+
+function setScale(s) {
+  currentScale = s;
+  document.getElementById('scale-slider').value = s;
+  document.getElementById('scale-val-label').textContent = s.toFixed(2) + '×';
+  document.querySelectorAll('.scale-btn').forEach((b) => b.classList.toggle('active', parseFloat(b.dataset.scale) === s));
+  refreshGridLab();
+  applyCamera();
+}
+document.querySelectorAll('.scale-btn').forEach((btn) => btn.addEventListener('click', () => setScale(parseFloat(btn.dataset.scale))));
+document.getElementById('scale-slider').addEventListener('input', (e) => {
+  const s = parseFloat(parseFloat(e.target.value).toFixed(2));
+  document.getElementById('scale-val-label').textContent = s.toFixed(2) + '×';
+  document.querySelectorAll('.scale-btn').forEach((b) => b.classList.toggle('active', parseFloat(b.dataset.scale) === s));
+  currentScale = s;
+  refreshGridLab();
+  applyCamera();
+});
+
+function setCellPx(v) {
+  cellPx = Math.max(8, Math.min(128, parseInt(v, 10) || REVIEW_DEFAULT.cellPx));
+  refreshGridLab();
+}
+document.getElementById('cell-slider').addEventListener('input', (e) => setCellPx(e.target.value));
+document.getElementById('cell-manual').addEventListener('change', (e) => setCellPx(e.target.value));
+document.querySelectorAll('[data-cell]').forEach((btn) => btn.addEventListener('click', () => setCellPx(btn.dataset.cell)));
+
+document.getElementById('btn-toggle-grid').addEventListener('click', () => { showGrid = !showGrid; refreshGridLab(); });
+document.getElementById('btn-toggle-fp').addEventListener('click', () => { showFootprints = !showFootprints; refreshGridLab(); });
+document.getElementById('btn-toggle-bld').addEventListener('click', () => { showBuildings = !showBuildings; refreshGridLab(); });
+
+document.getElementById('btn-copy-decision').addEventListener('click', async () => {
+  const json = JSON.stringify(buildDecisionPayload(), null, 2);
+  const block = document.getElementById('copy-block');
+  block.style.display = 'block';
+  block.textContent = json;
+  try {
+    await navigator.clipboard.writeText(json);
+    document.getElementById('btn-copy-decision').textContent = '✅ Copiado';
+    setTimeout(() => { document.getElementById('btn-copy-decision').textContent = '📋 COPIAR JSON (sin congelar)'; }, 2500);
+  } catch (err) {
+    document.getElementById('btn-copy-decision').textContent = 'Selecciona JSON abajo (Ctrl+C)';
+  }
+});
+
+// API mínima para capturas automatizadas
+window.__neniDemo = { getState: () => buildDecisionPayload(), applyReviewDefaults, setCellPx, setScale };
+
+// ── INIT ──────────────────────────────────────────────
+const forceReview = new URLSearchParams(location.search).get('review') === 'scale-final';
+if (forceReview) applyReviewDefaults();
+else applyReviewDefaults(); // arranque siempre en vista comparación Neni
+
+window.addEventListener('resize', applyCamera);
+refreshGridLab();
+applyCamera();
+</script>
+</body>
+</html>

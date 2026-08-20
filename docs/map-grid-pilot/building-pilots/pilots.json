@@ -1,0 +1,50 @@
+{
+  "note": "Pilotos v3 APROBADOS como referencias maestras. NO regenerar. JSON Neni no modificado.",
+  "orientation": "elevated-front (not ortho facade, not isometric-3/4)",
+  "grid": {
+    "cols": 78,
+    "rows": 18
+  },
+  "buildable_source": "map_grid-neni.json",
+  "pilots": [
+    {
+      "id": "house",
+      "name": "Casa",
+      "footprint": "4x2",
+      "anchor": "AK3",
+      "asset": "01-house-4x2.png",
+      "inhabitants_reference": 4
+    },
+    {
+      "id": "workshop",
+      "name": "Taller",
+      "footprint": "5x2",
+      "anchor": "AK7",
+      "asset": "01-workshop-5x2.png",
+      "inhabitants_reference": null
+    },
+    {
+      "id": "hq_central_l1",
+      "name": "Refugio Central I",
+      "footprint": "5x4",
+      "anchor": "AQ3",
+      "asset": "01-hq-5x4.png",
+      "inhabitants_reference": null
+    }
+  ],
+  "approved": true,
+  "visual_standard": "elevated-front v3",
+  "terrain_master": "../terrain-iter-match-lote1/01-map-empty.png",
+  "terrain_master_frozen_copy": "../approved-master/00-MAPA_MAESTRO_APROBADO.png",
+  "dirt_blend_reference": "../terrain-iter-match-lote1/03-closeup-dirt-blend.png",
+  "do_not_regenerate": [
+    "house",
+    "workshop",
+    "hq_central_l1",
+    "well",
+    "farm",
+    "infirmary",
+    "storage",
+    "terrain_master"
+  ]
+}

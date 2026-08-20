@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piloto Neni · DEBUG footprints</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #12100c; color: #e8e0d4; font-family: system-ui, sans-serif; }
+    #viewport { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+    #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+    #map-img { display: block; pointer-events: none; user-select: none; }
+    .fp { position: absolute; border: 2px solid; box-sizing: border-box; pointer-events: none; }
+    .fp-label { position: absolute; left: 4px; top: 2px; font: 700 12px Rajdhani, system-ui, sans-serif; text-shadow: 0 1px 2px #000; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; right: 12px; max-width: 520px;
+      background: rgba(18,16,12,0.92); border: 1px solid #444; border-radius: 10px;
+      padding: 12px 14px; font-size: 13px; line-height: 1.45; z-index: 20;
+    }
+    #hud h1 { margin: 0 0 8px; font-size: 15px; color: #e8c070; }
+    #hud table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+    #hud th, #hud td { text-align: left; padding: 3px 6px; border-bottom: 1px solid #333; }
+    #hud .muted { color: #9a9080; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <h1>DEBUG · Footprints reales vs mapa (CELL=96 px/celda)</h1>
+    <p class="muted">Sin sprites — solo ocupación lógica. Anchor = esquina superior-izquierda.</p>
+    <table>
+      <thead><tr><th>Edificio</th><th>Footprint</th><th>Mundo (px)</th></tr></thead>
+      <tbody id="tbl"></tbody>
+    </table>
+    <p id="analysis"></p>
+  </div>
+  <div id="viewport">
+    <div id="world">
+      <img id="map-img" src="../assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png" alt="mapa" draggable="false" />
+    </div>
+  </div>
+<script>
+const WORLD_W = 1819;
+const WORLD_H = 865;
+const NUCLEUS_X = 1100;
+const NUCLEUS_Y = 280;
+const CELL = 96;
+const BASE_W = 14;
+const BASE_H = 12;
+
+const FOOTPRINTS = [
+  { key: 'hq', label: 'HQ 5×4', fw: 5, fh: 4, ax: 7, ay: 5, color: '#e8c070' },
+  { key: 'house', label: 'Casa 4×2', fw: 4, fh: 2, ax: 2, ay: 6, color: '#3ddc6b' },
+  { key: 'well', label: 'Pozo 2×1', fw: 2, fh: 1, ax: 10, ay: 3, color: '#6ab0ff' },
+  { key: 'storage', label: 'Almacén 5×3', fw: 5, fh: 3, ax: 1, ay: 9, color: '#e36a6a' },
+];
+
+function cellTopLeft(ax, ay) {
+  return {
+    x: NUCLEUS_X + (ax - BASE_W / 2) * CELL,
+    y: NUCLEUS_Y + (ay - BASE_H / 2) * CELL,
+  };
+}
+
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+const mapImg = document.getElementById('map-img');
+mapImg.onload = () => {
+  mapImg.style.width = WORLD_W + 'px';
+  mapImg.style.height = WORLD_H + 'px';
+  layoutFootprints();
+  fitCamera();
+};
+if (mapImg.complete) mapImg.onload();
+
+function layoutFootprints() {
+  const tbody = document.getElementById('tbl');
+  FOOTPRINTS.forEach((fp) => {
+    const tl = cellTopLeft(fp.ax, fp.ay);
+    const w = fp.fw * CELL;
+    const h = fp.fh * CELL;
+    const el = document.createElement('div');
+    el.className = 'fp';
+    el.style.left = tl.x + 'px';
+    el.style.top = tl.y + 'px';
+    el.style.width = w + 'px';
+    el.style.height = h + 'px';
+    el.style.borderColor = fp.color;
+    el.style.background = fp.color + '22';
+    const lbl = document.createElement('div');
+    lbl.className = 'fp-label';
+    lbl.style.color = fp.color;
+    lbl.textContent = fp.label;
+    el.appendChild(lbl);
+    world.appendChild(el);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fp.label}</td><td>${fp.fw}×${fp.fh}</td><td>${w}×${h}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const gridW = BASE_W * CELL;
+  const gridH = BASE_H * CELL;
+  document.getElementById('analysis').innerHTML =
+    `Grid lógico ${BASE_W}×${BASE_H} celdas → <strong>${gridW}×${gridH} px</strong> de mundo. ` +
+    `Mapa ${WORLD_W}×${WORLD_H}. HQ ocupa ${(5*4*CELL*100/(WORLD_W*WORLD_H)).toFixed(1)}% del mapa. ` +
+    `Con CELL=96, una Casa (4×2) = ${4*CELL}×${2*CELL} px — coherente con parcelas visuales del mapa aprobado. ` +
+    `Alternativa 80 px/celda: Casa 320×160 (más densa). Alternativa 72: Casa 288×144.`;
+}
+
+function fitCamera() {
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  const zoom = Math.min(vw / WORLD_W, vh / WORLD_H) * 0.92;
+  const tx = (vw - WORLD_W * zoom) / 2;
+  const ty = (vh - WORLD_H * zoom) / 2;
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${zoom})`;
+}
+window.addEventListener('resize', fitCamera);
+</script>
+</body>
+</html>

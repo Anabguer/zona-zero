@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zona Zero · elige estilo de colonia</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: #12100c;
+      color: #e8e0d4;
+      display: flex;
+      flex-direction: column;
+    }
+    header { padding: 0.85rem 1rem 0.55rem; border-bottom: 1px solid #2a241c; }
+    h1 { font-family: Rajdhani, sans-serif; font-size: 1.35rem; margin: 0 0 0.25rem; }
+    .lead { margin: 0; color: #9a9080; font-size: 0.88rem; }
+    .now {
+      margin: 0.45rem 0 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #e8c070;
+    }
+    .err { color: #e07060; font-size: 0.9rem; margin: 0.4rem 0 0; }
+    .picks { display: flex; gap: 0.55rem; padding: 0.75rem 1rem; flex-wrap: wrap; }
+    .pick {
+      flex: 1;
+      min-width: 9.5rem;
+      background: #1a1612;
+      border: 3px solid #3a3228;
+      color: #e8e0d4;
+      border-radius: 10px;
+      padding: 0.85rem 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+    }
+    .pick:disabled { opacity: 0.45; cursor: wait; }
+    .pick strong { display: block; font-size: 1.1rem; }
+    .pick span { display: block; margin-top: 0.25rem; color: #9a9080; font-size: 0.75rem; }
+    .pick[data-style="yard"].is-on { border-color: #d4a060; background: #3a2c18; }
+    .pick[data-style="dirt"].is-on { border-color: #6a8a50; background: #1e2818; }
+    .pick[data-style="iso"].is-on { border-color: #70a8d4; background: #182838; }
+    iframe {
+      flex: 1;
+      width: 100%;
+      min-height: 62vh;
+      border: 0;
+      background: #0c0a08;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Elige A, B o C</h1>
+    <p class="lead">El mapa carga una vez. Luego cada botón cambia el suelo y las casas al momento.</p>
+    <p class="now" id="now">Cargando mapa…</p>
+    <p class="err" id="err" hidden></p>
+  </header>
+  <div class="picks">
+    <button type="button" class="pick" data-style="yard" disabled>
+      <strong>A · Patio ilustrado</strong>
+      <span>Suelo ocre + casas dibujadas</span>
+    </button>
+    <button type="button" class="pick" data-style="dirt" disabled>
+      <strong>B · Tierra continua</strong>
+      <span>Oscuro, pegatinas (el de ahora)</span>
+    </button>
+    <button type="button" class="pick" data-style="iso" disabled>
+      <strong>C · Bloques isométricos</strong>
+      <span>Cajas claras de madera</span>
+    </button>
+  </div>
+  <iframe id="preview" title="Vista de la colonia" src="./harness-zz#new=1&amp;demo=1&amp;colonyStyle=yard"></iframe>
+  <script>
+    const LABELS = {
+      yard: 'Viendo: A · Patio ilustrado (ocre, casas dibujadas)',
+      dirt: 'Viendo: B · Tierra continua (oscuro, pegatinas)',
+      iso: 'Viendo: C · Bloques isométricos (cajas de madera)',
+    };
+    const frame = document.getElementById('preview');
+    const now = document.getElementById('now');
+    const err = document.getElementById('err');
+    const buttons = [...document.querySelectorAll('.pick')];
+    let ready = false;
+
+    function game() {
+      return frame.contentWindow?.__zz || null;
+    }
+
+    function show(style) {
+      const zz = game();
+      if (!zz?.setColonyStyle) {
+        err.hidden = false;
+        err.textContent = 'El mapa aún no está listo. Espera un segundo y pulsa otra vez.';
+        return;
+      }
+      err.hidden = true;
+      zz.setColonyStyle(style);
+      now.textContent = LABELS[style];
+      buttons.forEach((b) => b.classList.toggle('is-on', b.dataset.style === style));
+    }
+
+    function waitReady() {
+      let n = 0;
+      const tick = () => {
+        n += 1;
+        const w = frame.contentWindow;
+        if (w?.__zzOk && w.__zz?.setColonyStyle) {
+          w.document.body.classList.add('zz-body--demo');
+          ready = true;
+          buttons.forEach((b) => { b.disabled = false; });
+          show('yard');
+          return;
+        }
+        if (w?.__zzErr) {
+          err.hidden = false;
+          err.textContent = 'Error al cargar el mapa: ' + w.__zzErr;
+          now.textContent = 'No se pudo cargar';
+          return;
+        }
+        if (n < 80) setTimeout(tick, 200);
+        else {
+          err.hidden = false;
+          err.textContent = 'No carga el mapa. Recarga esta página (Ctrl+F5).';
+        }
+      };
+      tick();
+    }
+
+    frame.addEventListener('load', waitReady);
+    buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.style)));
+    setTimeout(waitReady, 400);
+  </script>
+</body>
+</html>

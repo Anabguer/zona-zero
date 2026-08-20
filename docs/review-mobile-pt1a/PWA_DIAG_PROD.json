@@ -1,0 +1,84 @@
+{
+  "href": "https://intocables13.com/juegos/zona-zero/",
+  "title": "Zona Zero",
+  "displayModeStandalone": false,
+  "displayModeFullscreen": false,
+  "displayModeBrowser": true,
+  "navigatorStandalone": false,
+  "bodyHasStandaloneClass": false,
+  "manifestLink": "https://intocables13.com/juegos/zona-zero/manifest.webmanifest?v=43",
+  "manifestStatus": 200,
+  "manifest": {
+    "name": "Zona Zero",
+    "short_name": "Zona Zero",
+    "description": "Supervivencia postapocalíptica. Gestiona el refugio, explora y sobrevive.",
+    "id": "/juegos/zona-zero/",
+    "start_url": "/juegos/zona-zero/?source=pwa",
+    "scope": "/juegos/zona-zero/",
+    "display": "standalone",
+    "orientation": "landscape",
+    "background_color": "#12100c",
+    "theme_color": "#12100c",
+    "lang": "es",
+    "categories": [
+      "games"
+    ],
+    "icons": [
+      {
+        "src": "/juegos/zona-zero/assets/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/juegos/zona-zero/assets/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/juegos/zona-zero/assets/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ]
+  },
+  "icons": [
+    {
+      "src": "/juegos/zona-zero/assets/icon-192.png",
+      "status": 200,
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/juegos/zona-zero/assets/icon-512.png",
+      "status": 200,
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/juegos/zona-zero/assets/icon-512.png",
+      "status": 200,
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "sw": {
+    "supported": true,
+    "controller": true,
+    "registrationScope": "https://intocables13.com/juegos/zona-zero/",
+    "activeState": "activated",
+    "installing": false,
+    "waiting": false
+  },
+  "installCta": {
+    "present": true,
+    "hidden": true,
+    "btnText": "Instalar app",
+    "dismissedKey": null
+  },
+  "hasNuevaOrContinuar": true,
+  "chromeBarNote": "La barra X|título|dominio|⋮ NO está en el DOM del juego; es Chrome/Custom Tab.",
+  "beforeinstallpromptNote": "Playwright headless suele NO disparar beforeinstallprompt; en Android Chrome real sí puede tras engagement."
+}

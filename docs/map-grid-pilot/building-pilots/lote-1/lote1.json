@@ -1,0 +1,54 @@
+{
+  "lote": 1,
+  "frozen": true,
+  "note": "CONGELADO. No regenerar. Maestros no regenerados. NO gameplay.",
+  "farm_upgrades": "El catálogo no tiene niveles de huerto; greenhouse es edificio aparte. Se mantiene 3×2.",
+  "sawmill_footprint": "5x3 aprobado",
+  "pilots": [
+    {
+      "id": "storage",
+      "name": "Almacén",
+      "footprint": "5x3",
+      "anchor": "S3",
+      "asset": "01-storage-5x3.png"
+    },
+    {
+      "id": "infirmary",
+      "name": "Enfermería",
+      "footprint": "4x3",
+      "anchor": "Y3",
+      "asset": "01-infirmary-4x3.png"
+    },
+    {
+      "id": "farm",
+      "name": "Huerto",
+      "footprint": "3x2",
+      "anchor": "S7",
+      "asset": "01-farm-3x2.png"
+    },
+    {
+      "id": "well",
+      "name": "Pozo",
+      "footprint": "2x1",
+      "anchor": "W7",
+      "asset": "01-well-2x1.png"
+    }
+  ],
+  "masters_on_map_for_scale": [
+    {
+      "id": "house",
+      "anchor": "AK3",
+      "footprint": "4x2"
+    },
+    {
+      "id": "workshop",
+      "anchor": "AK7",
+      "footprint": "5x2"
+    },
+    {
+      "id": "hq_central_l1",
+      "anchor": "AQ3",
+      "footprint": "5x4"
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Zona Zero — DEBUG candidatos Núcleo / HQ</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:#0e0b06; font-family:'Segoe UI',system-ui,sans-serif; }
+#viewport {
+  position:fixed; inset:0; bottom:58px;
+  overflow:hidden; cursor:grab; touch-action:none; background:#0e0b06;
+}
+#viewport.grabbing { cursor:grabbing; }
+#world {
+  position:absolute; width:1819px; height:865px;
+  transform-origin:0 0; will-change:transform;
+}
+#map-img {
+  position:absolute; inset:0; width:1819px; height:865px;
+  display:block; pointer-events:none;
+}
+#overlay {
+  position:absolute; inset:0; width:1819px; height:865px;
+  pointer-events:none;
+}
+#hud {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  padding:6px 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  background:rgba(0,0,0,.85); color:#f5e9c0; font-size:12px;
+  pointer-events:none;
+}
+#hud strong { font-size:13px; }
+#panel {
+  position:fixed; right:8px; top:42px; z-index:200;
+  background:rgba(0,0,0,.9); border:1px solid rgba(255,255,255,.15);
+  border-radius:10px; padding:10px 12px; color:#e8ddb0;
+  font:11px/1.45 Consolas,monospace; max-width:280px;
+  pointer-events:all; max-height:calc(100vh - 110px); overflow:auto;
+}
+#panel h3 { font:700 12px 'Segoe UI',sans-serif; color:#ffd87a; margin-bottom:6px; }
+.cand {
+  border:1px solid rgba(255,255,255,.12); border-radius:8px;
+  padding:7px 8px; margin-bottom:7px; cursor:pointer;
+}
+.cand:hover { background:rgba(255,255,255,.06); }
+.cand.active { outline:2px solid #ffd87a; background:rgba(255,216,122,.12); }
+.cand .title { font-weight:700; font-size:12px; margin-bottom:2px; }
+.cand.a .title { color:#7ec8ff; }
+.cand.b .title { color:#9dff9d; }
+.cand.c .title { color:#ffc86a; }
+.cand.cur .title { color:#ff8080; }
+#toolbar {
+  position:fixed; left:0; right:0; bottom:0; z-index:300;
+  display:flex; flex-wrap:wrap; gap:5px; align-items:center;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  background:rgba(8,6,4,.94); border-top:1px solid rgba(255,255,255,.12);
+}
+#toolbar button {
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2);
+  color:#f5e9c0; border-radius:6px; padding:6px 9px; font-size:11px; font-weight:600; cursor:pointer;
+}
+#toolbar button.on { outline:2px solid #ffd87a; background:rgba(255,216,122,.18); }
+#toast {
+  position:fixed; top:40px; left:50%; transform:translateX(-50%); z-index:400;
+  background:rgba(30,80,30,.92); color:#d6ffd6; padding:7px 12px; border-radius:8px;
+  font-size:12px; display:none; pointer-events:none;
+}
+.note { opacity:.7; font-size:10px; margin-top:6px; line-height:1.35; }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <strong>DEBUG · Candidatos Núcleo / Refugio Central</strong>
+  <span>SOLO revisión visual · sin gameplay · JSON zonas intacto</span>
+  <span id="hud-cam"></span>
+</div>
+<div id="toast"></div>
+
+<div id="panel">
+  <h3>Elige viendo el mapa</h3>
+  <div id="cand-list"></div>
+  <div class="note">
+    Footprint HQ 5×4 = 120×96 px mundo (celdas terreno 24 px) — provisional para posicionar.<br>
+    No congela footprint de construcción.<br>
+    Halo = celdas buildable en radio 6 (excluye footprint).
+  </div>
+</div>
+
+<div id="viewport">
+  <div id="world">
+    <img id="map-img" src="assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png" width="1819" height="865" alt="">
+    <svg id="overlay" viewBox="0 0 1819 865" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<div id="toolbar">
+  <button type="button" class="on" id="btn-zones">Zonas</button>
+  <button type="button" class="on" id="btn-halos">Halos buildable</button>
+  <button type="button" class="on" id="btn-fps">Footprints HQ</button>
+  <button type="button" class="on" id="btn-labels">Etiquetas</button>
+  <button type="button" id="btn-fit">Fit mundo</button>
+  <button type="button" id="btn-focus-a">Focus A</button>
+  <button type="button" id="btn-focus-b">Focus B</button>
+  <button type="button" id="btn-focus-c">Focus C</button>
+  <button type="button" id="btn-focus-cur">Focus ACTUAL</button>
+</div>
+
+<script>
+const ZONES_URL = 'content/pilot/neni-pilot-zones-v3.json';
+const CAND_URL = 'content/pilot/hq-nucleus-candidates-v1.json';
+const WORLD_W = 1819, WORLD_H = 865, ZOOM_MAX = 3;
+
+const COLORS = {
+  A: { stroke: '#5eb0ff', fill: 'rgba(80,160,255,0.22)', mark: '#7ec8ff' },
+  B: { stroke: '#5fdc5f', fill: 'rgba(60,200,80,0.22)', mark: '#9dff9d' },
+  C: { stroke: '#ffb84a', fill: 'rgba(255,170,60,0.25)', mark: '#ffc86a' },
+  ACTUAL: { stroke: '#ff6666', fill: 'rgba(255,80,80,0.15)', mark: '#ff8080' },
+};
+
+let zones = null, cands = null;
+let cam = { x: WORLD_W / 2, y: WORLD_H / 2, zoom: 1 };
+let showZones = true, showHalos = true, showFps = true, showLabels = true;
+let focusId = null;
+
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+const overlay = document.getElementById('overlay');
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.display = 'none'; }, 2000);
+}
+
+function zoomMin() {
+  return Math.max(viewport.clientWidth / WORLD_W, viewport.clientHeight / WORLD_H);
+}
+function applyCamera() {
+  const vw = viewport.clientWidth, vh = viewport.clientHeight;
+  cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, cam.zoom));
+  const halfW = vw / 2 / cam.zoom, halfH = vh / 2 / cam.zoom;
+  if (vw / cam.zoom >= WORLD_W) cam.x = WORLD_W / 2;
+  else cam.x = Math.max(halfW, Math.min(WORLD_W - halfW, cam.x));
+  if (vh / cam.zoom >= WORLD_H) cam.y = WORLD_H / 2;
+  else cam.y = Math.max(halfH, Math.min(WORLD_H - halfH, cam.y));
+  world.style.transform = `scale(${cam.zoom}) translate(${-(cam.x - halfW)}px,${-(cam.y - halfH)}px)`;
+  document.getElementById('hud-cam').textContent =
+    `z=${cam.zoom.toFixed(2)} · (${Math.round(cam.x)},${Math.round(cam.y)})`;
+}
+function fitWorld() {
+  cam.zoom = zoomMin(); cam.x = WORLD_W / 2; cam.y = WORLD_H / 2; applyCamera();
+}
+function focusOn(wx, wy, z = 1.25) {
+  cam.x = wx; cam.y = wy; cam.zoom = Math.max(zoomMin(), z); applyCamera();
+}
+
+function parseKey(k) { const [cx, cy] = k.split(',').map(Number); return { cx, cy }; }
+function cellRect(cx, cy, g) {
+  const [ox, oy] = g.origin; const cell = g.cellPx;
+  return { x: ox + cx * cell, y: oy + cy * cell, w: cell, h: cell };
+}
+function isBuildable(cx, cy) {
+  const k = `${cx},${cy}`;
+  const v = zones.overrides?.[k];
+  return !v || v === 'buildable';
+}
+
+function renderPanel() {
+  const list = document.getElementById('cand-list');
+  const items = [
+    { id: 'ACTUAL', ...{ world: cands.currentNucleus.world, why: 'Punto actual (demasiado arriba/derecha)', aroundR6Buildable: '—', dirs: null, nearRoadCells: '—', cell: null } },
+    cands.candidates.A,
+    cands.candidates.B,
+    cands.candidates.C,
+  ];
+  list.innerHTML = items.map((c) => {
+    if (!c) return '';
+    const cls = c.id === 'ACTUAL' ? 'cur' : c.id.toLowerCase();
+    const dirs = c.dirs
+      ? `N${c.dirs.N} E${c.dirs.E} S${c.dirs.S} W${c.dirs.W} (min ${c.dirs.min})`
+      : '—';
+    const around = c.aroundR6Buildable != null ? `${c.aroundR6Buildable}/${c.aroundR6Total ?? '—'}` : '—';
+    return `<div class="cand ${cls} ${focusId === c.id ? 'active' : ''}" data-id="${c.id}">
+      <div class="title">${c.id} · world (${c.world.join(', ')})</div>
+      <div>${c.why || ''}</div>
+      <div>celda: ${c.cell ? c.cell.join(',') : '—'} · road≈${c.nearRoadCells ?? '—'} celdas</div>
+      <div>buildable radio6: ${around}</div>
+      <div>expansión: ${dirs}</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.cand').forEach((el) => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      focusId = id;
+      const c = id === 'ACTUAL'
+        ? { world: cands.currentNucleus.world }
+        : cands.candidates[id];
+      if (c) focusOn(c.world[0], c.world[1], 1.35);
+      renderPanel();
+      render();
+    });
+  });
+}
+
+function drawCandidate(c, id) {
+  if (!c) return;
+  const g = zones.grid;
+  const col = COLORS[id];
+  const [wx, wy] = c.world;
+  const cell = g.cellPx;
+  const fw = 5, fh = 4;
+
+  // Halo buildable radio 6
+  if (showHalos && c.cell) {
+    const [ccx, ccy] = c.cell;
+    const ax = ccx - 2, ay = ccy - 2;
+    for (let dy = -6; dy <= 6; dy++) {
+      for (let dx = -6; dx <= 6; dx++) {
+        const x = ccx + dx, y = ccy + dy;
+        if (x >= ax && x < ax + fw && y >= ay && y < ay + fh) continue;
+        if (!isBuildable(x, y)) continue;
+        const r = cellRect(x, y, g);
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', r.x + 0.5);
+        rect.setAttribute('y', r.y + 0.5);
+        rect.setAttribute('width', r.w - 1);
+        rect.setAttribute('height', r.h - 1);
+        rect.setAttribute('fill', col.fill);
+        rect.setAttribute('stroke', 'none');
+        overlay.appendChild(rect);
+      }
+    }
+  }
+
+  // Footprint 5×4
+  if (showFps && c.cell) {
+    const [ccx, ccy] = c.cell;
+    const ax = ccx - 2, ay = ccy - 2;
+    const r = cellRect(ax, ay, g);
+    const fp = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fp.setAttribute('x', r.x);
+    fp.setAttribute('y', r.y);
+    fp.setAttribute('width', fw * cell);
+    fp.setAttribute('height', fh * cell);
+    fp.setAttribute('fill', col.fill);
+    fp.setAttribute('stroke', col.stroke);
+    fp.setAttribute('stroke-width', focusId === id ? 3 : 2);
+    fp.setAttribute('stroke-dasharray', '6 3');
+    overlay.appendChild(fp);
+  } else if (showFps && id === 'ACTUAL') {
+    // marca actual sin footprint de celdas: círculo + caja orientativa 5×4 centrada
+    const fp = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fp.setAttribute('x', wx - (5 * cell) / 2);
+    fp.setAttribute('y', wy - (4 * cell) / 2);
+    fp.setAttribute('width', 5 * cell);
+    fp.setAttribute('height', 4 * cell);
+    fp.setAttribute('fill', col.fill);
+    fp.setAttribute('stroke', col.stroke);
+    fp.setAttribute('stroke-width', 2);
+    fp.setAttribute('stroke-dasharray', '4 4');
+    overlay.appendChild(fp);
+  }
+
+  // Mark point
+  const cross = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c1.setAttribute('cx', wx); c1.setAttribute('cy', wy); c1.setAttribute('r', 7);
+  c1.setAttribute('fill', col.mark); c1.setAttribute('stroke', '#fff'); c1.setAttribute('stroke-width', '2');
+  cross.appendChild(c1);
+  if (showLabels) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', wx);
+    t.setAttribute('y', wy - 14);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('fill', col.mark);
+    t.setAttribute('font-size', '13');
+    t.setAttribute('font-weight', '700');
+    t.setAttribute('font-family', 'Segoe UI, sans-serif');
+    t.setAttribute('stroke', '#000');
+    t.setAttribute('stroke-width', '3');
+    t.setAttribute('paint-order', 'stroke');
+    t.textContent = `${id} (${wx},${wy})`;
+    cross.appendChild(t);
+  }
+  overlay.appendChild(cross);
+}
+
+function render() {
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  if (!zones || !cands) return;
+  const g = zones.grid;
+
+  if (showZones) {
+    // blocked / forest / scrap soft
+    Object.entries(zones.overrides || {}).forEach(([k, sem]) => {
+      const { cx, cy } = parseKey(k);
+      const r = cellRect(cx, cy, g);
+      const fill = sem === 'blocked' ? 'rgba(200,70,50,0.28)'
+        : sem === 'forest' ? 'rgba(40,140,55,0.32)'
+        : sem === 'scrap' ? 'rgba(200,130,40,0.32)' : null;
+      if (!fill) return;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', r.x + 0.5);
+      rect.setAttribute('y', r.y + 0.5);
+      rect.setAttribute('width', r.w - 1);
+      rect.setAttribute('height', r.h - 1);
+      rect.setAttribute('fill', fill);
+      overlay.appendChild(rect);
+    });
+  }
+
+  drawCandidate({ world: cands.currentNucleus.world }, 'ACTUAL');
+  drawCandidate(cands.candidates.A, 'A');
+  drawCandidate(cands.candidates.B, 'B');
+  drawCandidate(cands.candidates.C, 'C');
+}
+
+async function boot() {
+  const [zr, cr] = await Promise.all([
+    fetch(ZONES_URL + '?v=' + Date.now()),
+    fetch(CAND_URL + '?v=' + Date.now()),
+  ]);
+  if (!zr.ok) throw new Error('No zonas canónicas');
+  if (!cr.ok) throw new Error('No candidatos HQ');
+  zones = await zr.json();
+  cands = await cr.json();
+  if (zones.schema !== 'neni-pilot-zone-map-v3') throw new Error('Schema zonas inesperado');
+  renderPanel();
+  render();
+  fitWorld();
+  toast('Candidatos A/B/C listos — elige en el panel');
+}
+
+document.getElementById('btn-zones').addEventListener('click', (e) => {
+  showZones = !showZones; e.target.classList.toggle('on', showZones); render();
+});
+document.getElementById('btn-halos').addEventListener('click', (e) => {
+  showHalos = !showHalos; e.target.classList.toggle('on', showHalos); render();
+});
+document.getElementById('btn-fps').addEventListener('click', (e) => {
+  showFps = !showFps; e.target.classList.toggle('on', showFps); render();
+});
+document.getElementById('btn-labels').addEventListener('click', (e) => {
+  showLabels = !showLabels; e.target.classList.toggle('on', showLabels); render();
+});
+document.getElementById('btn-fit').addEventListener('click', fitWorld);
+document.getElementById('btn-focus-a').addEventListener('click', () => {
+  focusId = 'A'; focusOn(...cands.candidates.A.world, 1.35); renderPanel(); render();
+});
+document.getElementById('btn-focus-b').addEventListener('click', () => {
+  focusId = 'B'; focusOn(...cands.candidates.B.world, 1.35); renderPanel(); render();
+});
+document.getElementById('btn-focus-c').addEventListener('click', () => {
+  focusId = 'C'; focusOn(...cands.candidates.C.world, 1.35); renderPanel(); render();
+});
+document.getElementById('btn-focus-cur').addEventListener('click', () => {
+  focusId = 'ACTUAL'; focusOn(...cands.currentNucleus.world, 1.35); renderPanel(); render();
+});
+
+let drag = null, camD = null;
+viewport.addEventListener('pointerdown', (e) => {
+  drag = { x: e.clientX, y: e.clientY }; camD = { ...cam };
+  viewport.classList.add('grabbing');
+});
+viewport.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  cam.x = camD.x - (e.clientX - drag.x) / cam.zoom;
+  cam.y = camD.y - (e.clientY - drag.y) / cam.zoom;
+  applyCamera();
+});
+function endP() { drag = null; viewport.classList.remove('grabbing'); }
+viewport.addEventListener('pointerup', endP);
+viewport.addEventListener('pointercancel', endP);
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.909;
+  const rect = viewport.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const ox = cam.x - viewport.clientWidth / 2 / cam.zoom;
+  const oy = cam.y - viewport.clientHeight / 2 / cam.zoom;
+  const wx = ox + mx / cam.zoom, wy = oy + my / cam.zoom;
+  cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, cam.zoom * factor));
+  cam.x = wx - mx / cam.zoom + viewport.clientWidth / 2 / cam.zoom;
+  cam.y = wy - my / cam.zoom + viewport.clientHeight / 2 / cam.zoom;
+  applyCamera();
+}, { passive: false });
+window.addEventListener('resize', applyCamera);
+
+boot().catch((err) => toast(err.message));
+</script>
+</body>
+</html>

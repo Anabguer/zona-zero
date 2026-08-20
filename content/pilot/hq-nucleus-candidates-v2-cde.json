@@ -1,0 +1,153 @@
+{
+  "schema": "hq-nucleus-candidates-v2-cde",
+  "note": "SOLO visual. JSON zonas canónico intacto. Footprint 5×4 en cellPx terreno 24 solo para posición.",
+  "mobilePortrait": {
+    "w": 390,
+    "h": 844,
+    "proposedInitialZoom": 1.2,
+    "zoomMinFit": 0.9757
+  },
+  "candidates": {
+    "C": {
+      "id": "C",
+      "why": "C — referencia (prueba anterior)",
+      "cell": [
+        -4,
+        8
+      ],
+      "world": [
+        848,
+        340
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 108,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 8,
+        "W": 2,
+        "S": 2,
+        "N": 2,
+        "min": 2,
+        "sum": 14
+      },
+      "nearRoadCells": 3,
+      "edgeMargin": 14,
+      "deltaFromC": [
+        0,
+        0
+      ],
+      "mobileViewport": {
+        "zoom": 1.2,
+        "visibleWorld": [
+          325,
+          703
+        ],
+        "worldAbovePx": 340,
+        "worldBelowPx": 352,
+        "viewTop": 0,
+        "viewBottom": 692
+      }
+    },
+    "D": {
+      "id": "D",
+      "why": "D — ~150–200 px más abajo que C (snap buildable + HQ 5×4)",
+      "cell": [
+        -5,
+        16
+      ],
+      "world": [
+        824,
+        532
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 100,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 5,
+        "W": 2,
+        "S": 2,
+        "N": 3,
+        "min": 2,
+        "sum": 12
+      },
+      "nearRoadCells": 2,
+      "edgeMargin": 14,
+      "deltaFromC": [
+        -24,
+        192
+      ],
+      "mobileViewport": {
+        "zoom": 1.2,
+        "visibleWorld": [
+          325,
+          703
+        ],
+        "worldAbovePx": 352,
+        "worldBelowPx": 333,
+        "viewTop": 180,
+        "viewBottom": 865
+      }
+    },
+    "E": {
+      "id": "E",
+      "why": "E — ~300–350 px más abajo que C (snap buildable + HQ 5×4)",
+      "cell": [
+        0,
+        22
+      ],
+      "world": [
+        944,
+        676
+      ],
+      "footprintCells": [
+        5,
+        4
+      ],
+      "footprintWorldPx": [
+        120,
+        96
+      ],
+      "aroundR6Buildable": 103,
+      "aroundR6Total": 149,
+      "dirs": {
+        "E": 2,
+        "W": 9,
+        "S": 2,
+        "N": 3,
+        "min": 2,
+        "sum": 16
+      },
+      "nearRoadCells": 3,
+      "edgeMargin": 8,
+      "deltaFromC": [
+        96,
+        336
+      ],
+      "mobileViewport": {
+        "zoom": 1.2,
+        "visibleWorld": [
+          325,
+          703
+        ],
+        "worldAbovePx": 352,
+        "worldBelowPx": 189,
+        "viewTop": 324,
+        "viewBottom": 865
+      }
+    }
+  }
+}

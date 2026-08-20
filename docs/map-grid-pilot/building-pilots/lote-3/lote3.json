@@ -1,0 +1,96 @@
+{
+  "lote": 3,
+  "note": "Revisión parcial. Chatarrería, radio y botiquín CONGELADOS. Refugio en HOLD HUMANO. No lote 4.",
+  "terrain_master": "docs/map-grid-pilot/terrain-iter-match-lote1/01-map-empty.png",
+  "pilots": [
+    {
+      "id": "scrapyard",
+      "name": "Chatarrería",
+      "footprint": "5x3",
+      "anchor": "B3",
+      "asset": "01-scrapyard-5x3.png",
+      "status": "frozen"
+    },
+    {
+      "id": "medkit",
+      "name": "Botiquín",
+      "footprint": "2x2",
+      "anchor": "Q3",
+      "asset": "01-medkit-2x2.png",
+      "status": "frozen"
+    },
+    {
+      "id": "shelter",
+      "name": "Refugio",
+      "footprint": "3x2",
+      "anchor": "B7",
+      "asset": "01-shelter-3x2.png",
+      "status": "hold_humano"
+    },
+    {
+      "id": "radio",
+      "name": "Radio",
+      "footprint": "3x2",
+      "anchor": "F7",
+      "asset": "01-radio-3x2.png",
+      "status": "frozen"
+    }
+  ],
+  "frozen_on_map": [
+    {
+      "id": "house",
+      "anchor": "AK3",
+      "footprint": "4x2"
+    },
+    {
+      "id": "workshop",
+      "anchor": "AK7",
+      "footprint": "5x2"
+    },
+    {
+      "id": "hq_central_l1",
+      "anchor": "AQ3",
+      "footprint": "5x4"
+    },
+    {
+      "id": "storage",
+      "anchor": "S3",
+      "footprint": "5x3"
+    },
+    {
+      "id": "infirmary",
+      "anchor": "Y3",
+      "footprint": "4x3"
+    },
+    {
+      "id": "farm",
+      "anchor": "S7",
+      "footprint": "3x2"
+    },
+    {
+      "id": "well",
+      "anchor": "W7",
+      "footprint": "2x1"
+    },
+    {
+      "id": "sawmill",
+      "anchor": "L3",
+      "footprint": "5x3"
+    },
+    {
+      "id": "greenhouse",
+      "anchor": "AD3",
+      "footprint": "4x3"
+    },
+    {
+      "id": "kitchen",
+      "anchor": "L7",
+      "footprint": "4x2"
+    },
+    {
+      "id": "cistern",
+      "anchor": "Y7",
+      "footprint": "2x2"
+    }
+  ]
+}

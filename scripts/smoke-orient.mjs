@@ -15,7 +15,7 @@ function assert(c, m) {
 }
 
 async function boot(page) {
-  await page.goto(`${BASE}/dev/harness.html#new=1&clear=1&name=Refugio%20Norte`, {
+  await page.goto(`${BASE}/dev/harness-zz.html#new=1&clear=1&name=Refugio%20Norte`, {
     waitUntil: 'networkidle',
     timeout: 60000,
   });

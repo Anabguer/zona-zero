@@ -1,7 +1,11 @@
 # PLAYTEST SESSION 1+2 — Guía de ejecución (Neni)
 
 **Fecha:** 2026-08-16  
-**Marco:** PRE_RELEASE_PLAN APROBADO · ZZ-183 APROBADA · **deploy playtest interno AUTORIZADO** (no release público)  
+**Estado PT1:** **PT1-A INTERRUMPIDO** — NO APROBADO PARA PLAYTEST MÓVIL (viewport / chrome).  
+**Informe:** `docs/review-mobile-pt1a/PT1A_VIEWPORT_MOBILE.md`  
+**Regla:** no continuar evaluando gameplay hasta OK de experiencia móvil. Reiniciar PT1 desde Nueva partida después del fix.
+
+**Marco:** PRE_RELEASE_PLAN APROBADO · ZZ-183 APROBADA · deploy playtest interno existía; **nuevo deploy móvil BLOQUEADO** hasta revisión viewport.  
 **Dispositivo:** móvil **en horizontal (landscape)**  
 **Regla de oro:** Neni juega como jugadora. **Sin checklist técnica** mientras juega.
 
@@ -14,7 +18,18 @@
 **Build playtest producción (2026-08-16):**  
 `https://intocables13.com/juegos/zona-zero/`  
 Requiere login Intocables. Móvil en **horizontal**.  
-Cache assets: `?v=40`. Si ves algo antiguo: recarga forzada una vez.
+
+### Estado sesión
+
+| ID | Estado | Motivo |
+|----|--------|--------|
+| **PT1-A** | **INTERRUMPIDO** | Viewport móvil / chrome navegador + HUD (ver `docs/review-mobile-pt1a/PT1A_VIEWPORT_MOBILE.md`) |
+| PLAYTEST 1 completo | **NO** — reiniciar desde Nueva partida tras fix móvil | |
+| PLAYTEST 2 | No iniciar | |
+
+**WATCH:** `WATCH-ONBOARDING-PACING` — coach «Colocá un huerto» demasiado inmediato.  
+**Intro:** positivo (Neni).  
+**Portada:** feedback logo-first registrado; propuesta sin deploy.
 
 ---
 
@@ -193,5 +208,6 @@ Pasar las hojas a Cursor/ChatGPT después — **no** durante la partida.
 ## Referencias
 
 - `docs/PLAYTEST_PLAN.md` — protocolo completo PT1–4  
+- `docs/review-mobile-pt1a/PT1A_VIEWPORT_MOBILE.md` — **PT1-A** viewport móvil (bloqueante)  
 - `docs/PRE_RELEASE_PLAN.md` — marco aprobado  
 - `docs/PRE_RELEASE_AUDIT.md` · `docs/ART_DEBT_AUDIT.md`

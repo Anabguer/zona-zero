@@ -41,6 +41,14 @@ $swJs = Join-Path $Root 'sw.js'
 $assetsLogo = Join-Path $Root 'assets\logo.svg'
 $icon192 = Join-Path $Root 'assets\icon-192.png'
 $icon512 = Join-Path $Root 'assets\icon-512.png'
+$cityIso = Join-Path $Root 'assets\art\terrain\city-iso.png'
+$colonyDirt = Join-Path $Root 'assets\art\terrain\colony-iso-world-v3.png'
+$dwellingV1 = Join-Path $Root 'assets\art\buildings\dwelling-v1b.png'
+$farmIso = Join-Path $Root 'assets\art\buildings\farm-iso.png'
+$wellIso = Join-Path $Root 'assets\art\buildings\well-iso.png'
+$propTree = Join-Path $Root 'assets\art\props\tree-dead.png'
+$propCar = Join-Path $Root 'assets\art\props\car-wreck.png'
+$propScrap = Join-Path $Root 'assets\art\props\scrap-pile.png'
 
 $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine('option batch abort')
@@ -61,6 +69,17 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("put `"$assetsLogo`" /juegos/zona-zero/assets/logo.svg")
 [void]$sb.AppendLine("put `"$icon192`" /juegos/zona-zero/assets/icon-192.png")
 [void]$sb.AppendLine("put `"$icon512`" /juegos/zona-zero/assets/icon-512.png")
+[void]$sb.AppendLine("put `"$cityIso`" /juegos/zona-zero/assets/art/terrain/city-iso.png")
+[void]$sb.AppendLine("put `"$colonyDirt`" /juegos/zona-zero/assets/art/terrain/colony-iso-world-v3.png")
+[void]$sb.AppendLine("put `"$dwellingV1`" /juegos/zona-zero/assets/art/buildings/dwelling-v1b.png")
+[void]$sb.AppendLine("put `"$farmIso`" /juegos/zona-zero/assets/art/buildings/farm-iso.png")
+[void]$sb.AppendLine("put `"$wellIso`" /juegos/zona-zero/assets/art/buildings/well-iso.png")
+[void]$sb.AppendLine('option batch continue')
+[void]$sb.AppendLine('mkdir /juegos/zona-zero/assets/art/props')
+[void]$sb.AppendLine('option batch abort')
+[void]$sb.AppendLine("put `"$propTree`" /juegos/zona-zero/assets/art/props/tree-dead.png")
+[void]$sb.AppendLine("put `"$propCar`" /juegos/zona-zero/assets/art/props/car-wreck.png")
+[void]$sb.AppendLine("put `"$propScrap`" /juegos/zona-zero/assets/art/props/scrap-pile.png")
 [void]$sb.AppendLine('exit')
 
 [System.IO.File]::WriteAllText($scriptPath, $sb.ToString())

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Zona Zero — Editor de zonas v3 (cellPx 24)</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:#0e0b06; font-family:'Segoe UI',system-ui,sans-serif; }
+
+#viewport {
+  position:fixed; inset:0; bottom:72px;
+  overflow:hidden; cursor:crosshair; touch-action:none;
+  background:#0e0b06;
+}
+#viewport.grabbing { cursor:grabbing; }
+#viewport.pan-mode { cursor:grab; }
+
+#world {
+  position:absolute;
+  width:1819px; height:865px;
+  transform-origin:0 0;
+  will-change:transform;
+}
+#map-img {
+  position:absolute; inset:0;
+  width:1819px; height:865px;
+  display:block; pointer-events:none;
+}
+#grid-overlay {
+  position:absolute; inset:0;
+  width:1819px; height:865px;
+  pointer-events:none;
+}
+#grid-overlay.no-zones .zone-layer { opacity:0; }
+#grid-overlay.no-grid .grid-layer { opacity:0; }
+
+#toolbar {
+  position:fixed; left:0; right:0; bottom:0; z-index:300;
+  display:flex; flex-wrap:wrap; align-items:center; gap:5px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  background:rgba(8,6,4,.94);
+  border-top:1px solid rgba(255,255,255,.12);
+  color:#f5e9c0;
+  font-size:10px;
+}
+#toolbar button {
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.2);
+  color:#f5e9c0; border-radius:6px;
+  padding:6px 8px; font-size:10px; font-weight:600;
+  cursor:pointer; white-space:nowrap;
+}
+#toolbar button.active { outline:2px solid #ffd87a; background:rgba(255,216,122,.15); }
+#toolbar button.tool-buildable.active { outline-color:#6fdc6f; background:rgba(80,180,80,.25); }
+#toolbar button.tool-blocked.active { outline-color:#e87060; background:rgba(200,80,60,.25); }
+#toolbar button.tool-forest.active { outline-color:#3db84a; background:rgba(40,120,50,.35); }
+#toolbar button.tool-scrap.active { outline-color:#d89040; background:rgba(180,100,30,.35); }
+#toolbar button.tool-erase.active { outline-color:#aaa; }
+#toolbar button.brush-btn.active { outline-color:#a8d4ff; background:rgba(80,140,220,.3); }
+#toolbar .sep { width:1px; height:22px; background:rgba(255,255,255,.15); margin:0 2px; }
+#toolbar .stat { flex:1 1 100%; color:rgba(255,255,255,.55); font-size:10px; padding-top:2px; }
+#toolbar .brush-row { display:flex; align-items:center; gap:4px; }
+
+#hud {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  padding:5px 10px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+  background:rgba(0,0,0,.78); color:#f5e9c0; font-size:12px;
+  pointer-events:none;
+}
+#hud strong { font-size:13px; }
+#toast {
+  position:fixed; top:44px; left:50%; transform:translateX(-50%);
+  z-index:400; padding:8px 14px; border-radius:8px;
+  background:rgba(30,80,30,.92); color:#d6ffd6; font-size:12px;
+  display:none; pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <strong>Editor zonas v3 — cellPx 24 · mapa completo</strong>
+  <span id="hud-bounds"></span>
+  <span id="hud-mode">Modo: CONSTRUIBLE</span>
+  <span id="hud-brush">Pincel: 1×1</span>
+  <span id="hud-groups"></span>
+  <span id="hud-cam"></span>
+</div>
+<div id="toast"></div>
+
+<div id="viewport">
+  <div id="world">
+    <img id="map-img" src="assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png" width="1819" height="865" alt="">
+    <svg id="grid-overlay" viewBox="0 0 1819 865" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<div id="toolbar">
+  <button type="button" class="tool-buildable active" data-tool="buildable">🟩 CONSTRUIBLE</button>
+  <button type="button" class="tool-blocked" data-tool="blocked">🚫 NO CONSTRUIBLE</button>
+  <button type="button" class="tool-forest" data-tool="forest">🌲 BOSQUE</button>
+  <button type="button" class="tool-scrap" data-tool="scrap">🚗 CHATARRA</button>
+  <button type="button" class="tool-erase" data-tool="erase">BORRAR</button>
+  <span class="sep"></span>
+  <span class="brush-row">
+    Pincel:
+    <button type="button" class="brush-btn active" data-brush="1">1×1</button>
+    <button type="button" class="brush-btn" data-brush="2">2×2</button>
+    <button type="button" class="brush-btn" data-brush="3">3×3</button>
+  </span>
+  <span class="sep"></span>
+  <button type="button" id="btn-pan">Pan ✋</button>
+  <button type="button" id="btn-fit">Fit mundo</button>
+  <button type="button" id="btn-overlay">Overlay zonas</button>
+  <button type="button" id="btn-grid">Grid</button>
+  <button type="button" id="btn-labels">Etiquetas</button>
+  <span class="sep"></span>
+  <button type="button" id="btn-save">Guardar</button>
+  <button type="button" id="btn-export">Export JSON</button>
+  <button type="button" id="btn-import">Import JSON</button>
+  <button type="button" id="btn-reset">REINICIAR → TODO CONSTRUIBLE</button>
+  <span class="stat" id="stat-cells">—</span>
+</div>
+<input type="file" id="file-import" accept="application/json,.json" hidden>
+
+<script>
+// ── Contrato v3 — grid completo @ cellPx 24 ───────────
+const WORLD_W = 1819, WORLD_H = 865;
+const NUCLEUS_X = 1100, NUCLEUS_Y = 280;
+/** Solo ancla origen (7×6 celdas desde núcleo); NO es límite espacial. */
+const ORIGIN_ANCHOR_W = 14, ORIGIN_ANCHOR_H = 12;
+const CELL = 24;
+const ZOOM_MAX = 3.0;
+const STORAGE_KEY = 'neni-pilot-zone-map-v3';
+const LEGACY_KEYS = ['neni-pilot-zone-map-v2', 'neni-pilot-zone-map-v1'];
+const AUTOSAVE_MS = 600;
+
+const SEMANTIC = {
+  buildable: { label: 'CONSTRUIBLE', buildable: true, groupType: null },
+  blocked:   { label: 'NO CONSTRUIBLE', buildable: false, groupType: null },
+  forest:    { label: 'BOSQUE / MADERA', buildable: false, groupType: 'forest' },
+  scrap:     { label: 'CHATARRA / METAL', buildable: false, groupType: 'scrap' },
+};
+
+const ZONE_STYLE = {
+  buildable: { fill: 'rgba(90,200,90,0.10)', stroke: 'rgba(120,255,120,0.25)' },
+  blocked:   { fill: 'rgba(200,70,50,0.42)', stroke: 'rgba(255,120,90,0.9)' },
+  forest:    { fill: 'rgba(40,140,55,0.45)', stroke: 'rgba(80,220,100,0.95)' },
+  scrap:     { fill: 'rgba(200,130,40,0.48)', stroke: 'rgba(255,190,80,0.95)' },
+};
+
+function computeWorldGridBounds(cellPx = CELL) {
+  const originX = NUCLEUS_X - (ORIGIN_ANCHOR_W / 2) * cellPx;
+  const originY = NUCLEUS_Y - (ORIGIN_ANCHOR_H / 2) * cellPx;
+  const minX = Math.floor((0 - originX) / cellPx);
+  const minY = Math.floor((0 - originY) / cellPx);
+  const maxX = Math.ceil((WORLD_W - originX) / cellPx) - 1;
+  const maxY = Math.ceil((WORLD_H - originY) / cellPx) - 1;
+  return {
+    originX, originY, minX, minY, maxX, maxY,
+    columns: maxX - minX + 1,
+    rows: maxY - minY + 1,
+    cellPx,
+  };
+}
+const GRID = computeWorldGridBounds();
+
+let cam = { x: NUCLEUS_X, y: NUCLEUS_Y, zoom: 1.0 };
+let tool = 'buildable';
+let brushSize = 1;
+let panMode = false;
+let overlayVisible = true;
+let showGridLines = true;
+let showDestLabels = true;
+/** Sparse overrides — default sin entrada = buildable */
+let overrides = {};
+
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+const overlay = document.getElementById('grid-overlay');
+let autosaveTimer = null;
+let dirty = false;
+
+function gridOrigin() {
+  return { x: GRID.originX, y: GRID.originY };
+}
+
+function inWorldGrid(cx, cy) {
+  return cx >= GRID.minX && cx <= GRID.maxX && cy >= GRID.minY && cy <= GRID.maxY;
+}
+
+function cellRect(cx, cy) {
+  const o = gridOrigin();
+  return { x: o.x + cx * CELL, y: o.y + cy * CELL, w: CELL, h: CELL };
+}
+
+function cellCenterWorld(cx, cy) {
+  const r = cellRect(cx, cy);
+  return { x: r.x + r.w / 2, y: r.y + r.h / 2 };
+}
+
+function worldFromScreen(clientX, clientY) {
+  const rect = viewport.getBoundingClientRect();
+  const mx = clientX - rect.left;
+  const my = clientY - rect.top;
+  const ox = cam.x - viewport.clientWidth / 2 / cam.zoom;
+  const oy = cam.y - viewport.clientHeight / 2 / cam.zoom;
+  return { wx: ox + mx / cam.zoom, wy: oy + my / cam.zoom };
+}
+
+function cellFromWorld(wx, wy) {
+  const o = gridOrigin();
+  const cx = Math.floor((wx - o.x) / CELL);
+  const cy = Math.floor((wy - o.y) / CELL);
+  if (!inWorldGrid(cx, cy)) return null;
+  return { cx, cy };
+}
+
+function key(cx, cy) { return `${cx},${cy}`; }
+
+function parseKey(k) {
+  const [cx, cy] = k.split(',').map(Number);
+  return { cx, cy };
+}
+
+function getSemantic(cx, cy) {
+  return overrides[key(cx, cy)] || 'buildable';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.display = 'none'; }, 2200);
+}
+
+function scheduleAutosave() {
+  dirty = true;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    if (!dirty) return;
+    saveLocal(true);
+    dirty = false;
+  }, AUTOSAVE_MS);
+}
+
+function zoomMin() {
+  return Math.max(viewport.clientWidth / WORLD_W, viewport.clientHeight / WORLD_H);
+}
+
+function applyCamera() {
+  const vw = viewport.clientWidth, vh = viewport.clientHeight;
+  const zm = zoomMin();
+  cam.zoom = Math.max(zm, Math.min(ZOOM_MAX, cam.zoom));
+  const halfW = vw / 2 / cam.zoom;
+  const halfH = vh / 2 / cam.zoom;
+  const visW = vw / cam.zoom;
+  const visH = vh / cam.zoom;
+  if (visW >= WORLD_W) cam.x = WORLD_W / 2;
+  else cam.x = Math.max(halfW, Math.min(WORLD_W - halfW, cam.x));
+  if (visH >= WORLD_H) cam.y = WORLD_H / 2;
+  else cam.y = Math.max(halfH, Math.min(WORLD_H - halfH, cam.y));
+  const ox = cam.x - halfW;
+  const oy = cam.y - halfH;
+  world.style.transform = `scale(${cam.zoom}) translate(${-ox}px,${-oy}px)`;
+  document.getElementById('hud-cam').textContent =
+    `z=${cam.zoom.toFixed(2)} · (${Math.round(cam.x)},${Math.round(cam.y)})`;
+}
+
+function fitWorld() {
+  cam.zoom = zoomMin();
+  cam.x = WORLD_W / 2;
+  cam.y = WORLD_H / 2;
+  applyCamera();
+}
+
+function iterAllCells(fn) {
+  for (let cy = GRID.minY; cy <= GRID.maxY; cy++) {
+    for (let cx = GRID.minX; cx <= GRID.maxX; cx++) fn(cx, cy);
+  }
+}
+
+function computeDestinationGroups(fromOverrides) {
+  const destinations = {};
+  const counters = { forest: 0, scrap: 0 };
+  const rawCells = { ...fromOverrides };
+
+  for (const groupType of ['forest', 'scrap']) {
+    const visited = new Set();
+    const seeds = Object.entries(rawCells)
+      .filter(([, sem]) => sem === groupType)
+      .map(([k]) => k);
+
+    for (const seed of seeds) {
+      if (visited.has(seed)) continue;
+      const queue = [seed];
+      const component = [];
+      visited.add(seed);
+
+      while (queue.length) {
+        const k = queue.shift();
+        component.push(k);
+        const { cx, cy } = parseKey(k);
+        for (const [nx, ny] of [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]]) {
+          if (!inWorldGrid(nx, ny)) continue;
+          const nk = key(nx, ny);
+          if (rawCells[nk] !== groupType || visited.has(nk)) continue;
+          visited.add(nk);
+          queue.push(nk);
+        }
+      }
+
+      counters[groupType] += 1;
+      const id = `${groupType}_zone_${String(counters[groupType]).padStart(2, '0')}`;
+      let sx = 0, sy = 0, wx = 0, wy = 0;
+      component.forEach((k) => {
+        const { cx, cy } = parseKey(k);
+        sx += cx; sy += cy;
+        const c = cellCenterWorld(cx, cy);
+        wx += c.x; wy += c.y;
+      });
+      const n = component.length;
+      destinations[id] = {
+        id,
+        semantic: groupType,
+        label: SEMANTIC[groupType].label,
+        buildable: false,
+        cells: [...component].sort(),
+        cellCount: n,
+        centroidCell: [sx / n, sy / n],
+        centroidWorld: [Math.round(wx / n), Math.round(wy / n)],
+      };
+    }
+  }
+  return destinations;
+}
+
+function buildFullCellRecords(fromOverrides) {
+  const destinations = computeDestinationGroups(fromOverrides);
+  const destByCell = {};
+  Object.values(destinations).forEach((d) => {
+    d.cells.forEach((k) => { destByCell[k] = d.id; });
+  });
+
+  const cells = {};
+  iterAllCells((cx, cy) => {
+    const k = key(cx, cy);
+    const sem = fromOverrides[k] || 'buildable';
+    const meta = SEMANTIC[sem];
+    const rec = { semantic: sem, buildable: meta.buildable };
+    if (destByCell[k]) rec.group = destByCell[k];
+    cells[k] = rec;
+  });
+  return { cells, destinations };
+}
+
+function buildPayload() {
+  const { cells, destinations } = buildFullCellRecords(overrides);
+  return {
+    version: 3,
+    schema: 'neni-pilot-zone-map-v3',
+    savedAt: new Date().toISOString(),
+    defaultSemantic: 'buildable',
+    grid: {
+      cellPx: CELL,
+      world: { w: WORLD_W, h: WORLD_H },
+      nucleus: [NUCLEUS_X, NUCLEUS_Y],
+      origin: [GRID.originX, GRID.originY],
+      bounds: {
+        minX: GRID.minX, minY: GRID.minY,
+        maxX: GRID.maxX, maxY: GRID.maxY,
+        columns: GRID.columns, rows: GRID.rows,
+      },
+    },
+    map: 'assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png',
+    overrides,
+    cells,
+    destinations,
+  };
+}
+
+function renderOverlay() {
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+
+  const o = gridOrigin();
+  const destinations = computeDestinationGroups(overrides);
+  const { minX, minY, maxX, maxY } = GRID;
+
+  const gridLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  gridLayer.setAttribute('class', 'grid-layer');
+
+  const zoneLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  zoneLayer.setAttribute('class', 'zone-layer');
+
+  // Fondo construible suave en todo el grid
+  const buildableBase = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  buildableBase.setAttribute('x', o.x + minX * CELL);
+  buildableBase.setAttribute('y', o.y + minY * CELL);
+  buildableBase.setAttribute('width', GRID.columns * CELL);
+  buildableBase.setAttribute('height', GRID.rows * CELL);
+  buildableBase.setAttribute('fill', ZONE_STYLE.buildable.fill);
+  buildableBase.setAttribute('stroke', 'none');
+  zoneLayer.appendChild(buildableBase);
+
+  if (showGridLines) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('stroke', 'rgba(255,255,255,0.14)');
+    g.setAttribute('stroke-width', '1');
+    g.setAttribute('fill', 'none');
+    for (let cx = minX; cx <= maxX + 1; cx++) {
+      const lx = o.x + cx * CELL;
+      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ln.setAttribute('x1', lx); ln.setAttribute('y1', o.y + minY * CELL);
+      ln.setAttribute('x2', lx); ln.setAttribute('y2', o.y + (maxY + 1) * CELL);
+      g.appendChild(ln);
+    }
+    for (let cy = minY; cy <= maxY + 1; cy++) {
+      const ly = o.y + cy * CELL;
+      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ln.setAttribute('x1', o.x + minX * CELL); ln.setAttribute('y1', ly);
+      ln.setAttribute('x2', o.x + (maxX + 1) * CELL); ln.setAttribute('y2', ly);
+      g.appendChild(ln);
+    }
+    gridLayer.appendChild(g);
+  }
+
+  const drawOrder = ['blocked', 'forest', 'scrap'];
+  for (const type of drawOrder) {
+    Object.entries(overrides).forEach(([k, sem]) => {
+      if (sem !== type) return;
+      const { cx, cy } = parseKey(k);
+      const r = cellRect(cx, cy);
+      const t = ZONE_STYLE[type];
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', r.x + 0.5);
+      rect.setAttribute('y', r.y + 0.5);
+      rect.setAttribute('width', r.w - 1);
+      rect.setAttribute('height', r.h - 1);
+      rect.setAttribute('fill', t.fill);
+      rect.setAttribute('stroke', t.stroke);
+      rect.setAttribute('stroke-width', '1.5');
+      zoneLayer.appendChild(rect);
+    });
+  }
+
+  if (showDestLabels) {
+    Object.values(destinations).forEach((dest) => {
+      const [wx, wy] = dest.centroidWorld;
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', wx);
+      txt.setAttribute('y', wy);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'middle');
+      txt.setAttribute('fill', dest.semantic === 'forest' ? '#b8ffb8' : '#ffd080');
+      txt.setAttribute('font-size', '10');
+      txt.setAttribute('font-family', 'Consolas, monospace');
+      txt.setAttribute('font-weight', '700');
+      txt.setAttribute('stroke', '#000');
+      txt.setAttribute('stroke-width', '2.5');
+      txt.setAttribute('paint-order', 'stroke');
+      txt.textContent = dest.id.replace('_zone_', ' ');
+      zoneLayer.appendChild(txt);
+    });
+  }
+
+  const nucleus = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  nucleus.setAttribute('cx', NUCLEUS_X);
+  nucleus.setAttribute('cy', NUCLEUS_Y);
+  nucleus.setAttribute('r', 5);
+  nucleus.setAttribute('fill', 'none');
+  nucleus.setAttribute('stroke', 'rgba(255,220,100,0.9)');
+  nucleus.setAttribute('stroke-width', '2');
+  gridLayer.appendChild(nucleus);
+
+  overlay.appendChild(zoneLayer);
+  overlay.appendChild(gridLayer);
+  overlay.classList.toggle('no-zones', !overlayVisible);
+  overlay.classList.toggle('no-grid', !showGridLines);
+
+  updateStats(destinations);
+}
+
+function updateStats(destinations) {
+  const counts = { buildable: 0, blocked: 0, forest: 0, scrap: 0 };
+  iterAllCells((cx, cy) => {
+    const sem = getSemantic(cx, cy);
+    if (counts[sem] != null) counts[sem] += 1;
+  });
+  const fGroups = Object.values(destinations).filter(d => d.semantic === 'forest').length;
+  const sGroups = Object.values(destinations).filter(d => d.semantic === 'scrap').length;
+  const totalCells = GRID.columns * GRID.rows;
+  const overrideCount = Object.keys(overrides).length;
+  document.getElementById('stat-cells').textContent =
+    `Total ${GRID.columns}×${GRID.rows}=${totalCells} · C:${counts.buildable} · X:${counts.blocked} · Bosque:${counts.forest} (${fGroups} dest) · Chatarra:${counts.scrap} (${sGroups} dest) · excepciones:${overrideCount}`;
+  document.getElementById('hud-groups').textContent =
+    fGroups || sGroups ? `Destinos: ${fGroups} bosque · ${sGroups} chatarra` : '';
+  document.getElementById('hud-bounds').textContent =
+    `Grid ${GRID.minX}…${GRID.maxX} × ${GRID.minY}…${GRID.maxY} (${GRID.columns}×${GRID.rows}) @ ${CELL}px`;
+}
+
+function applyToolToCell(cx, cy) {
+  if (!inWorldGrid(cx, cy)) return;
+  const k = key(cx, cy);
+  const sem = tool === 'erase' ? 'buildable' : tool;
+  if (sem === 'buildable') delete overrides[k];
+  else overrides[k] = sem;
+}
+
+function paintBrushAt(clientX, clientY) {
+  const { wx, wy } = worldFromScreen(clientX, clientY);
+  const c = cellFromWorld(wx, wy);
+  if (!c) return;
+  const half = Math.floor(brushSize / 2);
+  for (let dy = 0; dy < brushSize; dy++) {
+    for (let dx = 0; dx < brushSize; dx++) {
+      applyToolToCell(c.cx - half + dx, c.cy - half + dy);
+    }
+  }
+  renderOverlay();
+  scheduleAutosave();
+}
+
+function normalizeIncomingCell(v) {
+  if (typeof v === 'string' && SEMANTIC[v]) return v;
+  if (v && typeof v === 'object' && typeof v.semantic === 'string' && SEMANTIC[v.semantic]) {
+    return v.semantic;
+  }
+  return null;
+}
+
+function loadPayload(data, { silent = false } = {}) {
+  if (!data || typeof data !== 'object') throw new Error('JSON inválido');
+
+  const cellPx = data.grid?.cellPx;
+  if (cellPx && cellPx !== CELL) {
+    throw new Error(`cellPx=${cellPx} incompatible con editor v3 (requiere ${CELL})`);
+  }
+
+  overrides = {};
+  if (data.overrides && typeof data.overrides === 'object') {
+    Object.entries(data.overrides).forEach(([k, sem]) => {
+      if (typeof sem === 'string' && sem !== 'buildable' && SEMANTIC[sem]) overrides[k] = sem;
+    });
+  } else if (data.cells && typeof data.cells === 'object') {
+    Object.entries(data.cells).forEach(([k, v]) => {
+      const sem = normalizeIncomingCell(v);
+      if (sem && sem !== 'buildable') overrides[k] = sem;
+    });
+  }
+
+  renderOverlay();
+  if (!silent) toast('Mapa cargado');
+  scheduleAutosave();
+}
+
+function saveLocal(silent = false) {
+  const p = buildPayload();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  if (!silent) toast(`Guardado · ${Object.keys(p.destinations).length} destinos`);
+}
+
+function resetAllBuildable() {
+  if (!confirm('¿REINICIAR todo el mapa a CONSTRUIBLE?\n\nSe borrarán todas las excepciones pintadas por Neni.')) return;
+  overrides = {};
+  renderOverlay();
+  saveLocal(true);
+  toast('Todo construible');
+}
+
+function tryLoadV3() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    loadPayload(JSON.parse(raw), { silent: true });
+    return true;
+  }
+  const legacy = LEGACY_KEYS.find((k) => localStorage.getItem(k));
+  if (legacy) {
+    toast(`Datos ${legacy} ignorados (grid v2/v1 ≠ cellPx 24). Mapa nuevo todo construible.`);
+  }
+  renderOverlay();
+  return false;
+}
+
+// ── UI ────────────────────────────────────────────────
+document.querySelectorAll('[data-tool]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    tool = btn.dataset.tool;
+    panMode = false;
+    viewport.classList.remove('pan-mode');
+    document.getElementById('btn-pan').classList.remove('active');
+    document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
+    const label = tool === 'erase' ? 'BORRAR → construible' : (SEMANTIC[tool]?.label || tool);
+    document.getElementById('hud-mode').textContent = `Modo: ${label}`;
+  });
+});
+
+document.querySelectorAll('[data-brush]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    brushSize = parseInt(btn.dataset.brush, 10);
+    document.querySelectorAll('.brush-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('hud-brush').textContent = `Pincel: ${brushSize}×${brushSize}`;
+  });
+});
+
+document.getElementById('btn-pan').addEventListener('click', () => {
+  panMode = !panMode;
+  document.getElementById('btn-pan').classList.toggle('active', panMode);
+  viewport.classList.toggle('pan-mode', panMode);
+});
+
+document.getElementById('btn-fit').addEventListener('click', fitWorld);
+
+document.getElementById('btn-overlay').addEventListener('click', () => {
+  overlayVisible = !overlayVisible;
+  overlay.classList.toggle('no-zones', !overlayVisible);
+  document.getElementById('btn-overlay').textContent = overlayVisible ? 'Overlay zonas' : 'Mostrar overlay';
+});
+
+document.getElementById('btn-grid').addEventListener('click', () => {
+  showGridLines = !showGridLines;
+  overlay.classList.toggle('no-grid', !showGridLines);
+  document.getElementById('btn-grid').textContent = showGridLines ? 'Grid' : 'Mostrar grid';
+  renderOverlay();
+});
+
+document.getElementById('btn-labels').addEventListener('click', () => {
+  showDestLabels = !showDestLabels;
+  document.getElementById('btn-labels').textContent = showDestLabels ? 'Etiquetas' : 'Mostrar etiquetas';
+  renderOverlay();
+});
+
+document.getElementById('btn-save').addEventListener('click', () => saveLocal(false));
+document.getElementById('btn-reset').addEventListener('click', resetAllBuildable);
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  const p = buildPayload();
+  const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'neni-pilot-zones-v3.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Exportado · ${Object.keys(p.destinations).length} destinos · ${Object.keys(p.cells).length} celdas`);
+});
+
+document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-import').click());
+document.getElementById('file-import').addEventListener('change', (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      loadPayload(JSON.parse(reader.result));
+      saveLocal(true);
+    } catch (err) {
+      alert('Error al importar: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
+});
+
+// ── Pan / pintar ──────────────────────────────────────
+let drag = null, camD = null, painting = false;
+
+viewport.addEventListener('pointerdown', (e) => {
+  if (panMode || e.button === 1 || e.button === 2 || e.altKey) {
+    drag = { x: e.clientX, y: e.clientY };
+    camD = { ...cam };
+    viewport.classList.add('grabbing');
+    return;
+  }
+  painting = true;
+  paintBrushAt(e.clientX, e.clientY);
+  viewport.setPointerCapture?.(e.pointerId);
+});
+
+viewport.addEventListener('pointermove', (e) => {
+  if (drag) {
+    cam.x = camD.x - (e.clientX - drag.x) / cam.zoom;
+    cam.y = camD.y - (e.clientY - drag.y) / cam.zoom;
+    applyCamera();
+    return;
+  }
+  if (painting && !panMode) paintBrushAt(e.clientX, e.clientY);
+});
+
+function endPointer(e) {
+  drag = null;
+  painting = false;
+  viewport.classList.remove('grabbing');
+  viewport.releasePointerCapture?.(e.pointerId);
+}
+viewport.addEventListener('pointerup', endPointer);
+viewport.addEventListener('pointercancel', endPointer);
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.909;
+  const rect = viewport.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const ox = cam.x - viewport.clientWidth / 2 / cam.zoom;
+  const oy = cam.y - viewport.clientHeight / 2 / cam.zoom;
+  const wx = ox + mx / cam.zoom, wy = oy + my / cam.zoom;
+  cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, cam.zoom * factor));
+  cam.x = wx - mx / cam.zoom + viewport.clientWidth / 2 / cam.zoom;
+  cam.y = wy - my / cam.zoom + viewport.clientHeight / 2 / cam.zoom;
+  applyCamera();
+}, { passive: false });
+
+let touches = {}, lastDist = null, touchCam = null, touchMid = null, touchPainting = false;
+
+viewport.addEventListener('touchstart', (e) => {
+  for (const t of e.changedTouches) touches[t.identifier] = { x: t.clientX, y: t.clientY };
+  const ids = Object.keys(touches);
+  if (ids.length === 1 && !panMode) {
+    touchPainting = true;
+    paintBrushAt(touches[ids[0]].x, touches[ids[0]].y);
+  }
+  if (ids.length === 1 && panMode) {
+    drag = { x: touches[ids[0]].x, y: touches[ids[0]].y };
+    camD = { ...cam };
+  }
+  if (ids.length === 2) {
+    touchPainting = false;
+    const a = touches[ids[0]], b = touches[ids[1]];
+    lastDist = Math.hypot(b.x - a.x, b.y - a.y);
+    touchMid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    touchCam = { ...cam };
+    drag = null;
+  }
+}, { passive: false });
+
+viewport.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  for (const t of e.changedTouches) touches[t.identifier] = { x: t.clientX, y: t.clientY };
+  const ids = Object.keys(touches);
+  if (ids.length === 1 && touchPainting && !panMode) {
+    paintBrushAt(touches[ids[0]].x, touches[ids[0]].y);
+    return;
+  }
+  if (ids.length === 1 && drag) {
+    cam.x = camD.x - (touches[ids[0]].x - drag.x) / cam.zoom;
+    cam.y = camD.y - (touches[ids[0]].y - drag.y) / cam.zoom;
+    applyCamera();
+    return;
+  }
+  if (ids.length === 2 && lastDist && touchCam) {
+    const a = touches[ids[0]], b = touches[ids[1]];
+    const dist = Math.hypot(b.x - a.x, b.y - a.y);
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    cam.zoom = Math.max(zoomMin(), Math.min(ZOOM_MAX, touchCam.zoom * dist / lastDist));
+    if (touchMid) {
+      cam.x = touchCam.x - (mid.x - touchMid.x) / cam.zoom;
+      cam.y = touchCam.y - (mid.y - touchMid.y) / cam.zoom;
+    }
+    applyCamera();
+  }
+}, { passive: false });
+
+viewport.addEventListener('touchend', (e) => {
+  for (const t of e.changedTouches) delete touches[t.identifier];
+  if (Object.keys(touches).length === 0) { drag = null; touchPainting = false; }
+  if (Object.keys(touches).length < 2) { lastDist = null; touchCam = null; touchMid = null; }
+});
+
+window.addEventListener('resize', applyCamera);
+
+window.__zoneEditor = {
+  getState: () => buildPayload(),
+  setOverrides: (o) => { overrides = { ...o }; renderOverlay(); },
+  paintCell: (cx, cy, sem) => {
+    const k = key(cx, cy);
+    if (sem === 'buildable') delete overrides[k];
+    else overrides[k] = sem;
+    renderOverlay();
+    scheduleAutosave();
+  },
+  saveLocal,
+  loadPayload,
+  GRID,
+};
+
+// ── Init ──────────────────────────────────────────────
+try { tryLoadV3(); } catch { overrides = {}; renderOverlay(); }
+cam.zoom = zoomMin();
+cam.x = WORLD_W / 2;
+cam.y = WORLD_H / 2;
+applyCamera();
+
+// API test hook (?selftest=1)
+if (new URLSearchParams(location.search).get('selftest') === '1') {
+  window.addEventListener('load', () => setTimeout(() => window.dispatchEvent(new CustomEvent('zone-editor-ready')), 100));
+}
+</script>
+</body>
+</html>

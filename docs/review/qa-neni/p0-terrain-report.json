@@ -1,0 +1,239 @@
+{
+  "ok": [
+    "login",
+    "pilotTerrainCoords",
+    "HQ provisional @(-7,14)",
+    "zone rings ocultos en piloto",
+    "slot hits legacy ocultos",
+    "overlay buildable 2035 celdas",
+    "Casa en road_blocked RECHAZADA @(-23,-3)",
+    "Casa en forest RECHAZADA @(-39,-5)",
+    "Casa en scrap RECHAZADA @(-23,1)",
+    "Casa lejos exactamente (-25,-6)",
+    "3 edificios extra separados OK",
+    "ghost carretera invalido",
+    "click HQ",
+    "click Casa",
+    "drag Casa no abre sheet",
+    "save 5 edificios"
+  ],
+  "fail": [],
+  "info": {
+    "boot": {
+      "terrain": true,
+      "hq": {
+        "x": -7,
+        "y": 14
+      },
+      "cands": [
+        {
+          "ax": -7,
+          "ay": 14,
+          "worldTL": {
+            "x": 764,
+            "y": 472
+          },
+          "worldCenter": {
+            "x": 824,
+            "y": 520
+          },
+          "dist": 12,
+          "expand": 71,
+          "label": "HQ@terrain(-7,14)"
+        },
+        {
+          "ax": -4,
+          "ay": 14,
+          "worldTL": {
+            "x": 836,
+            "y": 472
+          },
+          "worldCenter": {
+            "x": 896,
+            "y": 520
+          },
+          "dist": 73,
+          "expand": 74,
+          "label": "HQ@terrain(-4,14)"
+        },
+        {
+          "ax": -9,
+          "ay": 20,
+          "worldTL": {
+            "x": 716,
+            "y": 616
+          },
+          "worldCenter": {
+            "x": 776,
+            "y": 664
+          },
+          "dist": 140,
+          "expand": 70,
+          "label": "HQ@terrain(-9,20)"
+        }
+      ],
+      "provisional": {
+        "ax": -7,
+        "ay": 14,
+        "worldCenter": {
+          "x": 824,
+          "y": 520
+        },
+        "note": "Provisional pending Human Gate — D histórico puede pisar no-buildable"
+      },
+      "rings": 0,
+      "slotHits": 0
+    },
+    "overlay": {
+      "cells": 2035,
+      "ghost": {
+        "x": -12,
+        "y": 14
+      },
+      "mode": "house"
+    },
+    "placeTests": {
+      "results": {
+        "road_blocked": {
+          "cell": {
+            "x": -23,
+            "y": -3
+          },
+          "semantic": "blocked",
+          "ok": false
+        },
+        "forest": {
+          "cell": {
+            "x": -39,
+            "y": -5
+          },
+          "semantic": "forest",
+          "ok": false
+        },
+        "scrap": {
+          "cell": {
+            "x": -23,
+            "y": 1
+          },
+          "semantic": "scrap",
+          "ok": false
+        }
+      },
+      "placed": {
+        "anchor": {
+          "x": -25,
+          "y": -6
+        },
+        "checkOk": true,
+        "placeOk": true,
+        "stored": {
+          "x": -25,
+          "y": -6
+        },
+        "worldTL": {
+          "x": 332,
+          "y": -8
+        },
+        "match": true
+      },
+      "extras": [
+        {
+          "type": "well",
+          "x": -39,
+          "y": -6,
+          "ok": true
+        },
+        {
+          "type": "storage",
+          "x": -17,
+          "y": -6,
+          "ok": true
+        },
+        {
+          "type": "workshop",
+          "x": -9,
+          "y": -6,
+          "ok": true
+        }
+      ],
+      "hq": {
+        "x": -7,
+        "y": 14
+      }
+    },
+    "roadGhost": {
+      "cell": {
+        "x": -23,
+        "y": -3
+      },
+      "valid": false
+    },
+    "clicks": {
+      "hq": {
+        "sheetOpen": true,
+        "selected": true
+      },
+      "house": {
+        "sheetOpen": true,
+        "selected": true
+      },
+      "dragNoSheet": true
+    },
+    "persist": {
+      "before": [
+        {
+          "type": "hq_central_l1",
+          "x": -7,
+          "y": 14
+        },
+        {
+          "type": "house",
+          "x": -25,
+          "y": -6
+        },
+        {
+          "type": "well",
+          "x": -39,
+          "y": -6
+        },
+        {
+          "type": "storage",
+          "x": -17,
+          "y": -6
+        },
+        {
+          "type": "workshop",
+          "x": -9,
+          "y": -6
+        }
+      ],
+      "after": [
+        {
+          "type": "hq_central_l1",
+          "x": -7,
+          "y": 14
+        },
+        {
+          "type": "house",
+          "x": -25,
+          "y": -6
+        },
+        {
+          "type": "well",
+          "x": -39,
+          "y": -6
+        },
+        {
+          "type": "storage",
+          "x": -17,
+          "y": -6
+        },
+        {
+          "type": "workshop",
+          "x": -9,
+          "y": -6
+        }
+      ]
+    }
+  }
+}

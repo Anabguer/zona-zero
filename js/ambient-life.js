@@ -5,6 +5,7 @@
 import { svgEl } from './icons.js';
 import { createRng, hashSeed } from './rng.js';
 import { healthSemaphore } from './outbreaks.js';
+import { slotForBuilding, pointBlockedByProp } from './colony-layout.js';
 
 const WORK_TYPES = new Set([
   'farm',
@@ -53,17 +54,29 @@ export function ambientSpriteBudget(state, content) {
   return Math.min(max, Math.max(2, raw));
 }
 
-function cellPos(b, bw, bh, scale) {
+function cellPos(state, b, bw, bh, scale) {
+  const plot = slotForBuilding(state, b);
+  if (plot) return { x: plot.lx, y: plot.ly + plot.rh * 0.28 };
   return {
     x: (b.x - bw / 2 + 0.5) * scale,
     y: (b.y - bh / 2 + 0.5) * scale,
   };
 }
 
+function nudgeOffProps(state, x, y, rng) {
+  for (let i = 0; i < 10; i++) {
+    if (!pointBlockedByProp(state, x, y, 1.05)) return { x, y };
+    const ang = rng.float(0, Math.PI * 2);
+    x += Math.cos(ang) * 1.55;
+    y += Math.sin(ang) * 1.15;
+  }
+  return { x, y };
+}
+
 /**
  * Plan de figuras (sin DOM). Roles: work | idle | shelter | sick | repair.
  */
-export function planAmbientFigures(state, content, { scale, bw, bh }) {
+export function planAmbientFigures(state, content, { scale, bw, bh, scatter = 1.2 }) {
   const cfg = ambientLifeConfig(content);
   if (cfg.enabled === false) return { figures: [], semaphore: 'green', budget: 0 };
   const budget = ambientSpriteBudget(state, content);
@@ -80,37 +93,44 @@ export function planAmbientFigures(state, content, { scale, bw, bh }) {
     buildings.find((b) => String(b.type).startsWith('hq_')) ||
     buildings.find((b) => b.type === 'shelter') ||
     buildings[0];
-  const hqPos = hq ? cellPos(hq, bw, bh, scale) : { x: 0, y: 0 };
+  const hqPos = hq ? cellPos(state, hq, bw, bh, scale) : { x: 0, y: 0 };
 
   if (underAttack) {
     // ZZ-171: figuras hacia refugio (HQ)
     for (let i = 0; i < budget; i++) {
       const ang = rng.float(0, Math.PI * 2);
-      const dist = rng.float(0.4, 1.6) * (scale * 0.35);
-      figures.push({
+      const dist = rng.float(0.4, 1.6) * (scatter * 0.35);
+    const pos = nudgeOffProps(
+      state,
+      hqPos.x + Math.cos(ang) * dist,
+      hqPos.y + Math.sin(ang) * dist * 0.7,
+      rng
+    );
+    figures.push({
         role: 'shelter',
-        x: hqPos.x + Math.cos(ang) * dist,
-        y: hqPos.y + Math.sin(ang) * dist * 0.7,
+        x: pos.x,
+        y: pos.y,
         s: rng.float(0.7, 0.95),
       });
     }
-    return { figures, semaphore, budget, underAttack: true, weather: wx };
+    return { figures: paintFigureHues(figures, state), semaphore, budget, underAttack: true, weather: wx };
   }
 
   // Workers en edificios staffed (ZZ-167)
   const staffed = buildings.filter((b) => (b.workers || 0) > 0 && b.hp > 0 && WORK_TYPES.has(b.type));
   for (const b of staffed) {
     if (figures.length >= budget) break;
-    const pos = cellPos(b, bw, bh, scale);
+    const pos = cellPos(state, b, bw, bh, scale);
     const n = Math.min(b.workers, cold || heat ? 1 : 2);
     for (let i = 0; i < n && figures.length < budget; i++) {
-      const ox = rng.float(-0.55, 0.55) * scale * 0.45;
-      const oy = rng.float(-0.35, 0.55) * scale * 0.4;
+      const ox = rng.float(-0.55, 0.55) * scatter * 0.45;
+      const oy = rng.float(-0.35, 0.55) * scatter * 0.4;
+      const placed = nudgeOffProps(state, pos.x + ox, pos.y + oy + scatter * 0.15, rng);
       figures.push({
         role: b.repair?.daysLeft > 0 ? 'repair' : 'work',
         buildingId: b.id,
-        x: pos.x + ox,
-        y: pos.y + oy + scale * 0.15,
+        x: placed.x,
+        y: placed.y,
         s: rng.float(0.72, 0.95),
       });
     }
@@ -120,13 +140,19 @@ export function planAmbientFigures(state, content, { scale, bw, bh }) {
   const sick = state.population?.sick || 0;
   if (sick > 0 && figures.length < budget) {
     const med = buildings.find((b) => ['infirmary', 'clinic', 'medkit'].includes(b.type) && b.hp > 0);
-    const anchor = med ? cellPos(med, bw, bh, scale) : hqPos;
+    const anchor = med ? cellPos(state, med, bw, bh, scale) : hqPos;
     const nSick = Math.min(2, sick, budget - figures.length);
     for (let i = 0; i < nSick; i++) {
+      const placed = nudgeOffProps(
+        state,
+        anchor.x + rng.float(-0.5, 0.5) * scatter * 0.4,
+        anchor.y + rng.float(-0.3, 0.4) * scatter * 0.35,
+        rng
+      );
       figures.push({
         role: 'sick',
-        x: anchor.x + rng.float(-0.5, 0.5) * scale * 0.4,
-        y: anchor.y + rng.float(-0.3, 0.4) * scale * 0.35,
+        x: placed.x,
+        y: placed.y,
         s: 0.8,
       });
     }
@@ -135,57 +161,69 @@ export function planAmbientFigures(state, content, { scale, bw, bh }) {
   // Idle cerca del patio / HQ
   while (figures.length < budget) {
     const ang = rng.float(0, Math.PI * 2);
-    const dist = rng.float(0.8, 2.2) * (scale * 0.45);
+    const dist = rng.float(0.8, 2.2) * (scatter * 0.45);
     // Clima extremo: menos idle outdoor
     if ((cold || heat) && rng.chance(0.45)) {
+      const placed = nudgeOffProps(
+        state,
+        hqPos.x + rng.float(-0.4, 0.4) * scatter * 0.3,
+        hqPos.y + rng.float(-0.3, 0.3) * scatter * 0.25,
+        rng
+      );
       figures.push({
         role: 'idle',
-        x: hqPos.x + rng.float(-0.4, 0.4) * scale * 0.3,
-        y: hqPos.y + rng.float(-0.3, 0.3) * scale * 0.25,
+        x: placed.x,
+        y: placed.y,
         s: rng.float(0.7, 0.9),
       });
     } else {
+      const placed = nudgeOffProps(
+        state,
+        hqPos.x + Math.cos(ang) * dist,
+        hqPos.y + Math.sin(ang) * dist * 0.75,
+        rng
+      );
       figures.push({
         role: 'idle',
-        x: hqPos.x + Math.cos(ang) * dist,
-        y: hqPos.y + Math.sin(ang) * dist * 0.75,
+        x: placed.x,
+        y: placed.y,
         s: rng.float(0.7, 0.95),
       });
     }
   }
 
-  return { figures: figures.slice(0, budget), semaphore, budget, underAttack: false, weather: wx };
+  return { figures: paintFigureHues(figures.slice(0, budget), state), semaphore, budget, underAttack: false, weather: wx };
 }
 
-function drawPerson(layer, fig, semaphore) {
+function paintFigureHues(figures, state) {
+  const sickN = state.population?.sick || 0;
+  const injN = state.population?.injured || 0;
+  figures.forEach((fig, i) => {
+    if (fig.role === 'sick' || i < sickN) fig.hue = 'red';
+    else if (i < sickN + injN) fig.hue = 'amber';
+    else fig.hue = 'green';
+  });
+  return figures;
+}
+
+function drawPerson(layer, fig, semaphore, personScale = 1) {
+  const hue = fig.hue || 'green';
   const g = svgEl('g', {
-    class: `zz-ambient-fig zz-ambient-fig--${fig.role} zz-ambient-sem--${semaphore}`,
+    class: `zz-ambient-fig zz-ambient-fig--dot zz-ambient-hue--${hue} zz-ambient-sem--${semaphore}`,
     transform: `translate(${fig.x},${fig.y})`,
     'aria-hidden': 'true',
   });
-  const s = fig.s || 0.85;
-  g.appendChild(svgEl('ellipse', { cx: 0, cy: 0.35 * s, rx: 0.35 * s, ry: 0.12 * s, class: 'zz-ambient-shadow' }));
-  g.appendChild(svgEl('circle', { cx: 0, cy: -0.35 * s, r: 0.26 * s, class: 'zz-ambient-head' }));
-  g.appendChild(
-    svgEl('rect', {
-      x: -0.2 * s,
-      y: -0.08 * s,
-      width: 0.4 * s,
-      height: 0.5 * s,
-      rx: 0.08,
-      class: 'zz-ambient-body',
-    })
-  );
-  if (fig.role === 'sick') {
-    g.appendChild(svgEl('circle', { cx: 0.22 * s, cy: -0.55 * s, r: 0.12 * s, class: 'zz-ambient-sick-dot' }));
-  }
+  const s = (fig.s || 0.85) * (personScale || 1);
+  const r = Math.max(0.28, 0.34 * s);
+  g.appendChild(svgEl('ellipse', { cx: 0, cy: r * 0.55, rx: r * 0.95, ry: r * 0.38, class: 'zz-ambient-shadow' }));
+  g.appendChild(svgEl('circle', { cx: 0, cy: 0, r, class: 'zz-ambient-dot' }));
   layer.appendChild(g);
 }
 
-function drawRepairScaffold(layer, b, scale, bw, bh) {
+function drawRepairScaffold(layer, b, scale, bw, bh, state) {
   if (!(b.repair?.daysLeft > 0) || b.hp <= 0) return;
-  const pos = cellPos(b, bw, bh, scale);
-  const cell = scale * 1.15;
+  const pos = cellPos(state, b, bw, bh, scale);
+  const cell = 3.2;
   const g = svgEl('g', {
     class: 'zz-ambient-scaffold',
     transform: `translate(${pos.x - cell / 2},${pos.y - cell / 2})`,
@@ -231,7 +269,7 @@ function drawBuildDust(layer, state, scale, bw, bh) {
   for (const id of ids) {
     const b = buildings.find((x) => x.id === id);
     if (!b) continue;
-    const pos = cellPos(b, bw, bh, scale);
+    const pos = cellPos(state, b, bw, bh, scale);
     const g = svgEl('g', {
       class: 'zz-ambient-dust',
       transform: `translate(${pos.x},${pos.y})`,
@@ -276,28 +314,13 @@ export function drawAmbientLife(layer, state, content, geo) {
     class: `zz-ambient-life zz-ambient-life--${plan.semaphore}`,
     'aria-hidden': 'true',
   });
-  drawPerimeterFlash(life, geo.scale, plan.underAttack);
+  drawPerimeterFlash(life, 1.4, plan.underAttack);
   drawBuildDust(life, state, geo.scale, geo.bw, geo.bh);
   for (const b of state.base?.buildings || []) {
-    drawRepairScaffold(life, b, geo.scale, geo.bw, geo.bh);
+    drawRepairScaffold(life, b, geo.scale, geo.bw, geo.bh, state);
   }
   for (const fig of plan.figures) {
-    drawPerson(life, fig, plan.semaphore);
-  }
-  // Frío: aliento abstracto sobre 1–2 figuras outdoor
-  if (plan.weather === 'cold' || plan.weather === 'blizzard') {
-    plan.figures.slice(0, 3).forEach((fig) => {
-      if (fig.role === 'shelter') return;
-      life.appendChild(
-        svgEl('ellipse', {
-          cx: fig.x + 0.25,
-          cy: fig.y - 0.55,
-          rx: 0.22,
-          ry: 0.1,
-          class: 'zz-ambient-breath',
-        })
-      );
-    });
+    drawPerson(life, fig, plan.semaphore, geo.personScale || 1);
   }
   layer.appendChild(life);
   return plan;

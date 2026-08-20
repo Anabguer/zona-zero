@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Zona Zero — QA harness (local shots)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/game.css" />
+  <link rel="stylesheet" href="./css/world.css" />
+  <style>body{margin:0} #zz-app{display:block!important}</style>
+</head>
+<body class="zz-body zz-body--play zz-body--world zz-body--v13 zz-body--pilot-neni">
+  <div id="zz-boot" class="zz-boot" hidden></div>
+  <div id="zz-app" class="zz-world zz-world--overlay">
+    <main class="zz-world-stage" id="zz-stage">
+      <div class="zz-world-map-wrap" id="zz-map-wrap">
+        <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img"></svg>
+      </div>
+    </main>
+    <header class="zz-hud" id="zz-hud">
+      <div class="zz-hud__top">
+        <div class="zz-hud__identity">
+          <strong id="zz-colony">QA Neni</strong>
+          <span id="zz-day-label">Día 1</span>
+          <span class="zz-qa-mark" id="zz-qa-mark">QA</span>
+        </div>
+      </div>
+      <div class="zz-hud__row">
+        <button type="button" class="zz-hud__pop" id="zz-open-pop"><strong id="zz-pop">0/0</strong></button>
+        <ul class="zz-hud__res" id="zz-resources"></ul>
+        <div class="zz-hud__tools">
+          <button type="button" class="zz-hud__tool zz-hud__tool--build" id="zz-open-build">Construir</button>
+        </div>
+      </div>
+      <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
+    </header>
+    <aside id="zz-sheet" class="zz-sheet" hidden>
+      <button type="button" class="zz-sheet__close" id="zz-sheet-close">×</button>
+      <div id="zz-sheet-body" class="zz-sheet__body"></div>
+    </aside>
+    <div class="zz-dock">
+      <button type="button" class="zz-btn zz-btn--ghost" id="zz-build-cancel" hidden>✕</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
+    </div>
+    <div id="zz-toast" class="zz-toast" hidden></div>
+  </div>
+  <script type="module">
+    import { bootGame } from './js/main.js';
+    await bootGame({ mode: 'new', clearExisting: true, pilot: 'neni', qa: true, name: 'QA Neni' });
+    window.__zzQaReady = true;
+  </script>
+</body>
+</html>

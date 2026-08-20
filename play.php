@@ -9,6 +9,9 @@ $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
 $clear = isset($_GET['clear']) && (string) $_GET['clear'] === '1';
 $fromIntro = isset($_GET['intro']) && (string) $_GET['intro'] === '1';
 $name = trim((string) ($_GET['name'] ?? 'Refugio Norte'));
+$pilot = isset($_GET['pilot']) && (string) $_GET['pilot'] === 'neni';
+$qa = $pilot && isset($_GET['qa']) && (string) $_GET['qa'] === '1';
+$debugFootprints = isset($_GET['debug']) && (string) $_GET['debug'] === 'footprints';
 if ($name === '') {
     $name = 'Refugio Norte';
 }
@@ -33,9 +36,10 @@ $base = zz_public_base();
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'game.css') ?>" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'world.css') ?>" />
+  <script src="/juegos/js/mobile-fullscreen.js?v=6"></script>
   <?php zz_print_js_importmap($base); ?>
 </head>
-<body class="zz-body zz-body--play zz-body--world zz-body--v13">
+<body class="zz-body zz-body--play zz-body--world zz-body--v13<?= $pilot ? ' zz-body--pilot-neni' : '' ?>">
   <script>
     if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
       document.body.classList.add('zz-standalone');
@@ -59,6 +63,9 @@ $base = zz_public_base();
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
           <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
+          <?php if ($pilot): ?>
+            <button type="button" id="zz-fit-world" title="Fit mundo">⤢</button>
+          <?php endif; ?>
           <button type="button" id="zz-zoom-in" title="Acercar">+</button>
         </div>
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img" aria-label="Zona Zero"></svg>
@@ -72,6 +79,7 @@ $base = zz_public_base();
         <div class="zz-hud__title">
           <strong id="zz-colony">Zona Zero</strong>
           <span id="zz-day-label">Día 1</span>
+          <?php if ($qa): ?><span class="zz-qa-mark" id="zz-qa-mark" title="Modo QA piloto">QA</span><?php endif; ?>
         </div>
         <div class="zz-hud__actions">
           <button type="button" class="zz-btn zz-btn--ghost zz-btn--icon" id="zz-help" title="Ayuda">?</button>
@@ -92,6 +100,10 @@ $base = zz_public_base();
         <div class="zz-hud__threat" title="Amenaza y defensa" hidden>
           <span class="zz-hud__pill zz-hud__pill--threat" title="Amenaza"><strong id="zz-threat">0</strong></span>
           <span class="zz-hud__pill zz-hud__pill--def" title="Defensa"><strong id="zz-defense">0</strong></span>
+        </div>
+        <div class="zz-hud__tools">
+          <button type="button" class="zz-hud__tool zz-hud__tool--build" id="zz-open-build">Construir</button>
+          <button type="button" class="zz-hud__tool zz-hud__tool--more" id="zz-open-more" title="Más">⋯</button>
         </div>
       </div>
       <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
@@ -138,21 +150,13 @@ $base = zz_public_base();
     <div id="zz-attack-card" class="zz-attack-card" hidden></div>
     <div id="zz-day-brief" class="zz-day-brief" hidden></div>
 
-    <footer class="zz-world-dock">
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-build" aria-label="Construir">
-        <span class="zz-dock-ico" aria-hidden="true">▣</span>
-        <span class="zz-dock-txt">Construir</span>
-      </button>
+    <footer class="zz-world-dock zz-world-dock--day">
       <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar">✕</button>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance" aria-label="Avanzar día">
         <span class="zz-dock-txt zz-dock-txt--advance">Avanzar día</span>
         <span class="zz-dock-txt zz-dock-txt--advance-short" aria-hidden="true">Día ›</span>
       </button>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden aria-label="Confirmar construcción">✓ Construir</button>
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-open-more" aria-label="Más">
-        <span class="zz-dock-ico" aria-hidden="true">⋯</span>
-        <span class="zz-dock-txt">Más</span>
-      </button>
     </footer>
 
     <div id="zz-defeat" class="zz-defeat" hidden>
@@ -197,6 +201,9 @@ $base = zz_public_base();
         name: <?= json_encode($name, JSON_UNESCAPED_UNICODE) ?>,
         clearExisting: <?= $clear ? 'true' : 'false' ?>,
         fromIntro: <?= $fromIntro ? 'true' : 'false' ?>,
+        pilot: <?= $pilot ? "'neni'" : 'null' ?>,
+        qa: <?= $qa ? 'true' : 'false' ?>,
+        debugFootprints: <?= $debugFootprints ? 'true' : 'false' ?>,
       });
     } catch (e) {
       console.error(e);

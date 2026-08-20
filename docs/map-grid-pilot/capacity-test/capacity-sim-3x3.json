@@ -1,0 +1,514 @@
+{
+  "grid": {
+    "cols": 78,
+    "rows": 18
+  },
+  "parcel_capacity_cells_estimate": 543,
+  "used_cells": 224,
+  "free_cells_estimate": 319,
+  "placements": [
+    {
+      "id": "casa_01",
+      "kind": "house",
+      "anchor": "E2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "E2",
+        "F2",
+        "G2",
+        "E3",
+        "F3",
+        "G3",
+        "E4",
+        "F4",
+        "G4"
+      ]
+    },
+    {
+      "id": "casa_02",
+      "kind": "house",
+      "anchor": "I2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "I2",
+        "J2",
+        "K2",
+        "I3",
+        "J3",
+        "K3",
+        "I4",
+        "J4",
+        "K4"
+      ]
+    },
+    {
+      "id": "casa_03",
+      "kind": "house",
+      "anchor": "R2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "R2",
+        "S2",
+        "T2",
+        "R3",
+        "S3",
+        "T3",
+        "R4",
+        "S4",
+        "T4"
+      ]
+    },
+    {
+      "id": "casa_04",
+      "kind": "house",
+      "anchor": "V2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "V2",
+        "W2",
+        "X2",
+        "V3",
+        "W3",
+        "X3",
+        "V4",
+        "W4",
+        "X4"
+      ]
+    },
+    {
+      "id": "casa_05",
+      "kind": "house",
+      "anchor": "AE2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AE2",
+        "AF2",
+        "AG2",
+        "AE3",
+        "AF3",
+        "AG3",
+        "AE4",
+        "AF4",
+        "AG4"
+      ]
+    },
+    {
+      "id": "casa_06",
+      "kind": "house",
+      "anchor": "AI2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AI2",
+        "AJ2",
+        "AK2",
+        "AI3",
+        "AJ3",
+        "AK3",
+        "AI4",
+        "AJ4",
+        "AK4"
+      ]
+    },
+    {
+      "id": "casa_07",
+      "kind": "house",
+      "anchor": "AS2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AS2",
+        "AT2",
+        "AU2",
+        "AS3",
+        "AT3",
+        "AU3",
+        "AS4",
+        "AT4",
+        "AU4"
+      ]
+    },
+    {
+      "id": "casa_08",
+      "kind": "house",
+      "anchor": "AW2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AW2",
+        "AX2",
+        "AY2",
+        "AW3",
+        "AX3",
+        "AY3",
+        "AW4",
+        "AX4",
+        "AY4"
+      ]
+    },
+    {
+      "id": "casa_09",
+      "kind": "house",
+      "anchor": "E13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "E13",
+        "F13",
+        "G13",
+        "E14",
+        "F14",
+        "G14",
+        "E15",
+        "F15",
+        "G15"
+      ]
+    },
+    {
+      "id": "casa_10",
+      "kind": "house",
+      "anchor": "I13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "I13",
+        "J13",
+        "K13",
+        "I14",
+        "J14",
+        "K14",
+        "I15",
+        "J15",
+        "K15"
+      ]
+    },
+    {
+      "id": "casa_11",
+      "kind": "house",
+      "anchor": "S13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "S13",
+        "T13",
+        "U13",
+        "S14",
+        "T14",
+        "U14",
+        "S15",
+        "T15",
+        "U15"
+      ]
+    },
+    {
+      "id": "casa_12",
+      "kind": "house",
+      "anchor": "W13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "W13",
+        "X13",
+        "Y13",
+        "W14",
+        "X14",
+        "Y14",
+        "W15",
+        "X15",
+        "Y15"
+      ]
+    },
+    {
+      "id": "casa_13",
+      "kind": "house",
+      "anchor": "AF13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AF13",
+        "AG13",
+        "AH13",
+        "AF14",
+        "AG14",
+        "AH14",
+        "AF15",
+        "AG15",
+        "AH15"
+      ]
+    },
+    {
+      "id": "casa_14",
+      "kind": "house",
+      "anchor": "AJ13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AJ13",
+        "AK13",
+        "AL13",
+        "AJ14",
+        "AK14",
+        "AL14",
+        "AJ15",
+        "AK15",
+        "AL15"
+      ]
+    },
+    {
+      "id": "casa_15",
+      "kind": "house",
+      "anchor": "BG13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "BG13",
+        "BH13",
+        "BI13",
+        "BG14",
+        "BH14",
+        "BI14",
+        "BG15",
+        "BH15",
+        "BI15"
+      ]
+    },
+    {
+      "id": "casa_16",
+      "kind": "house",
+      "anchor": "BK13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "BK13",
+        "BL13",
+        "BM13",
+        "BK14",
+        "BL14",
+        "BM14",
+        "BK15",
+        "BL15",
+        "BM15"
+      ]
+    },
+    {
+      "id": "huerto_01",
+      "kind": "farm",
+      "anchor": "BD2",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BD2",
+        "BE2",
+        "BD3",
+        "BE3"
+      ]
+    },
+    {
+      "id": "huerto_02",
+      "kind": "farm",
+      "anchor": "BG2",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BG2",
+        "BH2",
+        "BG3",
+        "BH3"
+      ]
+    },
+    {
+      "id": "huerto_03",
+      "kind": "farm",
+      "anchor": "BS2",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BS2",
+        "BT2",
+        "BS3",
+        "BT3"
+      ]
+    },
+    {
+      "id": "huerto_04",
+      "kind": "farm",
+      "anchor": "BQ13",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BQ13",
+        "BR13",
+        "BQ14",
+        "BR14"
+      ]
+    },
+    {
+      "id": "huerto_05",
+      "kind": "farm",
+      "anchor": "AW13",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "AW13",
+        "AX13",
+        "AW14",
+        "AX14"
+      ]
+    },
+    {
+      "id": "huerto_06",
+      "kind": "farm",
+      "anchor": "BT13",
+      "w": 2,
+      "h": 2,
+      "cells": [
+        "BT13",
+        "BU13",
+        "BT14",
+        "BU14"
+      ]
+    },
+    {
+      "id": "pozo_01",
+      "kind": "well",
+      "anchor": "AR2",
+      "w": 1,
+      "h": 1,
+      "cells": [
+        "AR2"
+      ]
+    },
+    {
+      "id": "pozo_02",
+      "kind": "well",
+      "anchor": "BC13",
+      "w": 1,
+      "h": 1,
+      "cells": [
+        "BC13"
+      ]
+    },
+    {
+      "id": "taller_01",
+      "kind": "workshop",
+      "anchor": "AO2",
+      "w": 3,
+      "h": 2,
+      "cells": [
+        "AO2",
+        "AP2",
+        "AQ2",
+        "AO3",
+        "AP3",
+        "AQ3"
+      ]
+    },
+    {
+      "id": "almacen_01",
+      "kind": "workshop",
+      "anchor": "BN13",
+      "w": 3,
+      "h": 2,
+      "cells": [
+        "BN13",
+        "BO13",
+        "BP13",
+        "BN14",
+        "BO14",
+        "BP14"
+      ]
+    },
+    {
+      "id": "clinica_01",
+      "kind": "clinic",
+      "anchor": "BW13",
+      "w": 3,
+      "h": 2,
+      "cells": [
+        "BW13",
+        "BX13",
+        "BY13",
+        "BW14",
+        "BX14",
+        "BY14"
+      ]
+    },
+    {
+      "id": "edificio_01",
+      "kind": "special",
+      "anchor": "AZ2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AZ2",
+        "BA2",
+        "BB2",
+        "AZ3",
+        "BA3",
+        "BB3",
+        "AZ4",
+        "BA4",
+        "BB4"
+      ]
+    },
+    {
+      "id": "edificio_02",
+      "kind": "special",
+      "anchor": "BM2",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "BM2",
+        "BN2",
+        "BO2",
+        "BM3",
+        "BN3",
+        "BO3",
+        "BM4",
+        "BN4",
+        "BO4"
+      ]
+    },
+    {
+      "id": "edificio_03",
+      "kind": "special",
+      "anchor": "AS13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AS13",
+        "AT13",
+        "AU13",
+        "AS14",
+        "AT14",
+        "AU14",
+        "AS15",
+        "AT15",
+        "AU15"
+      ]
+    },
+    {
+      "id": "edificio_04",
+      "kind": "special",
+      "anchor": "AY13",
+      "w": 3,
+      "h": 3,
+      "cells": [
+        "AY13",
+        "AZ13",
+        "BA13",
+        "AY14",
+        "AZ14",
+        "BA14",
+        "AY15",
+        "AZ15",
+        "BA15"
+      ]
+    }
+  ]
+}

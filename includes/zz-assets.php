@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 /**
- * Versión única de assets JS/CSS para cache-bust coherente del grafo ES modules.
+ * VersiÃ³n Ãºnica de assets JS/CSS para cache-bust coherente del grafo ES modules.
  * Subir SIEMPRE todo js/ (+ entry PHP) al cambiar esta constante.
  */
-const ZZ_ASSET_V = '43';
+const ZZ_ASSET_V = '86';
 
 function zz_asset_v(): string
 {
@@ -13,8 +13,8 @@ function zz_asset_v(): string
 }
 
 /**
- * Import map: cada /juegos/zona-zero/js/*.js → mismo URL con ?v=ZZ_ASSET_V.
- * Así los imports relativos hijos (./sim.js) no reutilizan caché de 30d incompatible
+ * Import map: cada /juegos/zona-zero/js/*.js â†’ mismo URL con ?v=ZZ_ASSET_V.
+ * AsÃ­ los imports relativos hijos (./sim.js) no reutilizan cachÃ© de 30d incompatible
  * con un main.js?v=N nuevo.
  *
  * @return array<string, string>
@@ -55,3 +55,4 @@ function zz_js_entry_href(string $rel = './js/main.js'): string
 {
     return htmlspecialchars($rel, ENT_QUOTES, 'UTF-8') . '?v=' . rawurlencode(zz_asset_v());
 }
+

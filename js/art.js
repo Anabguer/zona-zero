@@ -5,20 +5,23 @@
 export const ART_BASE = new URL('../assets/art/', import.meta.url).href.replace(/\/$/, '') + '/';
 
 export const BUILDING_ART = {
-  // HQ = edificio ancla sólido (shelter.webp). Refugio improvisado = misma base hasta arte propio.
-  // camp-d1.webp es viñeta circular: NO usarlo como sprite de mapa (recrea parche/GIS).
-  shelter: 'buildings/shelter.webp',
-  hq_central_l1: 'buildings/shelter.webp',
-  hq_central_l2: 'buildings/house.webp',
-  hq_central_l3: 'buildings/house.webp',
-  house: 'buildings/house.webp',
-  insulated_house: 'buildings/house.webp',
-  farm: 'buildings/farm.webp',
-  greenhouse: 'buildings/farm.webp',
-  well: 'buildings/well.webp',
-  cistern: 'buildings/well.webp',
+  // Vivienda v1: casita isométrica sobre tierra (sin fondo negro).
+  shelter: 'buildings/dwelling-v1b.png',
+  hq_central_l1: 'buildings/dwelling-v1b.png',
+  hq_central_l2: 'buildings/dwelling-v1b.png',
+  hq_central_l3: 'buildings/dwelling-v1b.png',
+  house: 'buildings/dwelling-v1b.png',
+  insulated_house: 'buildings/dwelling-v1b.png',
+  kitchen: 'buildings/dwelling-v1b.png',
+  block: 'buildings/dwelling-v1b.png',
+  farm: 'buildings/farm-iso.png',
+  greenhouse: 'buildings/farm-iso.png',
+  well: 'buildings/well-iso.png',
+  cistern: 'buildings/well-iso.png',
   workshop: 'buildings/workshop.webp',
   sawmill: 'buildings/workshop.webp',
+  scrapyard: 'buildings/workshop.webp',
+  mech_shop: 'buildings/workshop.webp',
   storage: 'buildings/storage.webp',
   infirmary: 'buildings/infirmary.webp',
   clinic: 'buildings/infirmary.webp',
@@ -47,6 +50,65 @@ export const FOG_ART = 'terrain/fog.webp';
 export const TERRAIN_ART = 'terrain/city.webp';
 /** Patio de colonia pintado (isométrico) — no foto aérea */
 export const COLONY_YARD_ART = 'terrain/colony-yard.webp';
+/** Patio circular ilustrado (fondo negro → blend lighten en mapa). */
+export const COLONY_YARD_CLEAN_ART = 'terrain/colony-yard-clean.png';
+/** Suelo colonia: tierra + hierba, sin carreteras ni props. */
+export const COLONY_DIRT_ART = 'terrain/colony-iso-world-v3.png';
+/** Ciudad isométrica PC (full-bleed, pan) */
+export const CITY_ISO_ART = 'terrain/city-iso.png';
+/** Mapa maestro A+B (4096x2720) — fondo del mundo con contrato de cámara real */
+export const WORLD_MAP_ART = 'terrain/mapa-mundo-4096x2720.png';
+/** Fondo del mundo piloto Neni (1819x865) — 1 unidad de mundo = 1 px a zoom=1 */
+export const PILOT_WORLD_MAP_ART = 'terrain/mapa-neni-1819x865-brownmatch-up2x.png';
+
+/**
+ * Sprites aprobados piloto Neni (autoridad en ?pilot=neni).
+ * NO sustituye BUILDING_ART del juego normal.
+ * shelter: HOLD humano — no migrar todavía.
+ */
+export const PILOT_BUILDING_ART = {
+  hq_central_l1: 'buildings/pilot/01-hq-5x4-matchcolor.png',
+  hq_central_l2: 'buildings/pilot/01-hq-5x4-matchcolor.png',
+  hq_central_l3: 'buildings/pilot/01-hq-5x4-matchcolor.png',
+  house: 'buildings/pilot/01-house-4x2-matchcolor.png',
+  well: 'buildings/pilot/01-well-2x1-matchcolor.png',
+  storage: 'buildings/pilot/01-storage-5x3-matchcolor.png',
+  workshop: 'buildings/pilot/01-workshop-5x2-matchcolor.png',
+  farm: 'buildings/pilot/01-farm-3x2-matchcolor.png',
+  infirmary: 'buildings/pilot/01-infirmary-4x3-matchcolor.png',
+  sawmill: 'buildings/pilot/01-sawmill-5x3-matchcolor.png',
+  greenhouse: 'buildings/pilot/01-greenhouse-4x3.png',
+  kitchen: 'buildings/pilot/01-kitchen-4x2.png',
+  cistern: 'buildings/pilot/01-cistern-2x2.png',
+  scrapyard: 'buildings/pilot/01-scrapyard-5x3-matchcolor.png',
+  medkit: 'buildings/pilot/01-medkit-2x2.png',
+  radio: 'buildings/pilot/01-radio-3x2-matchcolor.png',
+};
+
+/** Tipos con PNG piloto aprobado (listos para revisar en QA). */
+export function pilotApprovedArtTypes() {
+  return new Set(
+    Object.keys(PILOT_BUILDING_ART).filter((id) => !String(id).startsWith('hq_') || id === 'hq_central_l1')
+  );
+}
+
+/** ¿Hay asset piloto para este tipo? */
+export function hasPilotBuildingArt(type) {
+  if (!type) return false;
+  const key = String(type).startsWith('hq_') ? 'hq_central_l1' : type;
+  return !!PILOT_BUILDING_ART[key];
+}
+
+/** Decoración de colonia (árboles / pecios) — sprites, no pintados en el suelo. */
+export const PROP_ART = {
+  tree: 'props/tree-dead.png',
+  vehicle: 'props/car-wreck.png',
+  barrel: 'props/scrap-pile.png',
+};
+
+export function propArtUrl(kind) {
+  return artUrl(PROP_ART[kind] || PROP_ART.tree);
+}
 
 export const PORTRAIT_ART = {
   m: 'portraits/explorer-m.webp',
@@ -71,6 +133,27 @@ export function artUrl(rel) {
 
 export function buildingArtUrl(type) {
   return artUrl(BUILDING_ART[type] || BUILDING_ART.storage);
+}
+
+/** Solo asset piloto si existe; sin fallback al arte normal. */
+export function pilotBuildingArtUrl(type) {
+  if (!type) return null;
+  const key = String(type).startsWith('hq_') ? 'hq_central_l1' : type;
+  const rel = PILOT_BUILDING_ART[key];
+  return rel ? artUrl(rel) : null;
+}
+
+/**
+ * Arte para UI/mapa en piloto: autoridad PILOT_BUILDING_ART.
+ * Juego normal: BUILDING_ART.
+ */
+export function uiBuildingArtUrl(state, type) {
+  if (state?.flags?.pilot === 'neni') {
+    const pilot = pilotBuildingArtUrl(type);
+    if (pilot) return pilot;
+    return null;
+  }
+  return buildingArtUrl(type);
 }
 
 export function zoneArtUrl(zone) {
