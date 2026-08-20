@@ -22,23 +22,26 @@ export async function loadPilotZoneMap() {
       if (!r.ok) throw new Error('neni-pilot-zones-v3.json');
       return r.json();
     })
-    .then((doc) => {
-      if (doc?.schema !== 'neni-pilot-zone-map-v3') {
-        throw new Error('schema zona piloto inesperado');
-      }
-      _map = {
-        schema: doc.schema,
-        cellPx: doc.grid.cellPx,
-        origin: /** @type {[number, number]} */ ([doc.grid.origin[0], doc.grid.origin[1]]),
-        bounds: doc.grid.bounds,
-        cells: doc.cells || {},
-        overrides: doc.overrides || {},
-        defaultSemantic: doc.defaultSemantic || 'buildable',
-        world: doc.grid.world,
-      };
-      return _map;
-    });
+    .then((doc) => installPilotZoneMap(doc));
   return _loadPromise;
+}
+
+/** Instala el JSON de zonas (tests Node / boot). */
+export function installPilotZoneMap(doc) {
+  if (doc?.schema !== 'neni-pilot-zone-map-v3') {
+    throw new Error('schema zona piloto inesperado');
+  }
+  _map = {
+    schema: doc.schema,
+    cellPx: doc.grid.cellPx,
+    origin: /** @type {[number, number]} */ ([doc.grid.origin[0], doc.grid.origin[1]]),
+    bounds: doc.grid.bounds,
+    cells: doc.cells || {},
+    overrides: doc.overrides || {},
+    defaultSemantic: doc.defaultSemantic || 'buildable',
+    world: doc.grid.world,
+  };
+  return _map;
 }
 
 export function getPilotZoneMap() {

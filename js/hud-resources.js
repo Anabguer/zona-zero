@@ -5,8 +5,8 @@
  */
 
 export function hudResourceKeys(state) {
-  // Piloto Neni (modo pruebas): auditar gameplay con stock real existente.
-  if (state?.flags?.pilot === 'neni') {
+  // QA piloto: auditoría con stock completo. Piloto normal: mismo contrato D1 que el juego.
+  if (state?.flags?.pilot === 'neni' && state?.flags?.pilotQaMode) {
     return ['food', 'water', 'wood', 'metal', 'medicine', 'fuel', 'ammo'];
   }
 

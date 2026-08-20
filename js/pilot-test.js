@@ -15,12 +15,10 @@ export const PILOT_ZONE_REMAP_SCALE = 10;
 /** Radios mínimos legibles en mapa 1819×865. */
 export const PILOT_ZONE_R_MIN = 36;
 
-/** En QA: solo aprobados. Fuera de QA piloto: house/well/storage (vía main). */
+/** En QA: catálogo aprobado completo. Piloto normal D1: farm + well + house. */
 export function pilotBuildableTypeIds(state) {
   if (state?.flags?.pilotQaMode) return pilotQaReadyTypes();
-  return new Set(
-    Object.keys(PILOT_FOOTPRINTS).filter((id) => !String(id).startsWith('hq_'))
-  );
+  return new Set(['farm', 'well', 'house']);
 }
 
 /**

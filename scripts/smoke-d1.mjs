@@ -70,7 +70,7 @@ assert(startB.length === 1 && String(startB[0].type).startsWith('hq_'), 'D1 solo
 assert(onboardingStatus(state)?.step?.id === 'need_food', 'need_food contextual');
 assert(onboardingStatus(state)?.step?.highlight === 'build', 'highlight construir');
 assert(!onboardingStatus(state)?.step?.cta, 'sin CTA Continuar');
-assert(/superficie|Núcleo|huerto/i.test(onboardingStatus(state)?.step?.text || ''), 'tip 2.8 superficies/Núcleo/huerto');
+assert(/huerto|reservas|construir/i.test(onboardingStatus(state)?.step?.text || ''), 'tip D1 huerto/reservas');
 state.buildMode = true;
 assert(/fantasma|✓|✕|superficie/i.test(coachMessage(state) || ''), 'coach build: ghost/✓/superficie');
 state.buildMode = false;
@@ -94,8 +94,15 @@ assert(onboardingStatus(state)?.step?.id === 'staff_farm', 'staff_farm');
 const farm = state.base.buildings.find((b) => b.type === 'farm');
 assert(adjustBuildingWorkers(state, content, farm.id, 1).ok, 'asignar');
 checkOnboardingProgress(state);
-assert(onboardingStatus(state)?.step?.id === 'need_water', 'need_water');
+assert(onboardingStatus(state)?.step?.id === 'see_day', 'see_day tras staff');
+assert(onboardingStatus(state)?.step?.highlight === 'advance', 'highlight avanzar dia');
 assert(state.day === 1, 'sigue en D1');
+
+const { markGuideDayAdvanced } = await import(pathToFileURL(join(root, 'js', 'onboarding.js')).href);
+markGuideDayAdvanced(state);
+checkOnboardingProgress(state);
+assert(onboardingStatus(state)?.step?.id === 'need_water', 'need_water tras brief/dia');
+assert(state.flags.onboardingActive, 'guia sigue activa tras primer avance');
 
 const [wx, wy] = free();
 assert(placeBuilding(state, content, 'well', wx, wy).ok, 'pozo');

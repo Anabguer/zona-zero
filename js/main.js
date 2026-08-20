@@ -1157,7 +1157,8 @@ function openBuildSheet() {
     return;
   }
 
-  const pilotAllowed = pilot ? new Set(['house', 'well', 'storage']) : null;
+  // Piloto normal D1: farm/well/house. QA usa catálogo completo vía pilotBuildableTypeIds.
+  const pilotAllowed = pilot ? pilotBuildableTypeIds(state) : null;
   const list = playableBuildingDefs(content.buildings)
     .filter((b) => testMode || (b.minEra || 0) <= state.era)
     .filter((b) => (!pilotAllowed || pilotAllowed.has(b.id)))
@@ -2104,7 +2105,7 @@ function paintCoach() {
   card.classList.add('zz-coach-card--tip');
   text.textContent = coachMessage(state) || st.step.text;
   if (st.step.highlight === 'build' && !state.buildMode) {
-    /* Construir: tocar casita/solar en el mapa, no el dock. */
+    buildBtn?.classList.add('is-guide-pulse');
   }
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
     confirmBtn?.classList.add('is-guide-pulse');
@@ -2261,7 +2262,7 @@ function openVacantSlotSheet(slot) {
   const kindLabel = slot.kind === 'lot' ? 'solar vacío' : slot.kind === 'hq' ? 'refugio' : 'ruina';
   const suggest = suggestedBuildType(state);
   const pilot = state.flags?.pilot === 'neni';
-  const pilotAllowed = pilot ? new Set(['house', 'well', 'storage']) : null;
+  const pilotAllowed = pilot ? pilotBuildableTypeIds(state) : null;
   const list = playableBuildingDefs(content.buildings)
     .filter((b) => (b.minEra || 0) <= state.era)
     .filter((b) => !b.upgradeFrom)
@@ -2783,8 +2784,18 @@ export async function bootGame(opts) {
     state.flags.pilot = 'neni';
     state.flags.pilotQaMode = qa;
     state.flags.colonyCamV2 = 1; // evita override automático de cámara desde ensureColonyLayout()
-    state.flags.onboardingDone = true;
-    state.flags.onboardingActive = false;
+    // QA: auditoría libre sin coach. Piloto normal: onboarding D1 contextual.
+    if (qa) {
+      state.flags.onboardingDone = true;
+      state.flags.onboardingActive = false;
+    } else if (opts.mode === 'new' || opts.clearExisting || !loaded) {
+      state.flags.onboardingDone = false;
+      state.flags.onboardingActive = true;
+      state.flags.onboardingStep = 0;
+      delete state.flags.guideDayAdvanced;
+    } else if (!state.flags.onboardingDone) {
+      state.flags.onboardingActive = true;
+    }
     state.flags.pilotNeniCamInitialized = false;
     state.flags.pilotFootprintDebug = !!opts.debugFootprints;
     state.flags.pilotNeniHqCanon = PILOT_HQ_CANON;
