@@ -13,8 +13,17 @@ $isNew = isset($_GET['new']) && (string) $_GET['new'] === '1';
 $clear = isset($_GET['clear']) && (string) $_GET['clear'] === '1';
 $fromIntro = isset($_GET['intro']) && (string) $_GET['intro'] === '1';
 $name = trim((string) ($_GET['name'] ?? 'Refugio Norte'));
+// B1: el juego OFICIAL es el mundo Neni. `?pilot=neni` queda como alias compatible.
 $pilot = isset($_GET['pilot']) && (string) $_GET['pilot'] === 'neni';
-$qa = $pilot && isset($_GET['qa']) && (string) $_GET['qa'] === '1';
+// B1: entrada explícita a una partida Clásica (legacy) existente. Sin nuevas partidas legacy.
+$legacy = !$pilot && isset($_GET['legacy']) && (string) $_GET['legacy'] === '1';
+if ($legacy) {
+    // Producto B1: no se permiten partidas Clásicas nuevas ni borrados en esa entrada.
+    $isNew = false;
+    $clear = false;
+}
+// QA independiente del alias (?qa=1 sobre la página oficial o el alias).
+$qa = isset($_GET['qa']) && (string) $_GET['qa'] === '1';
 $debugFootprints = isset($_GET['debug']) && (string) $_GET['debug'] === 'footprints';
 if ($name === '') {
     $name = 'Refugio Norte';
@@ -67,7 +76,7 @@ $base = zz_public_base();
         <div class="zz-map-zoom" aria-label="Zoom">
           <button type="button" id="zz-zoom-out" title="Alejar">−</button>
           <button type="button" id="zz-recenter" title="Recentrar">⌂</button>
-          <?php if ($pilot): ?>
+          <?php if (!$legacy): ?>
             <button type="button" id="zz-fit-world" title="Fit mundo">⤢</button>
           <?php endif; ?>
           <button type="button" id="zz-zoom-in" title="Acercar">+</button>
@@ -206,6 +215,7 @@ $base = zz_public_base();
         clearExisting: <?= $clear ? 'true' : 'false' ?>,
         fromIntro: <?= $fromIntro ? 'true' : 'false' ?>,
         pilot: <?= $pilot ? "'neni'" : 'null' ?>,
+        legacy: <?= $legacy ? 'true' : 'false' ?>,
         qa: <?= $qa ? 'true' : 'false' ?>,
         debugFootprints: <?= $debugFootprints ? 'true' : 'false' ?>,
       });

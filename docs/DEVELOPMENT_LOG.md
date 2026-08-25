@@ -8488,3 +8488,52 @@ PENDIENTE DE REVISIÓN ChatGPT / Neni (HUMAN_GATE docs).
 ## APROBACIÓN FINAL CHATGPT
 NO
 
+
+---
+
+# BLOQUE B1 â€” ENTRADA OFICIAL + PERSISTENCIA REAL (2026-08-25)
+
+DECISIÃ“N PRODUCTO PREVIA: piloto Neni = base oficial v1 (B01 HUD aprobado por Neni).
+Sectores/Recuperar territorio: APARCADO en v1 oficial (sim interna intacta; revisiÃ³n tras playtest).
+Saves legacy: conservados como modo CLÃSICO; sin migraciÃ³n posicional al mundo Neni; sin nuevas partidas legacy.
+
+## QUÃ‰
+- Juego OFICIAL = mundo canÃ³nico Neni desde play.php a secas. `?pilot=neni` queda como alias compatible.
+- Persistencia real MySQL para partidas oficiales (api/save-load-slots con rotaciÃ³n mainâ†”backup). El piloto ya no vive solo en localStorage.
+- ImportaciÃ³n one-shot aditiva de `pilotNeniSave` (localStorage) cuando la BD estÃ¡ vacÃ­a; el original se conserva.
+- SAVE_VERSION 7â†’8 + `gen:'neni'` (OFFICIAL_GEN) + isOfficialGen(). Flags piloto antiguos se normalizan a gen.
+- Wipe `_wipeColonyToHqV1` restringido a partidas ClÃ¡sicas: nunca afecta al mundo Neni.
+- Hub: Continuar enruta por generaciÃ³n (slots.php expone `gen`; api-mock paridad). Etiqueta "Continuar (ClÃ¡sico)".
+- QA `?qa=1` independiente del alias y aislado en localStorage (`pilotNeniQaSave`), igual que antes.
+- Recuperar territorio aparcado en oficial: botÃ³n fuera del panel MÃ¡s, acciones expand-mode/recover-sector/focus-core con aviso, tema de ayuda oculto. sectors.js intacto.
+- ProtecciÃ³n: alias ?pilot=neni NO pisa un save ClÃ¡sico existente en BD (deriva a ClÃ¡sica salvo nueva explÃ­cita).
+- Nueva partida oficial NUNCA llama clearGame: la rotaciÃ³n mainâ†’backup protege la anterior.
+- Cache-bust ZZ_ASSET_V 89â†’90 (+ harness-zz actualizado).
+
+## ARCHIVOS
+js/play-mode.js (NUEVO, resolutor puro) Â· js/main.js Â· js/state.js Â· js/help.js Â· play.php Â· api/slots.php Â· includes/zz-assets.php Â· dev/api-mock.js Â· dev/harness-zz.html Â· dev/smoke-pilot-footprints.mjs (reparado: instalaba mapa terrain v3; fallaba igual en HEAD)
+
+## PRUEBAS
+- NUEVO scripts/smoke-official-mode.mjs: matriz resolvePlayMode (11 casos), v8/gen/wipe-guard, round-trip MySQL mock con HQ canon A (-7,14) Ã­ntegro.
+- Verdes (13): smoke-save, smoke-boot, smoke-build-place, smoke-sectors, zz020-021, zz024-027, zz030-032, zz033-048, zz175-178, smoke-pilot-d1-p0a, smoke-pilot-footprints, e2e-module-graph, smoke-official-mode.
+- KNOWN-FAIL preexistente (no regresiÃ³n B1, verificado idÃ©ntico en HEAD limpio via worktree): scripts/smoke-d1.mjs (5 fails de cÃ¡mara D1 LEGACY, contrato ZZ-018 obsoleto tras PT1-A/B01). Deuda documentada; testea el mundo en cuarentena.
+- php -l OK en play.php / slots.php / zz-assets.php.
+
+## E2E REAL (post-revisiÃ³n interna del bloque)
+- Entorno efÃ­mero de validaciÃ³n: PHP 8.3 (php -S multi-worker) + MariaDB 10.11 local + docroot copia exacta de htdocs + Playwright Chromium headless 844x390. BD local sembrada SOLO con usuarios de prueba (@test.local); cero datos reales.
+- scripts/e2e-b1-official.mjs (tooling de evidencia, sin commit): 66 asserts / 0 FAIL en 8 escenarios â€” entrada oficial desde hub real (sin ?pilot=neni), construcciÃ³n de Huerto por UI real + staffing, persistencia MySQL verificada por sondeo de fila y recarga con localStorage limpio, salir/volver por Continuar, alias pilot=neni sobre partida existente (misma generaciÃ³n), rotaciÃ³n mainâ†’backup al renovar (la anterior NO se pierde silenciosamente), QA aislado (mundo Neni + ayudas + localStorage propio + BD intocada), fixture ClÃ¡sica solo por ruta ?legacy=1 sin reinterpretar posiciones ni adquirir gen, nueva partida de usuario fresco nunca es ClÃ¡sica, consola/red limpia e importmap coherente v=90.
+- CORRECCIÃ“N B1 integrada (bug detectado por el propio E2E): guarda anti-reescritura idÃ©ntica en doSave() (lastSavedJson). Sin ella, cada autosave redundante rotaba mainâ†’backup y expulsaba la partida anterior del backup (pÃ©rdida silenciosa). TambiÃ©n evita el 404 esperado de load.php al entrar en modo QA (peek omitido cuando qa=1).
+- BaterÃ­a Node re-ejecutada tras la correcciÃ³n: 13/13 verdes (+ known-fail preexistente).
+
+## RIESGOS ABIERTOS
+- Guardado oficial requiere sesiÃ³n MySQL (PWA offline sin guardar; aceptado en B1).
+- Alias + save ClÃ¡sico deriva a ClÃ­sica (cosmÃ©tico: botÃ³n Fit mundo visible en mundo 4096; funcional).
+
+## ESTADO CURSOR
+COMPLETADA (commit Ãºnico local; SIN PUSH, SIN DEPLOY segÃºn orden)
+
+## ESTADO REVISIÃ"N
+PENDIENTE DE REVISIÃ"N
+
+## APROBACIÃ"N FINAL CHATGPT
+NO

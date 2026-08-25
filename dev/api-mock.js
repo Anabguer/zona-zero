@@ -26,6 +26,7 @@ export function fetchSaveStatus() {
           population: s.state?.population?.total || 0,
           alive: !s.state?.flags?.defeated,
           updated_at: s.updated_at,
+          gen: s.state?.gen ?? s.state?.flags?.pilot ?? null,
         }
       : null,
     slots: [

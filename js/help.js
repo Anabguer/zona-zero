@@ -58,9 +58,10 @@ export const HELP_TOPICS = [
     id: 'recover',
     title: 'Recuperar territorio',
     when: (s) =>
-      !!s.flags?.onboardingDone ||
-      (s.day || 1) >= 4 ||
-      (s.sectors || []).some((x) => x.status === 'recovering' || x.status === 'recovered'),
+      !s.flags?.sectorsUiParked &&
+      (!!s.flags?.onboardingDone ||
+        (s.day || 1) >= 4 ||
+        (s.sectors || []).some((x) => x.status === 'recovering' || x.status === 'recovered')),
     body: 'En Más → Recuperar territorio: ampliá sectores colindantes. Luego podréis construir en sus superficies.',
   },
   {

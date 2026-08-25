@@ -9,7 +9,19 @@ import { syncLaborFromColony } from './colony.js';
 import { createColonySectors, ensureSectors } from './sectors.js';
 import { ensureColonyLayout } from './colony-layout.js';
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
+/**
+ * Generaciones de partida:
+ * - gen 'neni'  → mundo canónico piloto Neni (juego oficial desde B1).
+ * - sin gen     → partida Clásica (legacy): se conserva cargable, no se migran posiciones.
+ */
+export const OFFICIAL_GEN = 'neni';
+
+/** ¿Es una partida de la generación oficial (mundo Neni)? */
+export function isOfficialGen(state) {
+  return state?.gen === OFFICIAL_GEN || state?.flags?.pilot === 'neni';
+}
+
 /** @deprecated legacy individual skills — solo migración */
 export const SKILL_KEYS = ['scout', 'gather', 'build', 'produce', 'fight'];
 
@@ -316,6 +328,8 @@ export function migrateState(state, content) {
   const balance = content?.balance || content;
   const next = { ...state };
   next.v = SAVE_VERSION;
+  // Normalizar generación: los flags piloto antiguos pasan a gen canónica.
+  if (next.gen == null && next.flags?.pilot === 'neni') next.gen = OFFICIAL_GEN;
   next.resources = normalizeResources(next.resources || {});
   if (!next.seed) next.seed = `migrated-${Date.now()}`;
   if (next.stability == null) next.stability = 50;
@@ -427,7 +441,8 @@ export function migrateState(state, content) {
     };
   });
   // Colonia a cero salvo HQ: quitar huertos/pozos/casas de saves viejos para probar la vivienda.
-  if (!next.flags._wipeColonyToHqV1) {
+  // B1: SOLO partidas Clásicas (legacy). Nunca aplicar a la generación oficial (mundo Neni).
+  if (!isOfficialGen(next) && !next.flags._wipeColonyToHqV1) {
     next.flags._wipeColonyToHqV1 = 1;
     next.base.buildings = (next.base.buildings || []).filter((b) =>
       String(b.type || '').startsWith('hq_')

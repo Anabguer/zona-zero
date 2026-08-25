@@ -16,6 +16,8 @@ if (!$decoded) {
 
 $save = null;
 if ($decoded) {
+    // B1: generación de la partida ('neni' = oficial; ausente = Clásica legacy).
+    $gen = $decoded['state']['gen'] ?? ($decoded['state']['flags']['pilot'] ?? null);
     $save = [
         'empty' => false,
         'title' => $decoded['meta']['title'],
@@ -25,6 +27,7 @@ if ($decoded) {
         'alive' => $decoded['meta']['alive'],
         'updated_at' => $decoded['meta']['updated_at'],
         'save_version' => $decoded['meta']['save_version'],
+        'gen' => $gen !== null ? (string) $gen : null,
     ];
 }
 
@@ -48,6 +51,7 @@ zz_respond([
                 'alive' => $save['alive'],
                 'updated_at' => $save['updated_at'],
                 'save_version' => $save['save_version'],
+                'gen' => $save['gen'],
             ]
             : [
                 'slot' => 1,

@@ -9,6 +9,16 @@ import {
   cellOccupiedByBuilding,
   validPilotAnchors,
 } from '../js/pilot-footprints.js';
+import { installPilotZoneMap } from '../js/pilot-terrain.js';
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+// Autoridad espacial del piloto: sin este mapa validPilotAnchors devuelve [] (desde terrain v3).
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+installPilotZoneMap(
+  JSON.parse(readFileSync(join(root, 'content', 'pilot', 'neni-pilot-zones-v3.json'), 'utf8'))
+);
 
 function mockState() {
   return {
@@ -16,7 +26,7 @@ function mockState() {
     base: {
       w: 14,
       h: 12,
-      buildings: [{ id: 'hq', type: 'hq_central_l1', x: 7, y: 5, hp: 100 }],
+      buildings: [{ id: 'hq', type: 'hq_central_l1', x: -7, y: 14, hp: 100 }],
     },
     sectors: [],
   };
@@ -33,7 +43,7 @@ console.log('Footprints:', { hqFp, houseFp, wellFp, storageFp });
 const houseAnchors = validPilotAnchors(st, null, 'house');
 console.log('House anchors válidos:', houseAnchors.length, houseAnchors.slice(0, 5));
 
-const pick = houseAnchors.find((a) => !footprintsOverlap(a.x, a.y, houseFp.w, houseFp.h, 7, 5, hqFp.w, hqFp.h));
+const pick = houseAnchors.find((a) => !footprintsOverlap(a.x, a.y, houseFp.w, houseFp.h, -7, 14, hqFp.w, hqFp.h));
 console.log('House anchor sin solapar HQ:', pick);
 
 st.base.buildings.push({ id: 'h1', type: 'house', x: pick.x, y: pick.y, hp: 100 });

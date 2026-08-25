@@ -11,7 +11,10 @@ import {
   summarizeState,
   migrateState,
   diaryEntries,
+  isOfficialGen,
+  OFFICIAL_GEN,
 } from './state.js';
+import { resolvePlayMode } from './play-mode.js';
 import { playableBuildingDefs, isV1PlayableBuilding } from './v1-catalog.js';
 import {
   advanceDay,
@@ -51,7 +54,7 @@ import {
   buildingMaxHp,
 } from './buildings-damage.js';
 import { resolvePendingChoice } from './director.js';
-import { startNewGameFlow, markIntroSeen, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
+import { startNewGameFlow, DEFAULT_COLONY_NAME, applyIntroArrival } from './intro.js';
 import { renderMap, bindMapCamera, recenterCamera, clampCamera, zoomCameraBy, panCameraBy, mapMetrics, cameraViewBox, fitWorldCamera } from './render-map.js';
 import {
   ensureBuildGhost,
@@ -171,6 +174,9 @@ const SKILL_LABEL = {
 let content = null;
 let state = null;
 let dirty = false;
+// B1: evita reescrituras idénticas — sin esto, cada save redundante rota main→backup
+// y termina expulsando la partida anterior del backup (pérdida silenciosa).
+let lastSavedJson = null;
 let chromeBound = false;
 let eventCardTimer = 0;
 let saveTimer = 0;
@@ -208,27 +214,32 @@ function scheduleSave() {
 async function doSave() {
   if (!state) return;
   try {
-    if (state.flags?.pilot === 'neni') {
-      // Piloto / QA: guardado SOLO local (no toca la persistencia normal).
-      const key = state.flags?.pilotQaMode ? 'pilotNeniQaSave' : 'pilotNeniSave';
+    if (state.flags?.pilotQaMode) {
+      // QA: aislado en localStorage, nunca toca la persistencia real.
       const payload = {
         v: 1,
         savedAt: Date.now(),
         state,
       };
       try {
-        localStorage.setItem(key, JSON.stringify(payload));
+        localStorage.setItem('pilotNeniQaSave', JSON.stringify(payload));
       } catch {
         /* ignore */
       }
       dirty = false;
-      if ($('zz-save-state')) {
-        $('zz-save-state').textContent = state.flags?.pilotQaMode ? 'Guardado (QA)' : 'Guardado (piloto)';
-      }
+      if ($('zz-save-state')) $('zz-save-state').textContent = 'Guardado (QA)';
+      return;
+    }
+    // Oficial (mundo Neni) y Clásico: persistencia real MySQL (main + backup).
+    const json = JSON.stringify(state);
+    if (json === lastSavedJson) {
+      dirty = false;
+      if ($('zz-save-state')) $('zz-save-state').textContent = 'Guardado';
       return;
     }
     const r = await api.saveGame(state, state.colonyName, summarizeState(state));
     if (!r.ok) throw new Error(r.error || 'save');
+    lastSavedJson = json;
     dirty = false;
     if ($('zz-save-state')) $('zz-save-state').textContent = 'Guardado';
   } catch (e) {
@@ -467,6 +478,12 @@ function handleSheetAction(action, btn) {
     return;
   }
   if (action === 'expand-mode') {
+    if (state.flags?.sectorsUiParked) {
+      toast('Recuperar territorio está aparcado en esta versión', 'info');
+      closeSheet();
+      paint();
+      return;
+    }
     if (state.uiMode === 'expand') {
       state.uiMode = null;
       state.selectedSectorId = null;
@@ -482,6 +499,10 @@ function handleSheetAction(action, btn) {
     return;
   }
   if (action === 'recover-sector') {
+    if (state.flags?.sectorsUiParked) {
+      toast('Recuperar territorio está aparcado en esta versión', 'info');
+      return;
+    }
     const id = btn.getAttribute('data-sector');
     const r = startSectorRecovery(state, id);
     if (!r.ok) {
@@ -496,6 +517,10 @@ function handleSheetAction(action, btn) {
     return;
   }
   if (action === 'focus-core') {
+    if (state.flags?.sectorsUiParked) {
+      toast('Recuperar territorio está aparcado en esta versión', 'info');
+      return;
+    }
     state.selectedSectorId = 'core';
     state.uiMode = state.uiMode === 'expand' ? 'expand' : null;
     openSectorSheet('core');
@@ -1355,6 +1380,8 @@ function openMoreSheet() {
     .join('');
 
   const soundOn = isSoundEnabled();
+  // B1 producto: Recuperar territorio aparcado en v1 oficial.
+  const sectorsParked = !!state.flags?.sectorsUiParked;
   openSheet(
     sheetPanel(
       'Más',
@@ -1367,14 +1394,18 @@ function openMoreSheet() {
       }</button>
       <button type="button" class="zz-btn zz-btn--ghost zz-btn--compact" data-action="open-help">Ayuda</button>
     </div>
-    <p>
+    ${
+      sectorsParked
+        ? ''
+        : `<p>
       <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="expand-mode">
         ${state.uiMode === 'expand' ? 'Salir de recuperación' : 'Recuperar territorio'}
       </button>
     </p>
     <p class="zz-sheet-panel__lead">
       Amplía la colonia sector a sector. Cada zona tiene su propia situación.
-    </p>
+    </p>`
+    }
     <p>Exploradores ${living}/${slots}.
       <button type="button" class="zz-btn zz-btn--compact" data-action="recruit-ex">Reclutar desde población</button>
     </p>
@@ -2757,10 +2788,229 @@ function bindChrome() {
   }
 }
 
+/** Banner de recuperación desde backup (compartido oficial/clásico). */
+function showRecoveredFromBackup(res) {
+  if (!res?.recoveredFromBackup) return;
+  const banner = $('zz-recover-banner');
+  if (banner) {
+    banner.hidden = false;
+    banner.textContent = res.message || 'Recuperamos tu colonia desde una copia de seguridad.';
+    setTimeout(() => {
+      banner.hidden = true;
+    }, 6000);
+  }
+  toast(res.message || 'Colonia recuperada', 'warn');
+}
+
+/**
+ * B1 — Juego OFICIAL: mundo canónico Neni con persistencia real (MySQL).
+ * - Nueva partida oficial nunca borra nada (la rotación main→backup protege la anterior).
+ * - Importación one-shot del save piloto local (aditiva; el original se conserva).
+ * - QA (?qa=1) sigue aislado en localStorage.
+ */
+async function bootOfficialWorld(opts, { qa, loadedRes }) {
+  // Refugio Central canónico — Human Gate Neni 2026-08-20: candidato A.
+  // Anchor terreno (-7,14) → world centro (824,520). Congelado; no recalcular.
+  const PILOT_HQ_AX = -7;
+  const PILOT_HQ_AY = 14;
+  const PILOT_NENI_NUCLEUS_X = 824;
+  const PILOT_NENI_NUCLEUS_Y = 520;
+  const PILOT_HQ_CANON = 'A-(-7,14)-824-520';
+
+  // Autoridad espacial: JSON canónico de zonas (cargar ANTES de anclar HQ / construir).
+  await loadPilotZoneMap();
+
+  // Marcar el mundo como canónico también a nivel CSS (página por defecto no trae clase).
+  if (typeof document !== 'undefined' && !document.body?.classList?.contains('zz-body--pilot-neni')) {
+    document.body.classList.add('zz-body--pilot-neni');
+  }
+
+  let baseState = null;
+  let importedFromLocal = false;
+
+  if (qa) {
+    // QA: localStorage aislado (no contamina partidas reales ni la BD).
+    let loaded = null;
+    try {
+      if (opts.mode === 'new' || opts.clearExisting) {
+        localStorage.removeItem('pilotNeniQaSave');
+      }
+      const raw = localStorage.getItem('pilotNeniQaSave');
+      if (raw) loaded = JSON.parse(raw);
+    } catch {
+      loaded = null;
+    }
+    baseState = loaded?.state ? migrateState(loaded.state, content) : null;
+  } else if (opts.mode !== 'new') {
+    // Cargar partida oficial desde MySQL (peek ya traído por el orquestador si venía del hub).
+    let res = loadedRes;
+    if (!res) {
+      try {
+        res = await api.loadGame();
+      } catch (e) {
+        res = { ok: false, error: String(e?.message || e) };
+      }
+    }
+    if (res?.ok && res?.state) {
+      const migrated = migrateState(res.state, content);
+      if (isOfficialGen(migrated)) {
+        baseState = migrated;
+        showRecoveredFromBackup(res);
+      }
+    }
+    if (!baseState) {
+      // Importación one-shot del save piloto local (mismo terreno/footprints → migración honesta).
+      try {
+        const raw = localStorage.getItem('pilotNeniSave');
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed?.state) {
+          baseState = migrateState(parsed.state, content);
+          importedFromLocal = true;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  state =
+    baseState ||
+    createNewState(content, opts.name || (qa ? 'QA Neni' : 'Refugio Norte'));
+
+  // Overrides de aislamiento + preparación UI
+  state.flags = state.flags || {};
+  state.gen = OFFICIAL_GEN;
+  state.flags.pilot = 'neni';
+  state.flags.pilotQaMode = qa;
+  state.flags.colonyCamV2 = 1; // evita override automático de cámara desde ensureColonyLayout()
+  // B1 producto: Recuperar territorio APARCADO en v1 oficial (sim interna intacta).
+  state.flags.sectorsUiParked = true;
+  // QA: auditoría libre sin coach. Oficial: onboarding D1 contextual.
+  if (qa) {
+    state.flags.onboardingDone = true;
+    state.flags.onboardingActive = false;
+  } else if (opts.mode === 'new' || opts.clearExisting || (!baseState && !loadedRes)) {
+    state.flags.onboardingDone = false;
+    state.flags.onboardingActive = true;
+    state.flags.onboardingStep = 0;
+    state.flags.introSeen = true; // paridad con markIntroSeen (ZZ-012): coach contextual
+    delete state.flags.guideDayAdvanced;
+  } else if (!state.flags.onboardingDone) {
+    state.flags.onboardingActive = true;
+  }
+  state.flags.pilotNeniCamInitialized = false;
+  state.flags.pilotFootprintDebug = !!opts.debugFootprints;
+  state.flags.pilotNeniHqCanon = PILOT_HQ_CANON;
+  state.flags.pilotTerrainCoords = 1;
+  state.flags.pilotTerrainVersion = 3;
+  delete state.flags.pilotHqProvisional;
+  delete state.flags.pilotHqCandidates;
+  delete state.flags.pilotHqForcedValid;
+
+  // Camp / cámara = centro world del HQ canónico A.
+  const camp = state.zones?.find((z) => z.type === 'camp');
+  if (camp) {
+    camp.x = PILOT_NENI_NUCLEUS_X;
+    camp.y = PILOT_NENI_NUCLEUS_Y;
+  }
+  ensureSectors(state);
+
+  // Grid base ya NO es autoridad de construcción en el mundo Neni (autoridad = terreno JSON).
+  state.base = state.base || { w: 14, h: 12, buildings: [] };
+  state.base.w = Math.max(state.base.w || 0, 76);
+  state.base.h = Math.max(state.base.h || 0, 37);
+
+  // HQ inicial fijo: no lo construye ni mueve el jugador; no se recalcula en paint.
+  let hq = (state.base.buildings || []).find((b) => b && b.hp > 0 && String(b.type).startsWith('hq_'));
+  if (!hq) {
+    hq = {
+      id: 'b_hq_pilot',
+      type: 'hq_central_l1',
+      x: PILOT_HQ_AX,
+      y: PILOT_HQ_AY,
+      hp: 100,
+      workers: 0,
+    };
+    state.base.buildings = [hq, ...(state.base.buildings || []).filter((b) => b && b.hp > 0)];
+  } else {
+    hq.type = String(hq.type).startsWith('hq_') ? hq.type : 'hq_central_l1';
+    hq.x = PILOT_HQ_AX;
+    hq.y = PILOT_HQ_AY;
+    hq.hp = Math.max(1, hq.hp || 100);
+    delete hq.plotId;
+  }
+  for (const b of state.base.buildings || []) {
+    if (b) delete b.plotId;
+  }
+
+  // Escala visual aprobada (sprites). No mezclar con footprints lógicos.
+  state.flags.pilotSpriteScale = 1.5;
+
+  // Zonas remapeadas siempre en el mundo Neni (mapa nuevo).
+  // Unlocks / 9999 / no-cost SOLO con ?qa=1.
+  remapPilotZones(state);
+  if (qa) {
+    applyPilotTestMode(state, content);
+  } else {
+    state.flags.pilotTestMode = false;
+  }
+
+  // Estado de UI de construcción: ghost se decide en el click humano (human gate).
+  state.uiMode = null;
+  state.buildMode = null;
+  state.buildGhost = null;
+  state.buildGhostValid = false;
+  dirty = false;
+
+  // Persistencia real (no QA): fijar nueva/importada en BD cuanto antes.
+  if (!qa && (importedFromLocal || !loadedRes)) {
+    try {
+      await api.saveGame(state, state.colonyName, summarizeState(state));
+    } catch {
+      /* el autosave reintenta; no bloquear el arranque */
+    }
+  }
+  // Base de "ya guardado" para el guarda anti-reescritura de doSave().
+  lastSavedJson = JSON.stringify(state);
+}
+
+/**
+ * B1 — Partida CLÁSICA (legacy): solo carga desde BD. Sin nuevas partidas legacy
+ * (lo bloquea play-mode.js). Posiciones legacy NO se migran al mundo Neni.
+ */
+async function bootLegacySave(opts, { loadedRes }) {
+  // Si la página venía marcada como mundo Neni (alias) y sirviéramos Clásico,
+  // quitar la marca: render-map sincroniza flag ← body class en cada pintado.
+  if (typeof document !== 'undefined') {
+    document.body?.classList?.remove('zz-body--pilot-neni');
+    delete document.body?.dataset?.zzPilotMap;
+  }
+  let res = loadedRes;
+  if (!res) {
+    try {
+      res = await api.loadGame();
+    } catch (e) {
+      res = { ok: false, error: String(e?.message || e) };
+    }
+  }
+  if (!res?.ok || !res?.state) throw new Error(res?.error || 'load');
+  state = migrateState(res.state, content);
+  showRecoveredFromBackup(res);
+  lastSavedJson = JSON.stringify(state); // baseline anti-reescritura (B1)
+  dirty = false;
+}
+
+/**
+ * B1 — bootGame resuelve el modo (play-mode.js) y delega:
+ * - oficial  → mundo canónico Neni + persistencia MySQL (QA aislado en localStorage)
+ * - clásico  → partida legacy existente, solo carga (sin nuevas partidas legacy)
+ */
 export async function bootGame(opts) {
   opts = { ...(opts || {}) };
   // Si play.php marcó el body como piloto, forzar opts aunque el JSON de boot fallara.
-  if (typeof document !== 'undefined' && document.body?.classList?.contains('zz-body--pilot-neni')) {
+  const bodyPilot =
+    typeof document !== 'undefined' && document.body?.classList?.contains('zz-body--pilot-neni');
+  if (bodyPilot) {
     opts.pilot = 'neni';
   }
   const boot = $('zz-boot');
@@ -2774,145 +3024,42 @@ export async function bootGame(opts) {
   }
   initSound();
 
-  const pilot = opts?.pilot === 'neni';
-
-  if (pilot) {
-    // Refugio Central canónico — Human Gate Neni 2026-08-20: candidato A.
-    // Anchor terreno (-7,14) → world centro (824,520). Congelado; no recalcular.
-    const PILOT_HQ_AX = -7;
-    const PILOT_HQ_AY = 14;
-    const PILOT_NENI_NUCLEUS_X = 824;
-    const PILOT_NENI_NUCLEUS_Y = 520;
-    const PILOT_HQ_CANON = 'A-(-7,14)-824-520';
-    const qa = !!opts?.qa;
-    const saveKey = qa ? 'pilotNeniQaSave' : 'pilotNeniSave';
-
-    // Autoridad espacial: JSON canónico de zonas (cargar ANTES de anclar HQ / construir).
-    await loadPilotZoneMap();
-
-    // Cargar piloto / QA (localStorage aislado del juego normal y entre sí)
-    let loaded = null;
+  // Peek único del save en BD para decidir generación (solo cuando hace falta).
+  // QA nunca usa MySQL: evitar el peek (y su 404 esperado) en ese modo.
+  let peek = null;
+  const needPeek = opts?.pilot !== 'neni' && opts?.mode !== 'new' && !opts?.qa;
+  if (needPeek) {
     try {
-      if (opts.mode === 'new' || opts.clearExisting) {
-        localStorage.removeItem(saveKey);
-      }
-      const raw = localStorage.getItem(saveKey);
-      if (raw) loaded = JSON.parse(raw);
-    } catch {
-      loaded = null;
-    }
-
-    state = loaded?.state ? migrateState(loaded.state, content) : createNewState(content, opts.name || (qa ? 'QA Neni' : 'Pilot Neni'));
-
-    // Overrides de aislamiento + preparación UI
-    state.flags = state.flags || {};
-    state.flags.pilot = 'neni';
-    state.flags.pilotQaMode = qa;
-    state.flags.colonyCamV2 = 1; // evita override automático de cámara desde ensureColonyLayout()
-    // QA: auditoría libre sin coach. Piloto normal: onboarding D1 contextual.
-    if (qa) {
-      state.flags.onboardingDone = true;
-      state.flags.onboardingActive = false;
-    } else if (opts.mode === 'new' || opts.clearExisting || !loaded) {
-      state.flags.onboardingDone = false;
-      state.flags.onboardingActive = true;
-      state.flags.onboardingStep = 0;
-      delete state.flags.guideDayAdvanced;
-    } else if (!state.flags.onboardingDone) {
-      state.flags.onboardingActive = true;
-    }
-    state.flags.pilotNeniCamInitialized = false;
-    state.flags.pilotFootprintDebug = !!opts.debugFootprints;
-    state.flags.pilotNeniHqCanon = PILOT_HQ_CANON;
-    state.flags.pilotTerrainCoords = 1;
-    state.flags.pilotTerrainVersion = 3;
-    delete state.flags.pilotHqProvisional;
-    delete state.flags.pilotHqCandidates;
-    delete state.flags.pilotHqForcedValid;
-
-    // Camp / cámara = centro world del HQ canónico A.
-    const camp = state.zones?.find((z) => z.type === 'camp');
-    if (camp) {
-      camp.x = PILOT_NENI_NUCLEUS_X;
-      camp.y = PILOT_NENI_NUCLEUS_Y;
-    }
-    ensureSectors(state);
-
-    // Grid base ya NO es autoridad de construcción en piloto (legacy sim).
-    state.base = state.base || { w: 14, h: 12, buildings: [] };
-    state.base.w = Math.max(state.base.w || 0, 76);
-    state.base.h = Math.max(state.base.h || 0, 37);
-
-    // HQ inicial fijo: no lo construye ni mueve el jugador; no se recalcula en paint.
-    let hq = (state.base.buildings || []).find((b) => b && b.hp > 0 && String(b.type).startsWith('hq_'));
-    if (!hq) {
-      hq = {
-        id: 'b_hq_pilot',
-        type: 'hq_central_l1',
-        x: PILOT_HQ_AX,
-        y: PILOT_HQ_AY,
-        hp: 100,
-        workers: 0,
-      };
-      state.base.buildings = [hq, ...(state.base.buildings || []).filter((b) => b && b.hp > 0)];
-    } else {
-      hq.type = String(hq.type).startsWith('hq_') ? hq.type : 'hq_central_l1';
-      hq.x = PILOT_HQ_AX;
-      hq.y = PILOT_HQ_AY;
-      hq.hp = Math.max(1, hq.hp || 100);
-      delete hq.plotId;
-    }
-    for (const b of state.base.buildings || []) {
-      if (b) delete b.plotId;
-    }
-
-    // Escala visual aprobada (sprites). No mezclar con footprints lógicos.
-    state.flags.pilotSpriteScale = 1.5;
-
-    // Zonas remapeadas siempre en piloto (mapa nuevo).
-    // Unlocks / 9999 / no-cost SOLO con ?qa=1.
-    remapPilotZones(state);
-    if (qa) {
-      applyPilotTestMode(state, content);
-    } else {
-      state.flags.pilotTestMode = false;
-    }
-
-    // Estado de UI de construcción: ghost se decide en el click humano (human gate).
-    state.uiMode = null;
-    state.buildMode = null;
-    state.buildGhost = null;
-    state.buildGhostValid = false;
-    dirty = false;
-  } else {
-    if (opts.mode === 'new') {
-      if (opts.clearExisting) {
-        await api.clearGame().catch(() => {});
-      }
-      state = createNewState(content, opts.name || 'Refugio 0');
-      if (opts.fromIntro) {
-        markIntroSeen(state);
-      }
-      const saved = await api.saveGame(state, state.colonyName, summarizeState(state));
-      if (!saved.ok) throw new Error(saved.error || 'save_failed');
-      dirty = false;
-    } else {
-      const res = await api.loadGame();
-      if (!res.ok) throw new Error(res.error || 'load');
-      state = migrateState(res.state, content);
-      if (res.recoveredFromBackup) {
-        const banner = $('zz-recover-banner');
-        if (banner) {
-          banner.hidden = false;
-          banner.textContent = res.message || 'Recuperamos tu colonia desde una copia de seguridad.';
-          setTimeout(() => {
-            banner.hidden = true;
-          }, 6000);
-        }
-        toast(res.message || 'Colonia recuperada', 'warn');
-      }
+      peek = await api.loadGame();
+    } catch (e) {
+      peek = { ok: false, error: String(e?.message || e) };
     }
   }
+
+  const mode = resolvePlayMode({
+    explicitPilot: opts?.pilot === 'neni',
+    bodyPilot,
+    isNew: opts?.mode === 'new',
+    clearExisting: !!opts?.clearExisting,
+    qa: !!opts?.qa,
+    legacyRequested: !!opts?.legacy,
+    peek,
+  });
+
+  if (mode.kind === 'official') {
+    await bootOfficialWorld(opts, { qa: mode.qa, loadedRes: mode.reason === 'save-official' ? peek : null });
+  } else if (mode.kind === 'legacy') {
+    await bootLegacySave(opts, { loadedRes: peek });
+  } else {
+    // legacy-empty
+    if (boot) {
+      boot.hidden = false;
+      boot.textContent = 'No hay partida Clásica guardada. Desde Inicio puedes empezar una partida nueva.';
+    }
+    return;
+  }
+
+  if (!state) throw new Error('boot sin estado');
 
   if (opts.colonyStyle && ['yard', 'dirt', 'iso'].includes(opts.colonyStyle)) {
     state.flags = state.flags || {};
@@ -3107,12 +3254,14 @@ export async function bootHub(opts = {}) {
 
     actions.innerHTML = '';
     if (hasSave) {
+      // B1: la generación del save decide la entrada (oficial vs Clásica).
+      // Sin gen (saves antiguos normales) → Clásica.
+      const playBase = String(opts.playUrl || 'play.php').split(/[?#]/)[0];
+      const isLegacySave = data.save?.gen !== OFFICIAL_GEN;
       const cont = document.createElement('a');
       cont.className = 'zz-btn zz-btn--primary zz-btn--hero';
-      cont.href = opts.playUrl
-        ? `${String(opts.playUrl).split(/[?#]/)[0]}#load=1`
-        : 'play.php';
-      cont.textContent = 'Continuar';
+      cont.href = isLegacySave ? `${playBase}?legacy=1#load=1` : `${playBase}#load=1`;
+      cont.textContent = isLegacySave ? 'Continuar (Clásico)' : 'Continuar';
       actions.appendChild(cont);
 
       const meta = document.createElement('p');
