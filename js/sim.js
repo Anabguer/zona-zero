@@ -212,7 +212,7 @@ export function placeBuilding(state, content, type, x, y) {
     const old = state.base.buildings.find((b) => b.type === def.upgradeFrom && b.hp > 0);
     if (old) {
       old.type = type;
-      pushLog(state, `Mejoráis a ${def.name}.`, 'good');
+      pushLog(state, `Mejoramos a ${def.name}.`, 'good');
       state.stats.buildingsBuilt += 1;
       return { ok: true, upgraded: true };
     }
@@ -223,7 +223,7 @@ export function placeBuilding(state, content, type, x, y) {
   const newId = state.base.buildings[state.base.buildings.length - 1].id;
   state.flags.justBuiltIds = [...(state.flags.justBuiltIds || []).filter((id) => id !== newId).slice(-3), newId];
   syncLaborFromColony(state, content);
-  pushLog(state, `Construís ${def.name}.`, 'good');
+  pushLog(state, `Construimos ${def.name}.`, 'good');
   return { ok: true };
 }
 
@@ -1311,7 +1311,7 @@ function buildDayBrief(state, content, before, prod, ctx) {
   });
 
   (state.log || [])
-    .filter((L) => L.day === state.day - 1 && /Construís|Mejoráis|Calefacción/.test(L.text || ''))
+    .filter((L) => L.day === state.day - 1 && /Construimos|Mejoramos|Calefacción/.test(L.text || ''))
     .slice(0, 3)
     .forEach((L) => facts.push({ kind: L.text?.includes('Calefacción') ? 'heat' : 'build', text: L.text }));
 

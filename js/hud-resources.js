@@ -1,15 +1,11 @@
 /**
  * Recursos visibles en HUD superior (ZZ-013).
  * D1: comida/agua/madera siempre legibles. Nunca fuel/ammo/oro en la barra.
- * Excepción: ?pilot=neni modo pruebas — muestra recursos reales para auditoría.
+ * B01 v1: fuel y munición fuera del HUD también en QA piloto (decisión de producto).
+ * La lógica interna de fuel/ammo sigue viva; solo desaparecen de la presentación.
  */
 
 export function hudResourceKeys(state) {
-  // QA piloto: auditoría con stock completo. Piloto normal: mismo contrato D1 que el juego.
-  if (state?.flags?.pilot === 'neni' && state?.flags?.pilotQaMode) {
-    return ['food', 'water', 'wood', 'metal', 'medicine', 'fuel', 'ammo'];
-  }
-
   const day = state.day || 1;
   const guideOn = !!(state.flags?.onboardingActive && !state.flags?.onboardingDone);
   const keys = ['food', 'water', 'wood'];
@@ -24,6 +20,6 @@ export function hudResourceKeys(state) {
   ) {
     if (!keys.includes('medicine')) keys.push('medicine');
   }
-  // Prohibido en HUD normal: fuel, ammo, energy, gold (Au/Gu legado)
+  // Prohibido en HUD: fuel, ammo, energy, gold (Au/Gu legado)
   return keys.filter((k) => !['fuel', 'ammo', 'energy', 'gold', 'au', 'gu'].includes(k));
 }

@@ -154,14 +154,14 @@ $base = zz_public_base();
     <div id="zz-attack-card" class="zz-attack-card" hidden></div>
     <div id="zz-day-brief" class="zz-day-brief" hidden></div>
 
-    <footer class="zz-world-dock zz-world-dock--day">
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar">✕</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance" aria-label="Avanzar día">
-        <span class="zz-dock-txt zz-dock-txt--advance">Avanzar día</span>
-        <span class="zz-dock-txt zz-dock-txt--advance-short" aria-hidden="true">Día ›</span>
+    <!-- Controles flotantes compactos (B01): avanzar día + confirmar/cancelar construcción -->
+    <div class="zz-fab" role="group" aria-label="Controles de partida">
+      <button type="button" class="zz-fab__btn zz-fab__btn--ok" id="zz-build-ok" hidden title="Confirmar construcción" aria-label="Confirmar construcción">✓</button>
+      <button type="button" class="zz-fab__btn zz-fab__btn--sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar construcción">✕</button>
+      <button type="button" class="zz-fab__btn zz-fab__btn--day" id="zz-advance" aria-label="Avanzar día" title="Avanzar día">
+        <span class="zz-fab__txt">Día</span><span class="zz-fab__chev" aria-hidden="true">›</span>
       </button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden aria-label="Confirmar construcción">✓ Construir</button>
-    </footer>
+    </div>
 
     <div id="zz-defeat" class="zz-defeat" hidden>
       <div class="zz-defeat__card">

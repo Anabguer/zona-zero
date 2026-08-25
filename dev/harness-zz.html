@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Zona Zero · harness bloque 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/game.css?v=76" />
-  <link rel="stylesheet" href="../css/world.css?v=76" />
+  <link rel="stylesheet" href="../css/game.css?v=89" />
+  <link rel="stylesheet" href="../css/world.css?v=89" />
   <script type="importmap">
   {
     "imports": {
@@ -107,14 +107,14 @@
     <div id="zz-event-card" class="zz-event-card" hidden></div>
     <div id="zz-attack-card" class="zz-attack-card" hidden></div>
     <div id="zz-day-brief" class="zz-day-brief" hidden></div>
-    <footer class="zz-world-dock zz-world-dock--day">
-      <button type="button" class="zz-btn zz-btn--ghost zz-btn--dock-sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar">✕</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance" aria-label="Avanzar día">
-        <span class="zz-dock-txt zz-dock-txt--advance">Avanzar día</span>
-        <span class="zz-dock-txt zz-dock-txt--advance-short" aria-hidden="true">Día ›</span>
+    <!-- Controles flotantes compactos (B01) - espejo de play.php -->
+    <div class="zz-fab" role="group" aria-label="Controles de partida">
+      <button type="button" class="zz-fab__btn zz-fab__btn--ok" id="zz-build-ok" hidden title="Confirmar construcción" aria-label="Confirmar construcción">✓</button>
+      <button type="button" class="zz-fab__btn zz-fab__btn--sec" id="zz-build-cancel" hidden title="Cancelar" aria-label="Cancelar construcción">✕</button>
+      <button type="button" class="zz-fab__btn zz-fab__btn--day" id="zz-advance" aria-label="Avanzar día" title="Avanzar día">
+        <span class="zz-fab__txt">Día</span><span class="zz-fab__chev" aria-hidden="true">›</span>
       </button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden aria-label="Confirmar construcción">✓ Construir</button>
-    </footer>
+    </div>
     <div id="zz-defeat" class="zz-defeat" hidden>
       <div class="zz-defeat__card">
         <h2>Derrota</h2>
@@ -151,11 +151,12 @@
   <span id="zz-stability" hidden></span>
   <details id="zz-objective-fold" hidden><summary></summary><p id="zz-objective"></p></details>
   <script type="module">
-    import { bootGame } from '../js/main.js?v=76';
+    import { bootGame } from '../js/main.js?v=89';
     const q = new URLSearchParams(
       (location.hash || '').replace(/^#/, '') || location.search.replace(/^\?/, '')
     );
     const pilot = q.get('pilot') === 'neni' ? 'neni' : undefined;
+    const qa = pilot != null && q.get('qa') === '1';
     const debugFootprints = q.get('debug') === 'footprints';
     const isLoad = q.get('load') === '1' && q.get('new') !== '1';
     const clearExisting =
@@ -170,6 +171,7 @@
       fromIntro: q.get('intro') === '1',
       colonyStyle: q.get('colonyStyle') || undefined,
       pilot,
+      qa,
       debugFootprints,
     }).then(() => {
       if (q.get('demo') === '1') document.body.classList.add('zz-body--demo');
@@ -181,13 +183,21 @@
         });
       }
       if (pilot) {
-        // Replica a play.php: UI mínima en modo piloto.
+        // Espejo de play.php en piloto: HUD completo + clase body canónica (+ marca QA).
         const fit = document.getElementById('zz-fit-world');
         if (fit) fit.hidden = false;
-        ['zz-save', 'zz-open-pop', 'zz-resources', 'zz-open-more', 'zz-advance'].forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) el.hidden = true;
-        });
+        document.body.classList.add('zz-body--pilot-neni');
+        if (qa) {
+          const title = document.querySelector('.zz-hud__title');
+          if (title && !document.getElementById('zz-qa-mark')) {
+            const mark = document.createElement('span');
+            mark.className = 'zz-qa-mark';
+            mark.id = 'zz-qa-mark';
+            mark.title = 'Modo QA piloto';
+            mark.textContent = 'QA';
+            title.appendChild(mark);
+          }
+        }
       }
       window.__zzOk = true;
     }).catch((e) => {

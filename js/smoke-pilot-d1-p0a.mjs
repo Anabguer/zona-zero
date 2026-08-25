@@ -145,7 +145,9 @@ assert(snap.base.buildings.some((b) => b.type === 'well' && b.workers === 1), 's
 const qaState = { flags: { pilot: 'neni', pilotQaMode: true } };
 const qaIds = pilotBuildableTypeIds(qaState);
 assert(qaIds.has('farm') && qaIds.has('storage') && qaIds.has('workshop'), 'QA catálogo amplio');
-assert(hudResourceKeys(qaState).includes('fuel'), 'QA HUD con fuel');
+// B01: fuel/ammo fuera del HUD también en QA (solo presentación; la lógica sigue viva)
+const qaHud = hudResourceKeys(qaState);
+assert(!qaHud.includes('fuel') && !qaHud.includes('ammo'), 'QA HUD sin fuel/ammo');
 
 if (fails) process.exit(1);
 console.log('Smoke P0-A piloto D1 OK');

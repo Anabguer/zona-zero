@@ -399,7 +399,7 @@ export function currentObjective(state, content) {
       return {
         id: 'need_repair',
         title: needRepair.length === 1 ? 'Edificio dañado' : `${needRepair.length} edificios dañados`,
-        text: 'Tocá la alerta o el edificio → Reparar (madera/metal + días).',
+        text: 'Toca la alerta o el edificio y pulsa Reparar (madera/metal y días).',
         buildingIds: needRepair.map((b) => b.id),
       };
     }

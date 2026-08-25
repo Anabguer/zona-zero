@@ -7,37 +7,37 @@
 export const GUIDE_STEPS = [
   {
     id: 'need_food',
-    text: 'Somos 3 y las reservas no durarán para siempre. Abrí Construir y elegid un Huerto.',
+    text: 'Somos 3 y las reservas no durarán para siempre. Abre Construir y elige un Huerto.',
     highlight: 'build',
     suggestBuild: 'farm',
     wait: 'hasFarm',
   },
   {
     id: 'staff_farm',
-    text: 'El huerto no produce solo. Tocadlo y asignad al menos 1 trabajador.',
+    text: 'El huerto no produce solo. Tócalo y asigna al menos 1 trabajador.',
     wait: 'farmStaffed',
   },
   {
     id: 'see_day',
-    text: 'Ya producimos comida. Veamos si alcanza: avanzad el día.',
+    text: 'Ya producimos comida. Veamos si alcanza: avanza el día.',
     highlight: 'advance',
     wait: 'dayAdvanced',
   },
   {
     id: 'need_water',
-    text: 'También necesitamos una fuente estable de agua. Abrí Construir y elegid un Pozo.',
+    text: 'También necesitamos una fuente estable de agua. Abre Construir y elige un Pozo.',
     highlight: 'build',
     suggestBuild: 'well',
     wait: 'hasWell',
   },
   {
     id: 'staff_well',
-    text: 'Asignad un trabajador al pozo.',
+    text: 'Asigna un trabajador al pozo.',
     wait: 'wellStaffed',
   },
   {
     id: 'ready',
-    text: 'El refugio empieza a producir. Cuando estéis listos, seguid construyendo o avanzad el día.',
+    text: 'El refugio empieza a producir. Sigue construyendo o avanza el día.',
     highlight: 'advance',
     wait: null,
   },
@@ -175,9 +175,9 @@ export function coachMessage(state) {
   const pilot = state?.flags?.pilot === 'neni';
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
     if (pilot) {
-      return 'Movéd el fantasma por el terreno válido (verde). Confirmad con ✓ cuando esté bien.';
+      return 'Mueve el fantasma a una zona válida (verde) y confirma con ✓.';
     }
-    return 'Colocad el edificio en un sitio válido y confirmad con ✓. Arrastrá el mapa fuera del fantasma para mirar alrededor.';
+    return 'Coloca el edificio en un sitio válido y confirma con ✓. Arrastra el mapa para mirar alrededor.';
   }
   return st.step.text;
 }

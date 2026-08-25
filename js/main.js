@@ -430,8 +430,8 @@ function handleSheetAction(action, btn) {
     paint();
     toast(
       state.flags?.pilot === 'neni'
-        ? 'Tocá el suelo junto al Refugio para mover el fantasma · confirmá con ✓'
-        : 'Tocá una ruina o un solar vacío',
+        ? 'Mueve el fantasma a una zona válida y confirma'
+        : 'Toca una ruina o un solar vacío',
       'info'
     );
     return;
@@ -531,7 +531,7 @@ function handleSheetAction(action, btn) {
     state.uiMode = 'explore';
     state.buildMode = null;
     closeSheet();
-    toast('Elegid un destino resaltado en el mapa', 'info');
+    toast('Elige un destino resaltado en el mapa', 'info');
     paint();
     return;
   }
@@ -673,7 +673,7 @@ function categoryDayImpact(key) {
   if (key === 'build') {
     return {
       text: n > 0 ? 'pueden construir' : 'sin mano de obra',
-      deficit: n < 1 ? 'Asignad construcción para edificar' : null,
+      deficit: n < 1 ? 'Asigna construcción para edificar' : null,
     };
   }
   if (key === 'defense') {
@@ -923,9 +923,9 @@ function openExplorerSheet(id) {
       ${
         e.status === 'ready'
           ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="start-explore" data-id="${e.id}">Explorar el mapa</button>
-             <p class="zz-muted" style="font-size:0.78rem;margin-top:0.35rem">O tocá directamente una zona en el mapa.</p>`
+             <p class="zz-muted" style="font-size:0.78rem;margin-top:0.35rem">O toca directamente una zona en el mapa.</p>`
           : e.status === 'away'
-            ? '<p class="zz-muted">Está fuera. Veréis su ruta en el mapa.</p>'
+            ? '<p class="zz-muted">Está fuera. Su ruta se ve en el mapa.</p>'
             : ''
       }
       <p><button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button></p>
@@ -949,7 +949,7 @@ function openZoneSheet(zoneId) {
           <img class="zz-ctx__art" src="${buildingArtUrl('shelter')}" alt="" />
           <div>
             <h2>${escapeHtml(z.name)}</h2>
-            <p>Tocá un edificio para gestionarlo. Construí para ampliar.</p>
+            <p>Toca un edificio para gestionarlo. Construye para ampliar.</p>
           </div>
         </div>
         <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
@@ -1144,7 +1144,7 @@ function openBuildSheet() {
     openSheet(
       `
     <h2 class="zz-sheet-panel__title">Construir · QA</h2>
-    <p class="zz-sheet-panel__lead">Solo “Listos” usan arte y footprint nuevos. Tocá el suelo · confirmá con ✓</p>
+    <p class="zz-sheet-panel__lead">Toca el suelo y confirma con ✓. Solo edificios “Listos” en QA.</p>
     <h3 class="zz-build-section">Listos para revisar</h3>
     <div class="zz-build-grid">${readyList || '<p class="zz-muted">Ninguno</p>'}</div>
     <h3 class="zz-build-section">HOLD humano</h3>
@@ -1188,7 +1188,7 @@ function openBuildSheet() {
         if (reqBld) lockReason = `Requiere ${content.buildings[b.requiresBuilding]?.name || b.requiresBuilding}`;
         else if (reqTech.length) lockReason = 'Falta investigación';
         else if (!afford) lockReason = `Falta: ${missing}`;
-        else if (!laborOk) lockReason = 'Asignad gente a construcción';
+        else if (!laborOk) lockReason = 'Asigna gente a construcción';
       }
       const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
       const thumb = pilot ? uiBuildingArtUrl(state, b.id) : buildingArtUrl(b.id);
@@ -1199,8 +1199,8 @@ function openBuildSheet() {
     <h2 class="zz-sheet-panel__title">Construir</h2>
     <p class="zz-sheet-panel__lead">${
       pilot
-        ? 'Elegí un edificio · tocá el suelo junto al Refugio · confirmá con ✓'
-        : 'Elegí un edificio y después tocá una ruina o un solar vacío.'
+        ? 'Elige un edificio y colócalo junto al Refugio'
+        : 'Elige un edificio y después toca una ruina o un solar vacío.'
     }</p>
     <div class="zz-build-grid">${list}</div>
   `, 'build');
@@ -1593,61 +1593,87 @@ function paintDeskPanel() {
 function fillExplorerHost(host) {
   if (!host || !state || !content) return;
   host.innerHTML = '';
-  const slots = explorerSlotsUnlocked(state, content.balance);
-  const list = (state.explorers || []).slice(0, Math.max(slots, (state.explorers || []).length));
-  list.forEach((e) => {
+  // B01: rail compacto de exactamente 3 slots (máximo canónico de exploradores).
+  const SLOTS = 3;
+  const unlocked = explorerSlotsUnlocked(state, content.balance);
+  const list = state.explorers || [];
+  for (let i = 0; i < SLOTS; i++) {
+    const e = list[i];
     const btn = document.createElement('button');
     btn.type = 'button';
-    const stClass =
-      e.status === 'away'
-        ? ' is-away'
-        : e.status === 'ready'
-          ? ' is-ready'
-          : e.status === 'dead'
-            ? ' is-dead'
-            : e.status === 'wounded'
-              ? ' is-wounded'
-              : '';
-    btn.className =
-      'zz-ex-card' + (state.selectedExplorerId === e.id ? ' is-selected' : '') + stClass;
-    const img = document.createElement('img');
-    img.className = 'zz-ex-portrait';
-    img.src = portraitArtUrl(e);
-    img.alt = '';
-    img.width = 40;
-    img.height = 40;
-    btn.appendChild(img);
-    const stTxt =
-      e.status === 'ready'
-        ? 'Listo'
-        : e.status === 'away'
-          ? 'En ruta'
-          : e.status === 'wounded'
-            ? 'Herido'
+    if (e) {
+      const stClass =
+        e.status === 'away'
+          ? ' is-away'
+          : e.status === 'ready'
+            ? ' is-ready'
             : e.status === 'dead'
-              ? 'Caído'
-              : e.status;
-    const meta = document.createElement('div');
-    meta.innerHTML = `<div class="zz-ex-card__name">${escapeHtml(e.name)}</div>
-      <div class="zz-ex-card__st">${stTxt} · Nv.${e.level || 1}</div>`;
-    btn.appendChild(meta);
-    btn.addEventListener('click', () => {
-      sfx.click?.();
-      openExplorerSheet(e.id);
-    });
+              ? ' is-dead'
+              : e.status === 'wounded'
+                ? ' is-wounded'
+                : '';
+      btn.className =
+        'zz-ex-card' + (state.selectedExplorerId === e.id ? ' is-selected' : '') + stClass;
+      const stTxt =
+        e.status === 'ready'
+          ? 'Listo'
+          : e.status === 'away'
+            ? 'En ruta'
+            : e.status === 'wounded'
+              ? 'Herido'
+              : e.status === 'dead'
+                ? 'Caído'
+                : e.status;
+      btn.title = `${e.name} · ${stTxt} · Nv.${e.level || 1}`;
+      btn.setAttribute('aria-label', btn.title);
+      const img = document.createElement('img');
+      img.className = 'zz-ex-portrait';
+      img.src = portraitArtUrl(e);
+      img.alt = '';
+      img.width = 40;
+      img.height = 40;
+      btn.appendChild(img);
+      const name = document.createElement('span');
+      name.className = 'zz-ex-card__name';
+      name.textContent = e.name;
+      btn.appendChild(name);
+      btn.addEventListener('click', () => {
+        sfx.click?.();
+        openExplorerSheet(e.id);
+      });
+    } else if (i < unlocked) {
+      btn.className = 'zz-ex-card zz-ex-card--empty';
+      btn.title = 'Plaza libre';
+      btn.setAttribute('aria-label', 'Plaza libre');
+      const ph = document.createElement('span');
+      ph.className = 'zz-ex-card__ph';
+      ph.setAttribute('aria-hidden', 'true');
+      ph.textContent = '+';
+      btn.appendChild(ph);
+      const name = document.createElement('span');
+      name.className = 'zz-ex-card__name';
+      name.textContent = 'Libre';
+      btn.appendChild(name);
+      btn.addEventListener('click', () => {
+        sfx.click?.();
+        openMoreSheet();
+      });
+    } else {
+      btn.className = 'zz-ex-card zz-ex-card--locked';
+      btn.disabled = true;
+      btn.title = 'Plaza bloqueada';
+      btn.setAttribute('aria-label', 'Plaza bloqueada');
+      const ph = document.createElement('span');
+      ph.className = 'zz-ex-card__ph';
+      ph.setAttribute('aria-hidden', 'true');
+      ph.textContent = '🔒';
+      btn.appendChild(ph);
+      const name = document.createElement('span');
+      name.className = 'zz-ex-card__name';
+      name.textContent = 'Bloqueada';
+      btn.appendChild(name);
+    }
     host.appendChild(btn);
-  });
-  if (livingExplorers(state).length < slots) {
-    const tip = document.createElement('button');
-    tip.type = 'button';
-    tip.className = 'zz-ex-card';
-    tip.style.opacity = '0.7';
-    tip.innerHTML = `<div></div><div><div class="zz-ex-card__name">Plaza libre</div><div class="zz-ex-card__st">Reclutar · ${livingExplorers(state).length}/${slots}</div></div>`;
-    tip.addEventListener('click', () => {
-      sfx.click?.();
-      openMoreSheet();
-    });
-    host.appendChild(tip);
   }
 }
 
@@ -2291,7 +2317,7 @@ function openVacantSlotSheet(slot) {
       else if (reqTech.length) lockReason = 'Falta investigación';
       else if (!afford) lockReason = `Falta: ${missing}`;
       else if ((state.population.labor?.build || 0) + (state.population.labor?.idle || 0) < 1)
-        lockReason = 'Asignad gente a construcción';
+        lockReason = 'Asigna gente a construcción';
       const guided = suggest && (b.id === suggest || b.id.startsWith(suggest));
       return `<button type="button" class="zz-build-card ${locked ? 'is-disabled' : ''} ${guided ? 'is-guide-suggest' : ''}" data-action="build-on-slot" data-slot="${slot.id}" data-build="${b.id}" ${
         locked ? 'disabled' : ''
@@ -2364,22 +2390,14 @@ function paintModeBanner() {
   if (state.uiMode === 'build' && state.buildMode) {
     el.hidden = false;
     const name = content.buildings[state.buildMode]?.name || 'edificio';
-    const pilot = state.flags?.pilot === 'neni';
-    const placeHint = pilot
-      ? 'tocá el suelo junto al Refugio · confirmá con ✓'
-      : `tocá ${slotKindForBuildingType(state.buildMode) === 'lot' ? 'un solar de tierra' : 'una ruina'}`;
-    el.innerHTML = `Colocá <strong>${escapeHtml(name)}</strong> · ${placeHint} · <button type="button" class="zz-linkish" data-cancel-build>✕ Cancelar</button>`;
-    el.querySelector('[data-cancel-build]')?.addEventListener('click', () => {
-      clearBuildMode(state);
-      paint();
-    });
+    el.textContent = `Coloca ${name} en una zona válida`;
   } else if (state.uiMode === 'explore') {
     el.hidden = false;
-    el.textContent = 'Tocá una zona del mapa para explorar';
+    el.textContent = 'Toca una zona del mapa para explorar';
   } else if (state.uiMode === 'expand') {
     el.hidden = false;
     el.innerHTML =
-      'Recuperar territorio · tocá una zona colindante · <button type="button" class="zz-linkish" data-cancel-expand>Listo</button>';
+      'Recupera territorio: toca una zona colindante · <button type="button" class="zz-linkish" data-cancel-expand>Listo</button>';
     el.querySelector('[data-cancel-expand]')?.addEventListener('click', () => {
       state.uiMode = null;
       state.selectedSectorId = null;
@@ -2504,12 +2522,14 @@ function renderChoiceModal() {
 
 function handleAdvanceDay() {
   if (state.pendingChoice) {
-    toast('Resolved la decisión pendiente', 'warn');
+    toast('Resuelve la decisión pendiente', 'warn');
     return;
   }
-  if (state.uiMode === 'build' || state.uiMode === 'explore') {
+  if (state.uiMode === 'build' || state.uiMode === 'explore' || state.uiMode === 'expand') {
+    // B01: los modos transitorios no sobreviven al avance de día (sin banners persistentes).
     state.uiMode = null;
     state.buildMode = null;
+    state.selectedSectorId = null;
   }
   const nTech = (state.research?.unlocked || []).length;
   const eraBefore = state.era || 0;
@@ -2523,7 +2543,7 @@ function handleAdvanceDay() {
   markGuideDayAdvanced(state);
   const revealed = maybeRevealEarlyLandmarks(state);
   if (revealed) {
-    toast('Un punto cercano aparece en el mapa. Tocá para explorar.', 'info');
+    toast('Un punto cercano aparece en el mapa. Toca para explorar.', 'info');
     sfx.discover?.();
   }
   checkOnboardingProgress(state);
