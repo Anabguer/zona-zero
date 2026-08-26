@@ -332,6 +332,20 @@ export function currentObjective(state, content) {
       text: `Frío en ${days} día(s) — ~${need} madera/día · reserva ${reserve} días.`,
     };
   }
+  // B2 — sanidad básica ANTES de camas: si no hay ningún edificio médico, ese es el paso
+  {
+    const hasMed = (state.base?.buildings || []).some(
+      (b) => ['medkit', 'infirmary', 'clinic', 'lab'].includes(b.type) && b.hp > 0
+    );
+    const hurt0 = (state.population?.sick || 0) + (state.population?.injured || 0);
+    if (!hasMed && hurt0 > 0) {
+      return {
+        id: 'need_medicine',
+        title: 'Sanidad básica',
+        text: `${hurt0} herido(s)/enfermo(s): un Botiquín acelera su recuperación.`,
+      };
+    }
+  }
   // ZZ-058: brote / camas
   if (state.outbreak?.active) {
     const beds = (state.base?.buildings || []).reduce((n, b) => {
@@ -427,7 +441,34 @@ export function currentObjective(state, content) {
       text: 'Asegura comida y agua: huerto, pozo y trabajadores.',
     };
   }
-  if (pop >= cap - 1 || cap <= 6) {
+
+  // B2 — materiales base del loop oficial (día ≥2): madera → metal
+  if ((state.day || 1) >= 2) {
+    const blds = state.base?.buildings || [];
+    const hasSaw = blds.some((b) => ['sawmill', 'workshop'].includes(b.type) && b.hp > 0);
+    const hasScrap = blds.some((b) => b.type === 'scrapyard' && b.hp > 0);
+    if (!hasSaw) {
+      return {
+        id: 'materials_wood',
+        title: 'Materiales',
+        text: 'Construye un Aserradero: la madera permitirá ampliar el refugio.',
+      };
+    }
+    if (!hasScrap) {
+      const metalShort = Object.entries(content?.buildings?.scrapyard?.cost || {}).some(
+        ([k, v]) => (state.resources?.[k] || 0) < v
+      );
+      return {
+        id: 'materials_metal',
+        title: 'Materiales',
+        text: metalShort
+          ? 'Falta metal para la Chatarrería: una expedición cercana puede traerlo.'
+          : 'Construye una Chatarrería para producir metal.',
+      };
+    }
+  }
+  // B2 — vivienda cuando hay presión real (no spam con colonia mínima)
+  if (pop >= Math.max(4, cap - 1)) {
     return {
       id: 'housing',
       title: 'Ampliación',
@@ -452,6 +493,20 @@ export function currentObjective(state, content) {
       };
     }
   }
+  // B2 — sanidad básica cuando hay bajas o la colonia ya va rodando
+  {
+    const hasMed = (state.base?.buildings || []).some(
+      (b) => ['medkit', 'infirmary', 'clinic', 'lab'].includes(b.type) && b.hp > 0
+    );
+    const hurt = (state.population?.sick || 0) + (state.population?.injured || 0);
+    if (!hasMed && hurt > 0) {
+      return {
+        id: 'need_medicine',
+        title: 'Sanidad básica',
+        text: `${hurt} herido(s)/enfermo(s): un Botiquín acelera su recuperación.`,
+      };
+    }
+  }
   // ZZ-063: munición baja con amenaza
   if ((state.resources?.ammo || 0) < 3 && (state.director?.threat || 0) >= 22) {
     return {
@@ -466,6 +521,18 @@ export function currentObjective(state, content) {
       title: 'Defensa',
       text: 'Refuerza el perímetro (gente o torre).',
     };
+  }
+  // B2 — desbloqueo real de investigación (era ≥1, banco aún no construido)
+  {
+    const era = state.era || 0;
+    const hasBench = (state.base?.buildings || []).some((b) => ['tech_bench', 'lab'].includes(b.type) && b.hp > 0);
+    if (era >= 1 && !hasBench) {
+      return {
+        id: 'research_hint',
+        title: 'Investigación',
+        text: 'Nueva era: un Banco Técnico abre mejoras para la colonia.',
+      };
+    }
   }
   if (state.day >= 12 && state.flags?.objectivesDismissed !== true) {
     return null;

@@ -15,10 +15,48 @@ export const PILOT_ZONE_REMAP_SCALE = 10;
 /** Radios mínimos legibles en mapa 1819×865. */
 export const PILOT_ZONE_R_MIN = 36;
 
-/** En QA: catálogo aprobado completo. Piloto normal D1: farm + well + house. */
+/**
+ * B2 — Catálogo OFICIAL progresivo (no-QA).
+ * Gates por día + era sobre el catálogo aprobado (footprints PILOT_FOOTPRINTS).
+ * Sin costes nuevos: los datos son los canónicos de content/buildings.json.
+ *
+ * Lógica de progresión D1–D10:
+ * - D1: comida y agua (farm, well).
+ * - D2: materiales base (sawmill madera · scrapyard metal) + almacén.
+ * - D3: medicina básica (medkit).
+ * - D4: vivienda ampliada (house) cuando la población empieza a crecer.
+ * - Era ≥1 (indicadores, no día fijo): cocina, cisterna, invernadero, enfermería,
+ *   banco técnico (investigación).
+ *
+ * Fuera de la UX oficial v1-B2 (documentado en DEVELOPMENT_LOG): defensas (bloque
+ * futuro §13-UX), radio/expedition_center/garage/command/mech_shop (mid-game o fuel),
+ * lab/clinic (era 2+), block/insulated_house (vivienda avanzada), shelter (footprint HOLD).
+ */
+export function pilotOfficialGates(state) {
+  const day = state?.day || 1;
+  const era = state?.era || 0;
+  const allowed = new Set(['farm', 'well']);
+  if (day >= 2) {
+    allowed.add('sawmill');
+    allowed.add('scrapyard');
+    allowed.add('storage');
+  }
+  if (day >= 3) allowed.add('medkit');
+  if (day >= 4) allowed.add('house');
+  if (era >= 1) {
+    allowed.add('kitchen');
+    allowed.add('cistern');
+    allowed.add('greenhouse');
+    allowed.add('infirmary');
+    allowed.add('tech_bench');
+  }
+  return allowed;
+}
+
+/** En QA: catálogo aprobado completo. Oficial no-QA: gates progresivos B2. */
 export function pilotBuildableTypeIds(state) {
   if (state?.flags?.pilotQaMode) return pilotQaReadyTypes();
-  return new Set(['farm', 'well', 'house']);
+  return pilotOfficialGates(state);
 }
 
 /**

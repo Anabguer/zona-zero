@@ -36,8 +36,27 @@ export const GUIDE_STEPS = [
     wait: 'wellStaffed',
   },
   {
+    id: 'need_wood',
+    text: 'La madera ampliará este refugio. Con metal y madera ya pagados, construye un Aserradero.',
+    highlight: 'build',
+    suggestBuild: 'sawmill',
+    wait: 'hasSawmill',
+  },
+  {
+    id: 'staff_sawmill',
+    text: 'Asigna un trabajador al aserradero para que caigan troncos.',
+    wait: 'sawmillStaffed',
+  },
+  {
+    id: 'need_metal',
+    text: 'El metal llega de la chatarra. Construye una Chatarrería (si falta metal, una expedición cercana puede traerlo).',
+    highlight: 'build',
+    suggestBuild: 'scrapyard',
+    wait: 'hasScrapyard',
+  },
+  {
     id: 'ready',
-    text: 'El refugio empieza a producir. Sigue construyendo o avanza el día.',
+    text: 'Comida, agua y materiales en marcha. Sigue la franja de objetivo de arriba y avanza el día cuando estés listo.',
     highlight: 'advance',
     wait: null,
   },
@@ -88,6 +107,9 @@ function stepWaitMet(state, wait) {
   if (wait === 'dayAdvanced') return !!state.flags?.guideDayAdvanced;
   if (wait === 'hasWell') return hasType(state, ['well']);
   if (wait === 'wellStaffed') return staffed(state, ['well']);
+  if (wait === 'hasSawmill') return hasType(state, ['sawmill']);
+  if (wait === 'sawmillStaffed') return staffed(state, ['sawmill']);
+  if (wait === 'hasScrapyard') return hasType(state, ['scrapyard', 'workshop', 'mech_shop']);
   return false;
 }
 
@@ -173,7 +195,7 @@ export function coachMessage(state) {
   const st = onboardingStatus(state);
   if (!st) return null;
   const pilot = state?.flags?.pilot === 'neni';
-  if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
+  if (state.buildMode && st.step.suggestBuild) {
     if (pilot) {
       return 'Mueve el fantasma a una zona válida (verde) y confirma con ✓.';
     }

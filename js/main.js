@@ -2101,12 +2101,9 @@ function paintObjective() {
   const btn = $('zz-mission');
   const text = $('zz-mission-text');
   if (!btn || !text) return;
-  // Durante la guía y el bloque D1–D5 no competir con coach/brief
+  // B2: durante la guía activa el coach manda (sin duplicar). En cuanto la guía
+  // se despide, el chip de objetivo SIEMPRE visible — Neni nunca sin brújula.
   if (state.flags?.onboardingActive && !state.flags?.onboardingDone) {
-    btn.hidden = true;
-    return;
-  }
-  if ((state.day || 1) <= 5) {
     btn.hidden = true;
     return;
   }
@@ -3060,6 +3057,18 @@ export async function bootGame(opts) {
   }
 
   if (!state) throw new Error('boot sin estado');
+
+  // Instrumentación QA/E2E (solo lectura + repaint): verificación de estado en pruebas.
+  if (typeof window !== 'undefined') {
+    window.__ZZ_GET_STATE = () => state;
+    window.__ZZ_REPAINT = () => paint();
+    window.__ZZ_DEBUG_GUIDE = () => ({
+      blocked: overlayBlocksGuide(),
+      step: onboardingStatus(state)?.index ?? null,
+      text: (() => { try { return coachMessage(state); } catch (e) { return 'ERR:' + e; } })(),
+      chipObj: missionAlert(state, content)?.id || null,
+    });
+  }
 
   if (opts.colonyStyle && ['yard', 'dirt', 'iso'].includes(opts.colonyStyle)) {
     state.flags = state.flags || {};
