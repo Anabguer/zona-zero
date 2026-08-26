@@ -442,11 +442,10 @@ export function currentObjective(state, content) {
     };
   }
 
-  // B2 — materiales base del loop oficial (día ≥2): madera → metal
+  // B2 — materiales base del loop oficial (día ≥2): madera → metal → staffing real
   if ((state.day || 1) >= 2) {
     const blds = state.base?.buildings || [];
     const hasSaw = blds.some((b) => ['sawmill', 'workshop'].includes(b.type) && b.hp > 0);
-    const hasScrap = blds.some((b) => b.type === 'scrapyard' && b.hp > 0);
     if (!hasSaw) {
       return {
         id: 'materials_wood',
@@ -454,7 +453,8 @@ export function currentObjective(state, content) {
         text: 'Construye un Aserradero: la madera permitirá ampliar el refugio.',
       };
     }
-    if (!hasScrap) {
+    const scrap = blds.find((b) => b.type === 'scrapyard' && b.hp > 0);
+    if (!scrap) {
       const metalShort = Object.entries(content?.buildings?.scrapyard?.cost || {}).some(
         ([k, v]) => (state.resources?.[k] || 0) < v
       );
@@ -464,6 +464,26 @@ export function currentObjective(state, content) {
         text: metalShort
           ? 'Falta metal para la Chatarrería: una expedición cercana puede traerlo.'
           : 'Construye una Chatarrería para producir metal.',
+      };
+    }
+    // B2 revisión: chatarrería SIN personal no produce — el objetivo no puede darse por cerrado.
+    // - Si hay manos libres → pide asignar (acción realizable).
+    // - Si NO hay manos libres → NO exige lo imposible: pasa al siguiente objetivo contextual
+    //   (vivienda/exploración traen crecimiento → el objetivo de staffing reaparecerá solo).
+    const scrapStaffed = (scrap.workers || 0) > 0;
+    if (!scrapStaffed && (state.population?.labor?.idle || 0) > 0) {
+      return {
+        id: 'materials_metal_staff',
+        title: 'Materiales',
+        text: 'Asigna 1 trabajador a la Chatarrería: sin personal produce 0 metal.',
+      };
+    }
+    const saw = blds.find((b) => ['sawmill', 'workshop'].includes(b.type) && b.hp > 0);
+    if ((saw?.workers || 0) === 0 && (state.population?.labor?.idle || 0) > 0) {
+      return {
+        id: 'materials_wood_staff',
+        title: 'Materiales',
+        text: 'Asigna 1 trabajador al Aserradero: sin personal produce 0 madera.',
       };
     }
   }

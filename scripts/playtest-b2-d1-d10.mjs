@@ -234,7 +234,7 @@ async function runSeed(seed, verbose) {
 
     // métricas del día resultante
     const events = (st.log || [])
-      .filter((e) => e.day === st.day - 1 && ['bad', 'warn', 'story'].includes(e.kind))
+      .filter((e) => e.day >= st.day - 1 && ['bad', 'warn', 'story'].includes(e.kind))
       .slice(0, 3)
       .map((e) => e.text);
     const snap = snapshot(st, { ...extra, eventos: events.join(' | ').slice(0, 90) });

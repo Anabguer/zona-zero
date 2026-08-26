@@ -155,7 +155,7 @@ function officialState(day = 1, era = 0, qa = false) {
   // Investigación al abrir era
   const sr = officialState(8, 1);
   sr.base.buildings = [{ id: 'b_hq', type: 'hq_central_l1', x: -7, y: 14, hp: 100, workers: 0 }];
-  addSimple(sr, 'farm', 1); addSimple(sr, 'well', 1); addSimple(sr, 'sawmill'); addSimple(sr, 'scrapyard');
+  addSimple(sr, 'farm', 1); addSimple(sr, 'well', 1); addSimple(sr, 'sawmill', 1); addSimple(sr, 'scrapyard', 1);
   sr.expeditionsDone = 1;
   sr.stats.zonesControlled = 2;
   sr.zones = [
@@ -198,6 +198,63 @@ function addSimple(state, type, workers = 0) {
   const missingMetal = Math.max(0, scrapCost.metal - (resA.metal || 0));
   // B2 fix anti-deadlock: startingResources.metal 12 cierra la cadena base SIN depender de loot
   assert(missingMetal === 0, 'cadena A: chatarrería pagable tras farm+well+sawmill (sin loot, sin deadlock)');
+}
+
+// ---------- 6. B2 revisión: staffing de Chatarrería nunca imposible ----------
+{
+  // Guía incluye paso de staffing de chatarrería con espera adaptable
+  const stStep = GUIDE_STEPS.find((s) => s.id === 'staff_scrapyard');
+  assert(!!stStep && stStep.wait === 'scrapyardStaffedOrNoHands', 'guía: paso staff_scrapyard adaptable');
+
+  // Caso A: hay manos libres → exige asignar (objetivo realizable)
+  const sa = officialState(3, 0);
+  sa.base.buildings = [{ id: 'b_hq', type: 'hq_central_l1', x: -7, y: 14, hp: 100, workers: 0 }];
+  addSimple(sa, 'farm', 1); addSimple(sa, 'well', 1); addSimple(sa, 'sawmill', 1);
+  addSimple(sa, 'scrapyard', 0);
+  sa.population.labor.idle = 0; // farm+well+sawmill ocupan a pop3
+  // con idle=0 el objetivo NO exige staffing imposible
+  let o = currentObjective(sa, content);
+  assert(o?.id !== 'materials_metal_staff', `sin manos libres: NO exige staffing (${o?.id})`);
+  sa.population.labor.idle = 1; // aparece un libre → objetivo de staffing reaparece
+  o = currentObjective(sa, content);
+  assert(o?.id === 'materials_metal_staff', `con manos libres: pide asignar (${o?.id})`);
+
+  // Guía: con idle=0 el paso se resuelve solo (nunca bloquea con orden imposible)
+  const sg = officialState(4, 0);
+  sg.base.buildings = [{ id: 'b_hq', type: 'hq_central_l1', x: -7, y: 14, hp: 100, workers: 0 }];
+  addSimple(sg, 'farm', 1); addSimple(sg, 'well', 1); addSimple(sg, 'sawmill', 1);
+  addSimple(sg, 'scrapyard', 0);
+  sg.population.labor.idle = 0;
+  sg.flags.onboardingDone = false; sg.flags.onboardingActive = true;
+  // colocar la guía en el paso de staffing
+  const idx = GUIDE_STEPS.findIndex((s) => s.id === 'staff_scrapyard');
+  sg.flags.onboardingStep = idx;
+  checkOnboardingProgress(sg);
+  assert(
+    sg.flags.onboardingStep > idx || sg.flags.onboardingDone,
+    'guía: sin manos libres el paso NO bloquea (avanza solo)'
+  );
+
+  // ---------- 7. Muerte por herido sin camas: NUNCA silenciosa ----------
+  const { healPopulationTick } = await import(pathToFileURL(join(root, 'js', 'population.js')).href);
+  let muertes = 0;
+  let conLog = 0;
+  for (let i = 0; i < 400; i++) {
+    const sd = officialState(5, 0);
+    sd.base.buildings = [{ id: 'b_hq', type: 'hq_central_l1', x: -7, y: 14, hp: 100, workers: 0 }];
+    sd.population.injured = 1;
+    sd.population.labor.medicine = 0;
+    sd.resources.medicine = 0;
+    const before = sd.population.total;
+    healPopulationTick(sd, content.balance, content);
+    if (sd.population.total < before) {
+      muertes++;
+      const logged = (sd.log || []).some((e) => e.kind === 'bad' && /no pudimos salvarle/i.test(e.text));
+      if (logged) conLog++;
+    }
+  }
+  assert(muertes > 10, `muertes simuladas suficientes (${muertes}/400 intentos)`);
+  assert(muertes === conLog, `TODA muerte por herido-sin-camas deja log visible (${conLog}/${muertes})`);
 }
 
 if (fails > 0) {

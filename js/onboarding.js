@@ -55,6 +55,11 @@ export const GUIDE_STEPS = [
     wait: 'hasScrapyard',
   },
   {
+    id: 'staff_scrapyard',
+    text: 'Asigna 1 trabajador a la Chatarrería: sin personal produce 0 metal.',
+    wait: 'scrapyardStaffedOrNoHands',
+  },
+  {
     id: 'ready',
     text: 'Comida, agua y materiales en marcha. Sigue la franja de objetivo de arriba y avanza el día cuando estés listo.',
     highlight: 'advance',
@@ -110,6 +115,11 @@ function stepWaitMet(state, wait) {
   if (wait === 'hasSawmill') return hasType(state, ['sawmill']);
   if (wait === 'sawmillStaffed') return staffed(state, ['sawmill']);
   if (wait === 'hasScrapyard') return hasType(state, ['scrapyard', 'workshop', 'mech_shop']);
+  // B2 revisión: exigir staffing SOLO si hay manos libres; si no, el paso se resuelve solo
+  // (la ficha ya avisa «Sin personal — no produce» y el objetivo reaparecerá al crecer).
+  if (wait === 'scrapyardStaffedOrNoHands') {
+    return staffed(state, ['scrapyard']) || (state.population?.labor?.idle || 0) === 0;
+  }
   return false;
 }
 
@@ -195,6 +205,10 @@ export function coachMessage(state) {
   const st = onboardingStatus(state);
   if (!st) return null;
   const pilot = state?.flags?.pilot === 'neni';
+  // Paso adaptable: sin manos libres no se exige staffing imposible (B2 revisión).
+  if (st.step.id === 'staff_scrapyard' && (state.population?.labor?.idle || 0) === 0) {
+    return 'Ahora no hay manos libres: la Chatarrería empezará a producir en cuanto la colonia crezca.';
+  }
   if (state.buildMode && st.step.suggestBuild) {
     if (pilot) {
       return 'Mueve el fantasma a una zona válida (verde) y confirma con ✓.';

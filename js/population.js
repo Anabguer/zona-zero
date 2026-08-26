@@ -250,6 +250,17 @@ export function healPopulationTick(state, balance, content = null) {
     if (Math.random() < chance * Math.min(3, pop.injured)) {
       changePopulation(state, -1, balance, 'death');
       if (pop.injured > 0) pop.injured -= 1;
+      // B2 revisión: ninguna muerte puede ser silenciosa. Sin camas médicas,
+      // un herido puede no superar la noche — el jugador debe saberlo y poder
+      // mitigarlo (botiquín/enfermería = objetivo need_medicine).
+      state.log = state.log || [];
+      state.log.unshift({
+        day: state.day,
+        text: 'No pudimos salvarle: herido sin camas médicas. Necesitamos sanidad.',
+        kind: 'bad',
+        diary: true,
+      });
+      if (state.log.length > 120) state.log.length = 120;
     }
   }
 
