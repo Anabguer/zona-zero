@@ -97,13 +97,15 @@ export function syncLaborFromColony(state, content) {
     for (const key of order) {
       if (over <= 0) break;
       const list = staffableBuildings(state, content, key).slice().sort((a, b) => (b.workers || 0) - (a.workers || 0));
-      for (const b of list) {
-        if (over <= 0) break;
-        const take = Math.min(b.workers || 0, over);
-        b.workers -= take;
-        next[key] -= take;
-        over -= take;
-      }
+       for (const b of list) {
+         if (over <= 0) break;
+         const curWorkers = b.workers || 0;
+         if (key === 'water' && curWorkers <= 1) continue;
+         const take = key === 'water' ? Math.min(curWorkers - 1, over) : Math.min(curWorkers, over);
+         b.workers -= take;
+         next[key] -= take;
+         over -= take;
+       }
       if (key === 'build' && over > 0) {
         const take = Math.min(next.build, over);
         next.build -= take;
@@ -264,6 +266,83 @@ export function adjustBuildingWorkers(state, content, buildingId, delta) {
   return { ok: true, workers: b.workers, labor: { ...state.population.labor } };
 }
 
+function productionWithWorkers(def, workers) {
+  if (!def?.produces) return {};
+  const jobs = Math.max(1, def.jobs || 1);
+  const staff = Math.max(0, workers || 0);
+  if (staff <= 0) return {};
+  const ratio = clamp(staff / jobs, 0.15, 1.15);
+  const out = {};
+  Object.entries(def.produces).forEach(([k, v]) => {
+    out[k] = Math.max(0, Math.round(v * ratio));
+  });
+  return out;
+}
+
+function daysOfStock(state, content, resourceKey, currentWorkers, candidateWorkers) {
+  const pop = state.population?.total || 0;
+  if (pop <= 0) return 999;
+  const stock = state.resources?.[resourceKey] || 0;
+  const needPerDay = pop * (content.balance?.[resourceKey === 'food' ? 'foodPerPersonPerDay' : 'waterPerPersonPerDay'] || (resourceKey === 'food' ? 0.9 : 0.88));
+  const buildings = staffableBuildings(state, content, resourceKey === 'food' ? 'food' : 'water');
+  let prod = 0;
+  for (const b of buildings) {
+    const def = content.buildings[b.type];
+    const w = (b.id === candidateWorkers.buildingId) ? candidateWorkers.workers : (b.workers || 0);
+    const out = productionWithWorkers(def, w);
+    prod += out[resourceKey] || 0;
+  }
+  const net = prod - needPerDay;
+  if (net >= 0) return 999;
+  return stock / Math.abs(net);
+}
+
+export function tryRotateWorkerForMetal(state, content) {
+  const era = state.era || 0;
+  if (era < 1) return false;
+  const hasBench = (state.base?.buildings || []).some((b) => ['tech_bench', 'lab'].includes(b.type) && b.hp > 0);
+  if (hasBench) return false;
+  const scrap = (state.base?.buildings || []).find((b) => b.type === 'scrapyard' && b.hp > 0);
+  if (!scrap) return false;
+  if ((scrap.workers || 0) > 0) return false;
+  const tbCost = content.buildings?.tech_bench?.cost || { wood: 4, metal: 6 };
+  const metal = state.resources?.metal || 0;
+  if (metal >= (tbCost.metal || 6)) return false;
+  const pop = state.population?.total || 0;
+  if (pop < 5) return false;
+  const foodB = staffableBuildings(state, content, 'food');
+  const waterB = staffableBuildings(state, content, 'water');
+  let bestSource = null;
+  let bestDays = 0;
+  for (const b of foodB) {
+    if ((b.workers || 0) <= 1) continue;
+    const days = daysOfStock(state, content, 'food', b.workers, { buildingId: b.id, workers: b.workers - 1 });
+    if (days > bestDays && days >= 5) {
+      bestDays = days;
+      bestSource = { type: 'food', building: b, days };
+    }
+  }
+  for (const b of waterB) {
+    if ((b.workers || 0) <= 1) continue;
+    const days = daysOfStock(state, content, 'water', b.workers, { buildingId: b.id, workers: b.workers - 1 });
+    if (days > bestDays && days >= 5) {
+      bestDays = days;
+      bestSource = { type: 'water', building: b, days };
+    }
+  }
+  if (!bestSource) return false;
+  bestSource.building.workers = (bestSource.building.workers || 0) - 1;
+  scrap.workers = (scrap.workers || 0) + 1;
+  state.flags = state.flags || {};
+  state.flags.rotatedForMetal = {
+    from: bestSource.type,
+    buildingId: bestSource.building.id,
+    day: state.day,
+    daysBuffer: Math.floor(bestDays)
+  };
+  return true;
+}
+
 export function autoStaffColony(state, content) {
   const pop = state.population;
   if (!pop) return { ok: false };
@@ -299,6 +378,7 @@ export function autoStaffColony(state, content) {
     pop.manual.build = Math.min(left, Math.max(1, Math.floor(wf * 0.12)));
   }
   syncLaborFromColony(state, content);
+  tryRotateWorkerForMetal(state, content);
   return { ok: true };
 }
 
