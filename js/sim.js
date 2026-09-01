@@ -1219,6 +1219,11 @@ export function advanceDay(state, content) {
     );
   }
 
+  // B4K.3H ENGINE FIX: sync labor after attack to prevent sumWorkers > workforce
+  // resolveBaseAttack → applyCasualties increases injured → workforce drops
+  // but building.workers stay stale. This sync reconciles them.
+  syncLaborFromColony(state, content);
+
   checkVictory(state, content);
   checkDefeat(state);
 
