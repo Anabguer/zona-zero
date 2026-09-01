@@ -97,15 +97,14 @@ export function syncLaborFromColony(state, content) {
     for (const key of order) {
       if (over <= 0) break;
       const list = staffableBuildings(state, content, key).slice().sort((a, b) => (b.workers || 0) - (a.workers || 0));
-       for (const b of list) {
-         if (over <= 0) break;
-         const curWorkers = b.workers || 0;
-         if (key === 'water' && curWorkers <= 1) continue;
-         const take = key === 'water' ? Math.min(curWorkers - 1, over) : Math.min(curWorkers, over);
-         b.workers -= take;
-         next[key] -= take;
-         over -= take;
-       }
+      for (const b of list) {
+        if (over <= 0) break;
+        const curWorkers = b.workers || 0;
+        const take = Math.min(curWorkers, over);
+        b.workers -= take;
+        next[key] -= take;
+        over -= take;
+      }
       if (key === 'build' && over > 0) {
         const take = Math.min(next.build, over);
         next.build -= take;
