@@ -200,7 +200,10 @@ export function applyEventEffects(state, content, effects = {}, rng) {
   if (effects.setFlag) state.flags.narrative[effects.setFlag] = true;
   if (effects.clearFlag) delete state.flags.narrative[effects.clearFlag];
   if (effects.damageSurvivor) {
-    applyCasualties(state, content.balance, { injured: 1 });
+    const derivedRng = createRng((state.rngState || 1) ^ (state.day * 7919) ^ 0xD5);
+    if (derivedRng.chance(effects.damageSurvivor / 100)) {
+      applyCasualties(state, content.balance, { injured: 1 });
+    }
   }
   if (effects.killSurvivorChance && rng.chance(effects.killSurvivorChance)) {
     applyCasualties(state, content.balance, { dead: 1 });
