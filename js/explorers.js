@@ -3,6 +3,7 @@
  */
 import { createRng } from './rng.js';
 import { clamp, uid } from './util.js';
+import { rngOf } from './sim.js';
 
 export const EXPLORER_SKILLS = ['explore', 'loot', 'fight', 'resist'];
 
@@ -137,7 +138,7 @@ export function killExplorer(state, explorer, balance, { recoverGear = null } = 
   explorer.expeditionId = null;
   const chance = recoverGear == null ? balance?.explorers?.gearRecoverChanceOnDeath ?? 0.55 : recoverGear ? 1 : 0;
   // gear recovery abstracted into resources if lucky
-  if (Math.random() < chance && explorer.gear?.weapon && explorer.gear.weapon !== 'none') {
+  if (rngOf(state).chance(chance) && explorer.gear?.weapon && explorer.gear.weapon !== 'none') {
     state.resources.metal = (state.resources.metal || 0) + 1;
   }
   explorer.gear = { weapon: 'none', armor: 'none' };

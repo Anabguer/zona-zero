@@ -86,9 +86,9 @@ function riskSeed(state, content) {
   return clamp(r, 0.005, 0.35);
 }
 
-function phaseDuration(balance, phase, arch, quarantine) {
+function phaseDuration(balance, phase, arch, quarantine, state) {
   const range = balance.outbreaks?.phaseDays?.[phase] || [2, 3];
-  let d = range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1));
+  let d = range[0] + (state ? rngOf(state).int(range[0], range[1]) : Math.floor(Math.random() * (range[1] - range[0] + 1)));
   d = Math.max(1, Math.round(d * (arch.durationBias || 1)));
   if (quarantine) d = Math.max(1, Math.round(d * 0.7));
   return d;
@@ -106,7 +106,7 @@ export function startOutbreak(state, content, forcedType = null) {
     label: arch.label || arch.id,
     phase: 'seed',
     phaseDay: 0,
-    phaseLen: phaseDuration(content.balance, 'seed', arch, q),
+    phaseLen: phaseDuration(content.balance, 'seed', arch, q, state),
     days: 0,
     severity: 1,
     newCasesToday: 0,
@@ -138,14 +138,14 @@ function advancePhase(state, content, arch) {
     if (containScore >= sick + 4 && next === 'peak') {
       ob.phase = 'resolve';
       ob.phaseDay = 0;
-      ob.phaseLen = phaseDuration(content.balance, 'resolve', arch, q);
+      ob.phaseLen = phaseDuration(content.balance, 'resolve', arch, q, state);
       pushLog(state, 'El brote parece contenerse gracias a la sanidad.', 'good');
       return;
     }
   }
   ob.phase = next;
   ob.phaseDay = 0;
-  ob.phaseLen = phaseDuration(content.balance, next, arch, q);
+  ob.phaseLen = phaseDuration(content.balance, next, arch, q, state);
   if (next === 'peak') {
     ob.severity = Math.min(3, (ob.severity || 1) + 1);
     state.stability = Math.max(0, (state.stability || 0) - 3);

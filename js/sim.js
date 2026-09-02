@@ -121,7 +121,7 @@ export const RES_LABEL = {
   tools: 'herramientas',
 };
 
-function rngOf(state) {
+export function rngOf(state) {
   return createRng((state.rngState || 1) + state.day * 9973);
 }
 

@@ -7,6 +7,7 @@
  */
 
 import { clamp } from './util.js';
+import { rngOf } from './sim.js';
 
 
 
@@ -247,7 +248,7 @@ export function healPopulationTick(state, balance, content = null) {
   // Sin camas: riesgo de muerte en heridos
   if (beds <= 0 && (pop.injured || 0) > 0) {
     const chance = cfg.deathChanceNoBedsPerInjured ?? 0.08;
-    if (Math.random() < chance * Math.min(3, pop.injured)) {
+    if (rngOf(state).chance(chance * Math.min(3, pop.injured))) {
       changePopulation(state, -1, balance, 'death');
       if (pop.injured > 0) pop.injured -= 1;
       // B2 revisión: ninguna muerte puede ser silenciosa. Sin camas médicas,
