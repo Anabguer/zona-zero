@@ -155,7 +155,7 @@
     "max": 12,
     "jobs": 3,
     "produces": {
-      "food": 5
+      "food": 7
     },
     "minEra": 0,
     "requires": [],
@@ -197,7 +197,7 @@
     "max": 8,
     "jobs": 2,
     "produces": {
-      "water": 5
+      "water": 7
     },
     "minEra": 0,
     "requires": [],
