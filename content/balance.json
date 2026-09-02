@@ -113,7 +113,7 @@
     "phaseDays": { "seed": [1, 2], "spread": [2, 4], "peak": [2, 3], "resolve": [2, 4], "recovery": [2, 3] }
   },
   "health": {
-    "healPerBed": 0.55,
+    "healPerBed": 0.75,
     "healPerMedStaff": 0.45,
     "healPerMedicine": 0.35,
     "minHealWithoutBeds": 0.35,
