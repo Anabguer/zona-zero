@@ -239,6 +239,7 @@ export function resolveBaseAttack(state, content, intensity = 2, opts = {}) {
 
   let dead = Math.min(Math.max(1, pop - floorPop), maxDead);
   dead = Math.min(dead, Math.max(0, pop - floorPop));
+  if (pop <= 6 && dead > 1) dead = 1;
   const hasFarmOrDef = state.base.buildings.some(
     (b) =>
       ['farm', 'greenhouse', 'watchtower', 'bunker', 'fence', 'barricade'].includes(b.type) && b.hp > 0
