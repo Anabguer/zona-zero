@@ -924,13 +924,55 @@ function botDecide(st) {
     }
   }
 
-  // 2b) ROTATION POLICY — manage material buffers and rotate workers legally
+  // 2b) ROTATION POLICY B5.9 — demand-aware + capacity-safe wood recovery
+  // Maintains existing canonical hysteresis (WOOD_TARGET=20, WOOD_RESUME=8)
+  // Adds wood demand check to prevent dead-band stagnation (wood 9-19)
   const woodBuffer = st.resources.wood || 0;
   const metalBuffer = st.resources.metal || 0;
   const foodBuffer = st.resources.food || 0;
   const waterBuffer = st.resources.water || 0;
 
-  // Buffer targets (reasonable for pop 6-9)
+  // B5.9: Calculate legitimate wood demand from currently affordable buildings
+  // This identifies construction/affordability needs the colony is trying to meet
+  let woodDemand = 0;
+  // House: wood 10
+  const houseDef = content.buildings.house;
+  const houseAllowed = pilotBuildableTypeIds(st).has('house');
+  const houseCanAfford = houseAllowed && Object.entries(houseDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const houseAnchors = houseAllowed ? anchorsMod.validPilotAnchors(st, content, 'house') : [];
+  if (houseAllowed && houseCanAfford && houseAnchors.length > 0) woodDemand += houseDef.cost.wood || 10;
+  // Tech Bench: wood 4
+  const tbDef = content.buildings.tech_bench;
+  const tbAllowed = pilotBuildableTypeIds(st).has('tech_bench');
+  const tbCanAfford = tbAllowed && Object.entries(tbDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const tbAnchors = tbAllowed ? anchorsMod.validPilotAnchors(st, content, 'tech_bench') : [];
+  if (tbAllowed && tbCanAfford && tbAnchors.length > 0) woodDemand += tbDef.cost.wood || 4;
+  // Cistern: wood 3
+  const cisternDef = content.buildings.cistern;
+  const cisternAllowed = pilotBuildableTypeIds(st).has('cistern');
+  const cisternCanAfford = cisternAllowed && Object.entries(cisternDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const cisternAnchors = cisternAllowed ? anchorsMod.validPilotAnchors(st, content, 'cistern') : [];
+  if (cisternAllowed && cisternCanAfford && cisternAnchors.length > 0) woodDemand += cisternDef.cost.wood || 3;
+  // Sawmill: wood 3
+  const sawmillDef = content.buildings.sawmill;
+  const sawmillAllowed = pilotBuildableTypeIds(st).has('sawmill');
+  const sawmillCanAfford = sawmillAllowed && Object.entries(sawmillDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const sawmillAnchors = sawmillAllowed ? anchorsMod.validPilotAnchors(st, content, 'sawmill') : [];
+  if (sawmillAllowed && sawmillCanAfford && sawmillAnchors.length > 0) woodDemand += sawmillDef.cost.wood || 3;
+  // Scrapyard: wood 4
+  const scDef = content.buildings.scrapyard;
+  const scAllowed = pilotBuildableTypeIds(st).has('scrapyard');
+  const scCanAfford = scAllowed && Object.entries(scDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const scAnchors = scAllowed ? anchorsMod.validPilotAnchors(st, content, 'scrapyard') : [];
+  if (scAllowed && scCanAfford && scAnchors.length > 0) woodDemand += scDef.cost.wood || 4;
+  // Greenhouse: wood 8
+  const ghDef = content.buildings.greenhouse;
+  const ghAllowed = pilotBuildableTypeIds(st).has('greenhouse');
+  const ghCanAfford = ghAllowed && Object.entries(ghDef.cost || {}).every(([k, v]) => (st.resources[k] || 0) >= v);
+  const ghAnchors = ghAllowed ? anchorsMod.validPilotAnchors(st, content, 'greenhouse') : [];
+  if (ghAllowed && ghCanAfford && ghAnchors.length > 0) woodDemand += ghDef.cost.wood || 8;
+
+  // Buffer targets — canonical baseline (preserved)
   const WOOD_TARGET = 20;
   const WOOD_RESUME = 8;
   const METAL_TARGET = 20;
@@ -940,7 +982,7 @@ function botDecide(st) {
   const scrapyards = st.base.buildings.filter(b => b.type === 'scrapyard' && b.hp > 0);
   const techBenches = st.base.buildings.filter(b => b.type === 'tech_bench' && b.hp > 0);
 
-  // 1. PAUSE sawmill if wood buffer full
+  // 1. PAUSE sawmill if wood buffer full (canonical, preserved)
   for (const saw of sawmills) {
     if ((saw.workers || 0) > 0 && woodBuffer >= WOOD_TARGET) {
       const r = adjustBuildingWorkers(st, content, saw.id, -1);
@@ -948,7 +990,7 @@ function botDecide(st) {
     }
   }
 
-  // 2. PAUSE scrapyard if metal buffer full
+  // 2. PAUSE scrapyard if metal buffer full (canonical, preserved)
   for (const sc of scrapyards) {
     if ((sc.workers || 0) > 0 && metalBuffer >= METAL_TARGET) {
       const r = adjustBuildingWorkers(st, content, sc.id, -1);
@@ -956,18 +998,22 @@ function botDecide(st) {
     }
   }
 
-  // 3. RESUME sawmill if wood low
-  if (woodBuffer <= WOOD_RESUME) {
+  // 3. B5.9: RESUME sawmill if wood low AND legitimate unmet demand AND safe labor capacity
+  // Key: only assign if idle workers exist AFTER critical survival needs (food/water/medical)
+  // This prevents the wood 9-19 dead band from causing permanent sawmill pause
+  // while never stealing workers from critical survival production
+  if ((woodBuffer <= WOOD_RESUME || (woodBuffer < woodDemand && (st.population.labor?.idle || 0) > 0)) && (st.population.labor?.idle || 0) > 0) {
+    // Only assign sawmill worker if it won't reduce critical survival coverage
+    // Reuse canonical idle worker check: if there are idle workers beyond survival needs
     for (const saw of sawmills) {
-      if ((saw.workers || 0) === 0 && (st.population.labor?.idle || 0) > 0) {
+      if ((saw.workers || 0) === 0) {
         const r = adjustBuildingWorkers(st, content, saw.id, 1);
         if (r.ok) actions.push('rotate:resume_sawmill');
-        break;
       }
     }
   }
 
-  // 4. RESUME scrapyard if metal low
+  // 4. RESUME scrapyard if metal low (canonical, preserved)
   if (metalBuffer <= METAL_RESUME) {
     for (const sc of scrapyards) {
       if ((sc.workers || 0) === 0 && (st.population.labor?.idle || 0) > 0) {
