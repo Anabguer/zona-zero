@@ -1,9 +1,16 @@
 /**
- * PLAYTEST LARGO — D1→D50 (y D100 si 3+ sobreviven).
+ * PLAYTEST LARGO — D1→D300
  * Bot legal: construir, asignar, avanzar día, expediciones.
  * NO regala recursos, NO toca balance, NO modifica código del juego.
  *
- *   node scripts/playtest-long.mjs
+ *   node scripts/playtest-long.mjs --seeds=lt-alpha,lt-beta --maxDay=300
+ *
+ * Paquete territorial canónico (B5.22–B5.32):
+ *   - never-targeted exploration pass
+ *   - territorial scoring (frontier + contested bonuses)
+ *   - distance k=0.45
+ *   - TOP6 candidate pool
+ *   - second explorer recruitment
  *
  * Salida: JSON estructurado en scripts/playtest-long-results.json
  */
@@ -13,41 +20,13 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-// B4K.3E: Variant A/E support — parse flags before any dynamic imports
-const VARIANT = process.argv.includes('--variant=A') ? 'A'
-  : process.argv.includes('--variant=E') ? 'E'
-  : process.argv.includes('--variant=G') ? 'G'
-  : null;
 const maxDayArg = process.argv.find(a => a.startsWith('--maxDay='));
 const seedsArg = process.argv.find(a => a.startsWith('--seeds='));
+const POST_CONTROL_SCAVENGE = process.argv.includes('--postControlScavenge');
+const THIRD_FARM_CAPACITY = process.argv.includes('--thirdFarmCapacity');
+const SCALABLE_FARM_CAPACITY = process.argv.includes('--scalableFarmCapacity');
 const MAX_DAY = maxDayArg ? parseInt(maxDayArg.split('=')[1]) : 50;
 const SEEDS = seedsArg ? seedsArg.split('=')[1].split(',') : ['lt-alpha', 'lt-beta', 'lt-gamma', 'lt-delta', 'lt-epsilon'];
-
-// B4K.3E: Patch colony.js for variant A or E BEFORE any imports
-// BOTH variants: remove water>=1 protection
-// Variant E: additionally swap food↔water order
-// Variant G: NO colony.js patch, only balance.json patch
-let _savedColonyJs = null;
-if (VARIANT === 'A' || VARIANT === 'E') {
-  const _colonyPath = join(root, 'js', 'colony.js');
-  _savedColonyJs = readFileSync(_colonyPath, 'utf8');
-  let _patched = _savedColonyJs
-    .replace(
-      /if \(key === 'water' && curWorkers <= 1\) continue;\s*\r?\n\s*const take = key === 'water' \? Math\.min\(curWorkers - 1, over\) : Math\.min\(curWorkers, over\);/,
-      'const take = Math.min(curWorkers, over);'
-    );
-  // Variant E: swap food↔water order in cutting loop
-  if (VARIANT === 'E') {
-    _patched = _patched.replace(
-      "const order = ['produce', 'defense', 'medicine', 'build', 'water', 'food'];",
-      "const order = ['produce', 'defense', 'medicine', 'build', 'food', 'water'];"
-    );
-    console.log('B4K.3E VARIANT E: water>=1 REMOVED + food-before-water order');
-  } else {
-    console.log('B4K.3E VARIANT A (control): water>=1 REMOVED, original order preserved');
-  }
-  writeFileSync(_colonyPath, _patched);
-}
 
 const loadJson = (n) => JSON.parse(readFileSync(join(root, 'content', n), 'utf8'));
 const locationsDoc = loadJson('locations.json');
@@ -67,12 +46,6 @@ const content = {
   zonesDoc: { zones: locationsDoc.seedLayout || [] },
 };
 
-// B4K.3G: Patch balance for variant G (natural healing)
-if (VARIANT === 'G') {
-  content.balance.health.minHealWithoutBeds = 1.0;
-  console.log('B4K.3G VARIANT G: minHealWithoutBeds=1.0 (natural healing active)');
-}
-
 const { createNewState, housingCapacity, defenseValue } = await import(pathToFileURL(join(root, 'js', 'state.js')).href);
 const { installPilotZoneMap } = await import(pathToFileURL(join(root, 'js', 'pilot-terrain.js')).href);
 const { remapPilotZones, pilotBuildableTypeIds } = await import(pathToFileURL(join(root, 'js', 'pilot-test.js')).href);
@@ -80,29 +53,11 @@ const simModule = await import(pathToFileURL(join(root, 'js', 'sim.js')).href);
 const { placeBuilding, adjustBuildingWorkers, startExpedition, expeditionPreview, startResearch, canAfford } = simModule;
 let { advanceDay } = simModule;
 
-// B4K.3C C2 mode: neutralize post-outbreak sync at sim.js:1174
-// B4K.3D: also neutralize for A/B variants
-const C2_MODE = process.argv.includes('--c2');
-const NEUTRALIZE_POST_OUTBREAK = C2_MODE || VARIANT === 'A' || VARIANT === 'B' || VARIANT === 'E' || VARIANT === 'G';
-if (NEUTRALIZE_POST_OUTBREAK) {
-  const { readFileSync: rfs, writeFileSync: wfs, unlinkSync: ufs } = await import('fs');
-  const simSrc = rfs(join(root, 'js', 'sim.js'), 'utf8');
-  const patched = simSrc.replace(
-    '  syncLaborFromColony(state, content);\n  tickResearch(state, content);',
-    '  // B4K.3D: post-outbreak sync neutralized for A/B test\n  // syncLaborFromColony(state, content);\n  tickResearch(state, content);'
-  );
-  const c2Path = join(root, 'js', '_sim-c2.mjs');
-  wfs(c2Path, patched);
-  const c2Mod = await import(pathToFileURL(c2Path).href);
-  advanceDay = c2Mod.advanceDay;
-  try { ufs(c2Path); } catch {}
-  console.log(`B4K.3D: post-outbreak sync at sim.js:1174 NEUTRALIZED (${VARIANT ? 'variant '+VARIANT : 'c2'})`);
-}
 const onbMod = await import(pathToFileURL(join(root, 'js', 'onboarding.js')).href);
 const { ensureOnboarding, checkOnboardingProgress, onboardingStatus, markGuideDayAdvanced } = onbMod;
 const { currentObjective, syncLaborFromColony } = await import(pathToFileURL(join(root, 'js', 'colony.js')).href);
 const { workforce: canonicalWorkforce } = await import(pathToFileURL(join(root, 'js', 'population.js')).href);
-const { livingExplorers } = await import(pathToFileURL(join(root, 'js', 'explorers.js')).href);
+const { livingExplorers, recruitExplorer, explorerSlotsUnlocked } = await import(pathToFileURL(join(root, 'js', 'explorers.js')).href);
 const anchorsMod = await import(pathToFileURL(join(root, 'js', 'pilot-footprints.js')).href);
 
 installPilotZoneMap(loadJson('pilot/neni-pilot-zones-v3.json'));
@@ -124,7 +79,6 @@ const IMMIGRATION_LOG = [];
 const POP_MILESTONES = [];
 const POP_CHANGES = [];
 const WORKFORCE_LOG = [];
-// B4L.6: Emergency rotation state (per-seed, reset in runSeed)
 let _emergencyMedActive = false;
 
 // ─── helpers ────────────────────────────────────────────
@@ -150,6 +104,7 @@ function newOfficialGame(seed) {
   } else { hq.x = HQ.x; hq.y = HQ.y; }
   remapPilotZones(st);
   ensureOnboarding(st);
+  st._expeditionTargets = [];
   return st;
 }
 
@@ -476,24 +431,103 @@ function staffAll(st, types) {
   }
 }
 
-function tryExpedition(st, preferMetal) {
+// Expedition targeting: never-targeted pass + territorial scoring + k=0.45 + TOP6
+function tryExpeditionTargeted(st, preferMetal) {
   const ex = livingExplorers(st).find((e) => e.status === 'ready' && !e.expeditionId);
   if (!ex) return { ok: false, error: 'sin explorador listo' };
   const camp = st.zones.find((z) => z.type === 'camp') || { x: 824, y: 520 };
   const cands = st.zones.filter((z) => z.state !== 'unknown' && z.id !== camp.id && z.type !== 'camp');
   if (!cands.length) return { ok: false, error: 'sin zonas descubiertas' };
+
+  const targeted = new Set((st._expeditionTargets || []));
+  const neverTargeted = cands.filter(z => !targeted.has(z.id));
+
   const score = (z) => {
     const d = Math.hypot((z.x ?? 0) - camp.x, (z.y ?? 0) - camp.y);
     const metalBonus = preferMetal && (z.loot?.metal || 0) > 0 ? -100 : 0;
     return d + metalBonus;
   };
-  cands.sort((a, b) => score(a) - score(b));
-  for (const z of cands.slice(0, 4)) {
+
+  // Phase 1: try never-targeted zones (using canonical ordering)
+  if (neverTargeted.length > 0) {
+    neverTargeted.sort((a, b) => score(a) - score(b));
+    for (const z of neverTargeted.slice(0, 4)) {
+      const prev = expeditionPreview(st, content, z.id, ex.id);
+      if ((prev?.fuel || 0) > (st.resources.fuel || 0)) continue;
+      const r = startExpedition(st, content, z.id, ex.id);
+      if (r.ok) {
+        if (!st._expeditionTargets) st._expeditionTargets = [];
+        st._expeditionTargets.push(z.id);
+        return { ok: true, zone: z.name, days: prev.days, fuel: prev.fuel || 0, explorer: ex.name };
+      }
+    }
+  }
+
+  // Phase 2: territorial scoring with k=0.45
+  const controlledIds = new Set(cands.filter(z => z.state === 'controlled').map(z => z.id));
+
+  const baseScore = (z) => {
+    const d = Math.hypot((z.x ?? 0) - camp.x, (z.y ?? 0) - camp.y);
+    const metalBonus = preferMetal && (z.loot?.metal || 0) > 0 ? -100 : 0;
+    return d * 0.45 + metalBonus;
+  };
+
+  const territorialScore = (z) => {
+    let s = baseScore(z);
+
+    // Frontier bonus: hostile zone adjacent to a controlled zone
+    if (z.state === 'hostile') {
+      const isFrontier = (z.neighbors || []).some(nid => controlledIds.has(nid));
+      if (isFrontier) s -= 50;
+    }
+
+    // Contested bonus: zone near capture threshold
+    if (z.state === 'contested') {
+      const thr = content.balance?.controlClearThreshold || 0.52;
+      const cp = z.controlProgress || 0;
+      const canSecure = (z.infectedLeft || 0) <= 0 && cp >= thr;
+      if (canSecure) s -= 80;
+      else if (cp >= thr * 0.6) s -= 30;
+    }
+
+    return s;
+  };
+
+  cands.sort((a, b) => territorialScore(a) - territorialScore(b));
+  const legalCands = cands.filter(z => z.state !== 'controlled').slice(0, 6);
+  for (const z of legalCands) {
     const prev = expeditionPreview(st, content, z.id, ex.id);
     if ((prev.fuel || 0) > (st.resources.fuel || 0)) continue;
     const r = startExpedition(st, content, z.id, ex.id);
-    if (r.ok) return { ok: true, zone: z.name, days: prev.days, fuel: prev.fuel || 0, explorer: ex.name };
+    if (r.ok) {
+      if (!st._expeditionTargets) st._expeditionTargets = [];
+      st._expeditionTargets.push(z.id);
+      return { ok: true, zone: z.name, days: prev.days, fuel: prev.fuel || 0, explorer: ex.name };
+    }
   }
+
+  // Phase 3: post-control scavenging (only if --postControlScavenge flag)
+  if (POST_CONTROL_SCAVENGE) {
+    const ctrlCands = cands.filter(z => z.state === 'controlled');
+    if (ctrlCands.length > 0) {
+      ctrlCands.sort((a, b) => {
+        const da = Math.hypot((a.x ?? 0) - camp.x, (a.y ?? 0) - camp.y);
+        const db = Math.hypot((b.x ?? 0) - camp.x, (b.y ?? 0) - camp.y);
+        return da - db;
+      });
+      for (const z of ctrlCands) {
+        const prev = expeditionPreview(st, content, z.id, ex.id);
+        if ((prev.fuel || 0) > (st.resources.fuel || 0)) continue;
+        const r = startExpedition(st, content, z.id, ex.id);
+        if (r.ok) {
+          if (!st._expeditionTargets) st._expeditionTargets = [];
+          st._expeditionTargets.push(z.id);
+          return { ok: true, zone: z.name, days: prev.days, fuel: prev.fuel || 0, explorer: ex.name, scavenging: true };
+        }
+      }
+    }
+  }
+
   return { ok: false, error: 'sin destino válido' };
 }
 
@@ -510,8 +544,8 @@ function snapshot(st) {
   });
   const expls = livingExplorers(st);
   const def = defenseValue(st, content.buildings, content.balance);
-  const foodDays = st.population.total > 0 ? (st.resources.food || 0) / st.population.total : 999;
-  const waterDays = st.population.total > 0 ? (st.resources.water || 0) / st.population.total : 999;
+  const foodDays = resourceDays(st, 'food');
+  const waterDays = resourceDays(st, 'water');
   return {
     day: st.day,
     pop: st.population.total,
@@ -601,6 +635,12 @@ function minWellWorkersForNeed(waterNeed, wellCount, st) {
   return wellCount * 2;
 }
 
+function resourceDays(st, key) {
+  const pop = st.population?.total || 0;
+  if (pop <= 0) return 999;
+  return (st.resources?.[key] || 0) / pop;
+}
+
 // ─── B4K.3C instrumentation ─────────────────────────────
 
 const INVARIANT_LOG = [];
@@ -684,6 +724,7 @@ function botDecide(st) {
   }
 
   // 1) ADAPTIVE WATER POLICY — react to weather and water crisis
+
   // Tech Bench reservation — when era>=1 and no tech_bench, save 4w+6m for it.
   const hasTechBench = st.base.buildings.some((b) => b.type === 'tech_bench' && b.hp > 0);
   const tbCost = content.buildings.tech_bench.cost || {};
@@ -702,8 +743,9 @@ function botDecide(st) {
       }
     }
   }
-  const waterRatio = st.waterDays || (pop > 0 ? (st.resources.water || 0) / pop : 999);
-  const foodDays = st.foodDays || (pop > 0 ? (st.resources.food || 0) / pop : 999);
+
+  const waterRatio = resourceDays(st, 'water');
+  const foodDays = resourceDays(st, 'food');
   const waterDays = waterRatio;
   const weatherNow = st.weather || 'clear';
   const pending = st.pendingWeather;
@@ -804,9 +846,10 @@ function botDecide(st) {
   }
 
   // 0b) ADAPTIVE FOOD POLICY — anticipate and react to food needs
-  const foodRatio = st.foodDays || 999;
-  const foodCrisis = foodRatio < 4;
-  const foodDanger = foodRatio < 10;
+  // NOTE: st.foodDays is undefined; foodRatio was always 999 pre-B5.42, making foodCrisis/foodDanger dead code
+  const foodRatio = 999;
+  const foodCrisis = false;
+  const foodDanger = false;
   // const pop = st.population.total || 0; // already declared in water policy
   const farmCount = st.base.buildings.filter((b) => b.type === 'farm' && b.hp > 0).length;
   const totalFarmWorkers = st.base.buildings.filter(b => b.type === 'farm' && b.hp > 0).reduce((sum, b) => sum + (b.workers || 0), 0);
@@ -827,6 +870,28 @@ function botDecide(st) {
   if (farmCount < 2 && foodCrisis && pop >= 4) {
     const r = tryBuild(st, 'farm');
     if (r.ok) actions.push('food:build_farm2(crisis)');
+  }
+
+  // B5.41: 3rd farm capacity — build when structural food pressure + existing farms are meaningfully staffed
+  const _curFoodDays = pop > 0 ? (st.resources.food || 0) / pop : 999;
+  if (THIRD_FARM_CAPACITY && farmCount === 2 && _curFoodDays < 5 && pop >= 10) {
+    const farms = st.base.buildings.filter(b => b.type === 'farm' && b.hp > 0);
+    const totalFarmWorkers = farms.reduce((s, b) => s + (b.workers || 0), 0);
+    if (totalFarmWorkers >= 4) {
+      const r = tryBuild(st, 'farm');
+      if (r.ok) actions.push('food:build_farm3(capacity)');
+    }
+  }
+
+  // B5.42: Scalable farm capacity — build when production < consumption + existing farms meaningfully staffed
+  if (SCALABLE_FARM_CAPACITY && pop >= 10) {
+    const curProd = realFoodProd(totalFarmWorkers, farmCount, st);
+    const curCons = pop * 0.9;
+    // Require existing farms to be reasonably staffed (at least 2 workers per farm)
+    if (curProd < curCons && totalFarmWorkers >= farmCount * 2) {
+      const r = tryBuild(st, 'farm');
+      if (r.ok) actions.push('food:build_farm(scalable)');
+    }
   }
 
   // Calculate REAL farm staffing needs: 1 worker per farm base + margin for weather
@@ -1206,8 +1271,8 @@ function botDecide(st) {
       }
     }
 
-    // extra farm (more aggressive)
-    if (st.foodDays < 12 && st.population.total >= 4) {
+    // extra farm (more aggressive) — trigger was dead code pre-B5.42; st.foodDays is undefined
+    if (st.foodDays && st.foodDays < 12 && st.population.total >= 4) {
       const farmCount2 = st.base.buildings.filter((b) => b.type === 'farm' && b.hp > 0).length;
       if (farmCount2 < 2) {
         const r = tryBuild(st, 'farm');
@@ -1215,8 +1280,35 @@ function botDecide(st) {
       }
     }
 
-    // extra well (proactive)
-    if (st.waterDays < 10 && st.population.total >= 5) {
+    // B5.41: 3rd farm capacity — contextual trigger
+    const _curFoodDays3 = st.population.total > 0 ? (st.resources.food || 0) / st.population.total : 999;
+    if (THIRD_FARM_CAPACITY && _curFoodDays3 < 5 && st.population.total >= 10) {
+      const farmCount3 = st.base.buildings.filter((b) => b.type === 'farm' && b.hp > 0).length;
+      if (farmCount3 === 2) {
+        const totalFarmWorkers3 = st.base.buildings
+          .filter((b) => b.type === 'farm' && b.hp > 0)
+          .reduce((s, b) => s + (b.workers || 0), 0);
+        if (totalFarmWorkers3 >= 4) {
+          const r = tryBuild(st, 'farm');
+          if (r.ok) actions.push('built:farm3');
+        }
+      }
+    }
+
+    // B5.42: Scalable farm capacity — contextual trigger
+    if (SCALABLE_FARM_CAPACITY && st.population.total >= 10) {
+      const _fc = st.base.buildings.filter((b) => b.type === 'farm' && b.hp > 0).length;
+      const _fw = st.base.buildings.filter((b) => b.type === 'farm' && b.hp > 0).reduce((s, b) => s + (b.workers || 0), 0);
+      const _fp = realFoodProd(_fw, _fc, st);
+      const _fc2 = st.population.total * 0.9;
+      if (_fp < _fc2 && _fw >= _fc * 2) {
+        const r = tryBuild(st, 'farm');
+        if (r.ok) actions.push('built:farm_scalable');
+      }
+    }
+
+    // extra well (proactive) — trigger was dead code pre-B5.42; st.waterDays is undefined
+    if (st.waterDays && st.waterDays < 10 && st.population.total >= 5) {
       const wellCount2 = st.base.buildings.filter((b) => b.type === 'well' && b.hp > 0).length;
       if (wellCount2 < 2) {
         const r = tryBuild(st, 'well');
@@ -1224,8 +1316,8 @@ function botDecide(st) {
       }
     }
 
-    // 3rd well when pop is high
-    if (st.waterDays < 12 && st.population.total >= 9) {
+    // 3rd well when pop is high — trigger was dead code pre-B5.42; st.waterDays is undefined
+    if (st.waterDays && st.waterDays < 12 && st.population.total >= 9) {
       const wellCount3 = st.base.buildings.filter((b) => b.type === 'well' && b.hp > 0).length;
       if (wellCount3 < 3) {
         const r = tryBuild(st, 'well');
@@ -1250,12 +1342,32 @@ function botDecide(st) {
         if (r.ok) actions.push('built:barricade');
       }
     }
+
   }
 
-  // 5) expeditions
+  // Second explorer recruitment — recruit when capacity exists and survival stable
+  {
+    const slots = explorerSlotsUnlocked(st, content.balance);
+    const living = livingExplorers(st).length;
+    const pop = st.population?.total || 0;
+    const fDays = pop > 0 ? (st.resources.food || 0) / (pop * 0.9) : 999;
+    const wDays = pop > 0 ? (st.resources.water || 0) / (pop * 0.88) : 999;
+    const canRecruitNow = st.explorerRecruitReadyDay == null || st.day >= st.explorerRecruitReadyDay;
+    const survivalStable = fDays >= 6 && wDays >= 6 && pop >= 4
+      && (st.population.injured || 0) === 0 && (st.population.sick || 0) === 0;
+
+    if (slots >= 2 && living < 2 && canRecruitNow && survivalStable) {
+      const r = recruitExplorer(st, content);
+      if (r.ok) {
+        actions.push('recruited:explorer2');
+      }
+    }
+  }
+
+  // 5) expeditions — always use targeted expedition logic
   if (st.day >= 3) {
     const metalNeeded = (st.resources.metal || 0) < 10;
-    const exp = tryExpedition(st, metalNeeded);
+    const exp = tryExpeditionTargeted(st, metalNeeded);
     if (exp.ok) actions.push(`exped:${exp.zone}(${exp.days}d)`);
     else actions.push(`exped:NO:${exp.error}`);
   }
@@ -1319,6 +1431,21 @@ async function runSeed(seed, maxDay) {
     const beforeBldgs = st.base.buildings.length;
     const beforeExp = st.expeditions.length;
 
+    // B5.36: capture zone states before advanceDay for expedition forensic
+    const _b536_zonesBefore = {};
+    for (const z of (st.zones || [])) {
+      if (z.id !== 'camp' && z.type !== 'camp') {
+        _b536_zonesBefore[z.id] = { state: z.state, cp: z.controlProgress || 0, inf: z.infectedLeft || 0 };
+      }
+    }
+    const _b536_activeExps = (st.expeditions || []).map(e => ({ id: e.id, zoneId: e.zoneId, depDay: e.departDay }));
+    // B5.36: capture expedition starts (departDay === today)
+    const _b536_newExps = (st.expeditions || []).filter(e => e.departDay === st.day).map(e => ({
+      day: st.day, type: 'expedition_start', zoneId: e.zoneId,
+      zoneName: (st.zones.find(z => z.id === e.zoneId) || {}).name || e.zoneId,
+      explorerName: (livingExplorers(st).find(x => x.id === e.explorerId) || {}).name || e.explorerId,
+    }));
+
     const res = advanceDay(st, content);
 
     if (traceDay && traceEntry) {
@@ -1351,10 +1478,35 @@ async function runSeed(seed, maxDay) {
       eventsLog.push({ day: st.day, type: 'attack', result: res.attack.result, damage: (res.attack.damaged || []).map((d) => d.name) });
     }
 
+    // B5.36: log expedition starts
+    eventsLog.push(..._b536_newExps);
+
     // detect expedition reports
     const reports = res?.expeditionReports || [];
     if (reports.length) {
-      eventsLog.push({ day: st.day, type: 'expedition', reports: reports.map((r) => ({ outcome: r.outcome, loot: r.loot, dead: r.dead })) });
+      for (const r of reports) {
+        const _b = _b536_zonesBefore[r.zoneId] || {};
+        eventsLog.push({
+          day: st.day,
+          type: 'expedition',
+          outcome: r.outcome,
+          zoneId: r.zoneId,
+          zoneName: r.zoneName,
+          explorerName: r.explorerName,
+          controlled: r.controlled,
+          secured: r.secured,
+          wounded: r.wounded,
+          dead: r.dead,
+          loot: r.loot,
+          revealed: r.revealed,
+          stateBefore: _b.state,
+          cpBefore: _b.cp,
+          infBefore: _b.inf,
+          stateAfter: (st.zones.find(z => z.id === r.zoneId) || {}).state,
+          cpAfter: (st.zones.find(z => z.id === r.zoneId) || {}).controlProgress || 0,
+          infAfter: (st.zones.find(z => z.id === r.zoneId) || {}).infectedLeft || 0,
+        });
+      }
     }
 
     // detect events
@@ -1395,7 +1547,7 @@ async function runSeed(seed, maxDay) {
     if (!milestones.era2 && st.era >= 2) milestones.era2 = st.day;
     if (!milestones.era3 && st.era >= 3) milestones.era3 = st.day;
     if (!milestones.era4 && st.era >= 4) milestones.era4 = st.day;
-    if (!milestones.radio && st.base.buildings?.some((b) => b.type === 'radio_antenna' && b.hp > 0)) milestones.radio = st.day;
+    if (!milestones.radio && st.base.buildings?.some((b) => b.type === 'radio' && b.hp > 0)) milestones.radio = st.day;
     if (!milestones.mission && (st.missions?.active || []).length > 0) milestones.mission = st.day;
     if (!milestones.faction && eventsLog.some((e) => (e.text || '').includes('facción'))) milestones.faction = st.day;
     if (!milestones.hospital && (st.base.buildings || []).some((b) => ['clinic', 'infirmary'].includes(b.type) && b.hp > 0)) {
@@ -1437,9 +1589,7 @@ async function runSeed(seed, maxDay) {
 // ─── execute ────────────────────────────────────────────
 
 (async () => {
-console.log(`=== B4K.3E — FASE 1: D1→D${MAX_DAY} ===`);
-if (VARIANT === 'A') console.log('VARIANT A (control): water-before-food, NO water>=1');
-if (VARIANT === 'E') console.log('VARIANT E (experimental): food-before-water, NO water>=1');
+console.log(`=== PLAYTEST LARGO — D1→D${MAX_DAY} ===`);
 console.log(`Seeds: ${SEEDS.join(', ')}\n`);
 const phase1Results = [];
 
@@ -1473,7 +1623,7 @@ if (survivors.length >= 3 && MAX_DAY < CONTINUE_DAYS) {
       const buildMap = { materials_wood: 'sawmill', materials_metal: 'scrapyard', research_hint: 'tech_bench', need_medicine: 'medkit' };
       if (obj?.id && buildMap[obj.id]) tryBuild(st, buildMap[obj.id]);
       if ((obj?.id === 'housing' || obj?.id === 'housing_overflow') && st.day >= 4) tryBuild(st, 'house');
-      if (st.day >= 3) tryExpedition(st, (st.resources.metal || 0) < 10);
+      if (st.day >= 3) tryExpeditionTargeted(st, (st.resources.metal || 0) < 10);
       advanceDay(st, content);
       markGuideDayAdvanced(st);
       onbMod.maybeRevealEarlyLandmarks(st);
@@ -1497,12 +1647,10 @@ const totalViolations = LEGALITY_LOG.reduce((s, l) => s + l.violations.length, 0
 // save full results
 const fullResults = {
   timestamp: new Date().toISOString(),
-  variant: VARIANT,
-  neutralizePostOutbreak: NEUTRALIZE_POST_OUTBREAK,
   maxDay: MAX_DAY,
   seeds: SEEDS,
-  b4k3c: { mode: C2_MODE ? 'C2' : (VARIANT ? 'A/B' : 'C1'), invariantChanges: changed, legalViolations: totalViolations },
-  seeds: SEEDS,
+  invariantChanges: changed,
+  legalViolations: totalViolations,
   phase1: phase1Results.map((r) => ({
     seed: r.seed,
     verdict: r.verdict,
@@ -1520,9 +1668,7 @@ const fullResults = {
   })),
 };
 
-// B4K.3E: Variant-aware output naming
-const variantTag = VARIANT ? `-${VARIANT === 'A' ? 'control-A' : 'experimental-E'}` : '';
-const outputFilename = `b4k3e${variantTag}-D${MAX_DAY}-results.json`;
+const outputFilename = `playtest-long-D${MAX_DAY}-results.json`;
 writeFileSync(join(root, 'scripts', outputFilename), JSON.stringify(fullResults, null, 2));
 console.log(`\nResultados guardados en scripts/${outputFilename}`);
 
@@ -1537,13 +1683,6 @@ console.table(fullResults.phase1.map((r) => ({
   muertes: r.deaths,
   eventos: r.eventsCount,
 })));
-
-// ─── B4K.3E OUTPUT ─────────────────────────────────────
-console.log('\n=== B4K.3E: FOOD/WATER PRIORITY TEST ===');
-console.log(`Variant: ${VARIANT || 'none'}`);
-console.log(`Post-outbreak sync: ${NEUTRALIZE_POST_OUTBREAK ? 'NEUTRALIZED' : 'ACTIVE'}`);
-if (VARIANT === 'A') console.log('Control: water-before-food (original order)');
-if (VARIANT === 'E') console.log('Experimental: food-before-water (swapped order)');
 
 // Invariant analysis
 console.log(`\nINVARIANT:`);
@@ -1604,31 +1743,5 @@ if (TRACE_LOG.length) {
     console.log(`    wells:`, t.E_wells?.map(w => `id=${w.id}:w=${w.workers}`).join(' '));
     console.log(`    labor: food=${t.E_labor.food} water=${t.E_labor.water} produce=${t.E_labor.produce} defense=${t.E_labor.defense} medicine=${t.E_labor.medicine} build=${t.E_labor.build} idle=${t.E_labor.idle}`);
   }
-}
-
-// Save B4K.3C data
-const b4k3cData = {
-  mode: C2_MODE ? 'C2' : 'C1',
-  timestamp: new Date().toISOString(),
-  invariantLog: INVARIANT_LOG,
-  legalityLog: LEGALITY_LOG,
-  wellWorkersLog: WELL_WORKERS_LOG,
-  traceLog: TRACE_LOG,
-  summary: {
-    incoherentBeforePreSync: incoherentBefore,
-    incoherentAfterPreSync: incoherentAfter,
-    stateChangedByPreSync: changed,
-    totalLegalViolations: totalViolations,
-    wellZeroDays,
-  },
-};
-writeFileSync(join(root, 'scripts', `b4k3c-results-${C2_MODE ? 'c2' : 'c1'}.json`), JSON.stringify(b4k3cData, null, 2));
-console.log(`\nB4K.3C data saved to scripts/b4k3c-results-${C2_MODE ? 'c2' : 'c1'}.json`);
-
-// B4K.3E: Restore colony.js if it was patched
-if (_savedColonyJs !== null) {
-  const _colonyPath = join(root, 'js', 'colony.js');
-  writeFileSync(_colonyPath, _savedColonyJs);
-  console.log('\nB4K.3E: colony.js RESTORED to original');
 }
 })();
