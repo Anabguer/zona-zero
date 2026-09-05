@@ -55,7 +55,7 @@ body.zz-from-intro #zz-boot {
   color: transparent;
 }
 
-.zz-world--overlay {
+.zz-world--overlay:not([hidden]) {
   position: relative;
   width: 100%;
   max-width: none;
@@ -947,7 +947,7 @@ body.zz-from-intro #zz-boot {
   position: absolute;
   right: 0.55rem;
   bottom: calc(var(--zz-dock-h) + 4.2rem + env(safe-area-inset-bottom, 0px));
-  z-index: 40;
+  z-index: 22;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -1325,7 +1325,7 @@ body.zz-from-intro #zz-boot {
 .zz-rotate-gate {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 100;
   display: grid;
   place-items: center;
   padding: max(1.25rem, env(safe-area-inset-top, 0px)) max(1.25rem, env(safe-area-inset-right, 0px))

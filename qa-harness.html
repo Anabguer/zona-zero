@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Zona Zero — QA harness (local shots)</title>
+  <title>Zona Zero — QA harness (Neni shell)</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./css/game.css" />
   <link rel="stylesheet" href="./css/world.css" />
+  <link rel="stylesheet" href="./css/ui-foundation.css" />
   <style>body{margin:0} #zz-app{display:block!important}</style>
 </head>
 <body class="zz-body zz-body--play zz-body--world zz-body--v13 zz-body--pilot-neni">
@@ -17,33 +18,89 @@
         <svg id="zz-map" class="zz-map" viewBox="0 0 100 100" role="img"></svg>
       </div>
     </main>
-    <header class="zz-hud" id="zz-hud">
-      <div class="zz-hud__top">
-        <div class="zz-hud__identity">
-          <strong id="zz-colony">QA Neni</strong>
-          <span id="zz-day-label">Día 1</span>
-          <span class="zz-qa-mark" id="zz-qa-mark">QA</span>
-        </div>
-      </div>
-      <div class="zz-hud__row">
-        <button type="button" class="zz-hud__pop" id="zz-open-pop"><strong id="zz-pop">0/0</strong></button>
-        <ul class="zz-hud__res" id="zz-resources"></ul>
-        <div class="zz-hud__tools">
-          <button type="button" class="zz-hud__tool zz-hud__tool--build" id="zz-open-build">Construir</button>
-        </div>
-      </div>
-      <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
-    </header>
-    <aside id="zz-sheet" class="zz-sheet" hidden>
-      <button type="button" class="zz-sheet__close" id="zz-sheet-close">×</button>
-      <div id="zz-sheet-body" class="zz-sheet__body"></div>
-    </aside>
-    <div class="zz-dock">
-      <button type="button" class="zz-btn zz-btn--ghost" id="zz-build-cancel" hidden>✕</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-advance">Avanzar día</button>
-      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-build-ok" hidden>✓ Construir</button>
+
+    <!-- Mission / mode-banner: outside .zz-hud so they remain visible in Neni -->
+    <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
+      <span class="zz-mission__ico" aria-hidden="true">◎</span>
+      <span id="zz-mission-text">—</span>
+    </button>
+    <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
+
+    <!-- Coach / onboarding -->
+    <div id="zz-coach" class="zz-coach-card" hidden>
+      <p id="zz-coach-text"></p>
+      <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" id="zz-coach-next">Continuar</button>
     </div>
-    <div id="zz-toast" class="zz-toast" hidden></div>
+
+    <!-- Sheet contextual -->
+    <aside id="zz-sheet" class="zz-sheet" hidden aria-label="Ficha">
+      <div class="zz-sheet__handle" aria-hidden="true"></div>
+      <button type="button" class="zz-sheet__close" id="zz-sheet-close" aria-label="Cerrar">×</button>
+      <div id="zz-sheet-body" class="zz-sheet__body" tabindex="-1"></div>
+    </aside>
+
+    <div id="zz-event-card" class="zz-event-card" hidden role="status"></div>
+    <div id="zz-attack-card" class="zz-attack-card" hidden role="status"></div>
+    <div id="zz-day-brief" class="zz-day-brief" hidden role="dialog" aria-modal="true" aria-label="Resumen del día"></div>
+
+    <div id="zz-defeat" class="zz-defeat" hidden>
+      <div class="zz-defeat__card">
+        <h2>Derrota</h2>
+        <p id="zz-defeat-msg"></p>
+        <ul id="zz-defeat-stats" class="zz-end-stats"></ul>
+      </div>
+    </div>
+    <div id="zz-choice-modal" class="zz-choice" hidden role="dialog" aria-modal="true" aria-labelledby="zz-choice-title">
+      <div class="zz-choice__card">
+        <div class="zz-choice__head" id="zz-choice-head"></div>
+        <h2 id="zz-choice-title">Decisión</h2>
+        <p id="zz-choice-text"></p>
+        <div id="zz-choice-actions" class="zz-choice__actions"></div>
+      </div>
+    </div>
+
+    <!-- ═══ NENI UI SHELL (Phase 3) ═══ -->
+    <div id="zz-ui-shell" class="zz-ui-shell">
+      <!-- HUD Primario -->
+      <div class="zz-ui-hud" id="zz-ui-hud">
+        <div class="zz-ui-hud__left">
+          <span class="zz-ui-chip zz-ui-chip--day" id="zz-ui-day" title="Día actual">D1</span>
+          <button type="button" class="zz-ui-chip zz-ui-chip--pop" id="zz-ui-pop" title="Población / plazas de vivienda">
+            <span class="zz-ui-chip__val" id="zz-ui-pop-val">0/0</span>
+          </button>
+        </div>
+        <div class="zz-ui-hud__center" id="zz-ui-resources" aria-label="Recursos"></div>
+        <div class="zz-ui-hud__right">
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-help" title="Ayuda" aria-label="Ayuda">?</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-sound" aria-pressed="true" title="Sonido" aria-label="Sonido">♪</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-save" title="Guardar" aria-label="Guardar partida">G</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--build" id="zz-ui-build" title="Construir">Construir</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-more" title="Más" aria-label="Más opciones">⋯</button>
+        </div>
+      </div>
+
+      <!-- Camera Controls -->
+      <div class="zz-ui-camera" id="zz-ui-camera">
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-home" title="Recentrar en HQ" aria-label="Recentrar en HQ">⌂</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-fit" title="Ajustar mundo completo" aria-label="Ajustar vista del mundo">⤢</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-zoom-in" title="Acercar" aria-label="Acercar">+</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-zoom-out" title="Alejar" aria-label="Alejar">−</button>
+      </div>
+
+      <!-- Explorer Rail -->
+      <div class="zz-ui-explorer-rail" id="zz-ui-explorer-rail" aria-label="Exploradores"></div>
+
+      <!-- Action Bar -->
+      <div class="zz-ui-action-bar" id="zz-ui-action-bar">
+        <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-build-ok" hidden title="Confirmar construcción" aria-label="Confirmar construcción">✓</button>
+        <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-build-cancel" hidden title="Cancelar construcción" aria-label="Cancelar construcción">✕</button>
+        <button type="button" class="zz-ui-btn zz-ui-btn--day" id="zz-ui-advance" title="Avanzar día" aria-label="Avanzar día">
+          <span>Día</span><span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="zz-toast" class="zz-toast" hidden role="status" aria-live="polite"></div>
   </div>
   <script type="module">
     import { bootGame } from './js/main.js';

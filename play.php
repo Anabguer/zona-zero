@@ -49,10 +49,11 @@ $base = zz_public_base();
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'game.css') ?>" />
   <link rel="stylesheet" href="<?= zz_css_href($base, 'world.css') ?>" />
+  <link rel="stylesheet" href="<?= zz_css_href($base, 'ui-foundation.css') ?>" />
   <script src="/juegos/js/mobile-fullscreen.js?v=6"></script>
   <?php zz_print_js_importmap($base); ?>
 </head>
-<body class="zz-body zz-body--play zz-body--world zz-body--v13<?= $pilot ? ' zz-body--pilot-neni' : '' ?>">
+<body class="zz-body zz-body--play zz-body--world zz-body--v13">
   <script>
     if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
       document.body.classList.add('zz-standalone');
@@ -119,12 +120,14 @@ $base = zz_public_base();
           <button type="button" class="zz-hud__tool zz-hud__tool--more" id="zz-open-more" title="Más">⋯</button>
         </div>
       </div>
-      <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
-        <span class="zz-mission__ico" aria-hidden="true">◎</span>
-        <span id="zz-mission-text">—</span>
-      </button>
-      <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
     </header>
+
+    <!-- Mission / mode-banner: outside .zz-hud so they remain visible in Neni -->
+    <button type="button" class="zz-mission" id="zz-mission" hidden aria-live="polite">
+      <span class="zz-mission__ico" aria-hidden="true">◎</span>
+      <span id="zz-mission-text">—</span>
+    </button>
+    <p class="zz-mode-banner" id="zz-mode-banner" hidden></p>
 
     <!-- Coach / onboarding -->
     <div id="zz-coach" class="zz-coach-card" hidden>
@@ -159,9 +162,9 @@ $base = zz_public_base();
     </aside>
 
     <div id="zz-pulse-layer" class="zz-pulse-layer" aria-hidden="true"></div>
-    <div id="zz-event-card" class="zz-event-card" hidden></div>
-    <div id="zz-attack-card" class="zz-attack-card" hidden></div>
-    <div id="zz-day-brief" class="zz-day-brief" hidden></div>
+    <div id="zz-event-card" class="zz-event-card" hidden role="status"></div>
+    <div id="zz-attack-card" class="zz-attack-card" hidden role="status"></div>
+    <div id="zz-day-brief" class="zz-day-brief" hidden role="dialog" aria-modal="true" aria-label="Resumen del día"></div>
 
     <!-- Controles flotantes compactos (B01): avanzar día + confirmar/cancelar construcción -->
     <div class="zz-fab" role="group" aria-label="Controles de partida">
@@ -190,7 +193,7 @@ $base = zz_public_base();
         <a class="zz-btn zz-btn--ghost" data-zz-back href="<?= htmlspecialchars($base) ?>">Volver</a>
       </div>
     </div>
-    <div id="zz-choice-modal" class="zz-choice" hidden>
+    <div id="zz-choice-modal" class="zz-choice" hidden role="dialog" aria-modal="true" aria-labelledby="zz-choice-title">
       <div class="zz-choice__card">
         <div class="zz-choice__head" id="zz-choice-head"></div>
         <h2 id="zz-choice-title">Decisión</h2>
@@ -198,8 +201,49 @@ $base = zz_public_base();
         <div id="zz-choice-actions" class="zz-choice__actions"></div>
       </div>
     </div>
+
+    <!-- ═══ NENI UI SHELL ═══ -->
+    <div id="zz-ui-shell" class="zz-ui-shell" hidden aria-hidden="true" inert>
+      <!-- HUD Primario -->
+      <div class="zz-ui-hud" id="zz-ui-hud">
+        <div class="zz-ui-hud__left">
+          <span class="zz-ui-chip zz-ui-chip--day" id="zz-ui-day" title="Día actual">D1</span>
+          <button type="button" class="zz-ui-chip zz-ui-chip--pop" id="zz-ui-pop" title="Población / plazas de vivienda">
+            <span class="zz-ui-chip__val" id="zz-ui-pop-val">0/0</span>
+          </button>
+        </div>
+        <div class="zz-ui-hud__center" id="zz-ui-resources" aria-label="Recursos"></div>
+        <div class="zz-ui-hud__right">
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-help" title="Ayuda" aria-label="Ayuda">?</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-sound" aria-pressed="true" title="Sonido" aria-label="Sonido">♪</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-save" title="Guardar" aria-label="Guardar partida">G</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--build" id="zz-ui-build" title="Construir">Construir</button>
+          <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-more" title="Más" aria-label="Más opciones">⋯</button>
+        </div>
+      </div>
+
+      <!-- Camera Controls -->
+      <div class="zz-ui-camera" id="zz-ui-camera">
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-home" title="Recentrar en HQ" aria-label="Recentrar en HQ">⌂</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-fit" title="Ajustar mundo completo" aria-label="Ajustar vista del mundo">⤢</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-zoom-in" title="Acercar" aria-label="Acercar">+</button>
+        <button type="button" class="zz-ui-camera__btn" id="zz-ui-zoom-out" title="Alejar" aria-label="Alejar">−</button>
+      </div>
+
+      <!-- Explorer Rail -->
+      <div class="zz-ui-explorer-rail" id="zz-ui-explorer-rail" aria-label="Exploradores"></div>
+
+      <!-- Action Bar -->
+      <div class="zz-ui-action-bar" id="zz-ui-action-bar">
+        <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-build-ok" hidden title="Confirmar construcción" aria-label="Confirmar construcción">✓</button>
+        <button type="button" class="zz-ui-btn zz-ui-btn--icon" id="zz-ui-build-cancel" hidden title="Cancelar construcción" aria-label="Cancelar construcción">✕</button>
+        <button type="button" class="zz-ui-btn zz-ui-btn--day" id="zz-ui-advance" title="Avanzar día" aria-label="Avanzar día">
+          <span>Día</span><span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </div>
   </div>
-  <div id="zz-toast" class="zz-toast" hidden></div>
+  <div id="zz-toast" class="zz-toast" hidden role="status" aria-live="polite"></div>
   <!-- hidden compatibility targets -->
   <span id="zz-era" hidden></span>
   <span id="zz-weather" hidden></span>

@@ -775,7 +775,7 @@ function openPopulationSheet() {
       }
     <p class="zz-sheet-panel__lead">Asigná gente en cada edificio (+/−). Aquí solo ves el resumen.</p>
     ${rows}
-    <p style="margin-top:0.35rem"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>`
+    <p class="zz-sheet-panel__foot"><button type="button" class="zz-btn" data-action="auto-labor">Redistribuir automático</button></p>`
     ),
     'population'
   );
@@ -832,16 +832,11 @@ function openBuildingSheet(id) {
     struct === 'ok'
       ? ''
       : repairing
-        ? `<p class="zz-ctx__prod">En reparación · ${b.repair.daysLeft} día(s) restante(s).</p>`
-        : `<p class="zz-ctx__warn">${structuralStateLabel(struct)} · HP ${Math.round(hp)}/${hpMax}</p>
-           <p class="zz-muted" style="font-size:0.8rem">Reparar: ${quote.wood} madera${
-             quote.metal ? ` · ${quote.metal} metal` : ''
-           } · ${quote.days} día(s)${
-             (state.research.unlocked || []).includes('rapid_repair') ? ' · reparación rápida' : ''
-           }</p>
-           <p><button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="repair-building" data-id="${
-             b.id
-           }">Reparar</button></p>`;
+        ? `<p class="zz-ctx__muted">En reparación · ${b.repair.daysLeft} día(s) restante(s).</p>`
+        : `<div class="zz-ctx__stats">
+             <div class="zz-ctx__stat"><span>Reparar</span><strong>${quote.wood} madera${quote.metal ? ` · ${quote.metal} metal` : ''} · ${quote.days} día(s)${(state.research.unlocked || []).includes('rapid_repair') ? ' · rápida' : ''}</strong></div>
+           </div>
+           <button type="button" class="zz-btn zz-btn--primary" data-action="repair-building" data-id="${b.id}">Reparar</button>`;
   const artFilter =
     struct === 'destroyed'
       ? 'filter:grayscale(0.7) brightness(0.7)'
@@ -852,66 +847,68 @@ function openBuildingSheet(id) {
           : '';
   const insulatedBadge =
     b.type === 'insulated_house'
-      ? '<p class="zz-muted" style="font-size:0.78rem;margin:0.15rem 0 0">Cubierta aislada</p>'
+      ? '<p class="zz-ctx__muted">Cubierta aislada</p>'
       : '';
+  const hpPct = hpMax > 0 ? Math.round((hp / hpMax) * 100) : 0;
+  const hpBarClass = struct === 'critical' ? 'zz-ctx__bar--hp' : struct === 'damaged' ? 'zz-ctx__bar--hp' : 'zz-ctx__bar--hp';
+  const badgeClass = struct === 'ok' ? 'zz-ctx__badge--ok' : struct === 'damaged' ? 'zz-ctx__badge--damaged' : struct === 'critical' ? 'zz-ctx__badge--critical' : 'zz-ctx__badge--destroyed';
   const upgradeDef = playableBuildingDefs(content.buildings).find(
     (d) => d.upgradeFrom === b.type && (d.minEra || 0) <= state.era
   );
   const upgradeBlock =
     upgradeDef && struct === 'ok'
-      ? `<p><button type="button" class="zz-btn zz-btn--wide" data-action="upgrade-building" data-build="${upgradeDef.id}" data-id="${b.id}" ${
+      ? `<button type="button" class="zz-btn zz-btn--primary" data-action="upgrade-building" data-build="${upgradeDef.id}" data-id="${b.id}" ${
           canAfford(state, upgradeDef.cost) ? '' : 'disabled'
-        }>Mejorar a ${escapeHtml(upgradeDef.name)}</button></p>`
+        }>Mejorar a ${escapeHtml(upgradeDef.name)}</button>`
       : '';
 
   openSheet(`
     <div class="zz-ctx">
       <div class="zz-ctx__head">
-        <img class="zz-ctx__art" src="${art}" alt="" width="64" height="64" style="${artFilter}" />
+        <img class="zz-ctx__art" src="${art}" alt="" width="56" height="56" style="${artFilter}" />
         <div>
           <h2>${escapeHtml(def.name)}</h2>
           <p>${escapeHtml((def.desc || '').slice(0, 90))}</p>
-          <p class="zz-muted" style="font-size:0.78rem;margin:0.2rem 0 0">${structuralStateLabel(
-            struct
-          )} · HP ${Math.round(hp)}/${hpMax}</p>
+          <span class="zz-ctx__badge zz-ctx__badge--spaced ${badgeClass}">${structuralStateLabel(struct)} · HP ${Math.round(hp)}/${hpMax}</span>
           ${insulatedBadge}
         </div>
       </div>
+      <div class="zz-ctx__bar ${hpBarClass}"><i style="width:${hpPct}%"></i></div>
       ${upgradeBlock}
       ${repairBlock}
       ${
         struct === 'destroyed'
-          ? `<p class="zz-muted">Sin producción hasta reconstruir.</p>`
+          ? `<p class="zz-ctx__muted">Sin producción hasta reconstruir.</p>`
           : key
-            ? `<div class="zz-ctx__stat">
-               <span>Trabajadores</span>
-               <div class="zz-stepper">
-                 <button type="button" data-bworkers="${b.id}" data-delta="-1" aria-label="Menos">−</button>
-                 <span>${workers} / ${cap}</span>
-                 <button type="button" data-bworkers="${b.id}" data-delta="1" aria-label="Más">+</button>
+            ? `<div class="zz-ctx__stat-box">
+                 <span class="zz-stat-label">Trabajadores</span>
+                 <div class="zz-stepper">
+                   <button type="button" data-bworkers="${b.id}" data-delta="-1" aria-label="Menos"${workers <= 0 ? ' disabled' : ''}>−</button>
+                   <span>${workers} / ${cap}</span>
+                   <button type="button" data-bworkers="${b.id}" data-delta="1" aria-label="Más"${workers >= cap ? ' disabled' : ''}>+</button>
+                 </div>
                </div>
-             </div>
-             <p class="zz-ctx__prod">${escapeHtml(prodLine)}</p>
-             ${bedsLine}
-             ${
-               state.outbreak?.active && def.beds
-                 ? `<p class="zz-muted">Brote ${escapeHtml(state.outbreak.label || '')} · fase ${escapeHtml(
-                     state.outbreak.phase || ''
-                   )}. Más staff sanitario acelera contención.</p>`
-                 : ''
-             }
-             ${unstaffed ? '<p class="zz-ctx__warn">⚠ Sin personal — no produce</p>' : ''}`
-            : `<p class="zz-muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
-             ${bedsLine}
-             ${
-               def.housing
-                 ? `<p class="zz-ctx__prod">Vivienda: <strong>${Math.floor(
-                     def.housing * structMult
-                   )}</strong> plazas${
-                     climateLabel ? ` · clima <strong>${escapeHtml(climateLabel)}</strong>` : ''
-                   }</p>`
-                 : ''
-             }`
+               <p class="zz-ctx__prod">${escapeHtml(prodLine)}</p>
+               ${bedsLine}
+               ${
+                 state.outbreak?.active && def.beds
+                   ? `<p class="zz-ctx__muted">Brote ${escapeHtml(state.outbreak.label || '')} · fase ${escapeHtml(
+                       state.outbreak.phase || ''
+                     )}. Más staff sanitario acelera contención.</p>`
+                   : ''
+               }
+               ${unstaffed ? '<p class="zz-ctx__warn">Sin personal — no produce</p>' : ''}`
+            : `<p class="zz-ctx__muted">Estructura pasiva · ${escapeHtml(prodLine)}</p>
+               ${bedsLine}
+               ${
+                 def.housing
+                   ? `<p class="zz-ctx__prod">Vivienda: <strong>${Math.floor(
+                       def.housing * structMult
+                     )}</strong> plazas${
+                       climateLabel ? ` · clima <strong>${escapeHtml(climateLabel)}</strong>` : ''
+                     }</p>`
+                   : ''
+               }`
       }
     </div>
   `, 'building');
@@ -930,30 +927,31 @@ function openExplorerSheet(id) {
     .join('');
   const stLabel =
     e.status === 'ready' ? 'Disponible' : e.status === 'away' ? 'En ruta' : e.status === 'wounded' ? 'Herido' : 'Caído';
+  const statusBadge = e.status === 'ready' ? 'zz-ctx__badge--ok' : e.status === 'wounded' ? 'zz-ctx__badge--damaged' : 'zz-ctx__badge--destroyed';
   const xp = Math.min(100, Math.round((e.xp || 0) % 100));
   const level = e.level || 1;
   const portrait = portraitArtUrl(e);
   openSheet(`
     <div class="zz-ctx">
       <div class="zz-explorer-hero">
-        <img src="${portrait}" alt="" width="56" height="56" />
+        <img src="${portrait}" alt="" width="52" height="52" />
         <div>
-          <h2 style="margin:0">${escapeHtml(e.name)}</h2>
-          <p style="margin:0.15rem 0 0">Explorador · Nv.${level}</p>
+          <h2>${escapeHtml(e.name)}</h2>
+          <p>Explorador · Nv.${level}</p>
           <div class="zz-xp-bar"><i style="width:${xp}%"></i></div>
         </div>
       </div>
+      <span class="zz-ctx__badge ${statusBadge}">${stLabel}</span>
       <div class="zz-skill-list">${skills}</div>
-      <p>Estado: <strong>${stLabel}</strong></p>
       ${
         e.status === 'ready'
-          ? `<button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="start-explore" data-id="${e.id}">Explorar el mapa</button>
-             <p class="zz-muted" style="font-size:0.78rem;margin-top:0.35rem">O toca directamente una zona en el mapa.</p>`
+          ? `<button type="button" class="zz-btn zz-btn--primary" data-action="start-explore" data-id="${e.id}">Explorar el mapa</button>
+             <p class="zz-ctx__muted">O toca directamente una zona en el mapa.</p>`
           : e.status === 'away'
-            ? '<p class="zz-muted">Está fuera. Su ruta se ve en el mapa.</p>'
+            ? '<p class="zz-ctx__muted">Está fuera. Su ruta se ve en el mapa.</p>'
             : ''
       }
-      <p><button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button></p>
+      <button type="button" class="zz-btn zz-btn--compact" data-action="rename-ex" data-id="${e.id}">Renombrar</button>
     </div>
   `, 'explorer');
   paint();
@@ -971,13 +969,13 @@ function openZoneSheet(zoneId) {
     openSheet(`
       <div class="zz-ctx">
         <div class="zz-ctx__head">
-          <img class="zz-ctx__art" src="${buildingArtUrl('shelter')}" alt="" />
+          <img class="zz-ctx__art" src="${buildingArtUrl('shelter')}" alt="" width="56" height="56" />
           <div>
             <h2>${escapeHtml(z.name)}</h2>
             <p>Toca un edificio para gestionarlo. Construye para ampliar.</p>
           </div>
         </div>
-        <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="open-build-from-camp">Construir aquí</button>
+        <button type="button" class="zz-btn zz-btn--primary" data-action="open-build-from-camp">Construir aquí</button>
       </div>
     `, 'camp');
     paint();
@@ -1019,9 +1017,11 @@ function openZoneSheet(zoneId) {
     })
     .join('');
 
+  const zoneBadgeClass = z.state === 'controlled' ? 'zz-ctx__badge--controlled' : z.state === 'contested' ? 'zz-ctx__badge--contested' : 'zz-ctx__badge--hostile';
+
   const controlNote =
     z.state === 'controlled'
-      ? `<p class="zz-muted" style="font-size:0.8rem">Controlada: def. colonia +${benefits.defenseBonus} · loot residual${
+      ? `<p class="zz-ctx__muted">Controlada: def. colonia +${benefits.defenseBonus} · loot residual${
           z.lootDepletion ? ` (agotamiento ${Math.round(z.lootDepletion * 100)}%)` : ''
         }.</p>`
       : z.state === 'contested'
@@ -1031,10 +1031,11 @@ function openZoneSheet(zoneId) {
   openSheet(`
     <div class="zz-ctx">
       <div class="zz-ctx__head">
-        <img class="zz-ctx__art" src="${art}" alt="" />
+        <img class="zz-ctx__art" src="${art}" alt="" width="56" height="56" />
         <div>
           <h2>${escapeHtml(z.name)}</h2>
-          <p>${badge} · Riesgo ${(z.risk * 100).toFixed(0)}%${
+          <span class="zz-ctx__badge ${zoneBadgeClass}">${badge}</span>
+          <p>Riesgo ${(z.risk * 100).toFixed(0)}%${
             z.controlProgress != null && z.state !== 'controlled'
               ? ` · control ${Math.round((z.controlProgress || 0) * 100)}%`
               : ''
@@ -1044,25 +1045,25 @@ function openZoneSheet(zoneId) {
       ${controlNote}
       ${
         preview
-          ? `             <div class="zz-ctx__stats">
+          ? `<div class="zz-ctx__stats">
                <div class="zz-ctx__stat"><span>Distancia</span><strong>${preview.distance} tramos</strong></div>
                <div class="zz-ctx__stat"><span>Tiempo</span><strong>${preview.days} día${preview.days === 1 ? '' : 's'}</strong></div>
                <div class="zz-ctx__stat"><span>Riesgo</span><strong>${escapeHtml(preview.category || 'medio')}</strong></div>
              </div>
-             <p class="zz-muted" style="margin:0.35rem 0">${
+             <p class="zz-ctx__muted">${
                (preview.fuel || 0) > 0
                  ? `Combustible: ${preview.fuel}`
                  : 'A pie · sin combustible'
              }${preview.vehicleEffects ? ` · ${escapeHtml(preview.vehicleEffects)}` : ''}${
                preview.centerLabel ? ` · ${escapeHtml(preview.centerLabel)}` : ''
              }${preview.note ? ` · ${escapeHtml(preview.note)}` : ''}</p>
-             <div class="zz-ctx__loot">
-               <span class="zz-muted">${preview.residual ? 'Botín residual' : 'Botín posible'}</span>
+             <div class="zz-ctx__stats">
+               <span class="zz-ctx__muted">${preview.residual ? 'Botín residual' : 'Botín posible'}</span>
                <div class="zz-loot-row">${lootIcons || '<span>¿?</span>'}</div>
              </div>
-             <p class="zz-ctx__explorer">Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · nivel ${ex.level || 1}</p>
-             <p class="zz-muted" style="font-size:0.78rem;margin:0.25rem 0">Vehículo:</p>
-             <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem">
+             <p class="zz-ctx__muted">Explorador: <strong>${escapeHtml(preview.explorerName)}</strong> · nivel ${ex.level || 1}</p>
+             <p class="zz-ctx__muted">Vehículo:</p>
+             <div class="zz-ctx__vehicles">
                <button type="button" class="zz-btn zz-btn--compact ${!ex.vehicleId ? 'zz-btn--primary' : ''}" data-action="pick-vehicle" data-ex="${ex.id}" data-veh="none">A pie</button>
                ${(state.vehiclesOwned || [])
                  .map((vid) => {
@@ -1074,10 +1075,10 @@ function openZoneSheet(zoneId) {
                  })
                  .join('')}
              </div>
-             <button type="button" class="zz-btn zz-btn--primary zz-btn--wide" data-action="send-exp" data-zone="${z.id}" ${
+             <button type="button" class="zz-btn zz-btn--primary" data-action="send-exp" data-zone="${z.id}" ${
                ex.status !== 'ready' ? 'disabled' : ''
              }>Enviar explorador</button>`
-          : '<p>No hay explorador disponible.</p>'
+          : '<p class="zz-ctx__muted">No hay explorador disponible.</p>'
       }
     </div>
   `, 'zone');
@@ -1267,7 +1268,7 @@ function openSectorSheet(id) {
 
   openSheet(`
     <div class="zz-ctx">
-      <div class="zz-ctx__head" style="grid-template-columns:1fr">
+      <div class="zz-ctx__head zz-ctx__head--single-col">
         <div>
           <h2>${escapeHtml(sector.name)}</h2>
           <p>${escapeHtml(sector.identity || '')}</p>
@@ -1276,14 +1277,14 @@ function openSectorSheet(id) {
       ${statusLine}
       ${
         problems
-          ? `<p class="zz-muted" style="margin:0.35rem 0 0.15rem;font-size:0.78rem">Situación</p>
+          ? `<p class="zz-muted zz-sector-label">Situación</p>
              <ul class="zz-sector-problems">${problems}</ul>`
           : '<p class="zz-muted">Núcleo ya asegurado.</p>'
       }
       ${
         sector.status !== 'recovered'
-          ? `<p class="zz-ctx__prod" style="margin-top:0.5rem">Al recuperar: ${escapeHtml(sector.gain || 'Más suelo construible.')}</p>
-             <p class="zz-muted" style="font-size:0.78rem">Esfuerzo total: ~${cost.days} día(s)${
+          ? `<p class="zz-ctx__prod zz-ctx__prod--spaced">Al recuperar: ${escapeHtml(sector.gain || 'Más suelo construible.')}</p>
+             <p class="zz-muted zz-muted--sm">Esfuerzo total: ~${cost.days} día(s)${
                  cost.wood || cost.metal
                    ? ` · madera ${cost.wood || 0} · metal ${cost.metal || 0}`
                    : ''
@@ -1305,10 +1306,10 @@ function openMoreSheet() {
   let techHtml = '';
   if (!hasBench) {
     techHtml =
-      '<p class="zz-muted" style="font-size:0.82rem">Construí un <strong>banco técnico</strong> para investigar mejoras. El huerto D1 no necesita tech.</p>';
+      '<p class="zz-muted zz-muted--md">Construí un <strong>banco técnico</strong> para investigar mejoras. El huerto D1 no necesita tech.</p>';
   } else {
     Object.entries(branches).forEach(([bid, br]) => {
-      techHtml += `<h3 style="margin:0.75rem 0 0.35rem;font-family:var(--zz-display)">${escapeHtml(br.name || bid)}</h3>`;
+      techHtml += `<h3 class="zz-tech-branch-title">${escapeHtml(br.name || bid)}</h3>`;
       (br.techs || []).forEach((t) => {
         const done = (state.research.unlocked || []).includes(t.id);
         const active = state.research.active === t.id;
@@ -1339,7 +1340,7 @@ function openMoreSheet() {
       (n, b) => n + ((b.type === 'tech_bench' || b.type === 'lab') && b.hp > 0 ? b.workers || 0 : 0),
       0
     );
-    techHtml += `<p class="zz-muted" style="font-size:0.78rem;margin-top:0.5rem">Staff research: ${rw} · más trabajadores en banco/lab → investigación más rápida. Solo 1 tech activa.</p>`;
+    techHtml += `<p class="zz-muted zz-muted--sm-spaced">Staff research: ${rw} · más trabajadores en banco/lab → investigación más rápida. Solo 1 tech activa.</p>`;
   }
   const vehs = (content.vehiclesDoc?.vehicles || [])
     .map((v) => {
@@ -1414,7 +1415,7 @@ function openMoreSheet() {
     }</p>
     ${sheetSection(
       'Misiones',
-      `<ul style="margin:0;padding-left:1.1rem;font-size:0.82rem">${
+      `<ul class="zz-section-list">${
         missionHtml || '<li class="zz-muted">Sin objetivo activo</li>'
       }</ul>`
     )}
@@ -1425,7 +1426,7 @@ function openMoreSheet() {
           ? 'Antena activa: señales e historias (no +% invisible).'
           : 'Construí una radio para señales, SOS y contactos.'
       }</p>
-    <ul style="margin:0;padding-left:1.1rem;font-size:0.82rem">${
+    <ul class="zz-section-list">${
       signalHtml || '<li class="zz-muted">Sin señales recientes</li>'
     }</ul>
     ${
@@ -1439,7 +1440,7 @@ function openMoreSheet() {
       `<p class="zz-sheet-panel__lead">${
         (state.achievementsUnlocked || []).length
       } / ${(content.achievementsDoc?.achievements || []).length} · badge + estabilidad, sin power creep</p>
-    <ul style="margin:0;padding-left:1.1rem;font-size:0.78rem">${
+    <ul class="zz-section-list--sm">${
       (ensureAchievements(state).recentBadges || [])
         .slice(0, 5)
         .map((b) => `<li>✦ ${escapeHtml(b.name)}</li>`)
@@ -1530,18 +1531,18 @@ function openMoreSheet() {
           return `<li>
             <strong>${escapeHtml(f.name)}</strong>
             <span class="zz-rel zz-rel--${f.relation}">${relationLabel(f.relation)}</span>
-            <span class="zz-muted" style="font-size:0.75rem"> · ${escapeHtml((f.desc || '').slice(0, 48))}</span>
+            <span class="zz-muted zz-muted--xs"> · ${escapeHtml((f.desc || '').slice(0, 48))}</span>
             ${
               canTrade
                 ? `<br/><button type="button" class="zz-btn zz-btn--compact" data-action="faction-trade" data-id="${f.id}">Trueque</button>`
-                : '<br/><span class="zz-muted" style="font-size:0.75rem">Sin comercio</span>'
+                : '<br/><span class="zz-muted zz-muted--xs">Sin comercio</span>'
             }
           </li>`;
         })
         .join('');
     })()}</ul>`
     )}
-    <p class="zz-sheet-panel__lead" style="margin-top:0.35rem">Diario reciente (sin spam de rutina):</p>
+    <p class="zz-sheet-panel__foot">Diario reciente (sin spam de rutina):</p>
     <ul class="zz-diary">${diaryEntries(state, 10)
       .map((e) => `<li class="zz-diary__item zz-diary__item--${escapeHtml(e.kind || 'info')}"><span class="zz-diary__day">D${e.day}</span> ${escapeHtml(e.text)}</li>`)
       .join('') || '<li class="zz-muted">Aún sin hechos destacables.</li>'}</ul>`
@@ -1963,6 +1964,139 @@ function handleGhostPointer(ev) {
   move(ev);
 }
 
+/* ═══ NENI UI SHELL (Phase 3) ═══ */
+const RES_LABEL_UI_NEW = {
+  food: 'Comida',
+  water: 'Agua',
+  wood: 'Madera',
+  metal: 'Metal',
+  medicine: 'Medicinas',
+};
+
+function paintNeniShell() {
+  if (!state || !state.flags || state.flags.pilot !== 'neni') return;
+  const pop = state.population;
+  const cap = housingCapacity(state, content.buildings);
+
+  /* Day chip */
+  const uiDay = $('zz-ui-day');
+  if (uiDay) {
+    uiDay.textContent = `D${state.day}`;
+    uiDay.title = `Día ${state.day}`;
+  }
+
+  /* Population */
+  const uiPopVal = $('zz-ui-pop-val');
+  if (uiPopVal) uiPopVal.textContent = `${pop.total}/${cap}`;
+
+  /* Resources */
+  const uiRes = $('zz-ui-resources');
+  if (uiRes) {
+    const show = hudResourceKeys(state);
+    const popN = Math.max(1, pop.total || 1);
+    uiRes.innerHTML = '';
+    show.forEach((k) => {
+      const val = state.resources[k] || 0;
+      const daysLeft = k === 'food' || k === 'water' ? val / popN : Infinity;
+      const label = RES_LABEL_UI_NEW[k] || k;
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'zz-ui-chip zz-ui-chip--res';
+      if (daysLeft < 2) chip.classList.add('is-crit');
+      else if (daysLeft < 4) chip.classList.add('is-low');
+      chip.title = `${label}: ${val}`;
+      chip.setAttribute('aria-label', `${label}: ${val}`);
+      const iconImg = document.createElement('img');
+      iconImg.className = 'zz-ui-chip__icon';
+      iconImg.src = artUrl(RES_ART[k]) || '';
+      iconImg.alt = '';
+      iconImg.width = 14;
+      iconImg.height = 14;
+      const valSpan = document.createElement('span');
+      valSpan.className = 'zz-ui-chip__val';
+      valSpan.textContent = fmtRes(val);
+      chip.appendChild(iconImg);
+      chip.appendChild(valSpan);
+      chip.addEventListener('click', () => {
+        toast(`${label}: ${val}`, 'info');
+      });
+      uiRes.appendChild(chip);
+    });
+  }
+
+  /* Population click → open population sheet */
+  const uiPop = $('zz-ui-pop');
+  if (uiPop && !uiPop._uiBound) {
+    uiPop._uiBound = true;
+    uiPop.addEventListener('click', () => {
+      sfx.click?.();
+      openPopulationSheet();
+    });
+  }
+}
+
+function paintNeniExplorers() {
+  if (!state || !state.flags || state.flags.pilot !== 'neni') return;
+  const rail = $('zz-ui-explorer-rail');
+  if (!rail) return;
+  const list = state.explorers || [];
+  const unlocked = explorerSlotsUnlocked(state, content.balance);
+  rail.innerHTML = '';
+  for (let i = 0; i < Math.min(unlocked, 3); i++) {
+    const e = list[i];
+    if (!e) continue;
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'zz-ui-ex-card';
+    card.setAttribute('aria-label', `${e.name} · ${e.status === 'ready' ? 'listo' : e.status === 'away' ? 'fuera' : e.status === 'wounded' ? 'herido' : e.status === 'dead' ? 'muerto' : e.status} · Nv.${e.level || 1}`);
+    if (e.status === 'ready') card.classList.add('is-ready');
+    else if (e.status === 'away') card.classList.add('is-away');
+    else if (e.status === 'wounded') card.classList.add('is-wounded');
+    else if (e.status === 'dead') card.classList.add('is-dead');
+    if (state.selectedExplorerId === e.id) card.classList.add('is-selected');
+    const portrait = document.createElement('img');
+    portrait.className = 'zz-ui-ex-card__portrait';
+    portrait.src = portraitArtUrl(e) || '';
+    portrait.alt = e.name;
+    portrait.width = 36;
+    portrait.height = 36;
+    const dot = document.createElement('span');
+    dot.className = 'zz-ui-ex-card__dot';
+    const name = document.createElement('span');
+    name.className = 'zz-ui-ex-card__name';
+    name.textContent = e.name;
+    card.appendChild(portrait);
+    card.appendChild(dot);
+    card.appendChild(name);
+    card.addEventListener('click', () => {
+      sfx.click?.();
+      openExplorerSheet(e.id);
+    });
+    rail.appendChild(card);
+  }
+}
+
+function paintNeniBuildDock() {
+  if (!state || !state.flags || state.flags.pilot !== 'neni') return;
+  const building = state.uiMode === 'build' && state.buildMode;
+  const uiOk = $('zz-ui-build-ok');
+  const uiCancel = $('zz-ui-build-cancel');
+  const uiAdvance = $('zz-ui-advance');
+  const uiBuild = $('zz-ui-build');
+  if (uiOk) uiOk.hidden = !building;
+  if (uiCancel) uiCancel.hidden = !building;
+  if (uiAdvance) uiAdvance.hidden = !!building;
+  if (uiBuild) {
+    uiBuild.classList.toggle('is-active', !!building);
+    if (building) uiBuild.textContent = state.buildMode || 'Construir';
+    else uiBuild.textContent = 'Construir';
+  }
+  if (building && uiOk) {
+    syncGhostValidity();
+    uiOk.disabled = !state.buildGhostValid;
+  }
+}
+
 function paint() {
   if (!state || !content) return;
   maybeRevealEarlyLandmarks(state);
@@ -1978,6 +2112,9 @@ function paint() {
   paintCoach();
   paintModeBanner();
   paintBuildDock();
+  paintNeniShell();
+  paintNeniExplorers();
+  paintNeniBuildDock();
   const banner = $('zz-recover-banner');
   if (banner) {
     const critical = criticalBannerAlert(state, content);
@@ -2140,9 +2277,16 @@ function paintCoach() {
   const buildBtn = $('zz-open-build');
   const advanceBtn = $('zz-advance');
   const confirmBtn = $('zz-build-ok');
+  /* Neni shell equivalents */
+  const uiBuildBtn = $('zz-ui-build');
+  const uiAdvanceBtn = $('zz-ui-advance');
+  const uiConfirmBtn = $('zz-ui-build-ok');
   if (buildBtn) buildBtn.classList.remove('is-guide-pulse');
   if (advanceBtn) advanceBtn.classList.remove('is-guide-pulse');
   if (confirmBtn) confirmBtn.classList.remove('is-guide-pulse');
+  if (uiBuildBtn) uiBuildBtn.classList.remove('is-guide-pulse');
+  if (uiAdvanceBtn) uiAdvanceBtn.classList.remove('is-guide-pulse');
+  if (uiConfirmBtn) uiConfirmBtn.classList.remove('is-guide-pulse');
   if (!card || !text) return;
   ensureOnboarding(state);
   checkOnboardingProgress(state);
@@ -2160,12 +2304,15 @@ function paintCoach() {
   text.textContent = coachMessage(state) || st.step.text;
   if (st.step.highlight === 'build' && !state.buildMode) {
     buildBtn?.classList.add('is-guide-pulse');
+    uiBuildBtn?.classList.add('is-guide-pulse');
   }
   if (state.buildMode && (st.step.wait === 'hasFarm' || st.step.wait === 'hasWell')) {
     confirmBtn?.classList.add('is-guide-pulse');
+    uiConfirmBtn?.classList.add('is-guide-pulse');
   }
   if (st.step.highlight === 'advance') {
     advanceBtn?.classList.add('is-guide-pulse');
+    uiAdvanceBtn?.classList.add('is-guide-pulse');
   }
   // Sin cascada Continuar: solo CTA de acción (abrir Construir).
   if (cta) {
@@ -2458,7 +2605,7 @@ function showAttackCard(atk) {
     <p>Intensidad ${atk.intensity ?? '—'} · Muertos ${atk.dead ?? 0} · Heridos ${atk.injured ?? 0} · Munición −${
       atk.ammoSpent ?? 0
     }</p>
-    <p class="zz-muted" style="font-size:0.82rem">${escapeHtml(atk.hordeLabel || '')}</p>
+    <p class="zz-muted">${escapeHtml(atk.hordeLabel || '')}</p>
     ${dmg}
     ${zone}
     <p class="zz-event-fx">${
@@ -2783,6 +2930,70 @@ function bindChrome() {
   if ($('zz-sound')) {
     $('zz-sound').classList.toggle('is-off', !isSoundEnabled());
   }
+  if ($('zz-ui-sound')) {
+    $('zz-ui-sound').classList.toggle('is-off', !isSoundEnabled());
+    $('zz-ui-sound').setAttribute('aria-pressed', isSoundEnabled() ? 'true' : 'false');
+  }
+
+  /* ═══ NENI UI SHELL bindings (Phase 3) ═══ */
+  $('zz-ui-advance')?.addEventListener('click', handleAdvanceDay);
+  $('zz-ui-build')?.addEventListener('click', () => {
+    sfx.click?.();
+    openBuildSheet();
+  });
+  $('zz-ui-build-ok')?.addEventListener('click', () => {
+    sfx.click?.();
+    confirmBuildPlacement();
+  });
+  $('zz-ui-build-cancel')?.addEventListener('click', () => {
+    sfx.click?.();
+    clearBuildMode(state);
+    toast('Construcción cancelada', 'info');
+    paint();
+  });
+  $('zz-ui-home')?.addEventListener('click', () => {
+    recenterCamera(state);
+    paint();
+    scheduleSave();
+  });
+  $('zz-ui-zoom-in')?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!state.mapCamera) return;
+    zoomCameraBy(state, 1.12, $('zz-map'));
+    paint();
+    scheduleSave();
+  });
+  $('zz-ui-zoom-out')?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!state.mapCamera) return;
+    zoomCameraBy(state, 1 / 1.12, $('zz-map'));
+    paint();
+    scheduleSave();
+  });
+  /* Neni shell: utility buttons (help, sound, save, more, fit) */
+  $('zz-ui-help')?.addEventListener('click', () => {
+    const { html } = renderHelpHtml(state);
+    openSheet(html, 'help');
+    scheduleSave();
+  });
+  $('zz-ui-sound')?.addEventListener('click', () => {
+    const on = !isSoundEnabled();
+    setSoundEnabled(on);
+    $('zz-ui-sound').classList.toggle('is-off', !on);
+    $('zz-ui-sound').setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  $('zz-ui-save')?.addEventListener('click', () => doSave());
+  $('zz-ui-more')?.addEventListener('click', () => {
+    sfx.click?.();
+    openMoreSheet();
+  });
+  $('zz-ui-fit')?.addEventListener('click', () => {
+    fitWorldCamera(state, $('zz-map'));
+    paint();
+    scheduleSave();
+  });
 }
 
 /** Banner de recuperación desde backup (compartido oficial/clásico). */
@@ -2797,6 +3008,77 @@ function showRecoveredFromBackup(res) {
     }, 6000);
   }
   toast(res.message || 'Colonia recuperada', 'warn');
+}
+
+/**
+ * UI Mode Activation — single entry point for shell visibility.
+ * Called by boot functions BEFORE the first paint that depends on #zz-ui-*.
+ *
+ * @param {'neni'|'legacy'} mode
+ */
+function activateGameUiMode(mode) {
+  if (typeof document === 'undefined') return;
+  const neniShell = document.getElementById('zz-ui-shell');
+  const legacyHud = document.getElementById('zz-hud');
+  const legacyFab = document.querySelector('.zz-fab');
+  const legacyZoom = document.querySelector('.zz-map-zoom');
+  const legacyExplorer = document.getElementById('zz-explorer-rail');
+
+  if (mode === 'neni') {
+    document.body.classList.add('zz-body--pilot-neni');
+    if (neniShell) {
+      neniShell.hidden = false;
+      neniShell.removeAttribute('aria-hidden');
+      neniShell.removeAttribute('inert');
+    }
+    if (legacyHud) {
+      legacyHud.hidden = true;
+      legacyHud.setAttribute('aria-hidden', 'true');
+      legacyHud.setAttribute('inert', '');
+    }
+    if (legacyFab) {
+      legacyFab.hidden = true;
+      legacyFab.setAttribute('aria-hidden', 'true');
+      legacyFab.setAttribute('inert', '');
+    }
+    if (legacyZoom) {
+      legacyZoom.hidden = true;
+      legacyZoom.setAttribute('aria-hidden', 'true');
+      legacyZoom.setAttribute('inert', '');
+    }
+    if (legacyExplorer) {
+      legacyExplorer.hidden = true;
+      legacyExplorer.setAttribute('aria-hidden', 'true');
+      legacyExplorer.setAttribute('inert', '');
+    }
+  } else {
+    document.body.classList.remove('zz-body--pilot-neni');
+    if (neniShell) {
+      neniShell.hidden = true;
+      neniShell.setAttribute('aria-hidden', 'true');
+      neniShell.setAttribute('inert', '');
+    }
+    if (legacyHud) {
+      legacyHud.hidden = false;
+      legacyHud.removeAttribute('aria-hidden');
+      legacyHud.removeAttribute('inert');
+    }
+    if (legacyFab) {
+      legacyFab.hidden = false;
+      legacyFab.removeAttribute('aria-hidden');
+      legacyFab.removeAttribute('inert');
+    }
+    if (legacyZoom) {
+      legacyZoom.hidden = false;
+      legacyZoom.removeAttribute('aria-hidden');
+      legacyZoom.removeAttribute('inert');
+    }
+    if (legacyExplorer) {
+      legacyExplorer.hidden = false;
+      legacyExplorer.removeAttribute('aria-hidden');
+      legacyExplorer.removeAttribute('inert');
+    }
+  }
 }
 
 /**
@@ -2816,11 +3098,6 @@ async function bootOfficialWorld(opts, { qa, loadedRes }) {
 
   // Autoridad espacial: JSON canónico de zonas (cargar ANTES de anclar HQ / construir).
   await loadPilotZoneMap();
-
-  // Marcar el mundo como canónico también a nivel CSS (página por defecto no trae clase).
-  if (typeof document !== 'undefined' && !document.body?.classList?.contains('zz-body--pilot-neni')) {
-    document.body.classList.add('zz-body--pilot-neni');
-  }
 
   let baseState = null;
   let importedFromLocal = false;
@@ -2967,6 +3244,9 @@ async function bootOfficialWorld(opts, { qa, loadedRes }) {
       /* el autosave reintenta; no bloquear el arranque */
     }
   }
+  // Activate Neni UI shell BEFORE the first paint that targets #zz-ui-*.
+  activateGameUiMode('neni');
+
   // Base de "ya guardado" para el guarda anti-reescritura de doSave().
   lastSavedJson = JSON.stringify(state);
 }
@@ -2976,12 +3256,6 @@ async function bootOfficialWorld(opts, { qa, loadedRes }) {
  * (lo bloquea play-mode.js). Posiciones legacy NO se migran al mundo Neni.
  */
 async function bootLegacySave(opts, { loadedRes }) {
-  // Si la página venía marcada como mundo Neni (alias) y sirviéramos Clásico,
-  // quitar la marca: render-map sincroniza flag ← body class en cada pintado.
-  if (typeof document !== 'undefined') {
-    document.body?.classList?.remove('zz-body--pilot-neni');
-    delete document.body?.dataset?.zzPilotMap;
-  }
   let res = loadedRes;
   if (!res) {
     try {
@@ -2993,6 +3267,8 @@ async function bootLegacySave(opts, { loadedRes }) {
   if (!res?.ok || !res?.state) throw new Error(res?.error || 'load');
   state = migrateState(res.state, content);
   showRecoveredFromBackup(res);
+  // Activate legacy UI shell BEFORE the first paint.
+  activateGameUiMode('legacy');
   lastSavedJson = JSON.stringify(state); // baseline anti-reescritura (B1)
   dirty = false;
 }
