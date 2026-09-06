@@ -3218,7 +3218,7 @@ async function bootOfficialWorld(opts, { qa, loadedRes }) {
   }
 
   // Escala visual aprobada (sprites). No mezclar con footprints lógicos.
-  state.flags.pilotSpriteScale = 1.5;
+  state.flags.pilotSpriteScale = 1.1;
 
   // Zonas remapeadas siempre en el mundo Neni (mapa nuevo).
   // Unlocks / 9999 / no-cost SOLO con ?qa=1.

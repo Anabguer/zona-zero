@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZZ — Camera Test (Dev)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; height: 100vh; touch-action: none; }
+    #hud {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(20,16,10,0.92); border-bottom: 1px solid #3a3020;
+      padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+      font: 12px monospace; color: #aaa;
+    }
+    .btn {
+      padding: 5px 12px; border-radius: 4px; border: 1px solid #554a35;
+      background: #2a2318; color: #ccc; font-size: 0.8rem; cursor: pointer;
+    }
+    .btn:hover { background: #3a3328; color: #fff; }
+    #hudInfo { margin-left: auto; color: #888; }
+    #wrap { width: 100vw; height: 100vh; overflow: hidden; cursor: grab; }
+    #wrap.dragging { cursor: grabbing; }
+    #wrap svg { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="hud">
+  <button class="btn" id="btnHome">HOME</button>
+  <button class="btn" id="btnZoomIn">+</button>
+  <button class="btn" id="btnZoomOut">−</button>
+  <span>C — Brownmatch · HQ scale 1.1</span>
+  <span id="hudInfo">zoom=— center=—</span>
+</div>
+
+<div id="wrap">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<script>
+// ── Constants ──
+const WORLD_W = 1819;
+const WORLD_H = 865;
+const HQ_X = 758;
+const HQ_Y = 462;
+const HQ_W = 132;
+const HQ_H = 106;
+const HQ_SRC = '../assets/art/buildings/pilot/01-hq-5x4-matchcolor.png';
+const TERRAIN_SRC = '../assets/art/terrain/mapa-neni-1819x865-brownmatch-up2x.png';
+
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 3.0;
+const INITIAL_ZOOM = 2.1;
+const NUCLEUS_X = 824;
+const NUCLEUS_Y = 520;
+
+// ── State ──
+let cam = { x: NUCLEUS_X, y: NUCLEUS_Y, zoom: INITIAL_ZOOM };
+let drag = null; // { startX, startY, startCamX, startCamY }
+let pinch = null; // { dist0, zoom0, midX, midY }
+
+const svg = document.getElementById('svg');
+const wrap = document.getElementById('wrap');
+
+// ── Build SVG ──
+svg.appendChild(makeSvg('rect', { x: 0, y: 0, width: WORLD_W, height: WORLD_H, fill: '#12100e' }));
+
+const terrainImg = makeSvg('image', {
+  x: 0, y: 0, width: WORLD_W, height: WORLD_H,
+  href: TERRAIN_SRC, preserveAspectRatio: 'xMidYMid slice'
+});
+svg.appendChild(terrainImg);
+
+const hqImg = makeSvg('image', {
+  x: HQ_X, y: HQ_Y, width: HQ_W, height: HQ_H,
+  href: HQ_SRC, preserveAspectRatio: 'xMidYMax meet'
+});
+svg.appendChild(hqImg);
+
+// Subtle grid
+const grid = makeSvg('g', { opacity: 0.05 });
+for (let x = 0; x <= WORLD_W; x += 24)
+  grid.appendChild(makeSvg('line', { x1: x, y1: 0, x2: x, y2: WORLD_H, stroke: '#fff', 'stroke-width': 0.3 }));
+for (let y = 0; y <= WORLD_H; y += 24)
+  grid.appendChild(makeSvg('line', { x1: 0, y1: y, x2: WORLD_W, y2: y, stroke: '#fff', 'stroke-width': 0.3 }));
+svg.appendChild(grid);
+
+function makeSvg(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'href') el.setAttributeNS('http://www.w3.org/1999/xlink', 'href', v);
+    else el.setAttribute(k, String(v));
+  }
+  return el;
+}
+
+// ── Camera ──
+function applyCam() {
+  const vw = window.innerWidth / cam.zoom;
+  const vh = window.innerHeight / cam.zoom;
+  const vx = cam.x - vw / 2;
+  const vy = cam.y - vh / 2;
+  svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+  document.getElementById('hudInfo').textContent =
+    `zoom=${cam.zoom.toFixed(2)} center=${Math.round(cam.x)},${Math.round(cam.y)}`;
+}
+
+function clampCam() {
+  cam.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, cam.zoom));
+  const vw = window.innerWidth / cam.zoom;
+  const vh = window.innerHeight / cam.zoom;
+  const halfW = vw / 2;
+  const halfH = vh / 2;
+  if (vw >= WORLD_W) cam.x = WORLD_W / 2;
+  else cam.x = Math.max(halfW, Math.min(WORLD_W - halfW, cam.x));
+  if (vh >= WORLD_H) cam.y = WORLD_H / 2;
+  else cam.y = Math.max(halfH, Math.min(WORLD_H - halfH, cam.y));
+}
+
+function zoomAt(factor, px, py) {
+  const wx = cam.x + (px - window.innerWidth / 2) / cam.zoom;
+  const wy = cam.y + (py - window.innerHeight / 2) / cam.zoom;
+  cam.zoom *= factor;
+  clampCam();
+  // Keep world point under cursor stable
+  const newWx = cam.x + (px - window.innerWidth / 2) / cam.zoom;
+  const newWy = cam.y + (py - window.innerHeight / 2) / cam.zoom;
+  cam.x += wx - newWx;
+  cam.y += wy - newWy;
+  clampCam();
+  applyCam();
+}
+
+function goHome() {
+  cam.x = NUCLEUS_X;
+  cam.y = NUCLEUS_Y;
+  cam.zoom = INITIAL_ZOOM;
+  clampCam();
+  applyCam();
+}
+
+// ── Mouse drag ──
+wrap.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  drag = { startX: e.clientX, startY: e.clientY, startCamX: cam.x, startCamY: cam.y };
+  wrap.setPointerCapture(e.pointerId);
+  wrap.classList.add('dragging');
+});
+
+wrap.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.startX;
+  const dy = e.clientY - drag.startY;
+  cam.x = drag.startCamX - dx / cam.zoom;
+  cam.y = drag.startCamY - dy / cam.zoom;
+  clampCam();
+  applyCam();
+});
+
+wrap.addEventListener('pointerup', () => {
+  drag = null;
+  wrap.classList.remove('dragging');
+});
+
+// ── Mouse wheel zoom ──
+wrap.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  zoomAt(factor, e.clientX, e.clientY);
+}, { passive: false });
+
+// ── Touch pinch zoom ──
+wrap.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const t0 = e.touches[0], t1 = e.touches[1];
+    const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    const midX = (t0.clientX + t1.clientX) / 2;
+    const midY = (t0.clientY + t1.clientY) / 2;
+    pinch = { dist0: dist, zoom0: cam.zoom, midX, midY,
+              camX0: cam.x, camY0: cam.y };
+  }
+}, { passive: false });
+
+wrap.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && pinch) {
+    e.preventDefault();
+    const t0 = e.touches[0], t1 = e.touches[1];
+    const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    const ratio = dist / pinch.dist0;
+    cam.zoom = pinch.zoom0 * ratio;
+    // Keep pinch center stable
+    const wx = pinch.camX0 + (pinch.midX - window.innerWidth / 2) / pinch.zoom0;
+    const wy = pinch.camY0 + (pinch.midY - window.innerHeight / 2) / pinch.zoom0;
+    clampCam();
+    const newWx = cam.x + (pinch.midX - window.innerWidth / 2) / cam.zoom;
+    const newWy = cam.y + (pinch.midY - window.innerHeight / 2) / cam.zoom;
+    cam.x += wx - newWx;
+    cam.y += wy - newWy;
+    clampCam();
+    applyCam();
+  }
+}, { passive: false });
+
+wrap.addEventListener('touchend', () => { pinch = null; });
+
+// ── Buttons ──
+document.getElementById('btnHome').addEventListener('click', goHome);
+document.getElementById('btnZoomIn').addEventListener('click', () => {
+  cam.zoom *= 1.2; clampCam(); applyCam();
+});
+document.getElementById('btnZoomOut').addEventListener('click', () => {
+  cam.zoom /= 1.2; clampCam(); applyCam();
+});
+
+// ── Keyboard ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' || e.key === 'h') goHome();
+  if (e.key === '+' || e.key === '=') { cam.zoom *= 1.2; clampCam(); applyCam(); }
+  if (e.key === '-') { cam.zoom /= 1.2; clampCam(); applyCam(); }
+});
+
+// ── Init ──
+window.addEventListener('resize', () => { clampCam(); applyCam(); });
+clampCam();
+applyCam();
+</script>
+</body>
+</html>

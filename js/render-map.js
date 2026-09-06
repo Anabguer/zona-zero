@@ -2729,6 +2729,8 @@ function zoomMinForState(state, svg) {
   return clamp(fitMin, 0.01, ZOOM_MAX);
 }
 
+const PILOT_INITIAL_ZOOM_FACTOR = 2.1;
+
 export function recenterCamera(state) {
   if (!state) return;
   state.mapCamera = state.mapCamera || {};
@@ -2741,16 +2743,14 @@ export function recenterCamera(state) {
     const isFirst = !state.flags.pilotNeniCamInitialized;
 
     if (isFirst) {
-      // Cámara inicial canónica: centrada en HQ D (824,532). No reutilizar vistas demo antiguas.
       cam.x = nucleus.x;
       cam.y = nucleus.y;
-      cam.zoom = Math.min(ZOOM_MAX, Math.max(zmin * 2.5, zmin));
+      cam.zoom = Math.min(ZOOM_MAX, Math.max(zmin * PILOT_INITIAL_ZOOM_FACTOR, 1.0));
       state.flags.pilotNeniCamInitialized = true;
     } else {
-      // Recentrar (botón): sólo centra en núcleo y deja un zoom razonable.
       cam.x = nucleus.x;
       cam.y = nucleus.y;
-      cam.zoom = Math.max(1.0, zmin);
+      cam.zoom = Math.min(ZOOM_MAX, Math.max(zmin * PILOT_INITIAL_ZOOM_FACTOR, 1.0));
     }
     return;
   }
