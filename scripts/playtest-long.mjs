@@ -25,6 +25,7 @@ const seedsArg = process.argv.find(a => a.startsWith('--seeds='));
 const POST_CONTROL_SCAVENGE = process.argv.includes('--postControlScavenge');
 const THIRD_FARM_CAPACITY = process.argv.includes('--thirdFarmCapacity');
 const SCALABLE_FARM_CAPACITY = process.argv.includes('--scalableFarmCapacity');
+const SCALABLE_WATER_CAPACITY = process.argv.includes('--scalableWaterCapacity');
 const MAX_DAY = maxDayArg ? parseInt(maxDayArg.split('=')[1]) : 50;
 const SEEDS = seedsArg ? seedsArg.split('=')[1].split(',') : ['lt-alpha', 'lt-beta', 'lt-gamma', 'lt-delta', 'lt-epsilon'];
 
@@ -781,6 +782,16 @@ function botDecide(st) {
     if (r.ok) actions.push('water:build_well3(proactive)');
   }
 
+  // B5.44: Scalable water capacity — build when production < consumption + existing wells fully staffed
+  if (SCALABLE_WATER_CAPACITY) {
+    const wellMax = content.buildings?.well?.max || 8;
+    const wellJobsPerInstance = content.buildings?.well?.jobs || 2;
+    if (waterProduction < waterConsumption && totalWellWorkers >= wellCount * wellJobsPerInstance && wellCount < wellMax) {
+      const r = tryBuild(st, 'well');
+      if (r.ok) actions.push('water:build_well(scalable)');
+    }
+  }
+
   // Calculate REAL water staffing needs: 1 worker per well base + margin for weather
   const minWellWorkers = Math.max(wellCount, Math.ceil(waterNeed / 4)); // 4 water/worker base
   const weatherMargin = (heatOrStormPending || heatOrStormNow) ? 1 : 0;
@@ -1322,6 +1333,20 @@ function botDecide(st) {
       if (wellCount3 < 3) {
         const r = tryBuild(st, 'well');
         if (r.ok) actions.push('built:well3');
+      }
+    }
+
+    // B5.44: Scalable water capacity — contextual trigger
+    if (SCALABLE_WATER_CAPACITY) {
+      const _wc = st.base.buildings.filter((b) => b.type === 'well' && b.hp > 0).length;
+      const _ww = st.base.buildings.filter((b) => b.type === 'well' && b.hp > 0).reduce((s, b) => s + (b.workers || 0), 0);
+      const _wp = realWaterProd(_ww, _wc, st);
+      const _wCons = (st.population.total || 0) * 0.88;
+      const _wellMax = content.buildings?.well?.max || 8;
+      const _wellJobs = content.buildings?.well?.jobs || 2;
+      if (_wp < _wCons && _ww >= _wc * _wellJobs && _wc < _wellMax) {
+        const r = tryBuild(st, 'well');
+        if (r.ok) actions.push('built:well_scalable');
       }
     }
 
